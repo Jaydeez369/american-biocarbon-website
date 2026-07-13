@@ -211,7 +211,7 @@ const HOME = {
       { label:"Biochar-Infused Soil", img:ASSETS.heroSoil, pos:"50% 50%", zoom:1.05, origin:"50% 50%",
         h:"Ready-to-use soil,<br>biochar built in.",
         sub:"A ready-to-use growing soil pre-blended with our carbon-negative bagasse biochar—water retention, nutrient holding, and aeration with no mixing. Coming Q4.",
-        primary:{label:"Notify me",href:CTA.biochar.href}, secondary:CTA.quote },
+        primary:{label:"Notify me",href:CTA.biochar.href}, secondary:CTA.specDownload, specProduct:"biochar-infused-soil" },
     ],
   },
   offer:{
