@@ -207,11 +207,11 @@ const HOME = {
       { label:"Absorbent Crumble", img:ASSETS.pelletsPhoto, pos:"50% 58%", zoom:1.1, origin:"50% 72%",
         h:"Cover more ground,<br>in less time.",
         sub:"A coarser grade that spreads fast across wide area, high volume spills, with the same high capacity bagasse absorption.",
-        primary:CTA.freeSamplePellets, secondary:CTA.specDownload, specProduct:"absorbent-pellets" },
+        primary:{label:"Notify me",href:CTA.freeSamplePellets.href}, secondary:CTA.specDownload, specProduct:"absorbent-pellets" },
       { label:"Biochar-Infused Soil", img:ASSETS.heroSoil, pos:"50% 50%", zoom:1.05, origin:"50% 50%",
         h:"Ready-to-use soil,<br>biochar built in.",
         sub:"A ready-to-use growing soil pre-blended with our carbon-negative bagasse biochar—water retention, nutrient holding, and aeration with no mixing. Coming Q4.",
-        primary:CTA.biochar, secondary:CTA.quote },
+        primary:{label:"Notify me",href:CTA.biochar.href}, secondary:CTA.quote },
     ],
   },
   offer:{
