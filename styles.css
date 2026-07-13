@@ -116,7 +116,7 @@ section.block{padding:72px 0;border-bottom:1px solid var(--line)}
 
 /* ---------- Primary offer ---------- */
 .offer{background:var(--white)}
-.offer-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.offer-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
 .offer h2{font-size:30px;margin:10px 0 14px}
 .steps-list{list-style:none;display:flex;flex-direction:column;gap:2px}
 .steps-list li{display:flex;gap:16px;padding:18px 4px;border-top:1px solid var(--line)}
@@ -150,7 +150,7 @@ section.block{padding:72px 0;border-bottom:1px solid var(--line)}
 /* ---------- Carbon pillar (elevated) ---------- */
 .carbon-pillar{background:linear-gradient(155deg,#16305f,#0d2148 55%,#0b1a34);color:#eaf0fb;border-bottom:none}
 .carbon-pillar .kicker{color:#e79aad}
-.cp-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:48px;align-items:start}
+.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
 .carbon-pillar h2{font-size:34px;color:#fff;margin:10px 0 16px;max-width:15ch}
 .cp-body{color:#c7d3ea;font-size:17px;max-width:60ch;margin-bottom:16px}
 .cp-thesis{color:#9fb4da;font-size:15px;max-width:60ch;border-left:3px solid var(--gold);padding-left:16px}
