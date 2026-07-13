@@ -1,0 +1,33 @@
+{
+  "spec_sheets": [
+    {
+      "id": "absorbent-pellets-spec",
+      "product_id": "absorbent-pellets",
+      "product_name": "Absorbent Pellets",
+      "file_name": "Absorbent-Pellets-Specification-Sheet.txt",
+      "file_path": "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.txt",
+      "title": "Absorbent Pellets - Technical Specification Sheet",
+      "description": "Complete technical specifications for American BioCarbon Absorbent Pellets including absorption ratios, bulk density, applications, and comparisons.",
+      "availability": "published",
+      "last_updated": "2026-07-15"
+    },
+    {
+      "id": "biochar-premium-spec",
+      "product_id": "agricultural-biochar",
+      "product_name": "100% Premium Biochar",
+      "file_name": "Biochar-Premium-Specification-Sheet.txt",
+      "file_path": "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.txt",
+      "title": "100% Premium Biochar - Technical Specification Sheet",
+      "description": "Complete technical specifications for American BioCarbon Premium Biochar including carbon content, nutrients, microstructure analysis, and soil applications.",
+      "availability": "published",
+      "last_updated": "2026-07-15"
+    }
+  ],
+  "by_product": {
+    "absorbent-pellets": ["absorbent-pellets-spec"],
+    "absorbent-crumble": ["absorbent-pellets-spec"],
+    "agricultural-biochar": ["biochar-premium-spec"],
+    "biochar-infused-soil": ["biochar-premium-spec"],
+    "biosoil": ["biochar-premium-spec"]
+  }
+}

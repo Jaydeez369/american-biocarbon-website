@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Variant A — Editorial Industrial | American BioCarbon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --navy:#0e1f40; --navy-2:#16305f; --ink:#111418; --crimson:#d7153f; --crimson-d:#b91237;
+  --paper:#f4f1ea; --paper-2:#e9e4d8; --line:rgba(14,31,64,.14); --gold:#c98a2b;
+  --f:"DM Sans",system-ui,sans-serif; --head:"Fraunces","Georgia",serif; --mono:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:16px;line-height:1.6}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:1220px;margin:0 auto;padding:0 32px}
+.mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:600}
+h1,h2,h3{font-family:var(--head);font-weight:500;line-height:1.02;letter-spacing:-.01em}
+
+/* nav */
+header{position:sticky;top:0;z-index:50;background:rgba(14,31,64,.96);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08)}
+.nav{display:flex;align-items:center;gap:34px;height:74px}
+.brand{font-family:var(--head);color:#fff;font-size:21px;font-weight:600;letter-spacing:-.02em}
+.brand b{color:var(--crimson);font-weight:600}
+.nav .links{display:flex;gap:26px;margin-left:8px}
+.nav .links a{color:#c4cfe6;font-size:13.5px;font-weight:500;letter-spacing:.01em}
+.nav .links a:hover{color:#fff}
+.nav .spring{flex:1}
+.nav .cta{background:var(--crimson);color:#fff;font-weight:600;font-size:13.5px;padding:11px 20px;border-radius:2px}
+.nav .cta:hover{background:var(--crimson-d)}
+
+/* hero */
+.hero{background:var(--navy);color:#fff;position:relative;overflow:hidden}
+.hero .grid{display:grid;grid-template-columns:1.05fr 1fr;min-height:82vh}
+.hero .left{padding:70px 0 60px;display:flex;flex-direction:column;justify-content:center;padding-right:56px}
+.hero .kick{color:#f0a9ba;margin-bottom:26px}
+.hero h1{font-size:clamp(46px,6vw,88px);color:#fff;letter-spacing:-.025em}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero .sub{font-size:19px;color:#c4cfe6;max-width:46ch;margin:28px 0 38px;line-height:1.55}
+.hero .btns{display:flex;gap:14px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--f);font-weight:600;font-size:15px;padding:16px 26px;border-radius:2px;cursor:pointer;border:1.5px solid transparent;transition:.15s}
+.btn-primary{background:var(--crimson);color:#fff}
+.btn-primary:hover{background:var(--crimson-d)}
+.btn-ghost{border-color:rgba(255,255,255,.35);color:#fff}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
+.hero .right{position:relative}
+.hero .right img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.05) contrast(1.02)}
+.hero .right::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--navy) 0%,transparent 22%)}
+.heroline{position:absolute;bottom:0;left:0;right:0;border-top:1px solid rgba(255,255,255,.14);background:rgba(14,31,64,.6);backdrop-filter:blur(4px);z-index:2}
+.heroline .wrap{display:flex;gap:44px;padding-top:16px;padding-bottom:16px;flex-wrap:wrap}
+.heroline span{color:#9fb4da;display:flex;align-items:center;gap:9px}
+.heroline span::before{content:"";width:6px;height:6px;background:var(--crimson);border-radius:50%}
+
+/* stat strip */
+.stats{background:var(--ink);color:#fff}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:40px 28px;border-right:1px solid rgba(255,255,255,.1)}
+.stat:last-child{border-right:0}
+.stat b{font-family:var(--head);font-size:44px;font-weight:500;display:block;line-height:1}
+.stat b em{color:var(--gold);font-style:normal}
+.stat span{color:#9aa3b2;font-size:13px;margin-top:10px;display:block}
+
+/* section */
+.sec{padding:100px 0}
+.sec-h{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;margin-bottom:54px;border-bottom:2px solid var(--ink);padding-bottom:24px}
+.sec-h h2{font-size:clamp(32px,4vw,52px);max-width:16ch}
+.sec-h .kick{color:var(--crimson)}
+.sec-h p{color:#5a5f68;max-width:38ch;font-size:16px}
+
+/* problem */
+.problem{background:var(--paper-2)}
+.prob-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:center}
+.prob-grid h2{font-size:clamp(30px,3.5vw,44px);margin-bottom:22px}
+.prob-grid p{color:#4a4f57;font-size:17px;margin-bottom:26px;max-width:52ch}
+.prob-list{list-style:none;display:flex;flex-direction:column;gap:2px}
+.prob-list li{display:flex;gap:16px;padding:18px 0;border-top:1px solid var(--line);font-size:15.5px;color:#33383f}
+.prob-list li b{font-family:var(--mono);color:var(--crimson);font-size:13px;flex:0 0 30px}
+
+/* products editorial rows */
+.prod{display:grid;grid-template-columns:70px 1.4fr 1fr auto;gap:32px;align-items:center;padding:34px 0;border-top:1px solid var(--line);transition:.2s}
+.prod:hover{padding-left:14px}
+.prod:last-child{border-bottom:1px solid var(--line)}
+.prod .no{font-family:var(--head);font-size:30px;color:var(--crimson)}
+.prod h3{font-size:27px;margin-bottom:5px}
+.prod .icp{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a8e96}
+.prod .blurb{color:#4a4f57;font-size:15px}
+.prod .arrow{font-size:22px;color:var(--navy);transition:.2s}
+.prod:hover .arrow{color:var(--crimson);transform:translateX(6px)}
+
+/* carbon band */
+.carbon{background:var(--navy);color:#fff}
+.carbon .grid{display:grid;grid-template-columns:1.3fr 1fr;gap:56px;align-items:center}
+.carbon .kick{color:#f0a9ba;margin-bottom:20px}
+.carbon h2{font-size:clamp(30px,3.6vw,48px);color:#fff;max-width:15ch;margin-bottom:22px}
+.carbon p{color:#c4cfe6;font-size:17px;max-width:56ch;margin-bottom:18px}
+.carbon .thesis{border-left:3px solid var(--gold);padding-left:20px;color:#9fb4da;font-size:15px}
+.aud{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-left:3px solid var(--gold);border-radius:4px;padding:20px 22px;margin-bottom:14px}
+.aud b{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#f0a9ba;display:block;margin-bottom:8px}
+.aud p{font-size:14px;color:#d3ddf0;margin:0}
+
+/* final cta */
+.final{background:var(--crimson);color:#fff;text-align:center;padding:110px 0}
+.final h2{font-size:clamp(36px,5vw,64px);color:#fff;max-width:18ch;margin:0 auto 22px}
+.final p{font-size:18px;color:#ffe0e6;max-width:52ch;margin:0 auto 36px}
+.final .btn-primary{background:#fff;color:var(--crimson)}
+.final .btn-primary:hover{background:var(--ink);color:#fff}
+.final .btn-ghost{border-color:rgba(255,255,255,.6);color:#fff}
+
+footer{background:var(--ink);color:#8a8e96;padding:44px 0;font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.badge{position:fixed;left:16px;bottom:16px;z-index:99;background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:9px 15px;border-radius:2px;text-transform:uppercase;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.badge b{color:var(--gold)}
+
+@media(max-width:900px){
+  .nav .links{display:none}
+  .hero .grid{grid-template-columns:1fr}
+  .hero .right{min-height:320px}
+  .hero .right::after{background:linear-gradient(0deg,var(--navy),transparent 50%)}
+  .hero .left{padding-right:0}
+  .stats .wrap{grid-template-columns:repeat(2,1fr)}
+  .stat:nth-child(2){border-right:0}
+  .prob-grid,.carbon .grid{grid-template-columns:1fr}
+  .prod{grid-template-columns:44px 1fr;gap:14px}
+  .prod .blurb,.prod .arrow{display:none}
+  .heroline .wrap{gap:20px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#">American<b>·</b>BioCarbon</a>
+    <div class="links">
+      <a href="#products">Absorbents</a>
+      <a href="#products">Industries</a>
+      <a href="#products">Agriculture</a>
+      <a href="#carbon">Carbon Removal</a>
+      <a href="#">Technical Data</a>
+    </div>
+    <div class="spring"></div>
+    <a class="cta" href="#final">Request Sample Kit</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="grid">
+      <div class="left">
+        <div class="kick mono">Oil &amp; Gas · Industrial Remediation</div>
+        <h1>Fewer bags.<br>Fewer <em>truckloads</em>.</h1>
+        <p class="sub">A sugarcane-bagasse absorbent that holds up to 5× its weight in liquid — so crews open fewer bags on the job and send fewer truckloads to disposal. Engineered for oilfield fluids, spill response, and industrial remediation.</p>
+        <div class="btns">
+          <a class="btn btn-primary" href="#final">Request Industrial Sample Kit →</a>
+          <a class="btn btn-ghost" href="#final">Get Bulk Quote</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="right" style="position:absolute;top:0;right:0;bottom:0;width:44%">
+    <img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/AmericanBiocarbon2021-292.jpg?v=1699280021" alt="Bagasse absorbent pellets on conveyor" />
+  </div>
+  <div class="heroline"><div class="wrap">
+    <span>Up to 5× weight absorption</span>
+    <span>Bulk · bulk-bag · truckload</span>
+    <span>SDS &amp; spec sheet available</span>
+  </div></div>
+</section>
+
+<section class="stats">
+  <div class="wrap">
+    <div class="stat"><b><em>5×</em></b><span>Weight in liquid absorbed — vs ~2.5× for wood pellets</span></div>
+    <div class="stat"><b>~½</b><span>Roughly half the bags opened per spill</span></div>
+    <div class="stat"><b>OMRI</b><span>Listed · IBI Certified · Puro.earth verified</span></div>
+    <div class="stat"><b>CO₂<em>−</em></b><span>Carbon-negative — durable removal per ton deployed</span></div>
+  </div>
+</section>
+
+<section class="sec problem">
+  <div class="wrap">
+    <div class="prob-grid">
+      <div>
+        <div class="kick mono" style="color:var(--crimson);margin-bottom:18px">The cost of standard sorbents</div>
+        <h2>Wood and clay make you buy, handle, and haul more than you should.</h2>
+        <p>Wood and clay sorbents typically hold about 2.5× their weight or less. That means more bags opened per spill, more material handled by crews, and more truckloads sent to disposal — where you pay by the pound.</p>
+      </div>
+      <ul class="prob-list">
+        <li><b>01</b><span>More bags per job = more labor and more truck space</span></li>
+        <li><b>02</b><span>More saturated material = more truckloads and tipping cost</span></li>
+        <li><b>03</b><span>Dust and non-renewable waste add handling and ESG friction</span></li>
+        <li><b>04</b><span>Hard to get specs, SDS, and a real bulk quote quickly</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="products">
+  <div class="wrap">
+    <div class="sec-h">
+      <div><div class="kick mono">One material line</div><h2>Built for your buyers.</h2></div>
+      <p>Five grades from a single bagasse platform — industrial remediation to certified carbon removal.</p>
+    </div>
+    <a class="prod" href="#final"><span class="no">01</span><div><div class="icp">Oil &amp; Gas · Spill Response · Remediation</div><h3>Absorbent Pellets</h3></div><div class="blurb">Holds up to 5× its weight in liquid. Fewer bags, lighter disposal, low dust.</div><span class="arrow">→</span></a>
+    <a class="prod" href="#final"><span class="no">02</span><div><div class="icp">Large-Area &amp; High-Volume Spills</div><h3>Absorbent Crumble</h3></div><div class="blurb">A coarser grade that spreads fast across a wide footprint — same high capacity.</div><span class="arrow">→</span></a>
+    <a class="prod" href="#final"><span class="no">03</span><div><div class="icp">Distributors · Blenders · Growers</div><h3>Agricultural Biochar</h3></div><div class="blurb">OMRI-listed bagasse biochar holds ~3–3.5× its weight in water — better moisture retention, faster compost.</div><span class="arrow">→</span></a>
+    <a class="prod" href="#final"><span class="no">04</span><div><div class="icp">Landscape · Nursery · Retail</div><h3>Biochar-Infused Soil</h3></div><div class="blurb">Ready-to-use blend with biochar's water- and nutrient-holding benefits. No mixing.</div><span class="arrow">→</span></a>
+    <a class="prod" href="#carbon"><span class="no">05</span><div><div class="icp">Corporate ESG · Brokers · Marketplaces</div><h3>Carbon Removal</h3></div><div class="blurb">Puro.earth-certified CORCs generated by real biochar deployment — backed by MRV.</div><span class="arrow">→</span></a>
+  </div>
+</section>
+
+<section class="sec carbon" id="carbon">
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <div class="kick mono">The dual-revenue engine</div>
+        <h2>Every ton deployed is also durable carbon removal.</h2>
+        <p>When our biochar is deployed, its stable carbon is locked away for the long term — certified through Puro.earth and issued as CORCs tied to real, documented deployment, not paper offsets. The physical product and the carbon value move on the same molecule.</p>
+        <p class="thesis">One supply chain, two revenue streams — and a defensible story for both the buyer and the market.</p>
+      </div>
+      <div>
+        <div class="aud"><b>For industrial &amp; ag buyers</b><p>Your remediation and soil spend funds verified, MRV-backed carbon removal — a cleaner materials story you can put in front of clients and HSE.</p></div>
+        <div class="aud"><b>For corporate ESG &amp; brokers</b><p>Durable, deployment-backed CORCs with an audit trail — real removed tons via Puro.earth, not avoidance offsets that fail scrutiny.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final" id="final">
+  <div class="wrap">
+    <div class="kick mono" style="color:#ffd0d9;margin-bottom:22px">Test it on your terms</div>
+    <h2>Run it against your current sorbent — before you switch a thing.</h2>
+    <p>Tell us the fluid, site, and volume. We ship an industrial sample kit with the SDS and spec sheet. A specialist replies within one business day.</p>
+    <div class="btns" style="justify-content:center;display:flex;gap:14px;flex-wrap:wrap">
+      <a class="btn btn-primary" href="#">Request Industrial Sample Kit →</a>
+      <a class="btn btn-ghost" href="#">Get Bulk Absorbent Quote</a>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">
+  <span>American BioCarbon · ProGreaux LLC — White Castle, Louisiana</span>
+  <span>OMRI Listed · IBI Certified · Puro.earth</span>
+</div></footer>
+
+<div class="badge">Concept <b>A</b> — Editorial Industrial</div>
+</body>
+</html>
