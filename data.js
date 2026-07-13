@@ -38,6 +38,8 @@ const BRAND = {
 /* Primary + secondary CTAs used across the site */
 const CTA = {
   sample:  { label:"Request quote",         href:"#/request-sample" },
+  freeSamplePellets: { label:"Free Sample", href:"#/shop/absorbent-pellets" },
+  freeSampleBiochar: { label:"Free Sample", href:"#/shop/agricultural-biochar" },
   quote:   { label:"Talk to us about volume",       href:"#/request-quote" },
   spec:    { label:"Get spec sheet",           href:"#/request-docs?doc=spec" },
   specDownload: { label:"Download Spec Sheet",      href:"#/request-quote" },
@@ -187,7 +189,7 @@ const HOME = {
   hero:{
     chosen:"Fewer bags per spill. Less weight to disposal.",
     sub:"Our sugarcane-bagasse absorbents, available as pellets, crumble, and fiber, hold up to 5× their weight in liquid, so crews open fewer bags and send fewer truckloads to disposal. Engineered for oilfield fluids, spill response, and industrial remediation.",
-    primary:CTA.sample, secondary:CTA.quote,
+    primary:CTA.freeSamplePellets, secondary:CTA.quote,
     proofLine:["Up to 5× weight absorption","SDS & spec sheet available"],
     image:ASSETS.pelletsPhoto,
     /* Full-bleed cinematic carousel, each slide pairs a massive edge-to-edge
@@ -196,19 +198,19 @@ const HOME = {
       { label:"Absorbent Pellets", img:ASSETS.heroPellets, pos:"50% 62%", zoom:1.24, origin:"50% 82%",
         h:"Fewer bags per spill.<br>Less weight to disposal.",
         sub:"Sugarcane bagasse absorbent pellets hold up to 5× their weight in liquid, so crews open fewer bags and haul fewer truckloads to disposal.",
-        primary:CTA.sample, secondary:CTA.quote },
+        primary:CTA.freeSamplePellets, secondary:CTA.quote },
       { label:"100% Biochar", img:ASSETS.hands, pos:"50% 50%", zoom:1.06, origin:"50% 55%",
         h:"Carbon that stays<br>in the ground.",
         sub:"OMRI listed bagasse biochar builds soil, holds water and nutrients, and locks durable carbon away for centuries.",
-        primary:CTA.biochar, secondary:CTA.quote },
+        primary:CTA.freeSampleBiochar, secondary:CTA.quote },
       { label:"Absorbent Crumble", img:ASSETS.pelletsPhoto, pos:"50% 58%", zoom:1.1, origin:"50% 72%",
         h:"Cover more ground,<br>in less time.",
         sub:"A coarser grade that spreads fast across wide area, high volume spills, with the same high capacity bagasse absorption.",
-        primary:CTA.sample, secondary:CTA.specDownload, specProduct:"absorbent-pellets" },
+        primary:CTA.freeSamplePellets, secondary:CTA.specDownload, specProduct:"absorbent-pellets" },
       { label:"BioSoil", img:ASSETS.heroBiosoil, pos:"50% 50%", zoom:1.05, origin:"50% 50%",
         h:"Peat performance,<br>without the peat.",
         sub:"Ready to use biochar infused growing media that retains water and nutrients like peat moss, with no mixing and no mined bog.",
-        primary:CTA.biochar, secondary:CTA.specDownload, specProduct:"biochar" },
+        primary:CTA.freeSampleBiochar, secondary:CTA.specDownload, specProduct:"biochar" },
     ],
   },
   offer:{
