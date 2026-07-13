@@ -775,6 +775,12 @@ function renderAbout(){
     <div><div class="kicker">Why it matters</div><h2 style="font-size:26px;margin:8px 0 12px">Performance and carbon, together</h2>
       <p class="lead">Because our biochar locks carbon into a durable form, deploying the physical product also generates certified carbon removal. Product performance and carbon value move on the same molecule.</p></div>
   </div></section>
+  <section class="block" style="background:var(--paper-2)"><div class="wrap two-col-copy">
+    <div><div class="kicker">Locally Sourced</div><h2 style="font-size:26px;margin:8px 0 12px">Louisiana-grown, responsibly sourced</h2>
+      <p class="lead">Every component comes from or is processed right here in Louisiana. Our multipurpose fiber, biochar, and coffee chaff are locally sourced and blended to create products like BioSoil—a ready-to-use growing media that replaces mined peat with renewable, locally grown alternatives.</p></div>
+    <div><div class="kicker">Supply with integrity</div><h2 style="font-size:26px;margin:8px 0 12px">Traceability from field to product</h2>
+      <p class="lead">We work directly with the Cora Texas Sugar Mill to capture bagasse, coffee processors for waste fiber, and local blenders to ensure every batch meets our performance standards. Local sourcing means faster turnaround, fresher materials, and complete supply-chain visibility.</p></div>
+  </div></section>
   ${ctaBand({h:"Work with us",sub:"Get a free sample, or talk to a specialist about volume.",primary:CTA.sample,secondary:CTA.quote,tertiary:CTA.specialist})}`;
 }
 
