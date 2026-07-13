@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VEJ Sales OS — Biochar Sales Department</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=bio3" />
+  <link rel="stylesheet" href="gtm-command-center.css?v=bio3" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">VEJ</div>
+        <div class="brand-text">
+          <strong>Sales OS</strong>
+          <span>ProGreaux · American BioCarbon</span>
+        </div>
+      </div>
+      <nav class="nav" id="nav"><!-- injected --></nav>
+      <div class="sidebar-foot">
+        <span class="dot"></span> Beachhead: Gulf South
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">☰</button>
+        <div class="topbar-title" id="topbarTitle">Executive Overview</div>
+        <div class="topbar-actions">
+          <div class="app-switch" role="tablist" aria-label="Switch app">
+            <a class="app-switch-btn" href="../">Website</a>
+            <a class="app-switch-btn active" href="./" aria-current="page">Sales OS</a>
+          </div>
+          <button class="btn btn-ghost" onclick="window.print()">Print / Export</button>
+        </div>
+      </header>
+      <div class="content" id="content"><!-- injected --></div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard</div>
+
+  <script src="data.js?v=bio3"></script>
+  <script src="gtm-data.js?v=bio3"></script>
+  <script src="app.js?v=bio3"></script>
+  <script src="gtm.js?v=bio3"></script>
+</body>
+</html>

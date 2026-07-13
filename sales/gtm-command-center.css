@@ -1,0 +1,32 @@
+/* ============ GTM Command Center — scoped polish ============ */
+/* Reuses the Sales OS design system; only adds GTM-specific accents. */
+
+/* Distinct accent bar on GTM nav groups so the module reads as one system */
+.nav-group{position:relative}
+
+/* GTM campaign cards get a subtle left accent */
+.gtm-cmp{border-left:3px solid var(--green);}
+.gtm-cmp h4{flex-wrap:wrap;gap:6px;line-height:1.5}
+
+/* Pre-launch + sequence blocks spacing */
+.gtm-pre-block,.gtm-seq{animation:fade .2s ease}
+
+/* Wide GTM tables (30-day, social, dashboard) get more room + tighter cells */
+#sec-gtm-30day table,#sec-gtm-social table{min-width:1180px;font-size:12px}
+#sec-gtm-30day td,#sec-gtm-social td{padding:8px 10px}
+#sec-gtm-crm table{min-width:760px}
+#sec-gtm-landing table{min-width:1080px}
+
+/* Keep long review questions readable */
+#sec-gtm-30day td em{font-size:11.5px;line-height:1.4;display:inline-block}
+
+/* Script copy blocks inside grid cards shouldn't overflow */
+.gtm-seq .script,.card .script{margin:6px 0}
+
+/* Status pills row wraps cleanly */
+#sec-gtm-crm .filters .pill{font-size:11px}
+
+/* Responsive: let the big tables scroll rather than break layout */
+@media(max-width:960px){
+  #sec-gtm-30day table,#sec-gtm-social table{min-width:1180px}
+}

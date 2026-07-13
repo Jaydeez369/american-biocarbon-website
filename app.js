@@ -176,7 +176,7 @@ function renderChrome(){
     <div><h4>Industries</h4>
       <a href="#/industry/oil-gas">Oil &amp; Gas</a><a href="#/industry/industrial-remediation">Industrial Remediation</a>
       <a href="#/industry/environmental-remediation">Environmental Remediation</a><a href="#/industry/spill-response">Spill Response</a><a href="#/industry/landfill-leachate">Landfill Leachate</a>
-      <a href="#/industry/distributors">Distributors</a><a href="#/industry/soil-blenders">Soil Blenders &amp; Compost</a></div>
+      <a href="#/industry/animal-bedding">Animal Bedding</a><a href="#/industry/distributors">Distributors</a><a href="#/industry/soil-blenders">Soil Blenders &amp; Compost</a></div>
     <div><h4>Resources</h4>
       <a href="#/technical">Certifications &amp; Technical Data</a><a href="#/compare">Compare vs Wood Pellets</a>
       <a href="#/about">About</a><a href="#/contact">Contact</a>
