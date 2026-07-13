@@ -248,7 +248,6 @@ function renderHome(){
     <p class="lead" style="margin-bottom:22px">${raw(H.comparison.sub)}</p>
     <div class="tbl tbl-hi"><table><thead><tr>${H.comparison.cols.map(c=>`<th>${raw(c)}</th>`).join("")}</tr></thead>
       <tbody>${H.comparison.rows.map(r=>`<tr>${r.map(x=>`<td>${raw(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-    <div class="btn-row" style="margin-top:22px">${btn(H.comparison.cta,"btn-dark")}</div>
   </div></section>
 
   <section class="block" style="padding-bottom:0"><div class="wrap">

@@ -41,6 +41,7 @@ const CTA = {
   freeSamplePellets: { label:"Free Sample", href:"#/shop/absorbent-pellets" },
   freeSampleBiochar: { label:"Free Sample", href:"#/shop/agricultural-biochar" },
   quote:   { label:"Talk to us about volume",       href:"#/request-quote" },
+  compare: { label:"Compare vs Wood Pellets",       href:"#/compare" },
   spec:    { label:"Get spec sheet",           href:"#/request-docs?doc=spec" },
   specDownload: { label:"Download Spec Sheet",      href:"#/request-quote" },
   sds:     { label:"Download SDS",                  href:"#/request-docs?doc=sds" },
@@ -372,7 +373,6 @@ const HOME = {
       ["Dust","Low","Moderate","High"],
       ["Carbon story","Carbon-negative","Neutral","None"],
     ],
-    cta:CTA.compare,
   },
   ag:{
     kicker:"Agriculture & Soil",
