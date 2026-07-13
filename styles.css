@@ -539,7 +539,9 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
 }
 
 /* ---- App switcher (Website / Sales OS) ---- */
-.app-switch{display:inline-flex;gap:2px;margin-left:18px;padding:3px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.app-switch-bar{background:#12264d;border-bottom:1px solid #24478a}
+.app-switch-bar .wrap{display:flex;justify-content:center;align-items:center;padding:6px 20px}
+.app-switch{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
 .app-switch-btn{padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--bar-text,#dfe6f2);text-decoration:none;line-height:1;white-space:nowrap;transition:background .15s,color .15s}
 .app-switch-btn:hover{background:rgba(255,255,255,.12)}
 .app-switch-btn.active{background:var(--crimson,#d7153f);color:#fff}
