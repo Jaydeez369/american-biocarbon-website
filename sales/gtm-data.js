@@ -311,17 +311,17 @@ scale:{
 /* ---------------------------------------------------------- 6. OUTBOUND SEQUENCES */
 sequences:[
   {seg:"Oil & Gas / Industrial Remediation",persona:"HSE / Procurement / Ops",tag:"CMP-OG",steps:[
-    {t:"⚡ A/B subject-line bank (test these)",b:"Rotate 2 at a time; kill any below the pack after ~100 sends. Keep them lowercase, curiosity/number-led, no 'quote' or 'partnership':\n\n1. absorbent that soaks ~5x its weight?\n2. {Company} + fewer bags per spill?\n3. cutting disposal weight on cleanups\n4. quick absorbent question, {First}\n5. plant-based sorbent for {Company}'s pads?\n6. wood/clay vs bagasse — free test\n7. re: your spill absorbent\n8. {First} — worth a 1-lb test?"},
-    {t:"Email 1 — Direct wedge (day 0)",b:"Subject: absorbent that soaks ~5x its weight?\n\n{First} — quick one. We make a plant-based absorbent from sugarcane bagasse that absorbs up to ~5x its weight in liquid (est.). For spill/tank/pad work that can mean less material and lighter disposal per event vs clay or wood pellets — plus a cleaner sustainability story if you're getting ESG pressure.\n\nWant me to send a free 1-lb sample to test against what you use now? No cost, nothing to sign.\n\n{Me}"},
+    {t:"⚡ A/B subject-line bank (test these)",b:"Rotate 2 at a time; kill any below the pack after ~100 sends. Keep them lowercase, curiosity/number-led, no 'quote' or 'partnership':\n\n1. absorbent that soaks up to ~5x its weight?\n2. {Company} + fewer bags per spill?\n3. cutting disposal weight on cleanups\n4. quick absorbent question, {First}\n5. plant-based sorbent for {Company}'s pads?\n6. wood/clay vs bagasse — free test\n7. re: your spill absorbent\n8. {First} — worth a 1-lb test?"},
+    {t:"Email 1 — Direct wedge (day 0)",b:"Subject: absorbent that soaks up to ~5x its weight?\n\n{First} — quick one. We make a plant-based absorbent from sugarcane bagasse that absorbs up to ~5x its weight in liquid (est.). For spill/tank/pad work that can mean less material and lighter disposal per event vs clay or wood pellets — plus a cleaner sustainability story if you're getting ESG pressure.\n\nWant me to send a free 1-lb sample to test against what you use now? No cost, nothing to sign.\n\n{Me}"},
     {t:"Email 1 — Variant B (A/B against Email 1)",b:"Subject: {First} — worth a 1-lb test?\n\n{First} — are you the one who picks the absorbent your crews run on spills and pads?\n\nWe make a bagasse-based sorbent that soaks up to ~5x its weight (est.) — usually fewer bags and lighter disposal than clay or wood. I'll ship a free 1-lb sample so you can test it head-to-head on a real cleanup. No cost, no commitment.\n\nWant one out this week?\n\n{Me}"},
-    {t:"Email 2 — Comparison (day 3)",b:"Subject: re: absorbent that soaks ~5x its weight?\n\n{First} — sending the one-pager: our pellet vs wood/clay on absorption-per-pound and disposal weight. The switch usually comes down to cost-per-gallon-absorbed.\n\nWho handles absorbent sourcing on your team? Happy to send a free sample kit their way to test.\n\n{Me}"},
+    {t:"Email 2 — Comparison (day 3)",b:"Subject: re: absorbent that soaks up to ~5x its weight?\n\n{First} — sending the one-pager: our pellet vs wood/clay on absorption-per-pound and disposal weight. The switch usually comes down to cost-per-gallon-absorbed.\n\nWho handles absorbent sourcing on your team? Happy to send a free sample kit their way to test.\n\n{Me}"},
     {t:"Email 3 — Risk-reversed sample (day 6)",b:"Subject: test it against your current absorbent\n\n{First} — no ask beyond a free test. We ship a procurement-ready sample kit; you run it against your current absorbent on a real cleanup. If it doesn't outperform, toss it — no strings.\n\nWant me to get a kit out this week? Just need a ship-to.\n\n{Me}"},
     {t:"Email 4 — Use-case nudge (day 10, NO LOI)",b:"Subject: what would you test it on?\n\n{First} — last practical one from me. Guys running tank batteries and SWD sites tell us disposal weight is the quiet cost. Easiest way to see if ours helps: a free sample on one job.\n\nWhat's the liquid/spill type you'd test it on? I'll match the kit and ship it. Still zero cost.\n\n{Me}"},
     {t:"Breakup (day 14)",b:"Subject: close the loop\n\n{First} — I'll stop here so I'm not cluttering your inbox. If absorbent sourcing ever opens up, we're a plant-based option worth a 10-minute test. I'll leave the spec sheet attached.\n\nAppreciate your time — {Me}"},
     {t:"Call opener",b:"Hi {First}, it's {Me} with American BioCarbon — I'll be quick. We make a plant-based absorbent that soaks up to ~5x its weight, and companies doing spill and tank work use it to cut material and disposal weight versus clay and wood pellets. Are you the right person for absorbent sourcing, or is that someone else on your team?"},
-    {t:"Voicemail",b:"Hi {First}, {Me} with American BioCarbon — plant-based absorbent, soaks about 5x its weight, used for spill and remediation work. I'd love to send you a free sample to test against what you use now. I'll follow up by email; you can also reach me at {phone}. Thanks."},
+    {t:"Voicemail",b:"Hi {First}, {Me} with American BioCarbon — plant-based absorbent, soaks up to about 5x its weight, used for spill and remediation work. I'd love to send you a free sample to test against what you use now. I'll follow up by email; you can also reach me at {phone}. Thanks."},
     {t:"LinkedIn connect note",b:"{First} — we make a bagasse-based industrial absorbent used in spill/remediation work. Sending a connect in case absorbent sourcing is ever on your plate."},
-    {t:"LinkedIn follow-up 1",b:"Thanks for connecting, {First}. Quick version: plant-based absorbent, ~5x its weight, lighter disposal than clay/wood. Want a free sample to test against what your team uses now? I'll ship one — no cost."},
+    {t:"LinkedIn follow-up 1",b:"Thanks for connecting, {First}. Quick version: plant-based absorbent, up to ~5x its weight, lighter disposal than clay/wood. Want a free sample to test against what your team uses now? I'll ship one — no cost."},
     {t:"LinkedIn follow-up 2",b:"{First} — no pressure. If it's useful I'll send the spec sheet + a wood/clay comparison so you have it on file for the next spill job. Want me to?"}
   ]},
   {seg:"Spill Response / Environmental Services",persona:"Ops / Field Supervisor",tag:"CMP-ENV",steps:[
@@ -330,8 +330,8 @@ sequences:[
     {t:"Email 3 (day 6)",b:"Subject: sample for your next job\n\n{First} — easiest path: I send a free sample kit, you use it on one real cleanup, and you decide. No cost, no commitment.\n\nWant a kit out this week?\n\n{Me}"},
     {t:"Email 4 — Next-job nudge (day 10, NO LOI)",b:"Subject: stage one for the next callout?\n\n{First} — last one from me. Since callouts are unpredictable, easiest is to have a free sample kit already on the shelf so your crew can test it the next time you get called out.\n\nWant me to ship one so it's ready? Zero cost.\n\n{Me}"},
     {t:"Breakup (day 14)",b:"Subject: last note\n\n{First} — I'll leave it here. Spec + comparison attached for the next time absorbent comes up. Thanks for the time — {Me}"},
-    {t:"Call opener",b:"Hi {First}, {Me} with American BioCarbon — plant-based absorbent that soaks about 5x its weight. Environmental crews use it to cut material and disposal weight on callouts. Are you the person who decides what absorbent goes on the truck?"},
-    {t:"Voicemail",b:"Hi {First}, {Me} with American BioCarbon. Plant-based absorbent, ~5x absorption, lighter disposal — worth testing on your next job. I'll email you the comparison; reach me at {phone}. Thanks."},
+    {t:"Call opener",b:"Hi {First}, {Me} with American BioCarbon — plant-based absorbent that soaks up to about 5x its weight. Environmental crews use it to cut material and disposal weight on callouts. Are you the person who decides what absorbent goes on the truck?"},
+    {t:"Voicemail",b:"Hi {First}, {Me} with American BioCarbon. Plant-based absorbent, up to ~5x absorption, lighter disposal — worth testing on your next job. I'll email you the comparison; reach me at {phone}. Thanks."},
     {t:"LinkedIn connect note",b:"{First} — we supply a plant-based industrial absorbent for spill/environmental work. Connecting in case it's useful for your crews."},
     {t:"LinkedIn follow-up 1",b:"Thanks {First}. We help environmental crews cut absorbent + disposal cost per callout. Open to a sample on your next job?"},
     {t:"LinkedIn follow-up 2",b:"{First} — I'll send the comparison sheet so it's on file. Want standing bulk pricing set up too?"}
@@ -343,7 +343,7 @@ sequences:[
     {t:"Email 4 (day 11)",b:"Subject: worth 10 minutes?\n\n{First} — if it's easier to talk it through, 10 minutes and I'll walk you through where sites see the biggest lift. Open this week?\n\n{Me}"},
     {t:"Breakup (day 15)",b:"Subject: closing the loop\n\n{First} — I'll pause here. Spec sheet attached for whenever leachate absorbent comes up. Thanks — {Me}"},
     {t:"Call opener",b:"Hi {First}, {Me} with American BioCarbon. We make a high-absorption plant-based media used for leachate and odor. Are you the right person for absorbent/media sourcing at the site?"},
-    {t:"Voicemail",b:"Hi {First}, {Me} with American BioCarbon — plant-based leachate/odor absorbent, ~5x absorption. I'll send the spec sheet; reach me at {phone}. Thanks."},
+    {t:"Voicemail",b:"Hi {First}, {Me} with American BioCarbon — plant-based leachate/odor absorbent, up to ~5x absorption. I'll send the spec sheet; reach me at {phone}. Thanks."},
     {t:"LinkedIn connect note",b:"{First} — plant-based high-absorption media for leachate/odor. Connecting in case it fits your site."},
     {t:"LinkedIn follow-up 1",b:"Thanks {First}. Want the spec sheet + a trial-quantity quote for a leachate test?"},
     {t:"LinkedIn follow-up 2",b:"{First} — happy to keep it simple: a free sample to your site for a leachate/odor test, no cost and nothing to sign. Want me to send one?"}
@@ -394,9 +394,9 @@ calling:{
   vmStrategy:"Leave a VM on the 1st and 3rd attempt only; keep under 20 seconds; always pair with an email same day ('just left you a VM'). Never leave a VM every call — it reads desperate.",
   scripts:[
     {t:"Gatekeeper",b:"Hi, hoping you can point me the right way — who handles absorbent or spill-material sourcing there? I've got a plant-based absorbent a few crews are testing and I want to reach the right person, not waste anyone's time. What's the best name?"},
-    {t:"Procurement",b:"Hi {First}, {Me} with American BioCarbon. Quick reason for the call: we make a plant-based absorbent that soaks about 5x its weight, and buyers use it to cut material and disposal cost versus clay and wood pellets. I'm not asking you to switch anything today — just whether it's worth putting a spec sheet and a sample in front of you to compare. Fair?"},
+    {t:"Procurement",b:"Hi {First}, {Me} with American BioCarbon. Quick reason for the call: we make a plant-based absorbent that soaks up to about 5x its weight, and buyers use it to cut material and disposal cost versus clay and wood pellets. I'm not asking you to switch anything today — just whether it's worth putting a spec sheet and a sample in front of you to compare. Fair?"},
     {t:"Operations Manager",b:"Hi {First}, {Me} with American BioCarbon. Your crews doing spill and tank work — we make a plant-based absorbent that soaks up more per pound, so it's less material to haul and lighter disposal. Worth throwing a sample on your next cleanup to see how it performs against what you use now?"},
-    {t:"Oilfield services",b:"Hi {First}, {Me} with American BioCarbon. Calling because oilfield crews go through a lot of absorbent on pads and around tanks. Ours is plant-based, soaks about 5x its weight, so less material per spill and lighter disposal. Are you the right person for that sourcing, or should I be talking to someone at the yard?"},
+    {t:"Oilfield services",b:"Hi {First}, {Me} with American BioCarbon. Calling because oilfield crews go through a lot of absorbent on pads and around tanks. Ours is plant-based, soaks up to about 5x its weight, so less material per spill and lighter disposal. Are you the right person for that sourcing, or should I be talking to someone at the yard?"},
     {t:"Remediation contractor",b:"Hi {First}, {Me} with American BioCarbon. On remediation jobs, absorbent cost and disposal weight quietly eat margin. Ours is plant-based and high-absorption, so it can trim both. Open to testing it on your next job with a free sample kit?"},
     {t:"Landfill operator",b:"Hi {First}, {Me} with American BioCarbon. For leachate and odor, we make a high-absorption plant-based media that can cut handling weight. Are you the right person to send a spec sheet and a free sample to?"},
     {t:"Ag distributor",b:"Hi {First}, {Me} with American BioCarbon. We supply a differentiated biochar/soil line to distributors with good channel margin and a real supply story. Are you the person who evaluates new products for your branches?"},
@@ -425,11 +425,11 @@ scriptLibrary:{
     {seg:"Oil & Gas / Industrial Remediation",tag:"CMP-OG",
      openers:[
        {style:"A · Direct-value",b:"Hi {First}, {Me} with American BioCarbon — I'll be quick. We make a plant-based absorbent that soaks up to ~5x its weight, and crews doing spill and tank work use it to cut material and disposal weight versus clay and wood pellets. Are you the right person for absorbent sourcing?"},
-       {style:"B · Permission-based",b:"Hi {First}, {Me} with American BioCarbon — did I catch you at an okay time for 20 seconds? … We make a bagasse-based spill absorbent that soaks about 5x its weight, and I just want to get a free sample in front of the right person to test. Is that you, or someone at the yard?"},
+       {style:"B · Permission-based",b:"Hi {First}, {Me} with American BioCarbon — did I catch you at an okay time for 20 seconds? … We make a bagasse-based spill absorbent that soaks up to about 5x its weight, and I just want to get a free sample in front of the right person to test. Is that you, or someone at the yard?"},
        {style:"C · Problem-led",b:"Hi {First}, {Me} with American BioCarbon. Quick reason for the call — on pads and around tanks, the disposal weight of used absorbent quietly runs up cost. Ours is plant-based and soaks more per pound, so less to haul. Worth me sending a free sample to test on a job?"},
        {style:"D · Curiosity / pattern-interrupt",b:"Hi {First}, {Me} with American BioCarbon — this is a cold call, I'll keep it to 15 seconds. We turn sugarcane waste into a spill absorbent that outsoaks clay and wood about 2 to 1. Can I just mail you a free sample so you can see it for yourself?"},
-       {style:"E · Referral/social-proof",b:"Hi {First}, {Me} with American BioCarbon. A few Gulf Coast remediation crews are testing our plant-based absorbent instead of clay — soaks ~5x its weight, lighter disposal. Figured you'd want a free sample to run the same test. You the right person for that?"},
-       {style:"F · Ultra-short (voicemail-proof)",b:"Hi {First} — {Me}, American BioCarbon. Plant-based absorbent, soaks 5x its weight. One question: can I send you a free sample to test? That's the whole call."}
+       {style:"E · Referral/social-proof",b:"Hi {First}, {Me} with American BioCarbon. A few Gulf Coast remediation crews are testing our plant-based absorbent instead of clay — soaks up to ~5x its weight, lighter disposal. Figured you'd want a free sample to run the same test. You the right person for that?"},
+       {style:"F · Ultra-short (voicemail-proof)",b:"Hi {First} — {Me}, American BioCarbon. Plant-based absorbent, soaks up to 5x its weight. One question: can I send you a free sample to test? That's the whole call."}
      ],
      gatekeeper:[
        {style:"Route-me",b:"Hi, hoping you can point me the right way — who handles absorbent or spill-material sourcing there? I've got a plant-based absorbent a few crews are testing and I just want to mail the right person a free sample. What's the best name?"},
@@ -442,16 +442,16 @@ scriptLibrary:{
        {o:"Not the right person",b:"No problem — who is? I just want to get a free sample into the right hands. Happy to use your name so it's not a cold hand-off."}
      ],
      voicemails:[
-       {style:"VM-1 (attempt 1)",b:"Hi {First}, {Me} with American BioCarbon — plant-based spill absorbent, soaks about 5x its weight. I'd like to send you a free sample to test against what you use now. I'll email you too; reach me at {phone}. Thanks."},
+       {style:"VM-1 (attempt 1)",b:"Hi {First}, {Me} with American BioCarbon — plant-based spill absorbent, soaks up to about 5x its weight. I'd like to send you a free sample to test against what you use now. I'll email you too; reach me at {phone}. Thanks."},
        {style:"VM-2 (attempt 3)",b:"{First}, {Me} again at American BioCarbon. Not trying to sell you anything — just want to mail a free absorbent sample for your crew to test. Shoot me a ship-to at {phone} and it's on its way."}
      ]},
     {seg:"Spill Response / Environmental Services",tag:"CMP-ENV",
      openers:[
-       {style:"A · Margin-led",b:"Hi {First}, {Me} with American BioCarbon. On callouts, absorbent cost and disposal weight quietly eat job margin. Ours is plant-based and soaks ~5x its weight. Can I send a free sample to test on your next job?"},
-       {style:"B · Readiness angle",b:"Hi {First}, {Me} with American BioCarbon. Since callouts are unpredictable, most crews like having a sample already on the shelf. Ours is a bagasse absorbent that soaks about 5x its weight — want me to mail a free one so it's ready?"},
+       {style:"A · Margin-led",b:"Hi {First}, {Me} with American BioCarbon. On callouts, absorbent cost and disposal weight quietly eat job margin. Ours is plant-based and soaks up to ~5x its weight. Can I send a free sample to test on your next job?"},
+       {style:"B · Readiness angle",b:"Hi {First}, {Me} with American BioCarbon. Since callouts are unpredictable, most crews like having a sample already on the shelf. Ours is a bagasse absorbent that soaks up to about 5x its weight — want me to mail a free one so it's ready?"},
        {style:"C · Permission",b:"Hi {First}, got 20 seconds? {Me}, American BioCarbon — plant-based spill absorbent, lighter disposal than clay. I just want to get a free sample to your crew to test. Are you the right person?"},
        {style:"D · Direct question",b:"Hi {First}, {Me} with American BioCarbon. Are you the one who decides what absorbent goes on the truck? … We make a plant-based one that outsoaks clay/wood — I'll mail a free sample to test. Sound good?"},
-       {style:"E · Curiosity",b:"Hi {First}, {Me}, American BioCarbon — quick cold call. Our absorbent is made from sugarcane and soaks 5x its weight. Can I just send you a free one so you can see it on your next cleanup?"}
+       {style:"E · Curiosity",b:"Hi {First}, {Me}, American BioCarbon — quick cold call. Our absorbent is made from sugarcane and soaks up to 5x its weight. Can I just send you a free one so you can see it on your next cleanup?"}
      ],
      gatekeeper:[
        {style:"Route-me",b:"Hi — who runs field supplies or absorbent purchasing for the crews? I just want to mail them a free sample to test, nothing more. Best name?"}
@@ -461,14 +461,14 @@ scriptLibrary:{
        {o:"Approved vendor list",b:"Understood — this is just a free trial so your team has real data if we ever come up for the list. No commitment. What's the ship-to?"}
      ],
      voicemails:[
-       {style:"VM-1",b:"Hi {First}, {Me} with American BioCarbon — plant-based spill absorbent, ~5x absorption, lighter disposal. I'd like to mail your crew a free sample for the next job. Reach me at {phone}. Thanks."}
+       {style:"VM-1",b:"Hi {First}, {Me} with American BioCarbon — plant-based spill absorbent, up to ~5x absorption, lighter disposal. I'd like to mail your crew a free sample for the next job. Reach me at {phone}. Thanks."}
      ]},
     {seg:"Landfill / Leachate / Waste",tag:"CMP-LF",
      openers:[
        {style:"A · Problem-led",b:"Hi {First}, {Me} with American BioCarbon. For leachate and odor, a high-absorption plant-based media can cut handling weight versus what most sites run. Can I send a free sample for a small trial?"},
        {style:"B · Spec-first",b:"Hi {First}, {Me}, American BioCarbon. Before I send anything — are you the right person for absorbent/media sourcing at the site? I've got a plant-based leachate media and a free sample I'd like your environmental team to test."},
        {style:"C · Compliance angle",b:"Hi {First}, {Me} with American BioCarbon. Sites dealing with leachate and odor compliance are testing a plant-based high-absorption media — lighter disposal footprint. Want a free sample to trial on a load?"},
-       {style:"D · Curiosity",b:"Hi {First}, {Me}, American BioCarbon — quick one. We make a sugarcane-based media that soaks about 5x its weight, used for landfill leachate. Can I just mail a free sample to the site?"}
+       {style:"D · Curiosity",b:"Hi {First}, {Me}, American BioCarbon — quick one. We make a sugarcane-based media that soaks up to about 5x its weight, used for landfill leachate. Can I just mail a free sample to the site?"}
      ],
      gatekeeper:[
        {style:"Route-me",b:"Hi — who handles environmental media or absorbent sourcing at the site? I'd like to send them a free sample for a leachate test. Best name?"}
@@ -478,7 +478,7 @@ scriptLibrary:{
        {o:"Regulatory approval needed",b:"Fair — the free sample is exactly how you'd start that review. I'll include the SDS and spec so your compliance folks can look. Ship-to?"}
      ],
      voicemails:[
-       {style:"VM-1",b:"Hi {First}, {Me} with American BioCarbon — plant-based leachate/odor media, ~5x absorption. I'd like to send a free sample for a site trial. Reach me at {phone}. Thanks."}
+       {style:"VM-1",b:"Hi {First}, {Me} with American BioCarbon — plant-based leachate/odor media, up to ~5x absorption. I'd like to send a free sample for a site trial. Reach me at {phone}. Thanks."}
      ]},
     {seg:"Ag Distributor / Co-op",tag:"CMP-AGD",
      openers:[
@@ -502,7 +502,7 @@ scriptLibrary:{
      openers:[
        {style:"A · Product-upgrade led",b:"Hi {First}, {Me} with American BioCarbon. Biochar as a blend input can upgrade your soil and compost products and open a premium SKU. I'll send a free sample so you can run a blend trial. You the one who decides on inputs?"},
        {style:"B · Prove-it framing",b:"Hi {First}, {Me}, American BioCarbon. We give you a simple A/B trial so you can prove the lift before committing to anything. Want a free bulk sample to run it in your own mix?"},
-       {style:"C · Curiosity",b:"Hi {First}, {Me} with American BioCarbon — quick cold call. Our bagasse biochar holds about 3x its weight in water and screens clean into blends. Can I just mail you a free sample to test?"},
+       {style:"C · Curiosity",b:"Hi {First}, {Me} with American BioCarbon — quick cold call. Our bagasse biochar holds up to about 3x its weight in water and screens clean into blends. Can I just mail you a free sample to test?"},
        {style:"D · Permission",b:"Hi {First}, 20 seconds okay? {Me}, American BioCarbon — biochar blend input for soil/compost yards. I want to get a free sample to whoever runs your blends. Is that you?"}
      ],
      gatekeeper:[
@@ -548,7 +548,7 @@ linkedin:{
   ],
   dm:[
     {t:"Connection note",b:"{First} — we make a bagasse-based industrial absorbent used in spill/remediation work. Connecting in case absorbent sourcing is ever on your plate."},
-    {t:"Follow-up 1 (2 days after accept)",b:"Thanks for connecting, {First}. Quick version: plant-based absorbent, soaks ~5x its weight, lighter disposal than clay/wood. Open to comparing it against what your team uses now? I can send a sample kit."},
+    {t:"Follow-up 1 (2 days after accept)",b:"Thanks for connecting, {First}. Quick version: plant-based absorbent, soaks up to ~5x its weight, lighter disposal than clay/wood. Open to comparing it against what your team uses now? I can send a sample kit."},
     {t:"Follow-up 2 (4 days later)",b:"{First} — no pressure. If it's useful I'll send the spec sheet + a wood/clay comparison so it's on file for the next spill job. Want me to?"},
     {t:"Follow-up 3 (soft, 1 week later)",b:"{First} — sharing a short absorption demo we posted, in case it's useful for your crews. Happy to talk whenever sourcing comes up."}
   ],
@@ -568,8 +568,8 @@ linkedin:{
 social:{
   posts:[
     {d:1,pl:"LinkedIn",topic:"Company intro / who we help",hook:"Most spill absorbents are clay or wood. There's a plant-based option.",body:"Intro American BioCarbon: bagasse-based absorbents + biochar for remediation, ag, and carbon. Who we help and why now.",vis:"Product hero + logo",cta:"Follow for absorption demos",icp:"All"},
-    {d:2,pl:"LinkedIn",topic:"Product proof",hook:"This is what 5x absorption looks like.",body:"Close-up of the pellet + packaging. What it is, what it's made of, where it's used.",vis:"Product macro photo",cta:"Want the spec sheet? DM me",icp:"O&G/ENV"},
-    {d:3,pl:"LinkedIn",topic:"Absorption demo",hook:"Watch it soak up ~5x its weight (est.).",body:"Short demo: pour liquid, show absorption. No hype, just the test.",vis:"Demo video (absorbency test)",cta:"Worth testing on your next spill?",icp:"O&G/ENV"},
+    {d:2,pl:"LinkedIn",topic:"Product proof",hook:"This is what up to 5x absorption looks like.",body:"Close-up of the pellet + packaging. What it is, what it's made of, where it's used.",vis:"Product macro photo",cta:"Want the spec sheet? DM me",icp:"O&G/ENV"},
+    {d:3,pl:"LinkedIn",topic:"Absorption demo",hook:"Watch it soak up to ~5x its weight (est.).",body:"Short demo: pour liquid, show absorption. No hype, just the test.",vis:"Demo video (absorbency test)",cta:"Worth testing on your next spill?",icp:"O&G/ENV"},
     {d:5,pl:"LinkedIn",topic:"Comparison vs wood pellet",hook:"Price-per-bag is the wrong number. Cost-per-gallon-absorbed is the right one.",body:"Side-by-side vs wood/clay on absorption-per-pound and disposal weight.",vis:"Comparison graphic (EST-tagged)",cta:"Want the comparison sheet?",icp:"O&G/ENV"},
     {d:7,pl:"LinkedIn",topic:"Bagasse story",hook:"Our absorbent starts as sugarcane waste.",body:"Co-location at a sugar mill (Cora Texas) → bagasse → product at source. Supply + sustainability story.",vis:"Facility/feedstock photo",cta:"Curious how it's made? Ask me",icp:"All"},
     {d:9,pl:"LinkedIn",topic:"Industrial use-case",hook:"Around tanks and on pads, absorbent adds up fast.",body:"How oilfield/industrial crews use it; less material, lighter disposal.",vis:"Use-case photo/graphic",cta:"Who handles absorbent sourcing on your team?",icp:"O&G"},

@@ -245,7 +245,7 @@ const HOME = {
       // NOTE: variant IDs below are the CURRENT live Shopify SKUs (Pellets 20 lb, Biochar 8 qt) used so checkout works
       // end-to-end today. Swap to the 1 lb / 8 oz SAMPLE variant IDs the moment Victor/Jesse create those SKUs.
       { id:"absorbent-pellets", name:"Absorbent Pellets", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Spill Control", accent:"aqua",
-        claim:"A 5:1 absorption ratio means crews open fewer bags per spill and send lighter loads to disposal.",
+        claim:"An up-to-5:1 absorption ratio means crews open fewer bags per spill and send lighter loads to disposal.",
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
         chips:["1 lb sample bag","100% bagasse","Low dust"], unit:"1 lb Sample Bag", sampleWeight:"1 LB", photo:ASSETS.pelletsPhoto, free:true, truckloadQ4:true,
         bag:{ banner:"ABSORBENT PELLETS", iconSet:"absorbent",
@@ -253,17 +253,17 @@ const HOME = {
           uses:"Spill Cleanup (Oil, Solvents & Non-Viscous Chemicals) | Animal Bedding | Landfill Leachate Control | Oil & Gas Fluid Remediation (Drilling & Fracking) | Flood & Natural Disaster Cleanup",
           desc:"A carbon-neutral, plant-based absorbent made from sugarcane bagasse. These pellets soak up five times their own weight in liquid, outperforming standard wood pellets, and are just as easy to use: sprinkle over the mess, let them fully absorb, then sweep up and dispose. Renewable, sustainably sourced, and built for tough industrial and household jobs alike.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE", omri:false },
-        desc:"Super-absorbent multi-purpose bagasse pellets made from the fiber left over when sugar is processed. A 5:1 absorption ratio suits spill cleanup, waste solidification, and remediation, as well as animal bedding and litter. Odorless, renewable, low dust, and easy to use.",
+        desc:"Super-absorbent multi-purpose bagasse pellets made from the fiber left over when sugar is processed. An up-to-5:1 absorption ratio suits spill cleanup, waste solidification, and remediation, as well as animal bedding and litter. Odorless, renewable, low dust, and easy to use.",
         gallery:[ CDN+"AbsorbentPelletsMock.jpg?v=1699280021", CDN+"AmericanBiocarbon2021-292.jpg?v=1699280021", CDN+"ABCAbsorbentPelletsFinal_printready.pdf.png?v=1699280021", CDN+"ABCAbsorbentPelletsFinal_printready.pdf_2.png?v=1699280021" ],
         sections:[
           { h:"Spill cleanup and remediation", body:"Soak up soil runoff, solvents, drilling and frac fluids, and other non-viscous liquids. Sprinkle the pellets over the spill, wait for full absorption, then sweep up and dispose of the saturated material per your local requirements." },
-          { h:"Waste solidification", body:"A 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and send lighter loads to disposal." },
+          { h:"Waste solidification", body:"An up-to-5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and send lighter loads to disposal." },
           { h:"Animal bedding", body:"Use as bedding by adding about a half gallon of water to the bag for wet bedding, or scatter the pellets across the habitat floor for dry bedding." },
           { h:"Pet litter", body:"A renewable, low-dust alternative to traditional litter for cats, rabbits, ferrets, birds, and more." },
         ],
         img:ASSETS.pelletsMock, variantId:"47285744566564", docIds:["spec","sds"] },
       { id:"agricultural-biochar", name:"100% Biochar", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI-listed", accent:"amber",
-        claim:"OMRI-listed bagasse biochar holds about 3 to 3.5 times its weight in water for better moisture and nutrient retention.",
+        claim:"OMRI-listed bagasse biochar holds up to 3 to 3.5 times its weight in water for better moisture and nutrient retention.",
         uses:["Soil amendment for gardens, beds, and lawns","Water and nutrient retention","Supports faster compost cycles","Carbon-negative soil carbon storage"],
         chips:["½ lb sample bag","OMRI-listed","100% bagasse"], unit:"½ lb Sample Bag", sampleWeight:"½ LB", photo:ASSETS.biocharPhoto, free:true, truckloadQ4:true,
         bag:{ banner:"100% BIOCHAR", iconSet:"soil",
@@ -271,12 +271,12 @@ const HOME = {
           uses:"Garden & Lawn Soil Amendment | Vegetable & Flower Bed Enrichment | Tree & Orchard Planting | Farm & Crop Field Application | Improving Water-Holding Capacity | Boosting Nutrient Retention & Microbial Activity | Long-Term Carbon Sequestration in Soil",
           desc:"A pure, carbon-negative soil amendment made from Louisiana sugarcane bagasse. Our biochar's porous, honeycomb structure locks carbon into a stable form that can persist in soil for decades to millennia, while improving water retention, nutrient availability, and aeration. It's OMRI Listed for organic use, so it fits right into organic gardens, farms, and landscaping programs. Simply mix into soil, water thoroughly to activate, and let it get to work building healthier ground from the roots up.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE", omri:true },
-        desc:"OMRI-listed 100% bagasse biochar soil enhancer for healthy growth and carbon capture, made from pure Louisiana sugarcane fiber. It improves water and nutrient retention and holds about 3 to 3.5 times its weight in water. Works as a soil amendment for gardens, beds, lawns, and trees.",
+        desc:"OMRI-listed 100% bagasse biochar soil enhancer for healthy growth and carbon capture, made from pure Louisiana sugarcane fiber. It improves water and nutrient retention and holds up to 3 to 3.5 times its weight in water. Works as a soil amendment for gardens, beds, lawns, and trees.",
         gallery:[ CDN+"100BiocharMock.jpg?v=1699279980", CDN+"AmericanBiocarbonBiochar1.jpg?v=1699279980", CDN+"1_45b3c726-d412-46ee-9b59-0347af6e854c.png?v=1699279980", CDN+"2_c0b4ae49-7772-478d-9cc8-71fb351a32b0.png?v=1699279980" ],
         sections:[
           { h:"How to use", body:"A general guideline is 10 to 25 pounds of biochar per 100 square feet. Loosen the soil and remove debris, remove 2 to 3 inches of topsoil, sprinkle the biochar, then replace the topsoil." },
           { h:"Water and monitor", body:"Water thoroughly to activate the product, saturating the soil to a depth of at least 6 inches. Check periodically so the soil stays moist but not waterlogged, and adjust the rate as needed. Add aggregates such as perlite if the soil retains too much water." },
-          { h:"Water and nutrient retention", body:"OMRI-listed bagasse biochar holds about 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
+          { h:"Water and nutrient retention", body:"OMRI-listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
         ],
         img:ASSETS.biocharMock, variantId:"46496458539300", docIds:["spec","sds"] },
       { id:"biosoil", name:"BioSoil", avail:"q4", cat:"Soil", category:"Growing Media · Peat-Moss Alternative", accent:"soil",
@@ -322,7 +322,7 @@ const HOME = {
   },
   categories:[
     { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, lighter disposal, low dust. Sample bags ship now.", cta:CTA.sample, href:"#/product/absorbent-pellets", img:ASSETS.pelletsMock, avail:"live" },
-    { name:"100% Biochar", icp:"Distributors · blenders · growers", blurb:"OMRI-listed bagasse biochar holds ~3 to 3.5× its weight in water, better moisture retention, faster compost. Sample bags ship now.", cta:CTA.biochar, href:"#/product/agricultural-biochar", img:ASSETS.biocharMock, avail:"live" },
+    { name:"100% Biochar", icp:"Distributors · blenders · growers", blurb:"OMRI-listed bagasse biochar holds up to ~3 to 3.5× its weight in water, better moisture retention, faster compost. Sample bags ship now.", cta:CTA.biochar, href:"#/product/agricultural-biochar", img:ASSETS.biocharMock, avail:"live" },
     { name:"Absorbent Crumble", icp:"Large-area & high-volume spills", blurb:"A coarser grade that spreads fast across a wide footprint, same high capacity.", cta:CTA.quote, href:"#/product/absorbent-crumble", img:ASSETS.pelletsMock, avail:"q4" },
     { name:"Biochar-Infused Soil", icp:"Landscape · nursery · retail", blurb:"Ready-to-use blend with biochar's water- and nutrient-holding benefits. No mixing.", cta:CTA.biochar, href:"#/product/biochar-infused-soil", img:ASSETS.biocharLg, avail:"q4" },
     { name:"Carbon Removal", icp:"Corporate ESG · brokers · marketplaces", blurb:"Puro.earth-certified CORCs generated by real biochar deployment, backed by MRV.", cta:CTA.carbon, href:"#/product/carbon-removal", img:ASSETS.hands, avail:"q4" },
@@ -355,7 +355,7 @@ const HOME = {
     primary:CTA.specialist, secondary:CTA.sample, image:ASSETS.pelletsPhoto,
   },
   comparison:{
-    h:"5:1 vs 2.5:1, the same spill, roughly half the bags",
+    h:"Up to 5:1 vs 2.5:1, the same spill, roughly half the bags",
     sub:"Absorbency numbers reflect available product data for non-viscous liquids. Request the spec sheet for test conditions.",
     cols:["Property","Bagasse Pellets","Wood Pellets","Clay Absorbent"],
     rows:[
@@ -371,8 +371,8 @@ const HOME = {
   ag:{
     kicker:"Agriculture & Soil",
     h:"Healthier soil, faster compost",
-    body:"OMRI-listed bagasse biochar holds ~3 to 3.5× its weight in water (per technical report) and improves nutrient retention, so blends hold moisture through dry spells and leach less fertilizer. Based on peer-reviewed research on biochar in composting, it can help shorten compost turnover ~10 to 30% (validate in your own process). For distributors, soil blenders, compost yards, growers, and landscape supply.",
-    bullets:["Holds ~3 to 3.5× its weight in water","Can help shorten compost cycles ~10 to 30% (research)","Inherent nutrients + microbial habitat","Bulk, bulk-bag & bagged formats"],
+    body:"OMRI-listed bagasse biochar holds up to ~3 to 3.5× its weight in water (per technical report) and improves nutrient retention, so blends hold moisture through dry spells and leach less fertilizer. Based on peer-reviewed research on biochar in composting, it can help shorten compost turnover ~10 to 30% (validate in your own process). For distributors, soil blenders, compost yards, growers, and landscape supply.",
+    bullets:["Holds up to ~3 to 3.5× its weight in water","Can help shorten compost cycles ~10 to 30% (research)","Inherent nutrients + microbial habitat","Bulk, bulk-bag & bagged formats"],
     primary:CTA.distributor, secondary:CTA.biochar, image:ASSETS.biocharLg,
   },
   carbon:{
@@ -400,7 +400,7 @@ const HOME = {
       { tag:"Spill Response & Disaster", desc:"More capture per bag for emergency crews and large-area cleanup.", href:"#/industry/spill-response", cta:"Spill-response line" },
       { tag:"Landfill & Waste", desc:"Solidify leachate and aqueous waste with RFP-ready documentation.", href:"#/industry/landfill-leachate", cta:"Leachate solutions" },
       { tag:"Ag Distributors & Growers", desc:"Add a carbon-negative, OMRI-listed biochar line with a margin model.", href:"#/industry/distributors", cta:"Distributor program" },
-      { tag:"Soil Blenders & Composters", desc:"Research points to ~10 to 30% faster compost turnover (validate in your process); holds ~3 to 3.5× its weight in water in blends.", href:"#/industry/soil-blenders", cta:"Blender & compost" },
+      { tag:"Soil Blenders & Composters", desc:"Research points to ~10 to 30% faster compost turnover (validate in your process); holds up to ~3 to 3.5× its weight in water in blends.", href:"#/industry/soil-blenders", cta:"Blender & compost" },
       { tag:"Corporate ESG & Carbon", desc:"Durable, deployment-backed CORCs via Puro.earth, not paper offsets.", href:"#/product/carbon-removal", cta:"Carbon removal" },
     ],
   },
@@ -417,7 +417,7 @@ const PRODUCTS = {
   "absorbent-pellets":{
     name:"Absorbent Pellets", icp:"Oil & gas · spill response · environmental remediation · landfill",
     intent:"Evaluate & procure an industrial sorbent",
-    seo:{ title:"Industrial Absorbent Pellets, 5:1 Bagasse Sorbent | American BioCarbon",
+    seo:{ title:"Industrial Absorbent Pellets, Up to 5:1 Bagasse Sorbent | American BioCarbon",
       desc:"Plant-based bagasse absorbent pellets that hold up to 5× their weight in liquid, vs ~2.5× for wood. Fewer bags, lighter disposal. Bulk supply, SDS & spec on request.",
       slug:"/absorbent-pellets", keyword:"industrial absorbent pellets",
       secondary:["oil spill absorbent pellets","plant-based absorbent","wood pellet alternative absorbent","biodegradable absorbent pellets"],
@@ -441,7 +441,7 @@ const PRODUCTS = {
     ],
     comparison:{ h:"Vs the status quo",
       cols:["","Bagasse Pellets","Wood Pellets","Clay"],
-      rows:[["Absorption","~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
+      rows:[["Absorption","Up to ~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
     faq:[
       { q:"What liquids do the pellets absorb?", a:"Oil, fuels, and non-viscous chemicals and aqueous streams. For a specific fluid, request the spec sheet and SDS so we can confirm suitability." },
       { q:"How is it disposed of?", a:"Saturated material is swept up and disposed of per your local requirements and the absorbed material's profile. Because it holds up to ~5× its weight vs ~2.5× for wood, you fill roughly half the bags and send less saturated weight to disposal, fewer pounds at by-the-pound rates and fewer truckloads." },
@@ -467,7 +467,7 @@ const PRODUCTS = {
       body:"On large-area or high-volume events, how fast you can lay material down drives labor hours, every extra minute spreading is a crew on the clock and a spill still migrating. Fine pellets spread slower across a wide footprint, so they take more passes and more labor to cover the same area." },
     explanation:{ h:"Coarser by design",
       body:"Crumble is the same 100% bagasse sorbent in a coarser texture that spreads faster and covers more ground per pass, while still soaking up several times its weight in liquid." },
-    useCases:["Large-area spill coverage","High-volume events","Disaster & flood cleanup","Industrial washdown areas","Oil & gas fluid remediation"],
+    useCases:["Drilling & frac fluid solidification","Large-area spill coverage","High-volume events","Disaster & flood cleanup","Industrial washdown areas","Oil & gas fluid remediation"],
     specs:[
       ["Absorption ratio","Up to ~5:1, non-viscous"],
       ["Texture","Coarse crumble (faster spread)"],
@@ -477,7 +477,7 @@ const PRODUCTS = {
     ],
     comparison:{ h:"Crumble vs pellets",
       cols:["","Crumble","Pellets"],
-      rows:[["Coverage speed","Faster","Standard"],["Best for","Large-area / high-volume","Targeted spills"],["Absorption","~5:1","~5:1"]] },
+      rows:[["Coverage speed","Faster","Standard"],["Best for","Large-area / high-volume","Targeted spills"],["Absorption","Up to ~5:1","Up to ~5:1"]] },
     faq:[
       { q:"When should I use crumble vs pellets?", a:"Choose crumble for large-area or high-volume spills where fast, broad coverage matters; choose pellets for targeted cleanup." },
       { q:"What volumes are available?", a:"Bulk and one-metric-ton bulk bags; truckload on request." },
@@ -496,15 +496,15 @@ const PRODUCTS = {
     h1:"OMRI-Listed Bagasse Biochar for Water &amp; Nutrient Retention",
     sub:"A carbon-negative sugarcane biochar that improves water and nutrient retention, supports soil microbiology, and, based on composting research, can help shorten compost turnover ~10 to 30% (validate in your own windrows).",
     primary:CTA.biochar, secondary:CTA.distributor, tertiary:CTA.spec, image:ASSETS.biocharPhoto, mock:ASSETS.biocharMock,
-    proofRow:["OMRI Listed · IBI Certified","Holds ~3 to 3.5× its weight in water","Inherent NPK + Ca/Mg","Free sample · volume supply Q4"],
+    proofRow:["OMRI Listed · IBI Certified","Holds up to ~3 to 3.5× its weight in water","Inherent NPK + Ca/Mg","Free sample · volume supply Q4"],
     problem:{ h:"Distributors and blenders need a differentiated line that actually pulls through",
       body:"Commodity amendments compete on price alone, every reorder shaves the margin thinner, and an undifferentiated bag only moves when it's the cheapest on the shelf. Growers increasingly ask for water efficiency, organic inputs, and a carbon story, and composters and blenders need throughput and consistent quality, not another line that races price to the bottom." },
     explanation:{ h:"A conditioner and a nutrient-bearing matrix",
-      body:"Bagasse biochar's honeycomb pore structure holds roughly 3 to 3.5× its weight in water, retains nutrients, and provides protected habitat for soil microbes. Unlike most wood biochar, it carries inherent nutrients (~0.6-0.2-0.7 NPK plus calcium and magnesium). It's OMRI listed and IBI certified, with heavy metals well below IBI and EPA Class A thresholds." },
+      body:"Bagasse biochar's honeycomb pore structure holds up to 3 to 3.5× its weight in water, retains nutrients, and provides protected habitat for soil microbes. Unlike most wood biochar, it carries inherent nutrients (~0.6-0.2-0.7 NPK plus calcium and magnesium). It's OMRI listed and IBI certified, with heavy metals well below IBI and EPA Class A thresholds." },
     useCases:["Soil amendment (sandy/degraded soils)","Compost acceleration & bulking","Premium blend component","Nursery & greenhouse media","Row-crop & specialty ag trials"],
     specs:[
       ["Organic carbon","~58 to 65% (dry basis)"],
-      ["Water-holding","~3 to 3.5× its weight (per technical report)"],
+      ["Water-holding","Up to ~3 to 3.5× its weight (per technical report)"],
       ["Nutrients","Inherent NPK ~0.6-0.2-0.7 + Ca/Mg"],
       ["H/C molar ratio","<0.7 (durable carbon)"],
       ["Certifications","OMRI Listed · IBI Certified · USDA Organic pending"],
@@ -512,7 +512,7 @@ const PRODUCTS = {
     ],
     comparison:{ h:"Bagasse vs wood biochar",
       cols:["","Bagasse","Wood"],
-      rows:[["Pore structure","Ordered honeycomb","Random/fractured"],["Water-holding","~3 to 3.5×","~2×"],["Inherent nutrients","Yes","Minimal"],["Best for","Sandy/degraded, compost","Structural only"]] },
+      rows:[["Pore structure","Ordered honeycomb","Random/fractured"],["Water-holding","Up to ~3 to 3.5×","~2×"],["Inherent nutrients","Yes","Minimal"],["Best for","Sandy/degraded, compost","Structural only"]] },
     faq:[
       { q:"Is it certified organic?", a:"It is OMRI Listed and IBI Certified. USDA Organic certification is pending, we don't present it as certified until it is." },
       { q:"Can it speed up composting?", a:"Peer-reviewed research shows biochar can shorten compost cycles ~10 to 30% and raise pile temperature, shorter cycles mean more batches through the same windrow footprint. We recommend a side-by-side windrow trial to measure the effect in your own operation." },
@@ -593,7 +593,7 @@ const PRODUCTS = {
 const INDUSTRIES = {
   "oil-gas":{
     name:"Oil & Gas Remediation", icp:"Oilfield services · procurement · HSE",
-    seo:{ title:"Drilling & Frac Fluid Absorbent, Plant-Based, 5:1 | American BioCarbon",
+    seo:{ title:"Drilling & Frac Fluid Absorbent, Plant-Based, Up to 5:1 | American BioCarbon",
       desc:"Solidify drilling and frac fluids and clean spills with a plant-based absorbent that holds up to 5× its weight, fewer bags, lighter disposal. Bulk supply, SDS on request.",
       slug:"/industries/oil-gas", keyword:"drilling fluid absorbent",
       secondary:["fracking fluid remediation absorbent","oil spill absorbent pellets","industrial absorbent pellets"],
@@ -657,7 +657,7 @@ const INDUSTRIES = {
   },
   "landfill-leachate":{
     name:"Landfill Leachate", icp:"Landfill operators · waste management · public works",
-    seo:{ title:"Landfill Leachate Absorbent, Solidify Aqueous Waste at 5:1 | American BioCarbon",
+    seo:{ title:"Landfill Leachate Absorbent, Solidify Aqueous Waste at Up to 5:1 | American BioCarbon",
       desc:"Solidify leachate and aqueous waste with a plant-based absorbent that holds up to 5× its weight. Renewable, low-dust, bulk supply. SDS & spec on request.",
       slug:"/industries/landfill-leachate", keyword:"landfill leachate absorbent",
       secondary:["leachate solidification","aqueous waste absorbent","plant-based absorbent"],
@@ -708,9 +708,9 @@ const INDUSTRIES = {
     sub:"For composters, the core problem is turnover time, every extra day a windrow sits is pad space that can't take a new batch. Research shows biochar can shorten compost cycles ~10 to 30% (validate in your own process), so you finish more batches per year on the same pad. For blenders, it firms up moisture performance in premium and sandy mixes.",
     primary:CTA.biochar, secondary:CTA.distributor, image:ASSETS.biocharLg,
     problem:"Compost turnover time caps how many batches you can finish per year, a fixed pad only holds so many windrows, so slower maturity directly cuts annual throughput and revenue per square foot. Blenders face moisture complaints in sandy and premium mixes and pressure to offer an organic/carbon story.",
-    fit:"Peer-reviewed research shows biochar can shorten compost cycles ~10 to 30% (validate in your process) and raise pile temperature; in blends, bagasse biochar holds ~3 to 3.5× its weight in water. We support a side-by-side windrow or blend trial so you measure the effect yourself.",
+    fit:"Peer-reviewed research shows biochar can shorten compost cycles ~10 to 30% (validate in your process) and raise pile temperature; in blends, bagasse biochar holds up to ~3 to 3.5× its weight in water. We support a side-by-side windrow or blend trial so you measure the effect yourself.",
     useCases:["Compost cycle acceleration","Windrow bulking & moisture","Premium blend water-holding","Organic / carbon-negative SKU"],
-    proof:["Compost cycle-time research (validate in your process)","~3 to 3.5× water-holding in blends","OMRI · IBI certified","Bulk supply"],
+    proof:["Compost cycle-time research (validate in your process)","Up to ~3 to 3.5× water-holding in blends","OMRI · IBI certified","Bulk supply"],
     procurement:["Windrow / blend trial protocol","Bulk & bulk-bag supply","Freight-aware pricing","Spec + OMRI docs"],
     faq:[
       { q:"How do I prove the compost-speed benefit?", a:"Run a side-by-side windrow: biochar-amended vs control, same recipe and turning schedule, and measure days-to-maturity and peak temperature. We provide the trial protocol and data sheet." },
@@ -770,7 +770,7 @@ const FORMS = {
   biochar:{
     name:"Request Biochar Sample",
     h:"Request a Biochar Sample",
-    sub:"Your biochar sample is free, shipping and handling included. For growers, blenders, composters, and distributors. Tell us your use and we'll send it with the spec sheet and its ~3 to 3.5× water-holding figure (per our technical report).",
+    sub:"Your biochar sample is free, shipping and handling included. For growers, blenders, composters, and distributors. Tell us your use and we'll send it with the spec sheet and its up to ~3 to 3.5× water-holding figure (per our technical report).",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company / farm", type:"text", req:true },
@@ -871,7 +871,7 @@ const CLAIMS = [
   { claim:"USDA Organic", safe:"USDA Organic pending", risky:"'USDA Organic certified'", proof:"USDA status", page:"Proof band, Biochar", status:"needs verification" },
   { claim:"Puro.earth", safe:"Puro.earth certified carbon removal (CORCs)", risky:"Fixed $/ton or tCO₂e without confirmation", proof:"Puro certification + MRV", page:"Carbon Removal", status:"verified" },
   { claim:"Heavy metals", safe:"Well below IBI / EPA Class A thresholds (per lab analyses)", risky:"'Zero contaminants / completely pure'", proof:"Independent lab reports", page:"Technical, Biochar", status:"lab-tested" },
-  { claim:"Water-holding", safe:"Holds ~3 to 3.5× its weight in water (per technical report)", risky:"'Holds 5× water' as a blanket claim", proof:"ProGreaux technical report", page:"Biochar, Soil, Ag section", status:"lab-tested" },
+  { claim:"Water-holding", safe:"Holds up to ~3 to 3.5× its weight in water (per technical report)", risky:"'Holds 5× water' as a blanket claim", proof:"ProGreaux technical report", page:"Biochar, Soil, Ag section", status:"lab-tested" },
   { claim:"Carbon durability", safe:"H/C molar ratio <0.7 supports durable, long-term carbon storage", risky:"'Permanent forever' with no standard", proof:"Lab H/C + Puro methodology", page:"Carbon, Technical", status:"lab-tested" },
   { claim:"Compost speed", safe:"Research shows biochar can shorten compost cycles ~10 to 30%; validate in your own process", risky:"'Our biochar cuts 14 days off your compost'", proof:"Peer-reviewed (general) + client's own trial", page:"Soil Blenders, Biochar", status:"field-supported" },
   { claim:"USDA-ARS study", safe:"Backed by a multi-year USDA-ARS field study on sugarcane bagasse biochar", risky:"Overstating specific yield outcomes", proof:"Study citation", page:"Biochar, About", status:"field-supported" },

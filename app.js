@@ -204,7 +204,11 @@ function renderHome(){
   // custom kraft sample bag (6 bags total, tailored per product).
   const zig = (HOME.buy.products||[]).map((p,i)=>{
     const isLive = p.avail==="live";
-    const primary = isLive ? {label:"Shop",href:"#/shop/"+p.id} : {label:"Get a free sample",href:"#/request-sample?preorder=1&product="+p.id};
+    // Homepage showcase sections 3 & 4 (index 2 & 3) use "Notify me" instead of a free-sample CTA.
+    const notifyPrimary = i===2 || i===3;
+    const primary = isLive ? {label:"Shop",href:"#/shop/"+p.id}
+      : notifyPrimary ? {label:"Notify me",href:"#/request-sample?preorder=1&product="+p.id}
+      : {label:"Get a free sample",href:"#/request-sample?preorder=1&product="+p.id};
     const secondary = isLive ? {label:"Get a free sample",href:"#/request-sample?product="+p.id} : null;
     return `
   <section class="block" style="background:${i%2?'var(--paper-2)':'var(--white)'}"><div class="wrap"><div class="split${i%2?' rev':''} bleed">
@@ -277,7 +281,7 @@ function renderProduct(id){
       <h1>${raw(p.h1)}</h1>
       <p class="sub">${raw(p.sub)}</p>
       <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}${p.tertiary?btn(p.tertiary,"btn-ghost-light"):""}</div>
-      <div class="proofrow">${p.proofRow.map(x=>`<span>${raw(x)}</span>`).join("")}</div>
+      ${(()=>{const isOffer=s=>/free|sample|q4|volume supply/i.test(s);const offer=(p.proofRow||[]).find(isOffer);const specs=(p.proofRow||[]).filter(x=>!isOffer(x));return `${offer?`<p class="cta-note">${raw(offer)}</p>`:""}${specs.length?`<p class="proofline">${specs.map(raw).join(" · ")}</p>`:""}`;})()}
     </div>
     <div class="media"><img src="${p.image}" alt="${raw(p.name)}"></div>
   </div></div></section>
@@ -623,7 +627,7 @@ function renderBuy(){
     </div>` : "";
   return `
   <section class="shop-head"><div class="wrap">
-    <div class="crumb"><a href="#/">Home</a> / Buy Online</div>
+    <div class="crumb"><a href="#/">Home</a> / Products</div>
     <h1>Shop</h1>
     <p class="shop-sub">Free samples ship in 4 to 7 business days · bulk bag and truckload by freight-aware quote.</p>
   </div></section>
@@ -776,7 +780,7 @@ function renderAbout(){
   </div></section>
   <section class="block" style="background:var(--paper-2)"><div class="wrap two-col-copy">
     <div><div class="kicker">Locally Sourced</div><h2 style="font-size:26px;margin:8px 0 12px">Louisiana-grown, responsibly sourced</h2>
-      <p class="lead">Every component comes from or is processed right here in Louisiana. Our multipurpose fiber, biochar, and coffee chaff are locally sourced and blended to create products like BioSoil—a ready-to-use growing media that replaces mined peat with renewable, locally grown alternatives.</p></div>
+      <p class="lead">Every component comes from or is processed right here in Louisiana. Our multipurpose fiber, biochar, and coffee chaff are locally sourced and processed into renewable, locally grown alternatives to mined peat and wood-based products.</p></div>
     <div><div class="kicker">Supply with integrity</div><h2 style="font-size:26px;margin:8px 0 12px">Traceability from field to product</h2>
       <p class="lead">We work directly with the Cora Texas Sugar Mill to capture bagasse, coffee processors for waste fiber, and local blenders to ensure every batch meets our performance standards. Local sourcing means faster turnaround, fresher materials, and complete supply-chain visibility.</p></div>
   </div></section>
