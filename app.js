@@ -700,9 +700,16 @@ function renderTechnical(){
       </div></div>`;
   }).join("");
   const indRows = Object.keys(TECH.byIndustry).map(id=>{
-    const n = INDUSTRIES[id]; const docs = TECH.byIndustry[id].map(x=>TECH.docs.find(d=>d.id===x)?.name.split(", ")[0]).filter(Boolean);
+    const n = INDUSTRIES[id];
+    const docObjs = TECH.byIndustry[id].map(x=>TECH.docs.find(d=>d.id===x)).filter(Boolean);
+    const docs = docObjs.map(d=>d.name.split(", ")[0]);
+    // If this industry's applicable spec sheet is one we have on file, offer a direct download.
+    const spec = docObjs.find(d=>d.file);
+    const action = spec
+      ? `<a class="btn btn-primary btn-sm" href="${spec.file}" download>Download spec ${raw(spec.fmt||"PDF")}</a>`
+      : `<a class="btn btn-primary btn-sm" href="${CTA.quote.href}">Notify me</a>`;
     return `<tr><td><strong>${raw(n?n.name:id)}</strong></td><td>${docs.map(d=>raw(d)).join(" · ")}</td>
-      <td><a class="btn btn-primary btn-sm" href="${CTA.quote.href}">Notify me</a></td></tr>`;
+      <td>${action}</td></tr>`;
   }).join("");
   return `
   <section class="phead"><div class="wrap"><div style="max-width:900px">

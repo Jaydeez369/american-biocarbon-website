@@ -112,8 +112,8 @@ const TECH = {
   ],
   // Document catalog, the gated deliverables (spec sheets first for primary products)
   docs:[
-    { id:"abs-spec", name:"Absorbent Pellets & Crumble, Spec Sheet", cat:"Absorbents", desc:"Absorbency ratio, bulk density, granulation, form factors.", primary:true },
-    { id:"bio-spec", name:"100% Biochar, Spec Sheet", cat:"Agriculture", desc:"Organic carbon, water-holding, NPK, particle size.", primary:true },
+    { id:"abs-spec", name:"Absorbent Pellets & Crumble, Spec Sheet", cat:"Absorbents", desc:"Absorbency ratio, bulk density, granulation, form factors.", primary:true, file:"assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.txt", fmt:"TXT" },
+    { id:"bio-spec", name:"100% Biochar, Spec Sheet", cat:"Agriculture", desc:"Organic carbon, water-holding, NPK, particle size.", primary:true, file:"assets/spec-sheets/Biochar-Premium-Specification-Sheet.txt", fmt:"TXT" },
     { id:"abs-sds", name:"Absorbent Pellets & Crumble, SDS", cat:"Absorbents", desc:"Safety data sheet for handling, storage, and disposal." },
     { id:"abs-disposal", name:"Saturated-Material Disposal Guidance", cat:"Absorbents", desc:"Handling and disposal profile for spent absorbent." },
     { id:"bio-lab", name:"Independent Lab Analysis, Heavy Metals & Nutrients", cat:"Agriculture", desc:"Full IBI panel: metals vs thresholds, NPK, H/C ratio, surface area." },
