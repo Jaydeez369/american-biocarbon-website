@@ -411,6 +411,58 @@ const DATA = {
     ],
   },
 
+  /* ============ 6B. BARGE / WATERBORNE COST ANALYSIS ============ */
+  barge:{
+    headline:"Barge is NOT for the local Gulf-South beachhead — the fixed dock-handling premium (~$24/ton, both ends) buries the tiny linehaul savings on a 30-mi White Castle→Baton Rouge hop, where a truck wins outright. Barge is the UNLOCK for FAR lanes (Zone D, 500 mi+): it beats truck past ~180 river-mi and beats rail past ~350–400 mi, converting a regional producer into an upriver-Midwest and Gulf-EXPORT supplier — IF a full-barge volume commitment exists. All figures are a defensible model, not fact; [A] = stated assumption.",
+    geography:[
+      "White Castle, LA (Cora Texas Sugar Mill) sits in Iberville Parish on the WEST BANK of the Lower Mississippi River, ~AHP mile ~168, inside the Baton Rouge–New Orleans deep-draft industrial corridor. This is the busiest inland-barge reach in North America.",
+      "Sugar mills in this corridor routinely ship RAW SUGAR & MOLASSES by barge — a mill-adjacent or shared bulk dock likely exists within a short dray. CONFIRM whether Cora Texas has an active loading dock / fleeting area before assuming on-site barge loading. [A]",
+      "Downriver reach: White Castle → Baton Rouge ~30 river-mi; → New Orleans / Gulf export elevators & deep-draft ~130 mi; → Gulf (blue-water export transfer) ~230 mi.",
+      "Upriver reach (the real prize): → Memphis ~680 mi; → St. Louis ~1,050 mi; → the entire Upper Mississippi, Ohio, Illinois, Missouri & Arkansas river ag belt; plus the Gulf Intracoastal Waterway (GIWW) east to Mobile/FL and west to TX.",
+      "Any inland river or GIWW-served receiver becomes reachable at ~$0.015/ton-mi linehaul — roughly 1/10th of truck and ~1/3rd of rail linehaul.",
+    ],
+    modeCompare:[
+      { mode:"Truck (TL)", linehaul:"$0.14–0.17 / ton-mi", fixed:"~$0 fixed (dock-to-dock N/A)", cap:"~16–22 t / load", note:"Door-to-door, no handling premium — unbeatable SHORT-haul; falls apart past ~300–500 mi." },
+      { mode:"Rail (carload)", linehaul:"$0.03–0.05 / ton-mi", fixed:"~$25–40 / ton transload + dray [A]", cap:"85–90 t / car", note:"Mid-range unlock 250–400 mi+; needs rail-served receiver." },
+      { mode:"Barge (covered hopper)", linehaul:"$0.01–0.02 / ton-mi ($0.015 base [A])", fixed:"~$24 / ton handling (≈$12 load + $12 unload, wharfage/stevedore/transload) [A] + dray each end", cap:"~1,400–1,750 t / barge", note:"Fixed handling premium is brutal short-haul; linehaul crushes everyone LONG-haul & for EXPORT." },
+    ],
+    // cost/ton = origin dray + load handle + (linehaul $0.015 × river-mi) + unload handle + receiver dray(in note)
+    lanes:[
+      { dest:"Baton Rouge, LA", mi:"~30", barge:"~$24.45", truck:"~$4.50", rail:"~$33", verdict:"TRUCK WINS", cls:"badge-gold", note:"Too short — barge pays full ~$24 handling for a $0.45 linehaul. Never barge this hop." },
+      { dest:"New Orleans / Gulf export", mi:"~130", barge:"~$25.95", truck:"~$19.50", rail:"~$38", verdict:"TRUCK (barge only for EXPORT transfer)", cls:"badge-gold", note:"Barge still trails truck on cost, BUT if the freight is continuing to blue-water EXPORT, barge-direct-to-elevator avoids a truck-to-barge rehandle → barge wins the EXPORT motion specifically." },
+      { dest:"Memphis, TN (upriver ag)", mi:"~680", barge:"~$34.20", truck:"~$73", rail:"~$52", verdict:"BARGE WINS", cls:"badge-green", note:"Past break-even. Barge undercuts rail by ~$18/ton and truck by ~$39/ton into Mid-South ag-biochar & soil markets." },
+      { dest:"St. Louis / Midwest belt", mi:"~1,050", barge:"~$39.75", truck:"~$140", rail:"~$60", verdict:"BARGE WINS BIG", cls:"badge-green", note:"Barge is ~1/3rd of rail and <1/3rd of truck. This is the lane that turns a LA producer into a national ag-biochar supplier." },
+      { dest:"Gulf blue-water EXPORT", mi:"~230 to transfer", barge:"~$27.45 + export transfer", truck:"n/a at scale", rail:"n/a", verdict:"BARGE ONLY", cls:"badge-green", note:"Containerized/bulk export (LatAm, EU CDR-linked biochar demand) is physically a barge/vessel motion — trucking to a Gulf port then rehandling is strictly worse." },
+    ],
+    breakeven:[
+      "Barge vs TRUCK break-even ≈ ~180 river-mi: handling premium $24 ÷ per-mile savings ($0.15 − $0.015 = $0.135) ≈ 178 mi. Past ~180 mi, barge is cheaper than truck. [A]",
+      "Barge vs RAIL break-even ≈ ~350–400 mi: both carry fixed handling; barge's ~$0.025/ton-mi linehaul edge overtakes rail once distance is long enough to matter. [A]",
+      "NET zones: <180 mi = TRUCK. 180–400 mi = case-by-case (barge if receiver is on the water, else truck/rail). 400 mi+ or EXPORT = BARGE, decisively.",
+      "Value/ton barely matters for barge (unlike rail): a $200/ton absorbent AND a $700/ton biochar both ride at the same ~$/ton — so barge can even carry LOW-value product profitably to far markets, which rail cannot.",
+    ],
+    capacity:[
+      "Capacity reality check: current output ~400 MT/mo. ONE covered hopper barge ≈ 1,400–1,750 t = ~3.5–4.4 MONTHS of production. You cannot fill a barge monthly today.",
+      "Two honest paths: (1) STOCKPILE & batch — accumulate ~1,400 t, ship one full barge per quarter to a committed far/export buyer; or (2) SHARED/partial barge — co-load with the sugar mill's own molasses/sugar barges or a 3rd-party consolidator to avoid paying for empty deck.",
+      "Do NOT model unit tows (15-barge × 1,500 t = 22,500 t) — that is 4½ YEARS of current output. Barge is a FUTURE-STATE / export lever, not a day-1 beachhead tool.",
+      "Barge becomes routine only after capacity scales to ≥1 full barge/mo (~1,500 MT/mo, ~3.7× today) OR a single export/Midwest offtake justifies quarterly full-barge shipments.",
+    ],
+    assumptions:[
+      "Barge linehaul $0.015/ton-mi base ($0.01–0.02 range) — inland dry-bulk covered-hopper proxy; USDA-AMS Grain Transportation Report & USACE modal benchmarks. Field-quote for actual biochar (low density may cube-out before weight → rate could rise). [A]",
+      "Handling $12/ton each end ($24 round) — wharfage + stevedoring + transload for a light, dusty, low-density bulk. Biochar's low bulk density (80–320 kg/m³) may push per-ton handling HIGHER (cubes out); verify with a terminal quote. [A]",
+      "Origin dray $0 assumed IF Cora Texas has an on/adjacent dock; add ~$3–6/ton if a 5–15 mi dray to a public dock (Port of Greater Baton Rouge / Port Allen area) is required. [A]",
+      "Truck comps at $0.15/ton-mi, rail at $0.04/ton-mi linehaul + $32/ton transload — carried over from the TAM/SAM/SOM transport model for apples-to-apples.",
+      "River miles ≠ road miles: barge distances follow the channel and run LONGER than the highway equivalent, which is already reflected in the lane figures.",
+    ],
+    verifyFirst:[
+      "Confirm Cora Texas Sugar Mill dock/fleeting status — on-site loading vs. nearest public bulk dock + dray distance (Port of Greater Baton Rouge, Port Allen, or a St. James/Iberville terminal).",
+      "Get a REAL covered-hopper freight quote for 2–3 target lanes (Memphis, St. Louis, a Gulf export elevator) from a barge line / broker (e.g. Ingram, ACBL, SCF, or a regional consolidator).",
+      "Quote terminal handling for LOW-DENSITY dusty bulk specifically — biochar may be charged by volume, not weight; get $/ton AND $/cf.",
+      "Test whether co-loading with the mill's sugar/molasses barge program is possible (shared fixed cost = the single biggest lever).",
+      "Confirm receiver-side unload/dray at each far node before quoting a delivered price — barge only pays if the RECEIVER is also on the water or a short dray from it.",
+      "For EXPORT: identify the Gulf transfer point & incoterm (FOB dock vs CIF) — export CDR-linked biochar demand (EU/LatAm) may subsidize the whole lane.",
+    ],
+  },
+
   /* ============ 7. PIPELINE ============ */
   objectModel:[
     { o:"Account", key:"Company, segment, freight zone, status" },

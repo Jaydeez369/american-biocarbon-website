@@ -46,6 +46,7 @@ const NAV=[
     {id:"messaging",ic:"❝",t:"Messaging & Proof"},
     {id:"biochar",ic:"🌱",t:"Biochar Specs & Avatars"},
     {id:"market",ic:"▤",t:"TAM / SAM / SOM"},
+    {id:"barge",ic:"⚓",t:"Barge Cost Analysis"},
   ]},
   {group:"Execution",items:[
     {id:"pipeline",ic:"▦",t:"Pipeline Builder"},
@@ -337,6 +338,31 @@ function rMarket(){
     sec("","Sourcing workflow — build the first 100")+
     `<div class="card"><ul>${mk.sourcing.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`+
     `<div class="note"><b>Enrichment:</b> Apollo.io is connected to this workspace — use it to find contacts, verify emails, and push accounts into the app.</div>`
+  );
+}
+
+/* --- Barge / Waterborne Cost Analysis (separate deep-dive, below TAM/SAM/SOM) --- */
+function rBarge(){
+  const b=DATA.barge;
+  return page("barge",
+    head("Barge & Waterborne Cost Analysis","A standalone freight deep-dive: can the Mississippi at White Castle move product cheaper than truck or rail? Full cost-per-ton model by lane, with break-even math and a capacity reality check. [A] = stated assumption; figures are a defensible model, not fact.")+
+    `<div class="note warn">${esc(b.headline)}</div>`+
+    sec("6B·1","White Castle waterway geography")+
+    `<div class="card"><ul>${b.geography.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`+
+    sec("6B·2","Mode comparison — the cost structure")+
+    table(["Mode","Linehaul","Fixed / handling","Payload","Note"],b.modeCompare.map(m=>[
+      `<strong>${esc(m.mode)}</strong>`,`<span class="t-num">${esc(m.linehaul)}</span>`,esc(m.fixed),`<span class="t-num">${esc(m.cap)}</span>`,esc(m.note)]))+
+    sec("6B·3","Delivered cost/ton by lane — barge vs truck vs rail")+
+    table(["Destination","River-mi","Barge $/ton","Truck $/ton","Rail $/ton","Verdict","Why"],b.lanes.map(x=>[
+      `<strong>${esc(x.dest)}</strong>`,`<span class="t-num">${esc(x.mi)}</span>`,`<span class="t-num" style="color:var(--green-bright)">${esc(x.barge)}</span>`,`<span class="t-num">${esc(x.truck)}</span>`,`<span class="t-num">${esc(x.rail)}</span>`,badge(x.verdict,x.cls),esc(x.note)]))+
+    sec("6B·4","Break-even logic — when barge starts to pay")+
+    `<div class="card"><ul>${b.breakeven.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
+    sec("6B·5","Capacity reality check")+
+    `<div class="note warn"><ul>${b.capacity.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
+    sec("6B·6","Key assumptions [A]")+
+    `<div class="card"><ul>${b.assumptions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
+    sec("6B·7","Verify-first — before quoting any barge lane")+
+    `<div class="card"><ul>${b.verifyFirst.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`
   );
 }
 
@@ -721,7 +747,7 @@ function rChecklist(){
 
 /* ================= BOOT ================= */
 function render(){
-  const html=[rDaily(),rOverview(),rAssumptions(),rSegments(),rPersonas(),rMessaging(),rBiochar(),rMarket(),
+  const html=[rDaily(),rOverview(),rAssumptions(),rSegments(),rPersonas(),rMessaging(),rBiochar(),rMarket(),rBarge(),
     rPipeline(),rAccounts(),rOutreach(),rCollateral(),rPricing(),rPlaybook(),rKpis(),rRoadmap(),rChecklist()].join("");
   $("#content").innerHTML=html;
 }
