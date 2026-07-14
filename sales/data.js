@@ -5,7 +5,7 @@
 const DATA = {
 
   meta: {
-    company: "VEJ · ProGreaux LLC · American BioCarbon",
+    company: "VEJ · American BioCarbon",
     location: "White Castle, LA (co-located w/ Cora Texas Sugar Mill)",
     beachhead: "Louisiana → Gulf South → SE / Sunbelt; national only for large offtakes",
   },
@@ -288,10 +288,10 @@ const DATA = {
         id:"absorbent", product:"Absorbent Pellets",
         audience:"Oil & Gas · Spill Response · Environmental Remediation · Landfill · Industrial EHS",
         avatar:"An HSE/EHS manager, field/ops supervisor, or procurement lead at an industrial or oilfield operation. They already buy clay or wood absorbents on a recurring, budgeted line. They think in bags-per-spill, disposal weight and cost, SDS, approvals, and job cost — NOT agronomy, soil, or carbon. They want proof it performs on a real cleanup and that it won't fail a compliance review.",
-        positioning:"For industrial, oilfield, spill-response, and landfill teams, ProGreaux Absorbent Pellets are a plant-based sugarcane-bagasse sorbent that holds up to ~5× its weight (vs ~2.5× for wood) — so crews open about half the bags and send lighter saturated waste to disposal, at a fraction of the cost-per-gallon of clay or cellulose.",
+        positioning:"For industrial, oilfield, spill-response, and landfill teams, American BioCarbon Absorbent Pellets are a plant-based sugarcane-bagasse sorbent that holds up to ~5× its weight (vs ~2.5× for wood) — so crews open about half the bags and send lighter saturated waste to disposal, at a fraction of the cost-per-gallon of clay or cellulose.",
         oneLiner:"A plant-based industrial absorbent that holds up to ~5× its weight — half the bags, lighter disposal, ~$0.15/gal absorbed.",
         pitch30:"You're buying clay or wood absorbents that barely hold their own weight. Ours is a sugarcane-bagasse pellet that soaks up to ~5× its weight — about half the bags per spill and less saturated weight to disposal, which is billed by the pound. 100% organic, low-dust, SDS on file. Want a free sample to run against what you use now on your next cleanup?",
-        pitch90:"ProGreaux makes an industrial absorbent from sugarcane bagasse at the Cora Texas mill in White Castle, LA. Bagasse has a naturally ordered, honeycomb pore structure, so carbonized and pelletized it draws in and holds up to ~5× its weight in non-viscous liquid — versus about 2.5× for wood pellets. On a real spill that means roughly half the bags to handle and less saturated weight going to disposal, and since disposal is billed by the pound, that's fewer pounds and fewer truckloads hauled. It's 100% organic biomass with no chemical additives, low dust, and renewable. SDS and spec sheet are on file for your procurement and EHS review. Easiest way to see it: a free sample to run head-to-head against your current absorbent on the next cleanup.",
+        pitch90:"American BioCarbon makes an industrial absorbent from sugarcane bagasse at the Cora Texas mill in White Castle, LA. Bagasse has a naturally ordered, honeycomb pore structure, so carbonized and pelletized it draws in and holds up to ~5× its weight in non-viscous liquid — versus about 2.5× for wood pellets. On a real spill that means roughly half the bags to handle and less saturated weight going to disposal, and since disposal is billed by the pound, that's fewer pounds and fewer truckloads hauled. It's 100% organic biomass with no chemical additives, low dust, and renewable. SDS and spec sheet are on file for your procurement and EHS review. Easiest way to see it: a free sample to run head-to-head against your current absorbent on the next cleanup.",
         proof:["Up to ~5:1 absorption vs ~2.5:1 wood (product spec / lab)","SDS + spec sheet on request","Cost-per-gal absorbed ~$0.15 vs ~$2.88 cellulose / ~$7.31 clay","100% organic bagasse, low dust, no additives","Fewer bags + lighter saturated disposal weight per spill"],
         neverSay:["biochar","soil / compost / windrow","OMRI / IBI / organic","carbon / CDR credits","water-holding / agronomy"]
       },
@@ -299,10 +299,10 @@ const DATA = {
         id:"biochar", product:"100% Biochar",
         audience:"MULTIPLE avatars — Distributors/Co-ops · Row-Crop & Specialty Farmers · Ranchers/Livestock · Poultry/Chicken farms · Compost/Soil Blenders · Nurseries/Greenhouses",
         avatar:"Biochar is the DYNAMIC product — one material, many different buyers, each with a different pain and a different lead benefit. Do NOT use a generic biochar pitch: pull the ONE benefit that matters to the buyer in front of you (water-holding for farmers, ammonia/odor for poultry & ranchers, cycle-time for composters, margin/differentiation for distributors, media performance for nurseries). Full per-avatar messaging, specs, benefit-by-mechanism, and industry comparisons live in the → Biochar Specs & Avatars tab. Common ground: they think in yards/blends/water-holding/OMRI/sell-through — NOT spills, SDS, or oilfield.",
-        positioning:"For ag distributors, soil/compost blenders, and growers, ProGreaux 100% Biochar is an OMRI-listed, IBI-certified sugarcane-bagasse biochar whose ordered honeycomb pore structure holds up to ~3–3.5× its weight in water and carries inherent nutrients (~0.6-0.2-0.7 NPK + Ca/Mg) — a differentiated, carbon-negative SKU that improves water/nutrient retention and, per research, can shorten compost cycles ~10–30%.",
+        positioning:"For ag distributors, soil/compost blenders, and growers, American BioCarbon 100% Biochar is an OMRI-listed, IBI-certified sugarcane-bagasse biochar whose ordered honeycomb pore structure holds up to ~3–3.5× its weight in water and carries inherent nutrients (~0.6-0.2-0.7 NPK + Ca/Mg) — a differentiated, carbon-negative SKU that improves water/nutrient retention and, per research, can shorten compost cycles ~10–30%.",
         oneLiner:"OMRI-listed sugarcane biochar that holds up to ~3–3.5× its weight in water and can shorten compost cycles ~10–30% — a differentiated, margin-accretive line.",
         pitch30:"Commodity amendments compete on price alone. Ours is an OMRI-listed, IBI-certified bagasse biochar with an ordered honeycomb pore structure that holds up to ~3–3.5× its weight in water and carries inherent nutrients — so it firms up water-holding in sandy and premium blends and, per peer-reviewed research, can shorten compost cycles ~10–30%. Differentiated line, real supply story. Want a free sample to trial in one blend or windrow?",
-        pitch90:"ProGreaux makes a 100% sugarcane-bagasse biochar at the Cora Texas mill in White Castle, LA. Unlike most wood biochar, bagasse has a naturally ordered honeycomb pore structure that holds up to 3–3.5× its weight in water, retains nutrients, and gives soil microbes protected habitat — and it carries inherent nutrients (~0.6-0.2-0.7 NPK plus Ca/Mg). It's OMRI Listed and IBI Certified, lab-verified below IBI and EPA Class A heavy-metal thresholds, and backed by a multi-year USDA-ARS field study. For blenders it firms up moisture performance in sandy and premium mixes; for composters, peer-reviewed research shows biochar can shorten the cycle ~10–30% — more batches per year on the same pad. Best way to prove it is in your own operation: a free sample to run in one blend or a side-by-side windrow.",
+        pitch90:"American BioCarbon makes a 100% sugarcane-bagasse biochar at the Cora Texas mill in White Castle, LA. Unlike most wood biochar, bagasse has a naturally ordered honeycomb pore structure that holds up to 3–3.5× its weight in water, retains nutrients, and gives soil microbes protected habitat — and it carries inherent nutrients (~0.6-0.2-0.7 NPK plus Ca/Mg). It's OMRI Listed and IBI Certified, lab-verified below IBI and EPA Class A heavy-metal thresholds, and backed by a multi-year USDA-ARS field study. For blenders it firms up moisture performance in sandy and premium mixes; for composters, peer-reviewed research shows biochar can shorten the cycle ~10–30% — more batches per year on the same pad. Best way to prove it is in your own operation: a free sample to run in one blend or a side-by-side windrow.",
         proof:["OMRI Listed · IBI Certified","Holds up to ~3–3.5× its weight in water (technical report)","Inherent NPK ~0.6-0.2-0.7 + Ca/Mg","USDA-ARS multi-year bagasse field study","Compost cycle ~10–30% shorter (peer-reviewed — validate in own windrow)","Heavy metals well below IBI / EPA Class A"],
         neverSay:["spill / cleanup","absorbent / sorbent / 5:1","SDS for disposal","oilfield / leachate / remediation","bags per spill"]
       }
@@ -325,7 +325,7 @@ const DATA = {
     dualStory:"Simple version for buyers: You buy and use the product for its performance — water-holding, absorbency, soil health. Because our biochar locks carbon into a stable form for the long haul, the act of using it removes CO₂. That removal is independently certified (Puro.earth) and can be sold as a carbon credit. We handle the carbon side; you get a better product, often at better economics because the carbon layer subsidizes the price.",
     proofMap:[
       { claim:"Accelerates composting / shorter turnover time", rel:"Composters, soil blenders", src:"Peer-reviewed (general biochar)", tier:3, safe:"Research shows biochar can shorten the compost cycle ~10–30% and speed maturity — validate in your own windrow trial", risk:"'Our biochar cuts 14 days off your compost' (no VEJ-specific trial yet)" },
-      { claim:"~3–3.5x water-holding capacity", rel:"Blenders, growers, landscape", src:"Lab-tested / ProGreaux report", tier:2, safe:"Holds up to 3–3.5x its weight in water (bagasse biochar, per technical report)", risk:"'Holds 5x water' as a blanket claim" },
+      { claim:"~3–3.5x water-holding capacity", rel:"Blenders, growers, landscape", src:"Lab-tested / American BioCarbon report", tier:2, safe:"Holds up to 3–3.5x its weight in water (bagasse biochar, per technical report)", risk:"'Holds 5x water' as a blanket claim" },
       { claim:"5:1 absorption ratio", rel:"Remediation, oilfield, bedding", src:"Product spec / lab", tier:2, safe:"Up to ~5:1 absorption vs ~2.5:1 for wood pellets", risk:"'Absorbs any chemical' — specify non-viscous" },
       { claim:"OMRI Listed / IBI Certified", rel:"Organic ag, distributors", src:"Certified", tier:1, safe:"OMRI Listed and IBI Certified", risk:"'USDA Organic certified' — it's PENDING" },
       { claim:"Puro.earth certified carbon", rel:"CDR/ESG buyers", src:"Certified", tier:1, safe:"Puro.earth certified carbon removal", risk:"Stating a fixed $/ton or tCO2e without confirmation" },
@@ -653,7 +653,7 @@ const DATA = {
   objections:[
     { o:"Biochar is too expensive", mean:"Doesn't see ROI yet", resp:"Reframe on outcome: water/fertilizer efficiency or fewer absorbent bags + disposal savings. Carbon layer can subsidize price.", proof:"ROI calc + field study", next:"What's your current cost per [unit/job]?", disq:"No budget & no use case" },
     { o:"I already use compost", mean:"Sees overlap", resp:"Complement, not replacement — biochar adds stable carbon + water-holding compost can't; use together.", proof:"Comparison sheet", next:"Where does your compost fall short on moisture/structure?", disq:"—" },
-    { o:"Wood biochar is cheaper", mean:"Price-anchored", resp:"Performance-per-dollar: ordered honeycomb pores → higher water-holding + inherent nutrients; ask them to trial side-by-side.", proof:"ProGreaux comparison / SEM", next:"Want a head-to-head sample?", disq:"—" },
+    { o:"Wood biochar is cheaper", mean:"Price-anchored", resp:"Performance-per-dollar: ordered honeycomb pores → higher water-holding + inherent nutrients; ask them to trial side-by-side.", proof:"American BioCarbon comparison / SEM", next:"Want a head-to-head sample?", disq:"—" },
     { o:"I don't understand carbon credits", mean:"Confused / skeptical", resp:"Keep it simple: buy the product for performance; we handle carbon; it may improve your price. No action needed from them.", proof:"Dual-value one-pager", next:"Want the plain-English version?", disq:"—" },
     { o:"Freight kills the economics", mean:"Delivered cost fear", resp:"Freight-zone pricing; concentrate volume; carbon value + product margin defend delivered cost inside zone.", proof:"Freight-aware calc", next:"What volume/frequency could you commit?", disq:"Zone C + tiny volume" },
     { o:"We need proof it works", mean:"Risk-averse", resp:"That's exactly what the trial is for — define success up front, ship a sample, measure.", proof:"Field study + sample", next:"What would prove it to you?", disq:"Won't define success" },
@@ -1011,7 +1011,7 @@ const DATA = {
         ["Aflatoxin challenge","0.5%","Restored body weight vs aflatoxin-only control"],
         ["Commercial base case","0.5–1.0%","Cleanest market-sizing band (mixed results higher)"],
       ]},
-      { h:"Market / cost positioning ($/ton)", cols:["","ProGreaux bulk","Market"], rows:[
+      { h:"Market / cost positioning ($/ton)", cols:["","American BioCarbon bulk","Market"], rows:[
         ["Working price","$700/ton [assumption]","Wholesale $600–$2,778; modal ~$1,600"],
         ["CA study","—","$600–$1,300 avg (20–40% bulk discounts)"],
         ["Angle","Enter low, undercut premium retail","Carbon layer can further subsidize price"],
@@ -1029,7 +1029,7 @@ const DATA = {
       "One material, MANY avatars — lead with the ONE benefit that matters to the buyer in front of you, not the whole list.",
       "USDA Organic is PENDING — say OMRI Listed / IBI Certified only.",
       "Poultry IN-FEED and any feed/health claim is AAFCO/FDA-CVM gated — until cleared, sell poultry as BEDDING/environmental only.",
-      "Compost cycle-time and yield lifts are Tier-3 general-biochar research → present as 'validate in your own trial,' never as a ProGreaux-specific guarantee.",
+      "Compost cycle-time and yield lifts are Tier-3 general-biochar research → present as 'validate in your own trial,' never as an American BioCarbon-specific guarantee.",
       "Carbon/CDR is a days-61–90 layer — mention as upside, don't lead ag pitches with it.",
     ],
   },

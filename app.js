@@ -205,8 +205,8 @@ function renderHome(){
   // custom kraft sample bag (6 bags total, tailored per product).
   const zig = (HOME.buy.products||[]).map((p,i)=>{
     const isLive = p.avail==="live";
-    // Homepage showcase sections 3 & 4 (index 2 & 3) use "Notify me" instead of a free-sample CTA.
-    const notifyPrimary = i===2 || i===3;
+    // Homepage showcase sections 3, 4 & 5 (index 2, 3 & 4) use "Notify me" instead of a free-sample CTA.
+    const notifyPrimary = i===2 || i===3 || i===4;
     const primary = isLive ? {label:"Shop",href:"#/shop/"+p.id}
       : notifyPrimary ? {label:"Notify me",href:"#/request-sample?preorder=1&product="+p.id}
       : {label:"Get a free sample",href:"#/request-sample?preorder=1&product="+p.id};
@@ -307,10 +307,14 @@ function renderProduct(id){
   </div></div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="split">
-      <div><div class="kicker">Proof</div><h2 style="font-size:26px;margin:8px 0 12px">Certified and lab-verified</h2>
-        <ul class="checks">${PROOF.certs.filter(c=>c.status!=="pending").slice(0,4).map(c=>`<li><b>${raw(c.name)}</b>, ${raw(c.note)}</li>`).join("")}</ul>
-        <p class="form-note">USDA Organic certification pending. Verify current certification language before publishing.</p>
+    <div class="split proc-split">
+      <div class="proc-left">
+        <div class="proc-copy">
+          <div class="kicker">Proof</div><h2 style="font-size:26px;margin:8px 0 12px">Certified and lab-verified</h2>
+          <ul class="checks">${PROOF.certs.filter(c=>c.status!=="pending").slice(0,4).map(c=>`<li><b>${raw(c.name)}</b>, ${raw(c.note)}</li>`).join("")}</ul>
+          <p class="form-note">USDA Organic certification pending. Verify current certification language before publishing.</p>
+        </div>
+        <img class="procimg" src="assets/industry/${id}.jpg" alt="${raw(p.name)}" loading="lazy">
       </div>
       <div class="formcard" id="pform"></div>
     </div>
@@ -351,11 +355,14 @@ function renderIndustry(id){
     <div style="margin-top:26px">${ucGrid(n.useCases)}</div>
   </div></section>
 
-  <section class="block"><div class="wrap"><div class="split">
-    <div>
-      <div class="kicker">Procurement</div><h2 style="font-size:26px;margin:8px 0 14px">Built for how you buy</h2>
-      <ul class="checks">${n.procurement.map(x=>`<li>${raw(x)}</li>`).join("")}</ul>
-      ${prods.length?`<div class="btn-row" style="margin-top:18px">${prods.map(p=>`<a class="btn btn-ghost btn-sm" href="#/product/${prodId(p)}">${raw(p.name)} →</a>`).join("")}</div>`:""}
+  <section class="block"><div class="wrap"><div class="split proc-split">
+    <div class="proc-left">
+      <div class="proc-copy">
+        <div class="kicker">Procurement</div><h2 style="font-size:26px;margin:8px 0 14px">Built for how you buy</h2>
+        <ul class="checks">${n.procurement.map(x=>`<li>${raw(x)}</li>`).join("")}</ul>
+        ${prods.length?`<div class="btn-row" style="margin-top:18px">${prods.map(p=>`<a class="btn btn-ghost btn-sm" href="#/product/${prodId(p)}">${raw(p.name)} →</a>`).join("")}</div>`:""}
+      </div>
+      <img class="procimg" src="assets/industry/${id}.jpg" alt="${raw(n.name)} application" loading="lazy">
     </div>
     <div class="formcard" id="pform"></div>
   </div></div></section>
@@ -876,14 +883,16 @@ function renderEnvironmentalRemediation(){
     </div>
   </div></section>
 
-  <section class="block"><div class="wrap">
-    <div class="grid" style="max-width:720px">
-      <div><div class="eyebrow-line"></div><h2 style="font-size:28px">Ready to cut costs and stay on timeline?</h2>
+  <section class="block" style="background:var(--paper-2)"><div class="wrap"><div class="split proc-split">
+    <div class="proc-left">
+      <div class="proc-copy">
+        <div class="eyebrow-line"></div><h2 style="font-size:28px;margin-bottom:10px">Ready to cut costs and stay on timeline?</h2>
         <p class="lead">Talk to a remediation specialist. We'll scope your project and get a pilot test scheduled within 48 hours.</p>
-        <div style="margin-top:18px">${btn(p.primary)}${btn(p.secondary,"btn-ghost")}</div>
       </div>
+      <img class="procimg" src="assets/industry/environmental-remediation.jpg" alt="Environmental remediation site" loading="lazy">
     </div>
-  </div></section>`;
+    <div class="formcard" id="mainform"></div>
+  </div></div></section>`;
 }
 
 function renderResellersIndustries(){
@@ -896,6 +905,7 @@ function renderResellersIndustries(){
       <p class="sub">${raw(p.sub)}</p>
       <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}</div>
     </div>
+    <div class="media"><img src="assets/industry/distributors.jpg" alt="Distributor warehouse and supply"></div>
   </div></div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
@@ -944,56 +954,20 @@ function renderResellersIndustries(){
     </div>
   </div></section>
 
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="eyebrow-line"></div><h2 style="margin-top:6px">Perks & Benefits Throughout Your Journey</h2>
-    <p class="lead" style="margin-bottom:22px">We're invested in your success from day one.</p>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-top:20px">
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">📧</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Monthly Email Updates</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Forecasts, market trends, inventory tips, and co-op opportunities delivered to your inbox. Stay informed, stay ahead.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">✓</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">One-Click Easy Ordering</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Streamlined portal with saved preferences. Order in seconds. Recurring orders set it and forget it.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">📍</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Real-Time Order Tracking</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Know exactly where your shipment is. Tracking updates sent automatically. Zero surprises.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">🎯</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Proactive Reminders</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Low-stock alerts. Reorder reminders based on your history. We never let you run out.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">🤝</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Dedicated Account Manager</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Your single point of contact. Available for questions, adjustments, and growth strategy. Real person, real support.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">📊</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Quarterly Business Reviews</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">We review performance together. Identify opportunities. Adjust strategy for next quarter.</p>
-      </div>
-    </div>
+  <section class="block" style="padding-top:96px;padding-bottom:96px"><div class="wrap" style="min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:28px">
+    <p class="lead" style="margin:0">Enterprise-grade supply, one simple step away.</p>
+    <a class="btn btn-primary" href="#/request-quote">Request Quote</a>
   </div></section>
 
-  <section class="block"><div class="wrap">
-    <div class="eyebrow-line"></div><h2 style="margin-top:6px">Start Ordering in Seconds</h2>
-    <p class="lead" style="margin-bottom:22px">Our platform is built for speed and simplicity. No friction. Pure efficiency.</p>
-    <div class="btn-row" style="justify-content:center;gap:12px;margin-top:20px">
-      ${btn(p.primary)}
-      <a class="btn btn-ghost-light" href="#/request-quote">Request Custom Quote</a>
-      <a class="btn btn-ghost-light" href="#/request-quote">Check Order Status</a>
+  <section class="block" style="background:var(--paper-2)"><div class="wrap"><div class="split proc-split">
+    <div class="proc-left">
+      <div class="proc-copy">
+        <div class="eyebrow-line"></div><h2 style="font-size:28px;margin-bottom:10px">Ready to differentiate your catalog?</h2>
+        <p class="lead">Let's talk territory, margin, and how we can support your growth. Reserve your distributor territory and lock pricing.</p>
+      </div>
+      <img class="procimg" src="assets/industry/reseller-industries.jpg" alt="Distribution and logistics" loading="lazy">
     </div>
-  </div></section>
-
-  <section class="block"><div class="wrap"><div class="ctaband">
-    <h2>Ready to differentiate your catalog?</h2><p>Let's talk territory, margin, and how we can support your growth.</p>
-    <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}</div>
+    <div class="formcard" id="mainform"></div>
   </div></div></section>`;
 }
 
@@ -1007,6 +981,7 @@ function renderResellersAgriculture(){
       <p class="sub">${raw(p.sub)}</p>
       <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}</div>
     </div>
+    <div class="media"><img src="assets/industry/agricultural-biochar.jpg" alt="Agricultural reseller and grower supply"></div>
   </div></div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
@@ -1066,43 +1041,6 @@ function renderResellersAgriculture(){
     </div>
   </div></section>
 
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="eyebrow-line"></div><h2 style="margin-top:6px">Reseller Perks & Benefits</h2>
-    <p class="lead" style="margin-bottom:22px">From your first order to ongoing growth, we're here to make it easy.</p>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-top:20px">
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">📧</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Weekly Email Updates</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Grower tips, field trial results, seasonal recommendations, and new data. Keep your customers ahead of the curve.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">✓</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">One-Click Reordering</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Save your order preferences. Reorder instantly. Set recurring shipments for seasonal demands.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">📍</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Live Order Tracking</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Know your delivery date to the day. SMS & email notifications. Peace of mind on every shipment.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">🔔</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Smart Reorder Reminders</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Based on your history, we send reminders before you run low. Never disappoint a grower with stockouts.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">🤝</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Dedicated Ag Specialist</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">Your direct line to agronomic expertise. Answer grower questions. Close deals with confidence.</p>
-      </div>
-      <div style="padding:18px;background:white;border-radius:4px;border-left:4px solid #D7153F">
-        <div style="font-size:24px;margin-bottom:8px">📊</div>
-        <b style="display:block;margin-bottom:8px;font-size:15px">Monthly Growth Reviews</b>
-        <p style="font-size:14px;line-height:1.5;color:#666;margin:0">We track your progress together. Celebrate wins. Adjust strategy. Build for next season.</p>
-      </div>
-    </div>
-  </div></section>
-
   <section class="block"><div class="wrap">
     <div class="eyebrow-line"></div><h2 style="margin-top:6px">Order and Track in Seconds</h2>
     <p class="lead" style="margin-bottom:22px">Our platform makes it effortless. Place orders, track shipments, manage inventory all in one place.</p>
@@ -1113,9 +1051,15 @@ function renderResellersAgriculture(){
     </div>
   </div></section>
 
-  <section class="block"><div class="wrap"><div class="ctaband">
-    <h2>Ready to add premium biochar to your line?</h2><p>Let's talk territory, grower needs, and how we build this together.</p>
-    <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}</div>
+  <section class="block" style="background:var(--paper-2)"><div class="wrap"><div class="split proc-split">
+    <div class="proc-left">
+      <div class="proc-copy">
+        <div class="eyebrow-line"></div><h2 style="font-size:28px;margin-bottom:10px">Ready to add premium biochar to your line?</h2>
+        <p class="lead">Let's talk territory, grower needs, and how we build this together. Reserve your territory and start with a free sample.</p>
+      </div>
+      <img class="procimg" src="assets/industry/reseller-agriculture.jpg" alt="Agricultural fields" loading="lazy">
+    </div>
+    <div class="formcard" id="mainform"></div>
   </div></div></section>`;
 }
 
