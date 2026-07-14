@@ -833,7 +833,7 @@ function renderEnvironmentalRemediation(){
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="eyebrow-line"></div><h2 style="margin-top:6px">The pain points you live with</h2>
-    <p class="lead" style="margin-bottom:18px">Site managers face real constraints. Here's what we hear—and how we solve it.</p>
+    <p class="lead" style="margin-bottom:18px">Site managers face real constraints. Here's what we hear, and how we solve it.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:22px">
       ${p.painPoints.map(pt=>`<div style="padding:18px;background:white;border-radius:4px">
         <div style="font-size:32px;margin-bottom:8px">${raw(pt.title.split(' ')[0])}</div>
@@ -910,7 +910,7 @@ function renderResellersIndustries(){
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="eyebrow-line"></div><h2 style="margin-top:6px">The distributor's dilemma</h2>
-    <p class="lead" style="margin-bottom:18px">Commodity industrial products compress margins. Here's what we hear—and what we solve.</p>
+    <p class="lead" style="margin-bottom:18px">Commodity industrial products compress margins. Here's what we hear, and what we solve.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:22px">
       ${p.painPoints.map(pp=>`<div style="padding:16px;background:white;border-radius:4px">
         <b style="display:block;margin-bottom:8px;font-size:15px">${raw(pp.title)}</b>

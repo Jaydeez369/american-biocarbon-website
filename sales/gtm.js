@@ -1,5 +1,5 @@
 /* ============================================================
-   VEJ Sales OS — GTM Command Center (plugin)
+   VEJ Sales OS · GTM Command Center (plugin)
    Loaded AFTER app.js. Reuses global helpers:
      page, head, sec, table, badge, script, esc, nl, tier, $,
      NAV, buildNav, go, copyEl
@@ -20,7 +20,7 @@
   function rSummary(){
     const s=GTM.summary;
     return page("gtm-summary",
-      head("GTM Executive Summary","The Month-1 thesis: SAMPLES-FIRST. The one goal is free samples of the two live products (Pellets, Biochar) in buyers' hands — that's the first win. No LOI talk in outreach, no bulk selling yet. LOIs are a quiet later step off winning trials.")+
+      head("GTM Executive Summary","The Month-1 thesis: SAMPLES-FIRST. The one goal is free samples of the two live products (Pellets, Biochar) in buyers' hands, that's the first win. No LOI talk in outreach, no bulk selling yet. LOIs are a quiet later step off winning trials.")+
       `<div class="note ok" style="font-size:13.5px"><b>Position:</b> ${esc(s.position)}</div>`+
       sec("G1","Why oil & gas / remediation first")+
       `<div class="grid g2">${s.wedgeWhy.map(w=>`<div class="card"><p style="color:var(--text-dim)">→ ${esc(w)}</p></div>`).join("")}</div>`+
@@ -84,7 +84,7 @@
       <div style="font-size:12px"><b style="color:var(--text)">Success metric:</b> ${esc(c.metric)}</div>
     </div>`;
     return page("gtm-campaigns",
-      head("ICP Campaign Strategy","Nine coordinated campaigns — oil & gas heavily weighted. Each has one specific CTA, its own proof, and a dedicated landing destination.")+
+      head("ICP Campaign Strategy","Nine coordinated campaigns, oil & gas heavily weighted. Each has one specific CTA, its own proof, and a dedicated landing destination.")+
       `<div class="note ok"><b>Effort weighting:</b> ${GTM.summary.allocation.map(a=>badge(a.icp.split(" ")[0]+" "+a.pct, a.cls)).join(" ")}</div>`+
       `<div class="grid" style="grid-template-columns:1fr;gap:14px">${cs.map(card).join("")}</div>`
     );
@@ -94,7 +94,7 @@
   function r30Day(){
     const weeks=GTM.day30Weeks;
     const cal=GTM.calendar||[];
-    const wk=w=>`<div class="card"><h4>${esc(w.wk)} — ${esc(w.theme)}</h4>
+    const wk=w=>`<div class="card"><h4>${esc(w.wk)} · ${esc(w.theme)}</h4>
       <div style="font-size:12.3px;display:grid;gap:4px">
         <div><b style="color:var(--green-bright)">Goal:</b> ${esc(w.goal)}</div>
         <div><b style="color:var(--gold-soft)">Focus:</b> ${esc(w.focus)}</div>
@@ -104,10 +104,10 @@
     const cells=cal.map(c=>`<div class="cal-day${c.light?" rest":""}" data-d="${c.d}" onclick="gtmCalPick(${c.d})">
       <div class="dn">${c.d}</div><div class="dt">${esc(c.theme)}</div><div class="dwk">Week ${c.wk}</div></div>`).join("");
     return page("gtm-30day",
-      head("30-Day Daily Plan — Calendar","Click any day to see the exact tasks for Jesse and Victor. Check tasks off as you go — they persist. Jesse = demand & the machine · Victor = product, proof, website & fulfillment.")+
+      head("30-Day Daily Plan · Calendar","Click any day to see the exact tasks for Jesse and Victor. Check tasks off as you go, they persist. Jesse = demand & the machine · Victor = product, proof, website & fulfillment.")+
       sec("","Weekly themes")+`<div class="grid g2">${weeks.map(wk).join("")}</div>`+
       `<div class="note warn"><b>Quality controls:</b> max ~20→40 sends/inbox/day ramped; bounce <2% or slow down; monitor replies daily; A/B subject lines; SAMPLE-FIRST only (no LOI/bulk talk in cold outreach); never spam.</div>`+
-      sec("","Calendar — click a day")+
+      sec("","Calendar · click a day")+
       `<div class="cal">${dow.map(d=>`<div class="cal-dow">${d}</div>`).join("")}${cells}</div>`+
       `<div id="gtmCalPanel"></div>`
     );
@@ -117,9 +117,9 @@
     document.querySelectorAll("#sec-gtm-30day .cal-day, .cal-day").forEach(el=>el.classList.toggle("sel", +el.dataset.d===d));
     const lane=(who,arr,cls)=>`<div class="cal-lane ${cls}"><h4>${who}</h4>${arr.map((t,i)=>chk(`cal:${d}:${cls}:${i}`,esc(t))).join("")}</div>`;
     const html=`<div class="cal-panel">
-      <div class="cal-panel-h"><h3>Day ${c.d} — ${esc(c.theme)}</h3><div class="sub">Week ${c.wk}${c.light?" · lighter / review day":""}</div></div>
-      <div class="cal-lanes">${lane("Jesse — demand & the machine",c.jesse,"j")}${lane("Victor — product, proof, website & fulfillment",c.victor,"v")}</div>
-      <div class="cal-meta">Tick each task as done — it stays checked across reloads. Victor's early weeks: certs/spec sheets, company discovery, product photos, testing, website approval, then Shopify install & go-live.</div>
+      <div class="cal-panel-h"><h3>Day ${c.d} · ${esc(c.theme)}</h3><div class="sub">Week ${c.wk}${c.light?" · lighter / review day":""}</div></div>
+      <div class="cal-lanes">${lane("Jesse · demand & the machine",c.jesse,"j")}${lane("Victor · product, proof, website & fulfillment",c.victor,"v")}</div>
+      <div class="cal-meta">Tick each task as done, it stays checked across reloads. Victor's early weeks: certs/spec sheets, company discovery, product photos, testing, website approval, then Shopify install & go-live.</div>
     </div>`;
     const panel=document.getElementById("gtmCalPanel"); if(panel){ panel.innerHTML=html; panel.scrollIntoView({behavior:"smooth",block:"nearest"}); }
   };
@@ -142,11 +142,11 @@
     const seqs=GTM.sequences;
     const filters=`<div class="filters"><span class="pill active" onclick="gtmSeqFilter(this,'all')">All</span>${seqs.map((o,i)=>`<span class="pill" onclick="gtmSeqFilter(this,'${i}')">${esc(o.tag)}</span>`).join("")}</div>`;
     const blocks=seqs.map((o,i)=>`<div class="gtm-seq" data-idx="${i}">
-      <h3 class="sub">${esc(o.seg)} — ${esc(o.persona)} ${badge(o.tag,"badge-blue")}</h3>
+      <h3 class="sub">${esc(o.seg)} · ${esc(o.persona)} ${badge(o.tag,"badge-blue")}</h3>
       ${o.steps.map(st=>script(st.t,st.b)).join("")}
     </div>`).join("");
     return page("gtm-sequences",
-      head("Outbound Sequences","Human, short, specific, credible — email 1–4, breakup, call opener, voicemail, and three LinkedIn steps per segment. Copy any block. Replace {First}/{Me}/{phone} before sending.")+
+      head("Outbound Sequences","Human, short, specific, credible: email 1–4, breakup, call opener, voicemail, and three LinkedIn steps per segment. Copy any block. Replace {First}/{Me}/{phone} before sending.")+
       `<div class="note"><b>Primary O&G angle:</b> Plant-based absorbent from sugarcane bagasse, absorbs up to ~5x its weight (est.) → potentially less material + lighter disposal vs wood/clay, with a cleaner sustainability story. Always tag ratio claims as estimates.</div>`+
       filters+blocks
     );
@@ -178,8 +178,8 @@
     const filters=`<div class="filters"><span class="pill active" onclick="gtmScrFilter(this,'all')">All</span>${L.segments.map((s,i)=>`<span class="pill" onclick="gtmScrFilter(this,'${i}')">${esc(s.tag)}</span>`).join("")}</div>`;
     const block=(s,i)=>`<div class="gtm-scr" data-idx="${i}">
       <h3 class="sub">${esc(s.seg)} ${badge(s.tag,"badge-blue")} ${s.claimCaution?badge("CLAIM-CONTROLLED","badge-gold"):""}</h3>
-      ${s.claimCaution?`<div class="note warn" style="margin:8px 0"><b>⚠ Claim control:</b> absorbent / moisture-management framing only — no animal-health, feed, or veterinary claims.</div>`:""}
-      <h4 style="margin-top:10px;color:var(--gold-soft)">Openers — A/B these (${s.openers.length} variants)</h4>
+      ${s.claimCaution?`<div class="note warn" style="margin:8px 0"><b>⚠ Claim control:</b> absorbent / moisture-management framing only, no animal-health, feed, or veterinary claims.</div>`:""}
+      <h4 style="margin-top:10px;color:var(--gold-soft)">Openers · A/B these (${s.openers.length} variants)</h4>
       <div class="grid g2">${s.openers.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
       <h4 style="margin-top:12px;color:var(--gold-soft)">Gatekeeper</h4>
       <div class="grid g2">${s.gatekeeper.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
@@ -189,7 +189,7 @@
       <div class="grid g2">${s.voicemails.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
     </div>`;
     return page("gtm-scripts",
-      head("Phone Script Library (A/B)","A deep bank of call openers, gatekeeper lines, objection turns, and voicemails per segment — every one built to earn a yes to a FREE SAMPLE. No LOIs, no bulk on a cold call. Copy any block; swap {First}/{Me}/{Company}/{phone}.")+
+      head("Phone Script Library (A/B)","A deep bank of call openers, gatekeeper lines, objection turns, and voicemails per segment, every one built to earn a yes to a FREE SAMPLE. No LOIs, no bulk on a cold call. Copy any block; swap {First}/{Me}/{Company}/{phone}.")+
       `<div class="note ok"><b>The whole point:</b> ${esc(L.intro)}</div>`+
       sec("","A/B testing rules")+`<div class="card">${ul(L.abRules)}</div>`+
       filters+L.segments.map(block).join("")
@@ -212,7 +212,7 @@
       <div style="font-size:12px"><b>Success metric:</b> <span style="color:var(--green-bright)">${esc(c.metric)}</span></div>
     </div>`;
     return page("gtm-longterm",
-      head("Long-Term / Compounding Channels","Beyond the Month-1 outbound sprint: the channels that build durable pipeline over 90 days to a year — Facebook groups, trade shows, referrals, content/SEO, distributors, and partnerships. Every one still funnels to the same first win: a free sample in hand.")+
+      head("Long-Term / Compounding Channels","Beyond the Month-1 outbound sprint: the channels that build durable pipeline over 90 days to a year: Facebook groups, trade shows, referrals, content/SEO, distributors, and partnerships. Every one still funnels to the same first win: a free sample in hand.")+
       `<div class="note"><b>Principle:</b> ${esc(L.intro)}</div>`+
       `<div class="grid" style="grid-template-columns:1fr;gap:14px">${L.channels.map(card).join("")}</div>`
     );
@@ -242,7 +242,7 @@
       sec("","Social pages to create")+
       table(["Page","Priority","Why"],l.socialPages.map(p=>[`<strong>${esc(p.p)}</strong>`,
         badge(p.need,p.need==="Required"?"badge-green":p.need==="Recommended"?"badge-gold":"badge-muted"),esc(p.why)]))+
-      `<div class="note">These are recommendations — no external accounts are auto-created. Build the LinkedIn company page first; it's the only required one for a founder-led B2B motion.</div>`
+      `<div class="note">These are recommendations. No external accounts are auto-created. Build the LinkedIn company page first; it's the only required one for a founder-led B2B motion.</div>`
     );
   }
 
@@ -252,7 +252,7 @@
     const rows=s.posts.map(p=>[`<strong class="t-num">D${p.d}</strong>`,badge(p.pl,"badge-blue"),`<strong>${esc(p.topic)}</strong>`,
       `<em>${esc(p.hook)}</em>`,esc(p.body),esc(p.vis),`<span style="color:var(--green-bright)">${esc(p.cta)}</span>`,pill(p.icp)]);
     return page("gtm-social",
-      head("30-Day Social & Content Calendar","Credibility over viral fluff. Every post has a hook, body, visual, CTA, and the ICP it serves — plus five product-demo video scripts.")+
+      head("30-Day Social & Content Calendar","Credibility over viral fluff. Every post has a hook, body, visual, CTA, and the ICP it serves, plus five product-demo video scripts.")+
       table(["Day","Platform","Topic","Hook","Body","Visual","CTA","ICP"],rows)+
       sec("","Product demo videos to script")+
       `<div class="grid g2">${s.videos.map(v=>`<div class="card"><h4>🎬 ${esc(v.t)}</h4><p style="color:var(--text-dim)">${esc(v.script)}</p></div>`).join("")}</div>`
@@ -294,7 +294,7 @@
   /* ---- 12. Dashboard ---- */
   function rDashboard(){
     return page("gtm-dashboard",
-      head("GTM Dashboard Spec","Every card with its formula, data source, target, warning threshold, and owner — daily activity through closed revenue and carbon optionality.")+
+      head("GTM Dashboard Spec","Every card with its formula, data source, target, warning threshold, and owner: daily activity through closed revenue and carbon optionality.")+
       table(["Card","Formula","Data source","Target","Warning threshold","Owner"],
         GTM.dashboard.map(c=>[`<strong>${esc(c.m)}</strong>`,`<span class="t-num">${esc(c.f)}</span>`,esc(c.src),
           `<span style="color:var(--green-bright)">${esc(c.tgt)}</span>`,`<span style="color:var(--red-soft)">${esc(c.warn)}</span>`,esc(c.o)]))+
@@ -306,7 +306,7 @@
   function rSample(){
     const f=GTM.sampleFlow;
     return page("gtm-sample",
-      head("Sample → LOI Workflow","From outreach to free sample to signed LOI — with qualification, approval, shipping SLA, follow-up timing, and the O&G procurement-grade standard. No bulk selling in Month 1.")+
+      head("Sample → LOI Workflow","From outreach to free sample to signed LOI, with qualification, approval, shipping SLA, follow-up timing, and the O&G procurement-grade standard. No bulk selling in Month 1.")+
       `<div class="grid g2">
         <div class="card"><h4>🧪 When to offer a SAMPLE</h4><p>${esc(f.whenSample)}</p></div>
         <div class="card"><h4>📝 When to present an LOI</h4><p>${esc(f.whenLOI)}</p></div>
@@ -331,7 +331,7 @@
     return page("gtm-launch",
       head("Final Execution Checklist","The gate before outbound, the exact first-48-hours moves, and week-one outputs with iteration rules.")+
       sec("","Before outreach (gate)")+`<div class="card">${ul(l.before)}</div>`+
-      sec("","First 48 hours — exact tasks")+
+      sec("","First 48 hours · exact tasks")+
       table(["Task","What to do"],l.first48.map(t=>[`<strong>${esc(t.t)}</strong>`,esc(t.d)]))+
       sec("","First week")+
       `<div class="grid g3">

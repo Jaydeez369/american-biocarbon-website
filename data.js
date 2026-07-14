@@ -14,7 +14,7 @@ const ASSETS = {
   biocharMock:CDN+"100BiocharMock.jpg?v=1699279980",
   biocharPhoto:CDN+"AmericanBiocarbonBiochar1.jpg?v=1699279980",
   biocharLg:  CDN+"biochar-lg.jpg?v=1702141148",
-  /* NEW canonical bag renders (local) — one distinct bag per product */
+  /* NEW canonical bag renders (local), one distinct bag per product */
   pelletsBag: "assets/products/absorbent-pellets-bag.png",
   biocharBag: "assets/products/100-biochar-bag.png",
   fiberBag:   "assets/products/multi-use-fiber-bag.png",
@@ -216,7 +216,7 @@ const HOME = {
         primary:{label:"Notify me",href:CTA.freeSamplePellets.href}, secondary:CTA.specDownload, specProduct:"absorbent-pellets" },
       { label:"Biochar-Infused Soil", img:ASSETS.heroSoil, pos:"50% 50%", zoom:1.05, origin:"50% 50%",
         h:"Ready-to-use soil,<br>biochar built in.",
-        sub:"A ready-to-use growing soil pre-blended with our carbon-negative bagasse biochar—water retention, nutrient holding, and aeration with no mixing. Coming Q4.",
+        sub:"A ready-to-use growing soil pre-blended with our carbon-negative bagasse biochar for water retention, nutrient holding, and aeration with no mixing. Coming Q4.",
         primary:{label:"Notify me",href:CTA.biochar.href}, secondary:CTA.specDownload, specProduct:"biochar-infused-soil" },
     ],
   },
@@ -618,7 +618,7 @@ const PRODUCTS = {
       rows:[["Basis","Physical biochar deployment","Paper/avoidance claims"],["Durability","Stable biochar form","Variable"],["Permanence","1000+ years","Uncertain"]] },
     faq:[
       { q:"What's the CO₂ per ton?", a:"We share verified methodology-specific figures during diligence. Request information and we'll provide current data aligned to our deployment pipeline." },
-      { q:"Forward purchase options?", a:"Yes, sized conservatively to our deployment schedule—we don't sell more credits than deployable tons." },
+      { q:"Forward purchase options?", a:"Yes, sized conservatively to our deployment schedule, we don't sell more credits than deployable tons." },
     ],
     form:"carbon",
     internal:["#/product/agricultural-biochar","#/about"],
@@ -996,8 +996,8 @@ const RESELLERS_INDUSTRIES = {
   ],
   whyABC:[
     { title:"Premium tiers & margins", desc:"Our distributor program offers volume-based tiering that rewards growth. Real margin room for your business." },
-    { title:"Differentiated product", desc:"Up to 5:1 absorption, plant-based, carbon-negative story. Customers have a reason to buy—and stick." },
-    { title:"We handle tech support", desc:"Spec sheets, field trials, and technical questions—we're behind you so your team closes faster." },
+    { title:"Differentiated product", desc:"Up to 5:1 absorption, plant-based, carbon-negative story. Customers have a reason to buy, and stick." },
+    { title:"We handle tech support", desc:"Spec sheets, field trials, and technical questions, we're behind you so your team closes faster." },
     { title:"Predictable supply", desc:"No allocation games. Committed lead times. Your inventory planning is reliable." },
     { title:"Marketing co-op", desc:"Case studies, ROI models, sell-side tools. Your reps close faster with real proof." }
   ],
@@ -1034,7 +1034,7 @@ const RESELLERS_AGRICULTURE = {
     { title:"Proven field performance", desc:"Up to 3–3.5× water holding with inherent N-P-K. Growers see real results, not just promises. That drives repeat purchases." },
     { title:"Unique value story", desc:"Carbon durability, honeycomb microstructure, inherent minerals. Growers have a reason to pay premium price and tell their peers." },
     { title:"Agronomic co-selling", desc:"We provide trial protocols, field study data, and direct education. Your reps sell with confidence and proof." },
-    { title:"Scalable co-op", desc:"Joint marketing, demo kits, field trials that drive real volume—not just catalogs." }
+    { title:"Scalable co-op", desc:"Joint marketing, demo kits, field trials that drive real volume, not just catalogs." }
   ],
   program:[
     { title:"Premium Margins", bullets:["Tiered pricing that rewards volume","Quarterly rebates for hitting targets","Co-op marketing budget"] },

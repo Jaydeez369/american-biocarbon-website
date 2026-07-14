@@ -1,4 +1,4 @@
-/* ============ VEJ Sales OS — app shell & renderers ============ */
+/* ============ VEJ Sales OS · app shell & renderers ============ */
 const $ = (s,el=document)=>el.querySelector(s);
 const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const nl = s => esc(s).replace(/\n/g,"<br>");
@@ -7,7 +7,7 @@ const nl = s => esc(s).replace(/\n/g,"<br>");
 const CHECK_KEY = "vej_checks_v1";
 function getChecks(){ try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch(e){ return {}; } }
 function setCheck(k,on){ const c=getChecks(); c[k]= on?1:0; try{ localStorage.setItem(CHECK_KEY, JSON.stringify(c)); }catch(e){} }
-/* chk(key, labelHTML, def) — labelHTML is trusted HTML; def = default-checked when never touched */
+/* chk(key, labelHTML, def): labelHTML is trusted HTML; def = default-checked when never touched */
 function chk(key, labelHTML, def){ const v=getChecks()[key]; const on = (v===undefined? !!def : !!v) ? " done" : ""; return `<label class="chk${on}" data-k="${esc(key)}" onclick="toggleChk(this)"><span class="box">✓</span><span class="lbl">${labelHTML}</span></label>`; }
 function checkStats(keys, defs){ const c=getChecks(); let done=0; keys.forEach((k,i)=>{ const v=c[k]; if(v===undefined? (defs&&defs[i]):v) done++; }); return {done, total:keys.length}; }
 window.toggleChk = el => { const on = !el.classList.contains("done"); el.classList.toggle("done", on); setCheck(el.dataset.k, on); };
@@ -117,14 +117,14 @@ function rDaily(){
     </div>`;
   }).join("");
   return page("today",
-    head("Daily Action Plan","Day-by-day, sector-by-sector — the exact plan to stay focused. Work top to bottom; every item is a checkbox that persists across reloads.")+
+    head("Daily Action Plan","Day-by-day, sector-by-sector, the exact plan to stay focused. Work top to bottom; every item is a checkbox that persists across reloads.")+
     `<div class="daily-mission card pad-lg">
        <div class="dm-row"><span class="dm-tag">THE MISSION</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
        <p class="dm-mission">${esc(D.mission)}</p>
        <div class="note" style="margin-top:10px"><b>2-week target:</b> ${esc(D.target)}</div>
      </div>`+
     legend+
-    sec("","The 2-week build-out — day by day")+
+    sec("","The 2-week build-out · day by day")+
     days+
     `<div class="chk-head" style="margin-top:14px"><span class="note" style="margin:0;flex:1"><b>Days 11–90 →</b> continue in the <a href="#roadmap" onclick="go('roadmap');return false" style="color:var(--gold-soft)">30/60/90 Roadmap</a> and track hygiene in the <a href="#checklist" onclick="go('checklist');return false" style="color:var(--gold-soft)">Launch Checklist</a>.</span><span class="chk-reset" onclick="resetChecks('daily:')">Reset daily checkmarks</span></div>`
   );
@@ -147,7 +147,7 @@ function rOverview(){
     `<div class="note ok"><b>The molecule does double duty.</b> ${esc(DATA.messaging.dualStory)}</div>`+
     `<div class="grid g3">${e.reinforce.map(r=>`<div class="card"><p>${esc(r)}</p></div>`).join("")}</div>`+
     `<div class="note" style="margin-top:14px"><b>Fastest path to large offtake:</b> ${esc(e.fastOfftake)}</div>`+
-    sec("","Claim discipline — proof hierarchy")+
+    sec("","Claim discipline · proof hierarchy")+
     `<p class="lead">Every claim in this system is tagged to a tier. Never present a lower-tier claim as a higher one.</p>`+
     table(["Tier","Classification","Examples"],DATA.proofTiers.map(p=>[tier(p.t),`<strong>${esc(p.name)}</strong>`,esc(p.ex)]))
   );
@@ -178,7 +178,7 @@ function rSegments(){
   const filters=`<div class="filters"><span class="pill active" onclick="segFilter(this,'all')">All</span>${groups.map(g=>`<span class="pill" onclick="segFilter(this,'${esc(g)}')">${esc(g)}</span>`).join("")}</div>`;
   const cards=DATA.segments.map(s=>segCard(s)).join("");
   return page("segments",
-    head("ICP Definition & Segmentation","Tight profiles for every buyer type, ranked by Month-1 speed-to-LOI (carbon is parked to days 61–90 — shown as a column, excluded from the beachhead score).")+
+    head("ICP Definition & Segmentation","Tight profiles for every buyer type, ranked by Month-1 speed-to-LOI (carbon is parked to days 61–90, shown as a column, excluded from the beachhead score).")+
     `<div class="note ok"><b>Recommended beachhead (top 3):</b> ${top3.map(t=>badge(t,"badge-green")).join(" ")}</div>`+
     sec("3","Segment ranking")+
     table(["Segment","Group","Speed","Recurring","Margin","Carbon","Strategic","Freight","Composite"],
@@ -221,7 +221,7 @@ window.segFilter=(el,g)=>{
 /* --- Personas --- */
 function rPersonas(){
   return page("personas",
-    head("Buyer Personas","What each buyer cares about, fears, and needs — with the discovery questions, opener, and CTA that land.")+
+    head("Buyer Personas","What each buyer cares about, fears, and needs, with the discovery questions, opener, and CTA that land.")+
     `<div class="grid g2">${DATA.personas.map(p=>`
       <div class="card pad-lg">
         <h4>${esc(p.name)} ${badge(p.seg,"badge-blue")}</h4>
@@ -254,8 +254,8 @@ function rMessaging(){
     <p style="color:var(--text);font-size:13.5px;line-height:1.6"><b style="color:${accent(t.id)}">Positioning:</b> ${esc(t.positioning)}</p>
     <div class="card" style="margin:10px 0"><h4>One-liner</h4><p style="color:var(--text)">${esc(t.oneLiner)}</p></div>
     <div class="grid g2">
-      <div class="card">${script(t.product+" — 30-second pitch",t.pitch30)}</div>
-      <div class="card">${script(t.product+" — 90-second pitch",t.pitch90)}</div>
+      <div class="card">${script(t.product+" · 30-second pitch",t.pitch30)}</div>
+      <div class="card">${script(t.product+" · 90-second pitch",t.pitch90)}</div>
     </div>
     <div class="grid g2" style="margin-top:10px">
       <div><b style="font-size:11px;color:var(--green-bright)">Proof to use</b><ul>${t.proof.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>
@@ -263,14 +263,14 @@ function rMessaging(){
     </div>
   </div>`;
   return page("messaging",
-    head("Value Proposition & Messaging","TWO separate avatars — every pitch is single-product. Absorbent Pellets sell to industrial/EHS/spill buyers; Biochar sells to ag/soil/grower buyers. Different person, different pain, different proof.")+
+    head("Value Proposition & Messaging","TWO separate avatars. Every pitch is single-product. Absorbent Pellets sell to industrial/EHS/spill buyers; Biochar sells to ag/soil/grower buyers. Different person, different pain, different proof.")+
     `<div class="note warn"><b>Split rule:</b> ${esc(m.splitRule)}</div>`+
-    sec("5","Track A — Absorbent Pellets (industrial)")+trackBlock(m.tracks[0])+
-    sec("","Track B — 100% Biochar (agriculture)")+trackBlock(m.tracks[1])+
+    sec("5","Track A · Absorbent Pellets (industrial)")+trackBlock(m.tracks[0])+
+    sec("","Track B · 100% Biochar (agriculture)")+trackBlock(m.tracks[1])+
     sec("","Comparison messaging (use only within the matching track)")+
     table(["Positioned against","Why we win"],m.comparisons.map(c=>[`<strong>${esc(c.vs)}</strong>`,esc(c.win)]))+
-    sec("","Proof-point map (claim safety — both products)")+
-    `<p class="lead">Match every claim to its tier. Use the safe wording. Avoid the risky wording — it creates legal & credibility exposure.</p>`+
+    sec("","Proof-point map (claim safety, both products)")+
+    `<p class="lead">Match every claim to its tier. Use the safe wording. Avoid the risky wording. It creates legal & credibility exposure.</p>`+
     table(["Claim","Tier","Buyer relevance","Source","✅ Safe wording","⛔ Avoid"],m.proofMap.map(p=>[
       `<strong>${esc(p.claim)}</strong>`,tier(p.tier),esc(p.rel),esc(p.src),
       `<span style="color:var(--green-bright)">${esc(p.safe)}</span>`,`<span style="color:var(--red-soft)">${esc(p.risk)}</span>`]))
@@ -294,17 +294,17 @@ function rBiochar(){
     </div>
   </div>`;
   return page("biochar",
-    head("Biochar — Specs, Data & Avatars","Biochar is the dynamic product: one material, MANY buyers. Full spec, benefit-by-mechanism, industry comparisons, and a differentiated avatar for each buyer type. Pull the ONE benefit + comparison that fits the buyer in front of you.")+
+    head("Biochar · Specs, Data & Avatars","Biochar is the dynamic product: one material, MANY buyers. Full spec, benefit-by-mechanism, industry comparisons, and a differentiated avatar for each buyer type. Pull the ONE benefit + comparison that fits the buyer in front of you.")+
     `<div class="card pad-lg"><p style="color:var(--text);font-size:13.5px;line-height:1.6">${esc(b.intro)}</p></div>`+
     sec("","Technical spec sheet")+
     table(["Property","Value"],b.spec.map(r=>[`<strong>${esc(r[0])}</strong>`,esc(r[1])]))+
-    sec("","Benefits by mechanism — match to the avatar")+
+    sec("","Benefits by mechanism · match to the avatar")+
     table(["Mechanism","What it does","Best for","Tier"],b.benefits.map(x=>[
       `<strong>${esc(x.mech)}</strong>`,esc(x.b),`<span style="color:var(--gold-soft)">${esc(x.who)}</span>`,tier(x.tier)]))+
-    sec("","Industry comparisons — how biochar stacks up")+
+    sec("","Industry comparisons · how biochar stacks up")+
     b.comparisons.map(c=>`<h3 class="sub">${esc(c.h)}</h3>`+table(c.cols.map(h=>esc(h)),c.rows.map(r=>r.map(x=>esc(x))))).join("")+
-    sec("","Biochar avatars — one material, differentiated per buyer")+
-    `<p class="lead">Absorbent Pellets have one industrial avatar; biochar sells across all of these. Each gets a different lead benefit and a different claim boundary — never a generic biochar pitch.</p>`+
+    sec("","Biochar avatars · one material, differentiated per buyer")+
+    `<p class="lead">Absorbent Pellets have one industrial avatar; biochar sells across all of these. Each gets a different lead benefit and a different claim boundary, never a generic biochar pitch.</p>`+
     b.avatars.map(avatarCard).join("")+
     sec("","Claim guardrails")+
     `<div class="note warn"><ul>${b.guardrails.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`
@@ -315,9 +315,9 @@ function rBiochar(){
 function rMarket(){
   const mk=DATA.market;
   return page("market",
-    head("TAM / SAM / SOM & Beachhead Strategy","A transport-aware model built from cited public anchors (USGS, USDA-AMS, IFEEDER/NARA, Grand View, Puro/CDR.fyi). [A] = stated assumption. Freight — not demand — caps the addressable market, differently per product by $/ton.")+
+    head("TAM / SAM / SOM & Beachhead Strategy","A transport-aware model built from cited public anchors (USGS, USDA-AMS, IFEEDER/NARA, Grand View, Puro/CDR.fyi). [A] = stated assumption. Freight, not demand, caps the addressable market, differently per product by $/ton.")+
     `<div class="note warn">${esc(mk.note)}</div>`+
-    sec("6","Market model — TAM / SAM / SOM (low / base / high)")+
+    sec("6","Market model · TAM / SAM / SOM (low / base / high)")+
     table(["Market","TAM (tons / $)","SAM (freight-viable)","SOM year 1 (low / base / high)","Mode & note"],mk.som.map(x=>[
       `<strong>${esc(x.m)}</strong>`,esc(x.tam),esc(x.sam),`<span style="color:var(--green-bright)">${esc(x.som)}</span>`,esc(x.note)]))+
     (mk.modeVerdict?sec("","Transport mode verdict by product")+
@@ -331,13 +331,13 @@ function rMarket(){
     table(["Filter","Rule"],mk.accountCriteria.map(c=>[`<strong>${esc(c.f)}</strong>`,esc(c.v)]))+
     (mk.assumptions?sec("","Key assumptions [A]")+
       `<div class="card"><ul>${mk.assumptions.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:"")+
-    (mk.gaps?sec("","Open gaps — treat as unverified")+
+    (mk.gaps?sec("","Open gaps · treat as unverified")+
       `<div class="note warn"><ul>${mk.gaps.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`:"")+
     (mk.verifyFirst?sec("","Verify-first (before any investor/lender deck)")+
       `<div class="card"><ul>${mk.verifyFirst.map(v=>`<li>${esc(v)}</li>`).join("")}</ul></div>`:"")+
-    sec("","Sourcing workflow — build the first 100")+
+    sec("","Sourcing workflow · build the first 100")+
     `<div class="card"><ul>${mk.sourcing.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`+
-    `<div class="note"><b>Enrichment:</b> Apollo.io is connected to this workspace — use it to find contacts, verify emails, and push accounts into the app.</div>`
+    `<div class="note"><b>Enrichment:</b> Apollo.io is connected to this workspace. Use it to find contacts, verify emails, and push accounts into the app.</div>`
   );
 }
 
@@ -349,19 +349,19 @@ function rBarge(){
     `<div class="note warn">${esc(b.headline)}</div>`+
     sec("6B·1","White Castle waterway geography")+
     `<div class="card"><ul>${b.geography.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`+
-    sec("6B·2","Mode comparison — the cost structure")+
+    sec("6B·2","Mode comparison · the cost structure")+
     table(["Mode","Linehaul","Fixed / handling","Payload","Note"],b.modeCompare.map(m=>[
       `<strong>${esc(m.mode)}</strong>`,`<span class="t-num">${esc(m.linehaul)}</span>`,esc(m.fixed),`<span class="t-num">${esc(m.cap)}</span>`,esc(m.note)]))+
-    sec("6B·3","Delivered cost/ton by lane — barge vs truck vs rail")+
+    sec("6B·3","Delivered cost/ton by lane · barge vs truck vs rail")+
     table(["Destination","River-mi","Barge $/ton","Truck $/ton","Rail $/ton","Verdict","Why"],b.lanes.map(x=>[
       `<strong>${esc(x.dest)}</strong>`,`<span class="t-num">${esc(x.mi)}</span>`,`<span class="t-num" style="color:var(--green-bright)">${esc(x.barge)}</span>`,`<span class="t-num">${esc(x.truck)}</span>`,`<span class="t-num">${esc(x.rail)}</span>`,badge(x.verdict,x.cls),esc(x.note)]))+
-    sec("6B·4","Break-even logic — when barge starts to pay")+
+    sec("6B·4","Break-even logic · when barge starts to pay")+
     `<div class="card"><ul>${b.breakeven.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
     sec("6B·5","Capacity reality check")+
     `<div class="note warn"><ul>${b.capacity.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
     sec("6B·6","Key assumptions [A]")+
     `<div class="card"><ul>${b.assumptions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
-    sec("6B·7","Verify-first — before quoting any barge lane")+
+    sec("6B·7","Verify-first · before quoting any barge lane")+
     `<div class="card"><ul>${b.verifyFirst.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`
   );
 }
@@ -378,13 +378,13 @@ function rPipeline(){
       <div class="crit" style="color:var(--red-soft)"><b>Don't advance:</b> ${esc(s.noAdv)}</div>
     </div></div>`).join("")}</div>`;
   return page("pipeline",
-    head("Sales Pipeline Design — for your Replit app","Object model, deal types, and three connected pipelines with stage exit criteria and the exact CRM fields to add. This is the build spec for your app's sales section.")+
+    head("Sales Pipeline Design · for your Replit app","Object model, deal types, and three connected pipelines with stage exit criteria and the exact CRM fields to add. This is the build spec for your app's sales section.")+
     sec("7A","Object model")+
     table(["Object","Key fields"],DATA.objectModel.map(o=>[`<strong>${esc(o.o)}</strong>`,esc(o.key)]))+
     sec("7B","Deal types")+`<div class="filters">${DATA.dealTypes.map(d=>`<span class="pill active" style="cursor:default">${esc(d)}</span>`).join("")}</div>`+
-    sec("7C","Pipeline 1 — Mid-market recurring")+kanban("",pl.midmarket)+
-    sec("","Pipeline 2 — Bulk offtake / supply")+kanban("",pl.offtake)+
-    sec("","Pipeline 3 — Carbon-credit buyer")+kanban("",pl.carbon)+
+    sec("7C","Pipeline 1 · Mid-market recurring")+kanban("",pl.midmarket)+
+    sec("","Pipeline 2 · Bulk offtake / supply")+kanban("",pl.offtake)+
+    sec("","Pipeline 3 · Carbon-credit buyer")+kanban("",pl.carbon)+
     `<div class="note warn"><b>Carbon guardrail:</b> never contract more credits than deployable tons. Carbon supply = deployed + committed product tons only.</div>`+
     sec("7D","Required CRM fields")+
     `<div class="grid g2">
@@ -440,7 +440,7 @@ function rAccounts(){
   const segs=[...new Set(SAMPLE_ACCOUNTS.map(a=>a[1]))];
   const rows=SAMPLE_ACCOUNTS.map((a,i)=>accRow(a,i)).join("");
   return page("accounts",
-    head("Target Accounts","A working account list view — filter by segment, sort by priority. This is a seeded demo; replace with your sourced Gulf South list (see TAM tab for the workflow).")+
+    head("Target Accounts","A working account list view, filter by segment, sort by priority. This is a seeded demo; replace with your sourced Gulf South list (see TAM tab for the workflow).")+
     `<div class="filters"><span class="pill active" onclick="accFilter(this,'all')">All segments</span>${segs.map(s=>`<span class="pill" onclick="accFilter(this,'${esc(s)}')">${esc(s)}</span>`).join("")}</div>`+
     `<div class="tbl-wrap"><table id="accTbl"><thead><tr>
       <th>Account</th><th>Segment</th><th>Location</th><th>Freight zone</th><th>Est. tons/yr</th><th>Priority</th><th>Status</th><th>Next action</th>
@@ -454,7 +454,7 @@ function accRow(a,i){
   const zc=zone==="A"?"badge-green":zone==="B"?"badge-gold":"badge-red";
   const next={Prospect:"First touch",Contacted:"Book discovery",Discovery:"Ship sample",Sample:"Trial check-in"}[status]||"Advance";
   return `<tr data-seg="${esc(seg)}"><td><strong>${esc(name)}</strong></td><td>${esc(seg)}</td><td>${esc(loc)}</td>
-    <td>${badge("Zone "+zone,zc)}</td><td class="t-num">${tons?tons.toLocaleString():"—"}</td>
+    <td>${badge("Zone "+zone,zc)}</td><td class="t-num">${tons?tons.toLocaleString():"-"}</td>
     <td>${badge("P"+pri,priCls)}</td><td>${badge(status,"badge-blue")}</td><td>${esc(next)}</td></tr>`;
 }
 window.accFilter=(el,s)=>{
@@ -467,12 +467,12 @@ function rOutreach(){
   const filters=`<div class="filters"><span class="pill active" onclick="outFilter(this,'all')">All segments</span>${DATA.outreach.map((o,i)=>`<span class="pill" onclick="outFilter(this,'${i}')">${esc(o.seg)}</span>`).join("")}</div>`;
   const blocks=DATA.outreach.map((o,i)=>`
     <div class="out-block" data-idx="${i}">
-      <h3 class="sub">${esc(o.seg)} — ${esc(o.persona)}</h3>
+      <h3 class="sub">${esc(o.seg)} · ${esc(o.persona)}</h3>
       ${o.steps.map(s=>script(s.t,s.b)).join("")}
       <div class="note"><b>Nurture:</b> ${esc(o.nurture)}</div>
     </div>`).join("");
   return page("outreach",
-    head("Outreach Engine","Human, direct, credible sequences per segment — email, call, voicemail, LinkedIn, breakup, and nurture. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
+    head("Outreach Engine","Human, direct, credible sequences per segment: email, call, voicemail, LinkedIn, breakup, and nurture. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
     filters+blocks
   );
 }
@@ -485,12 +485,12 @@ window.outFilter=(el,i)=>{
 function rWindrow(){
   const w=DATA.windrowTrial;
   const sampleRows=[
-    ["0","___","118","120","55","54","N","Build day — baseline"],
+    ["0","___","118","120","55","54","N","Build day · baseline"],
     ["3","___","135","148","54","54","Y","Treatment heating faster"],
     ["7","___","150","158","52","53","Y","Both thermophilic"],
     ["…","___","…","…","…","…","…","…"],
   ];
-  return sec("","Windrow Trial Protocol — composter closing asset")+
+  return sec("","Windrow Trial Protocol · composter closing asset")+
     `<div class="note ok"><b>Purpose:</b> ${esc(w.goal)}</div>`+
     `<div class="grid g2">
       <div class="card"><h4>🧪 Trial design (A/B)</h4><p>${esc(w.design)}</p></div>
@@ -515,7 +515,7 @@ function rWindrow(){
     windrowCopy(w);
 }
 function windrowCopy(w){
-  const txt=`WINDROW TRIAL PROTOCOL — Biochar vs Control
+  const txt=`WINDROW TRIAL PROTOCOL · Biochar vs Control
 Goal: ${w.goal}
 
 DESIGN: ${w.design}
@@ -546,7 +546,7 @@ ${w.guardrails.map(g=>`- ${g}`).join("\n")}`;
 /* --- Collateral --- */
 function rCollateral(){
   return page("collateral",
-    head("Collateral Library","Pitch deck outline, one-pagers, calculator specs, sample workflow, and the objection battlecard — all build-ready.")+
+    head("Collateral Library","Pitch deck outline, one-pagers, calculator specs, sample workflow, and the objection battlecard, all build-ready.")+
     sec("9","Master pitch deck (10–12 slides)")+
     table(["#","Slide","Purpose","Key bullets","CTA"],DATA.deck.map((s,i)=>[
       `<strong>${i+1}</strong>`,`<strong>${esc(s.s)}</strong>`,esc(s.p),
@@ -600,13 +600,13 @@ function rPricing(){
     sec("","Sample deal economics (placeholder)")+
     table(["Line","Value"],p.sampleDeal.map(x=>[`<strong>${esc(x.line)}</strong>`,`<span class="t-num">${esc(x.v)}</span>`]))+
     `<div class="note"><b>Deal evaluation stack:</b> ${p.dealEval.map(d=>badge(d,"badge-muted")).join(" ")}</div>`+
-    sec("","Live calculator — Freight-aware delivered margin")+calcFreight()+
-    sec("","Live calculator — Product + Carbon blended value")+calcBlended()+
-    sec("","Live calculator — Absorbent cost-per-gallon")+calcAbsorbent()
+    sec("","Live calculator · Freight-aware delivered margin")+calcFreight()+
+    sec("","Live calculator · Product + Carbon blended value")+calcBlended()+
+    sec("","Live calculator · Absorbent cost-per-gallon")+calcAbsorbent()
   );
 }
 function field(id,label,val,step="any"){return `<div class="field"><label>${label}</label><input type="number" id="${id}" value="${val}" step="${step}" oninput="recalc()"></div>`;}
-function out(id,label,hero=false){return `<div class="o${hero?" hero":""}"><div class="ol">${label}</div><div class="ov" id="${id}">—</div></div>`;}
+function out(id,label,hero=false){return `<div class="o${hero?" hero":""}"><div class="ol">${label}</div><div class="ov" id="${id}">-</div></div>`;}
 function calcFreight(){
   return `<div class="calc"><div class="calc-grid">
     ${field("f_rev","Product revenue ($)",12000)}
@@ -618,7 +618,7 @@ function calcFreight(){
 }
 function calcBlended(){
   return `<div class="calc">
-    <div class="note" style="margin:0 0 12px"><b>Carbon figures are ESTIMATES</b> — excluded from committed margin until verified.</div>
+    <div class="note" style="margin:0 0 12px"><b>Carbon figures are ESTIMATES</b>, excluded from committed margin until verified.</div>
     <div class="calc-grid">
     ${field("b_tons","Tons",100)}
     ${field("b_pmargin","Product margin / ton ($)",70)}
@@ -637,15 +637,15 @@ function calcAbsorbent(){
     ${out("a_ours","Cost @ our ratio",true)}${out("a_wood","Cost @ wood 2.5:1")}${out("a_save","You save")}
   </div></div>`;
 }
-const money=n=>isFinite(n)?"$"+Math.round(n).toLocaleString():"—";
+const money=n=>isFinite(n)?"$"+Math.round(n).toLocaleString():"-";
 function recalc(){
   // freight
   const rev=+val("f_rev"),cogs=+val("f_cogs"),fr=+val("f_freight");
-  const dm=rev-cogs-fr; set("f_margin",money(dm)); set("f_pct",rev?Math.round(dm/rev*100)+"%":"—");
+  const dm=rev-cogs-fr; set("f_margin",money(dm)); set("f_pct",rev?Math.round(dm/rev*100)+"%":"-");
   // blended
   const tons=+val("b_tons"),pm=+val("b_pmargin"),tco=+val("b_tco2e"),pr=+val("b_price");
   const prod=tons*pm, carbon=tons*tco*pr; set("b_prod",money(prod)); set("b_carbon",money(carbon)); set("b_blended",money(prod+carbon));
-  // absorbent — water ~8.34 lb/gal
+  // absorbent, water ~8.34 lb/gal
   const gal=+val("a_gal"),price=+val("a_price"),ratio=+val("a_ratio");
   const lb=gal*8.34; const ours=(lb/ratio)*price, wood=(lb/2.5)*price;
   set("a_ours",money(ours)); set("a_wood",money(wood)); set("a_save",money(wood-ours));
@@ -660,7 +660,7 @@ function rPlaybook(){
     head("Sales Playbook","Operating principles, qualification, discovery scripts, proof-demo motion, proposal & close, and the fulfillment handoff.")+
     sec("11","Operating principles")+
     `<div class="grid g2">${pb.principles.map(p=>`<div class="card"><p style="color:var(--text)">→ ${esc(p)}</p></div>`).join("")}</div>`+
-    sec("","Qualification — "+esc(pb.qual.framework.split(":")[0]))+
+    sec("","Qualification · "+esc(pb.qual.framework.split(":")[0]))+
     `<div class="note">${esc(pb.qual.framework)}</div>`+
     `<div class="card"><ul>${pb.qual.criteria.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`+
     sec("","Discovery questions by area")+
@@ -676,7 +676,7 @@ function rPlaybook(){
     </div>`+
     sec("","Fulfillment & MRV handoff")+
     `<div class="card"><ul>${pb.handoff.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
-    `<div class="note warn"><b>Capture MRV data at delivery</b> (application, site/GPS, weights) — no data, no carbon credit. This is the link between the product sale and the carbon revenue.</div>`
+    `<div class="note warn"><b>Capture MRV data at delivery</b> (application, site/GPS, weights): no data, no carbon credit. This is the link between the product sale and the carbon revenue.</div>`
   );
 }
 
@@ -700,7 +700,7 @@ function rKpis(){
 function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/both/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
 function rRoadmap(){
   return page("roadmap",
-    head("30 / 60 / 90-Day Launch Roadmap","Every task is a checkbox — click to mark done; it stays done across reloads. Each shows who owns it (Jesse / Victor / Both) and the deliverable.")+
+    head("30 / 60 / 90-Day Launch Roadmap","Every task is a checkbox, click to mark done; it stays done across reloads. Each shows who owns it (Jesse / Victor / Both) and the deliverable.")+
     DATA.roadmap.map((ph,pi)=>{
       const keys=ph.tasks.map((t,ti)=>`roadmap:${pi}:${ti}`);
       const defs=ph.tasks.map(t=>!!t.done);
@@ -729,7 +729,7 @@ function rChecklist(){
       arr.map((x,i)=>{ const done=/\|done$/.test(x); const txt=x.replace(/\|done$/,""); return chk(keys[i],esc(txt),done); }).join("")+`</div>`;
   };
   return page("checklist",
-    head("Final Implementation Checklist","The concrete launch moves — website & product, app build, collateral, lists, first outbound, and the claims to verify. Every item is a checkbox that persists across reloads.")+
+    head("Final Implementation Checklist","The concrete launch moves: website & product, app build, collateral, lists, first outbound, and the claims to verify. Every item is a checkbox that persists across reloads.")+
     `<div class="grid g2">
       ${block("web","① Website & product launch",c.website)}
       ${block("build","② Build in the app",c.build)}
