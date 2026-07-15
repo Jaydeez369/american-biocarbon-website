@@ -323,7 +323,7 @@ function renderProduct(id){
         <div class="proc-copy">
           <div class="kicker">Proof</div><h2 style="font-size:26px;margin:8px 0 12px">Certified and lab-verified</h2>
           <ul class="checks">${PROOF.certs.filter(c=>c.status!=="pending").slice(0,4).map(c=>`<li><b>${raw(c.name)}</b>, ${raw(c.note)}</li>`).join("")}</ul>
-          <p class="form-note">USDA Organic certification pending. Verify current certification language before publishing.</p>
+          <p class="form-note">USDA Organic certification in progress.</p>
         </div>
         <img class="procimg" src="assets/industry/${id}.jpg?v=v2" alt="${raw(p.name)}" loading="lazy">
       </div>

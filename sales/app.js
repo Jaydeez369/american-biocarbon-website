@@ -188,7 +188,7 @@ function punchBlock(pl,idx){
   const st=checkStats(keys, pl.items.map(()=>false));
   const pct=st.total?Math.round(st.done/st.total*100):0;
   const rows=pl.items.map((it,i)=>chk(keys[i],esc(it),false)).join("");
-  const rec=pl.recurring?badge("daily","badge-blue"):"";
+  const rec=pl.recurring?badge("daily","info"):"";
   const link=pl.link?`<button class="tlink" onclick="tGo('${pl.link.view}','')">View →</button>`:"";
   const open=idx===0?" open":""; const openh=idx===0?" open-h":"";
   return `<div class="punch">
@@ -367,7 +367,7 @@ function rSegments(){
   const cards=DATA.segments.map(s=>segCard(s)).join("");
   return page("segments",
     head("ICP Definition & Segmentation","Tight profiles for every buyer type, ranked by Month-1 speed-to-LOI (carbon is parked to days 61–90, shown as a column, excluded from the beachhead score).")+
-    `<div class="note ok"><b>Recommended beachhead (top 3):</b> ${top3.map(t=>badge(t,"badge-green")).join(" ")}</div>`+
+    `<div class="note ok"><b>Recommended beachhead (top 3):</b> ${top3.map(t=>badge(t,"positive")).join(" ")}</div>`+
     sec("3","Segment ranking")+
     table(["Segment","Group","Speed","Recurring","Margin","Carbon","Strategic","Freight","Composite"],
       ranked.map(r=>[`<strong>${esc(r.s.name)}</strong>`,esc(r.s.group),
@@ -379,7 +379,7 @@ function rSegments(){
 function rankbar(n){return `<div class="rank-bar"><span style="width:${n*20}%"></span></div>`;}
 function segCard(s){
   return `<div class="card seg-card" data-group="${esc(s.group)}">
-    <h4>${esc(s.name)} ${s.tag?badge(s.tag,s.tag.includes("#1")?"badge-green":s.tag.includes("Monetization")?"badge-gold":"badge-blue"):""}</h4>
+    <h4>${esc(s.name)} ${s.tag?badge(s.tag,s.tag.includes("#1")?"positive":s.tag.includes("Monetization")?"warning":"info"):""}</h4>
     <p style="margin-bottom:8px">${esc(s.summary)}</p>
     ${s.coreProblem?`<div class="note warn" style="margin:8px 0"><b>Core problem we solve:</b> ${esc(s.coreProblem)}</div>`:""}
     ${s.valueProp?`<div class="note ok" style="margin:8px 0"><b>Our value:</b> ${esc(s.valueProp)}</div>`:""}
@@ -396,8 +396,8 @@ function segCard(s){
       <div><b style="color:var(--text)">Order:</b> ${esc(s.order)} · <b style="color:var(--text)">Cycle:</b> ${esc(s.cycle)}</div>
       <div><b style="color:var(--text)">First offer:</b> ${esc(s.offer)}</div>
       <div><b style="color:var(--text)">Channel:</b> ${esc(s.channel)}</div>
-      <div><b style="color:var(--text)">Proof to lead with:</b> ${s.proof.map(p=>badge(p,"badge-blue")).join(" ")}</div>
-      <div style="margin-top:4px">${s.tags.map(t=>`<span class="badge badge-muted" style="font-size:10px">${esc(t)}</span>`).join(" ")}</div>
+      <div><b style="color:var(--text)">Proof to lead with:</b> ${s.proof.map(p=>badge(p,"info")).join(" ")}</div>
+      <div style="margin-top:4px">${s.tags.map(t=>`<span class="badge badge--neutral" style="font-size:10px">${esc(t)}</span>`).join(" ")}</div>
     </div>
   </div>`;
 }
@@ -412,7 +412,7 @@ function rPersonas(){
     head("Buyer Personas","What each buyer cares about, fears, and needs, with the discovery questions, opener, and CTA that land.")+
     `<div class="grid g2">${DATA.personas.map(p=>`
       <div class="card pad-lg">
-        <h4>${esc(p.name)} ${badge(p.seg,"badge-blue")}</h4>
+        <h4>${esc(p.name)} ${badge(p.seg,"info")}</h4>
         <div style="display:grid;gap:6px;font-size:12.5px;margin-top:6px">
           <div><b style="color:var(--green-bright)">Cares about:</b> ${esc(p.cares)}</div>
           <div><b style="color:var(--red-soft)">Fears:</b> ${esc(p.fears)}</div>
@@ -436,7 +436,7 @@ function rMessaging(){
   const trackBlock=t=>`<div class="card pad-lg" style="border-top:3px solid ${accent(t.id)};margin-bottom:16px">
     <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
       <h3 style="margin:0;color:${accent(t.id)}">${esc(t.product)}</h3>
-      <span class="badge badge-muted">${esc(t.audience)}</span>
+      <span class="badge badge--neutral">${esc(t.audience)}</span>
     </div>
     <div class="note" style="margin:10px 0"><b>Avatar:</b> ${esc(t.avatar)}</div>
     <p style="color:var(--text);font-size:13.5px;line-height:1.6"><b style="color:${accent(t.id)}">Positioning:</b> ${esc(t.positioning)}</p>
@@ -471,7 +471,7 @@ function rBiochar(){
   const avatarCard=a=>`<div class="card pad-lg" style="border-top:3px solid var(--green-bright);margin-bottom:14px">
     <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
       <h4 style="margin:0;color:var(--green-bright)">${esc(a.name)}</h4>
-      <span class="badge badge-muted">${esc(a.who)}</span>
+      <span class="badge badge--neutral">${esc(a.who)}</span>
     </div>
     <div style="font-size:12.8px;display:grid;gap:5px;margin-top:8px">
       <div><b style="color:var(--red-soft)">Pain:</b> ${esc(a.pain)}</div>
@@ -510,7 +510,7 @@ function rMarket(){
       `<strong>${esc(x.m)}</strong>`,esc(x.tam),esc(x.sam),`<span style="color:var(--green-bright)">${esc(x.som)}</span>`,esc(x.note)]))+
     (mk.modeVerdict?sec("","Transport mode verdict by product")+
       table(["Product","Best truck radius","Rail verdict","Primary reason"],mk.modeVerdict.map(m=>[
-        `<strong>${esc(m.p)}</strong>`,`<span class="t-num">${esc(m.truck)}</span>`,badge(m.rail,/Strong|Material/.test(m.rail)?"badge-green":/Marginal|Amplifies/.test(m.rail)?"badge-gold":"badge-muted"),esc(m.why)])):"")+
+        `<strong>${esc(m.p)}</strong>`,`<span class="t-num">${esc(m.truck)}</span>`,badge(m.rail,/Strong|Material/.test(m.rail)?"positive":/Marginal|Amplifies/.test(m.rail)?"warning":"neutral"),esc(m.why)])):"")+
     (mk.transport?sec("","Transport & rail model")+
       `<div class="card"><ul>${mk.transport.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`:"")+
     (mk.priceRefs?sec("","Reference prices used")+
@@ -561,7 +561,7 @@ function rPipeline(){
     <div class="kcol"><div class="kcol-h"><strong>${esc(s.s)}</strong><span class="prob">${s.prob}%</span></div>
     <div class="kcol-b">${esc(s.def)}
       <div class="crit"><b>Exit:</b> ${esc(s.exit)}</div>
-      <div class="crit"><b>Fields:</b> ${s.fields.map(f=>badge(f,"badge-muted")).join(" ")}</div>
+      <div class="crit"><b>Fields:</b> ${s.fields.map(f=>badge(f,"neutral")).join(" ")}</div>
       <div class="crit"><b>Next:</b> ${esc(s.next)}</div>
       <div class="crit" style="color:var(--red-soft)"><b>Don't advance:</b> ${esc(s.noAdv)}</div>
     </div></div>`).join("")}</div>`;
@@ -744,7 +744,7 @@ function rCollateral(){
     `<div class="grid g2">${DATA.calculators.map(c=>`<div class="card"><h4>${esc(c.name)}</h4>
       <b style="font-size:11.5px;color:var(--gold-soft)">Inputs</b><ul>${c.inputs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
       <div style="font-size:12px;margin-top:6px"><b style="color:var(--text)">Formula:</b> <span style="font-family:var(--mono);color:var(--text-dim)">${esc(c.formula)}</span></div>
-      <div style="font-size:12px;margin-top:4px"><b style="color:var(--text)">Saves to CRM:</b> ${c.saves.map(s=>badge(s,"badge-muted")).join(" ")}</div>
+      <div style="font-size:12px;margin-top:4px"><b style="color:var(--text)">Saves to CRM:</b> ${c.saves.map(s=>badge(s,"neutral")).join(" ")}</div>
     </div>`).join("")}</div>`+
     `<div class="note">Two of these run live in the <b>Pricing & Economics</b> tab.</div>`+
     sec("","Sample request workflow")+
@@ -786,7 +786,7 @@ function rPricing(){
     table(["Product","Unit","Note"],p.tiers.map(x=>[`<strong>${esc(x.p)}</strong>`,`<span class="t-num">${esc(x.unit)}</span>`,esc(x.note)]))+
     sec("","Sample deal economics (placeholder)")+
     table(["Line","Value"],p.sampleDeal.map(x=>[`<strong>${esc(x.line)}</strong>`,`<span class="t-num">${esc(x.v)}</span>`]))+
-    `<div class="note"><b>Deal evaluation stack:</b> ${p.dealEval.map(d=>badge(d,"badge-muted")).join(" ")}</div>`+
+    `<div class="note"><b>Deal evaluation stack:</b> ${p.dealEval.map(d=>badge(d,"neutral")).join(" ")}</div>`+
     sec("","Live calculator · Freight-aware delivered margin")+calcFreight()+
     sec("","Live calculator · Product + Carbon blended value")+calcBlended()+
     sec("","Live calculator · Absorbent cost-per-gallon")+calcAbsorbent()
@@ -874,8 +874,8 @@ function rKpis(){
   return page("kpis",
     head("Metrics & KPIs","Leading and lagging indicators, conversion funnel, pipeline coverage, and dashboard-card specs for your app.")+
     sec("12","Indicators")+
-    `<div class="grid g2">${list("Leading indicators",k.leading,"badge-green")}${list("Lagging indicators",k.lagging,"badge-gold")}</div>`+
-    `<div class="grid g2" style="margin-top:14px">${list("Conversion metrics",k.conversion,"badge-blue")}${list("Pipeline coverage",k.coverage,"badge-muted")}</div>`+
+    `<div class="grid g2">${list("Leading indicators",k.leading,"positive")}${list("Lagging indicators",k.lagging,"warning")}</div>`+
+    `<div class="grid g2" style="margin-top:14px">${list("Conversion metrics",k.conversion,"info")}${list("Pipeline coverage",k.coverage,"neutral")}</div>`+
     sec("","Dashboard card specs")+
     table(["Card","Definition","Formula","Filters","Source","Warn threshold","Owner"],k.cards.map(c=>[
       `<strong>${esc(c.c)}</strong>`,esc(c.def),`<span class="t-num">${esc(c.formula)}</span>`,esc(c.filter),esc(c.src),

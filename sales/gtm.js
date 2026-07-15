@@ -149,7 +149,7 @@
     const seqs=GTM.sequences;
     const filters=`<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="gtmSeqFilter(this,'all')">All</span>${seqs.map((o,i)=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="gtmSeqFilter(this,'${i}')">${esc(o.tag)}</span>`).join("")}</div>`;
     const blocks=seqs.map((o,i)=>`<div class="gtm-seq" data-idx="${i}">
-      <h3 class="sub">${esc(o.seg)} · ${esc(o.persona)} ${badge(o.tag,"badge-blue")}</h3>
+      <h3 class="sub">${esc(o.seg)} · ${esc(o.persona)} ${badge(o.tag,"info")}</h3>
       ${o.steps.map(st=>script(st.t,st.b)).join("")}
     </div>`).join("");
     return page("gtm-sequences",
@@ -209,7 +209,7 @@
   function rLongTerm(){
     const L=GTM.longTerm;
     const card=c=>`<div class="card pad-lg">
-      <h4>${esc(c.name)} ${badge(c.horizon,"badge-blue")} ${badge(c.cost,"badge-muted")}</h4>
+      <h4>${esc(c.name)} ${badge(c.horizon,"info")} ${badge(c.cost,"neutral")}</h4>
       <div class="note ok" style="margin:8px 0"><b>Why:</b> ${esc(c.why)}</div>
       <div class="grid g2" style="gap:8px">
         <div><b style="font-size:11px;color:var(--gold-soft)">Plays</b>${ul(c.plays)}</div>
@@ -256,7 +256,7 @@
   /* ---- 9. Social Calendar ---- */
   function rSocial(){
     const s=GTM.social;
-    const rows=s.posts.map(p=>[`<strong class="t-num">D${p.d}</strong>`,badge(p.pl,"badge-blue"),`<strong>${esc(p.topic)}</strong>`,
+    const rows=s.posts.map(p=>[`<strong class="t-num">D${p.d}</strong>`,badge(p.pl,"info"),`<strong>${esc(p.topic)}</strong>`,
       `<em>${esc(p.hook)}</em>`,esc(p.body),esc(p.vis),`<span style="color:var(--green-bright)">${esc(p.cta)}</span>`,pill(p.icp)]);
     return page("gtm-social",
       head("30-Day Social & Content Calendar","Credibility over viral fluff. Every post has a hook, body, visual, CTA, and the ICP it serves, plus five product-demo video scripts.")+
@@ -273,7 +273,7 @@
       head("Campaign ↔ Landing Page Coordination","Every campaign points to the right page with the right CTA, form, sequence, tag, and sales next step. No message-market mismatches.")+
       table(["ICP","Campaign","Outbound CTA","Landing page","Required section","Form","Sequence","Tag","Sales next step"],
         m.map(r=>[`<strong>${esc(r.icp)}</strong>`,esc(r.cmp),`<span style="color:var(--green-bright)">${esc(r.cta)}</span>`,
-          `<span class="t-num">${esc(r.lp)}</span>`,esc(r.section),esc(r.form),badge(r.seq,"badge-blue"),badge(r.tag,"badge-muted"),esc(r.next)]))+
+          `<span class="t-num">${esc(r.lp)}</span>`,esc(r.section),esc(r.form),badge(r.seq,"info"),badge(r.tag,"category"),esc(r.next)]))+
       sec("","Coordination rules (guardrails)")+
       `<div class="card">${GTM.landingRules.map(r=>`<div class="note warn" style="margin:6px 0">${esc(r)}</div>`).join("")}</div>`
     );
