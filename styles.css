@@ -468,6 +468,26 @@ tbody td:first-child{font-weight:650;color:var(--ink)}
 .phead .media img{width:100%;height:100%;object-fit:cover;object-position:50% 55%}
 /* lower-center framing default for content photos site-wide */
 .split .media img,.pdp-main img,.pdp-thumb img,.card .media img,.offer .media img{object-position:50% 55%}
+/* Product BAG renders: show the whole bag with breathing room, never crop.
+   Scoped to *-bag images so photographic shots keep their full-bleed cover framing. */
+.card .thumb img[src*="-bag."],
+.pcard .thumb img[src*="-bag."],
+.buycard .thumb img[src*="-bag."],
+.pdp-slide img[src*="-bag."],
+.split .media img[src*="-bag."],
+.phead .media img[src*="-bag."],
+.media img[src*="-bag."]{
+  object-fit:contain;
+  object-position:center;
+  padding:8%;
+  background:var(--white);
+}
+.pdp-thumb img[src*="-bag."]{
+  object-fit:contain;
+  object-position:center;
+  padding:10%;
+  background:var(--white);
+}
 
 /* ---------- Document library (gated) ---------- */
 .doclist{display:flex;flex-direction:column;gap:8px}
