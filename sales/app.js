@@ -948,6 +948,10 @@ document.addEventListener("keydown",e=>{
 buildNav();
 render();
 $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
+/* Preserve the original hash: plugins (gtm.js) register their own NAV views
+   after this boot runs, so a direct visit to e.g. #gtm-calling must be
+   remembered here before we fall back to "tasks". */
 const start=(location.hash||"#tasks").slice(1);
+window.__bootStart=start;
 go(NAV.flatMap(g=>g.items).some(i=>i.id===start)?start:"tasks");
 recalc();

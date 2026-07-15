@@ -388,7 +388,8 @@
   }
   $("#content").insertAdjacentHTML("beforeend",html);
 
-  // re-apply routing so deep-links to #gtm-* work
-  const start=(location.hash||"").slice(1);
+  // re-apply routing so deep-links to #gtm-* work. Use the original boot hash
+  // (app.js may have already fallen back to "tasks" for an unknown route).
+  const start=window.__bootStart||(location.hash||"").slice(1);
   if (NAV.flatMap(g=>g.items).some(i=>i.id===start)) go(start);
 })();
