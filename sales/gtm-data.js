@@ -388,8 +388,8 @@ sequences:[
 
 /* ---------------------------------------------------------- 7. CALLING PLAN */
 calling:{
-  order:["Accounts that opened/clicked an email (warmest)","Accounts where you already found the sourcing contact","Top-30 highest-priority O&G/remediation accounts","New O&G accounts (fresh dials)","ENV/landfill layer","Ag/distributor layer"],
-  when:["O&G/industrial ops: 7:30–9:00am and 4:00–5:30pm local (before/after field work)","Procurement: 9:30–11:30am Tue–Thu","Avoid Monday AM and Friday PM","Call within 1 business day of any positive email reply"],
+  order:["Accounts that opened/clicked an email (warmest)","Accounts where you already found the decision-maker","Top biochar accounts — ag distributors, blenders, composters, growers (PRIMARY)","New biochar accounts (fresh dials)","Absorbent EHS/spill/oilfield layer (secondary track)","Landfill / public-works layer"],
+  when:["Ag distributors / blenders / composters: 8:00–10:00am and 1:00–3:00pm local (before the yard gets busy)","Growers / farm ops: early AM or after 4:00pm","Absorbent industrial ops: 7:30–9:00am and 4:00–5:30pm local (before/after field work)","Procurement: 9:30–11:30am Tue–Thu","Avoid Monday AM and Friday PM; call within 1 business day of any positive email reply"],
   volume:["Week 1: research calls only (find the sourcing contact)","Week 2: 20–30 dials/day","Week 3: 30–50 dials/day","Week 4+: 40–55 dials/day, prioritizing email-openers and sample follow-ups"],
   vmStrategy:"Leave a VM on the 1st and 3rd attempt only; keep under 20 seconds; always pair with an email same day ('just left you a VM'). Never leave a VM every call — it reads desperate.",
   scripts:[

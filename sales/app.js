@@ -490,7 +490,7 @@ function rOutreach(){
       <div class="note"><b>Nurture:</b> ${esc(o.nurture)}</div>
     </div>`).join("");
   return page("outreach",
-    head("Outreach Engine","Human, direct, credible sequences per segment — email, call, voicemail, LinkedIn, breakup, and nurture. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
+    head("Outreach Engine","Human, direct, credible sequences per segment — email, call, voicemail, LinkedIn, breakup, and nurture. BIOCHAR segments (Soil Blenders, Ag Distributors) lead; absorbent runs as the secondary track. The cold ask is always a free sample — a winning biochar trial converts to an order against the 80 MT. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
     filters+blocks
   );
 }
