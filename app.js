@@ -275,7 +275,7 @@ function renderHome(){
 
   <section class="block"><div class="wrap">
     <div class="kicker">Applications</div><h2 style="margin-top:6px">Where it's used</h2>
-    <div style="margin-top:26px">${ucGrid(H.useCases)}</div>
+    <div style="margin-top:26px">${H.fieldApps?appCards(H.fieldApps):ucGrid(H.useCases)}</div>
   </div></section>
 
   ${ctaBand(H.finalCta)}`;
@@ -1005,16 +1005,10 @@ function renderEnvironmentalRemediation(){
     <div class="media"><img src="${p.image || ASSETS.pelletsPhoto}" alt="${raw(p.h1)}"></div>
   </div></div></section>
 
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="eyebrow-line"></div><h2 style="margin-top:6px">The pain points you live with</h2>
-    <p class="lead" style="margin-bottom:18px">Site managers face real constraints. Here's what we hear, and how we solve it.</p>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:22px">
-      ${p.painPoints.map(pt=>`<div style="padding:18px;background:white;border-radius:4px">
-        <b style="display:block;margin-bottom:8px;font-size:16px">${raw(pt.title)}</b>
-        <p style="font-size:14px;line-height:1.5;color:#666">${raw(pt.desc)}</p>
-      </div>`).join("")}
-    </div>
-  </div></section>
+  ${p.fieldApps?`<section class="block" style="background:var(--paper-2)"><div class="wrap">
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
+  </div></section>`:""}
 
   <section class="block"><div class="wrap">
     <div class="eyebrow-line"></div><h2>Why American BioCarbon wins on remediation</h2>
