@@ -55,15 +55,24 @@ function initHeroCarousel(){
   const slides = [...car.querySelectorAll(".hslide")];
   const dots = [...car.querySelectorAll(".hdot")];
   if(slides.length < 2) return;
+  const toggle = document.getElementById("heroToggle");
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let i = 0;
   const go = n => { i = (n + slides.length) % slides.length;
-    slides.forEach((s,k)=>{ const on = k===i; s.classList.toggle("active", on); s.setAttribute("aria-hidden", on?"false":"true"); });
+    slides.forEach((s,k)=>{ const on = k===i; s.classList.toggle("active", on); s.setAttribute("aria-hidden", on?"false":"true");
+      // inert keeps keyboard focus/AT out of offscreen slides (their CTAs are not tabbable)
+      if(on) s.removeAttribute("inert"); else s.setAttribute("inert",""); });
     dots.forEach((d,k)=>{ d.classList.toggle("active", k===i); d.setAttribute("aria-selected", k===i?"true":"false"); }); };
-  const stop = () => { if(_heroTimer){ clearInterval(_heroTimer); _heroTimer = null; } car.classList.add("paused"); };
-  const restart = () => { if(_heroTimer) clearInterval(_heroTimer); _heroTimer = setInterval(()=>go(i+1), 7000); };
+  const setToggle = paused => { if(!toggle) return; toggle.setAttribute("aria-pressed", paused?"true":"false");
+    toggle.setAttribute("aria-label", paused?"Play slideshow":"Pause slideshow");
+    toggle.querySelector(".hero-toggle-ic").textContent = paused ? "►" : "❚❚"; };
+  const stop = () => { if(_heroTimer){ clearInterval(_heroTimer); _heroTimer = null; } car.classList.add("paused"); setToggle(true); };
+  const play = () => { if(_heroTimer) clearInterval(_heroTimer); car.classList.remove("paused"); _heroTimer = setInterval(()=>go(i+1), 7000); setToggle(false); };
   // Clicking a dot selects that slide and pauses the carousel on it indefinitely.
   dots.forEach(d => d.addEventListener("click", ()=>{ go(+d.dataset.i); stop(); }));
-  restart();
+  if(toggle) toggle.addEventListener("click", ()=>{ _heroTimer ? stop() : play(); });
+  // Respect reduced-motion: do not auto-advance; leave user in control via dots/toggle.
+  if(reduce){ car.classList.add("paused"); setToggle(true); } else { play(); }
 }
 
 /* ---- shared components ---- */
@@ -178,21 +187,21 @@ function renderChrome(){
     <div>
       <img class="logo" src="${ASSETS.logoRev}" alt="American BioCarbon">
       <p class="addr">${raw(BRAND.legal)}<br>${raw(BRAND.address)}<br>${raw(BRAND.location)}</p>
-      <div class="foot-cta"><a class="btn btn-primary btn-sm" href="#/request-quote">Request quote</a><a class="cta-link-light" href="#/request-quote">Talk to us about volume</a></div>
+      <div class="foot-cta"><a class="btn btn-primary btn-sm" href="/request-quote">Request quote</a><a class="cta-link-light" href="/request-quote">Talk to us about volume</a></div>
     </div>
     <div><h4>Products</h4>
-      <a href="#/product/absorbent-pellets">Absorbent Pellets</a><a href="#/product/absorbent-crumble">Absorbent Crumble</a>
-      <a href="#/product/absorbent-fiber">Multipurpose Fiber</a><a href="#/product/agricultural-biochar">100% Biochar</a>
-      <a href="#/product/biochar-infused-soil">Biochar-Infused Soil</a>
-      <a href="#/product/carbon-removal">Carbon Removal</a></div>
+      <a href="/product/absorbent-pellets">Absorbent Pellets</a><a href="/product/absorbent-crumble">Absorbent Crumble</a>
+      <a href="/product/absorbent-fiber">Multipurpose Fiber</a><a href="/product/agricultural-biochar">100% Biochar</a>
+      <a href="/product/biochar-infused-soil">Biochar-Infused Soil</a>
+      <a href="/product/carbon-removal">Carbon Removal</a></div>
     <div><h4>Industries</h4>
-      <a href="#/industry/oil-gas">Oil &amp; Gas</a><a href="#/industry/industrial-remediation">Industrial Remediation</a>
-      <a href="#/industry/environmental-remediation">Environmental Remediation</a><a href="#/industry/spill-response">Spill Response</a><a href="#/industry/landfill-leachate">Landfill Leachate</a>
-      <a href="#/industry/animal-bedding">Animal Bedding</a><a href="#/industry/distributors">Distributors</a><a href="#/industry/soil-blenders">Soil Blenders &amp; Compost</a></div>
+      <a href="/industry/oil-gas">Oil &amp; Gas</a><a href="/industry/industrial-remediation">Industrial Remediation</a>
+      <a href="/environmental-remediation-solutions">Environmental Remediation</a><a href="/industry/spill-response">Spill Response</a><a href="/industry/landfill-leachate">Landfill Leachate</a>
+      <a href="/industry/animal-bedding">Animal Bedding</a><a href="/distributors-resellers-industries">Distributors</a><a href="/industry/soil-blenders">Soil Blenders &amp; Compost</a></div>
     <div><h4>Resources</h4>
-      <a href="#/technical">Certifications &amp; Technical Data</a><a href="#/compare">Compare vs Wood Pellets</a>
-      <a href="#/about">About</a><a href="#/contact">Contact</a>
-      <a href="#/request-sample">Get a free sample</a><a href="#/request-quote">Request Quote</a></div>
+      <a href="/technical">Certifications &amp; Technical Data</a><a href="/compare">Compare vs Wood Pellets</a>
+      <a href="/about">About</a><a href="/contact">Contact</a>
+      <a href="/request-sample">Get a free sample</a><a href="/request-quote">Request Quote</a></div>
   </div>
   <div class="legal"><span>© ${new Date().getFullYear()} ${raw(BRAND.name)}. All rights reserved.</span></div>`;
   const burger = $("#burger");
@@ -217,9 +226,9 @@ function renderHome(){
     const isLive = p.avail==="live";
     // Homepage showcase sections 3, 4 & 5 (index 2, 3 & 4) use "Stay informed" instead of a free-sample CTA.
     const notifyPrimary = i===2 || i===3 || i===4;
-    const primary = isLive ? {label:"Get a free sample",href:p.id==="agricultural-biochar"?"#/product/agricultural-biochar":p.id==="absorbent-pellets"?"#/shop/"+p.id:"#/request-sample?product="+p.id}
-      : notifyPrimary ? {label:"Stay informed",href:"#/request-sample?preorder=1&product="+p.id}
-      : {label:"Get a free sample",href:"#/request-sample?preorder=1&product="+p.id};
+    const primary = isLive ? {label:"Get a free sample",href:p.id==="agricultural-biochar"?"/product/agricultural-biochar":p.id==="absorbent-pellets"?"/shop/"+p.id:"/request-sample?product="+p.id}
+      : notifyPrimary ? {label:"Stay informed",href:"/request-sample?preorder=1&product="+p.id}
+      : {label:"Get a free sample",href:"/request-sample?preorder=1&product="+p.id};
     const secondary = null;
     return `
   <section class="block" style="background:${i%2?'var(--paper-2)':'var(--white)'}"><div class="wrap"><div class="split${i%2?' rev':''} bleed">
@@ -238,7 +247,7 @@ function renderHome(){
   return `
   <section class="hero" id="heroCarousel" aria-roledescription="carousel" aria-label="Product highlights">
     ${HS.map((s,i)=>{ const Ht = i===0?"h1":"h2"; return `
-      <div class="hslide${i===0?" active":""}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${HS.length}: ${raw(s.label)}" aria-hidden="${i===0?"false":"true"}">
+      <div class="hslide${i===0?" active":""}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${HS.length}: ${raw(s.label)}" aria-hidden="${i===0?"false":"true"}" ${i===0?"":"inert"}>
         <img class="hslide-img" src="${s.img}" alt="${raw(s.label)}" style="object-position:${s.pos||'50% 55%'};--z:${s.zoom||1.05};--o:${s.origin||'50% 55%'}" ${i?'loading="lazy"':'fetchpriority="high"'}>
         <div class="hslide-scrim"></div>
         <div class="hslide-content">
@@ -250,7 +259,7 @@ function renderHome(){
           </div>
         </div>
       </div>`; }).join("")}
-    <div class="hnav" role="tablist" aria-label="Choose product slide"><div class="hnav-inner wrap">${HS.map((s,i)=>`<button class="hdot${i===0?" active":""}" role="tab" aria-selected="${i===0?"true":"false"}" data-i="${i}"><span class="hdot-track"><span class="hdot-fill"></span></span><span class="hdot-row"><span class="hdot-num">${String(i+1).padStart(2,"0")}</span><span class="hdot-label">${raw(s.label)}</span></span></button>`).join("")}</div></div>
+    <div class="hnav"><div class="hnav-inner wrap"><div class="hnav-tabs" role="tablist" aria-label="Choose product slide">${HS.map((s,i)=>`<button class="hdot${i===0?" active":""}" role="tab" aria-selected="${i===0?"true":"false"}" data-i="${i}"><span class="hdot-track"><span class="hdot-fill"></span></span><span class="hdot-row"><span class="hdot-num">${String(i+1).padStart(2,"0")}</span><span class="hdot-label">${raw(s.label)}</span></span></button>`).join("")}</div><button class="hero-toggle" id="heroToggle" type="button" aria-label="Pause slideshow" aria-pressed="false"><span class="hero-toggle-ic" aria-hidden="true">❚❚</span></button></div></div>
   </section>
   ${proofBand()}
 
@@ -318,7 +327,7 @@ function renderProduct(id){
   return `
   <section class="phead"><div class="wrap"><div class="grid">
     <div>
-      <div class="crumb"><a href="#/">Home</a> / ${raw(p.name)}</div>
+      ${crumbs([{label:"Home",href:"/"},{label:p.name}])}
       <h1>${raw(p.h1)}</h1>
       <p class="sub">${raw(p.sub)}</p>
       <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}${p.tertiary?btn(p.tertiary,"btn-ghost-light"):""}</div>
@@ -359,7 +368,7 @@ function renderIndustry(id){
   return `
   <section class="phead"><div class="wrap"><div class="grid">
     <div>
-      <div class="crumb"><a href="#/">Home</a> / Industries / ${raw(n.name)}</div>
+      ${crumbs([{label:"Home",href:"/"},{label:"Industries"},{label:n.name}])}
       <h1>${raw(n.h1)}</h1>
       <p class="sub">${raw(n.sub)}</p>
       <div class="btn-row">${btn(n.primary)}${btn(n.secondary,"btn-ghost-light")}</div>
@@ -383,7 +392,7 @@ function renderIndustry(id){
       <div class="proc-copy">
         <div class="kicker">Procurement</div><h2 style="font-size:26px;margin:8px 0 14px">Built for how you buy</h2>
         <ul class="checks">${n.procurement.map(x=>`<li>${raw(x)}</li>`).join("")}</ul>
-        ${prods.length?`<div class="btn-row" style="margin-top:18px">${prods.map(p=>`<a class="btn btn-ghost btn-sm" href="#/product/${prodId(p)}">${raw(p.name)} →</a>`).join("")}</div>`:""}
+        ${prods.length?`<div class="btn-row" style="margin-top:18px">${prods.map(p=>`<a class="btn btn-ghost btn-sm" href="/product/${prodId(p)}">${raw(p.name)} →</a>`).join("")}</div>`:""}
       </div>
       <img class="procimg" src="assets/industry/${id}.jpg?v=v2" alt="${raw(n.name)} application" loading="lazy">
     </div>
@@ -404,9 +413,9 @@ function industryTech(id){
     <p style="color:#c3cbdc;max-width:640px">${raw(TECH.gateNote)}</p>
     <div class="doclist" style="margin-top:22px">
       ${docs.map(d=>`<div class="docrow dark"><div><b>${raw(d.name)}</b><span>${raw(d.desc)}</span></div>
-        <a class="btn btn-primary btn-sm" href="#/request-docs?ind=${id}">Request</a></div>`).join("")}
+        <a class="btn btn-primary btn-sm" href="/request-docs?ind=${id}" aria-label="Request ${esc(d.name)}">Request</a></div>`).join("")}
       ${studies.map(s=>`<div class="docrow dark"><div><b>${raw(s.title)}</b><span>${raw(s.venue)}, ${raw(s.finding)}</span></div>
-        <a class="btn btn-ghost-light btn-sm" href="#/request-docs?ind=${id}">Request</a></div>`).join("")}
+        <a class="btn btn-ghost-light btn-sm" href="/request-docs?ind=${id}" aria-label="Request ${esc(s.title)}">Request</a></div>`).join("")}
     </div>
     <div class="btn-row" style="margin-top:22px">${btn(CTA.docs,"btn-primary")}</div>
   </div></section>`;
@@ -418,7 +427,7 @@ function renderForm(kind, qs){
   setMeta({title:f.name+" | American BioCarbon", desc:f.sub, slug:"/"+kind});
   return `
   <section class="phead"><div class="wrap"><div style="max-width:760px">
-    <div class="crumb"><a href="#/">Home</a> / ${raw(f.name)}</div>
+    ${crumbs([{label:"Home",href:"/"},{label:f.name}])}
     <h1>${raw(f.h)}</h1><p class="sub">${raw(f.sub)}</p>
   </div></div></section>
   <section class="block"><div class="wrap"><div class="formwrap">
@@ -476,16 +485,16 @@ function fieldHTML(fl){
 /* ================= COMPARE ================= */
 function buyCard(p){
   const isLive = p.avail==="live";
-  const docLink = id => `<a href="#/request-docs?doc=${id}&product=${p.id}">${id==="sds"?"SDS":"Spec sheet"}</a>`;
+  const docLink = id => `<a href="/request-docs?doc=${id}&product=${p.id}">${id==="sds"?"SDS":"Spec sheet"}</a>`;
   const docs = isLive
     ? `<div class="buy-docs">${(p.docIds||[]).map(docLink).join("<span>·</span>")}</div>`
     : `<div class="buy-docs muted">Spec sheet coming</div>`;
   const primary = isLive
-    ? `<a class="btn btn-primary btn-sm" href="${(p.id==="absorbent-pellets"||p.id==="agricultural-biochar")?"#/shop/"+p.id:"#/request-sample?product="+p.id}">Get a free sample</a>`
-    : `<a class="btn btn-primary btn-sm" href="#/request-sample?preorder=1&product=${p.id}">Get a free sample</a>`;
+    ? `<a class="btn btn-primary btn-sm" href="${(p.id==="absorbent-pellets"||p.id==="agricultural-biochar")?"/shop/"+p.id:"/request-sample?product="+p.id}">Get a free sample</a>`
+    : `<a class="btn btn-primary btn-sm" href="/request-sample?preorder=1&product=${p.id}">Get a free sample</a>`;
   const cta = isLive
     ? `<div class="btn-row">${primary}</div>
-       <a class="notify" href="#/request-quote?product=${p.id}">Talk to us about volume →</a>`
+       <a class="notify" href="/request-quote?product=${p.id}">Talk to us about volume →</a>`
     : `<div class="btn-row">${primary}</div>`;
   return `<div class="card pcard buycard${isLive?"":" is-q4"}" data-cat="${raw(p.cat||"")}">
     <div class="thumb"><img src="${p.img}" alt="${raw(p.name)}" loading="lazy">
@@ -567,34 +576,6 @@ function kraftBag(p){
     </div>
   </div>`;
 }
-// Flat truckload-leaving-facility scene, tinted to a product accent (aqua / amber / soil).
-function truckScene(accent, label){
-  const c = { aqua:{a:"#17b3a3",b:"#0c7d72",ink:"#06403a"}, amber:{a:"#f0a63a",b:"#d0781a",ink:"#7a3f06"}, soil:{a:"#8a9a5b",b:"#5f6f39",ink:"#333d1e"} }[accent] || {a:"#4d6ba3",b:"#24478a",ink:"#12264d"};
-  return `<div class="scene"><svg viewBox="0 0 600 440" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${raw(label||"Truckloads from our facility")}">
-    <defs><linearGradient id="g-${accent}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${c.a}"/><stop offset="1" stop-color="${c.b}"/></linearGradient></defs>
-    <rect width="600" height="440" fill="url(#g-${accent})"/>
-    <g opacity=".10" fill="#fff"><circle cx="80" cy="70" r="46"/><circle cx="520" cy="60" r="30"/></g>
-    <!-- facility -->
-    <g fill="#fff" opacity=".92">
-      <rect x="60" y="150" width="150" height="150" rx="4"/>
-      <rect x="92" y="110" width="26" height="45"/><rect x="150" y="96" width="26" height="60"/>
-      <polygon points="60,150 135,120 210,150"/>
-    </g>
-    <g fill="${c.ink}" opacity=".28"><rect x="80" y="185" width="30" height="30"/><rect x="125" y="185" width="30" height="30"/><rect x="170" y="185" width="26" height="30"/></g>
-    <!-- road -->
-    <rect x="0" y="330" width="600" height="70" fill="${c.ink}" opacity=".25"/>
-    <g stroke="#fff" stroke-width="5" stroke-dasharray="34 26" opacity=".6"><line x1="0" y1="365" x2="600" y2="365"/></g>
-    <!-- truck -->
-    <g>
-      <rect x="250" y="238" width="210" height="92" rx="6" fill="#fff"/>
-      <rect x="460" y="262" width="70" height="68" rx="6" fill="#fff"/>
-      <rect x="476" y="276" width="40" height="30" rx="3" fill="${c.ink}" opacity=".3"/>
-      <circle cx="300" cy="336" r="22" fill="${c.ink}"/><circle cx="300" cy="336" r="9" fill="#fff"/>
-      <circle cx="495" cy="336" r="22" fill="${c.ink}"/><circle cx="495" cy="336" r="9" fill="#fff"/>
-    </g>
-  </svg>${label?`<span class="scene-tag">${raw(label)}</span>`:""}</div>`;
-}
 const SHOP_DOMAIN = "https://americanbiocarbon.com";
 // Shopify cart permalinks - site product id to checkout URL (variant:qty).
 // Store: American BioCarbon (de7e4a). Both are $0 free-sample variants of the
@@ -614,7 +595,7 @@ function renderShopProduct(id){
   const slideHTML = (s,i,ctx)=> `<div class="pdp-slide${i===0?" active":""}" data-slide="${i}"><img src="${s.src}" alt="${raw(p.name)}"></div>`;
   return `
   <section class="block" style="padding-top:34px"><div class="wrap">
-    <div class="crumb" style="margin-bottom:22px"><a href="#/buy">Products</a> / ${raw(p.name)}</div>
+    ${crumbs([{label:"Products",href:"/buy"},{label:p.name}], "margin-bottom:22px")}
     <div class="pdp">
       <div class="pdp-media">
         <div class="pdp-main">${slides.map((s,i)=>slideHTML(s,i,"m")).join("")}</div>
@@ -629,11 +610,11 @@ function renderShopProduct(id){
         <div class="chips" style="margin:0 0 18px">${(p.chips||[]).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
         ${SHOPIFY_CHECKOUT[p.id]
           ? `<a class="btn btn-primary" href="${SHOPIFY_CHECKOUT[p.id]}" style="width:100%;justify-content:center">Order free sample</a>`
-          : `<a class="btn btn-primary" href="#/request-sample?product=${p.id}" style="width:100%;justify-content:center">Get a free sample</a>`}
+          : `<a class="btn btn-primary" href="/request-sample?product=${p.id}" style="width:100%;justify-content:center">Get a free sample</a>`}
         <div class="pdp-links" style="margin-top:12px">
-          <a href="#/request-quote?product=${p.id}">Talk to us about volume</a>
+          <a href="/request-quote?product=${p.id}">Talk to us about volume</a>
           <span>·</span>
-          <a href="#/request-docs?doc=spec&product=${p.id}">Download spec sheet</a>
+          <a href="/request-docs?doc=spec&product=${p.id}">Download spec sheet</a>
         </div>
         <p class="pdp-secure">Free ${raw(p.sampleWeight||"")} sample. Ships in 4 to 7 business days from White Castle, LA.</p>
         ${p.truckloadQ4?`<p class="pdp-secure" style="color:var(--dim)">Bulk bag and truckload supply available Q4.</p>`:""}
@@ -647,11 +628,11 @@ function renderShopProduct(id){
       <p class="lead" style="max-width:70ch">${raw(p.desc||p.claim)}</p>
       ${(p.sections||[]).map(s=>`<div class="pdp-sec"><h3>${raw(s.h)}</h3><p>${raw(s.body)}</p></div>`).join("")}
       <div class="btn-row" style="margin-top:26px">
-        <a class="btn btn-dark" href="#/request-docs?doc=spec&product=${p.id}">Download Spec Sheet</a>
-        <a class="btn btn-ghost" href="#/request-docs?doc=sds&product=${p.id}">Download SDS</a>
+        <a class="btn btn-dark" href="/request-docs?doc=spec&product=${p.id}">Download Spec Sheet</a>
+        <a class="btn btn-ghost" href="/request-docs?doc=sds&product=${p.id}">Download SDS</a>
         ${SHOPIFY_CHECKOUT[p.id]
           ? `<a class="btn btn-ghost" href="${SHOPIFY_CHECKOUT[p.id]}">Order free sample</a>`
-          : `<a class="btn btn-ghost" href="#/request-sample?product=${p.id}">Get a free sample</a>`}
+          : `<a class="btn btn-ghost" href="/request-sample?product=${p.id}">Get a free sample</a>`}
       </div>
       <p class="pdp-meta" style="margin-top:16px">Ships from White Castle, Louisiana. ${p.truckloadQ4?"Truckload supply available Q4.":""}</p>
     </div>
@@ -677,7 +658,7 @@ function renderBuy(){
     </div>` : "";
   return `
   <section class="shop-head"><div class="wrap">
-    <div class="crumb"><a href="#/">Home</a> / Products</div>
+    ${crumbs([{label:"Home",href:"/"},{label:"Products"}])}
     <h1>Products</h1>
     <p class="shop-sub">Free samples ship in 4 to 7 business days · bulk bag and truckload by freight aware quote.</p>
   </div></section>
@@ -691,7 +672,7 @@ function renderBuy(){
       <div class="shop-main">
         ${group("Available now", live)}
         ${group("Coming Q4 2026", q4)}
-        <p class="shop-doc">Spec sheets, SDS &amp; OMRI listing (biochar) available on request, <a href="#/technical">Technical Data →</a></p>
+        <p class="shop-doc">Spec sheets, SDS &amp; OMRI listing (biochar) available on request, <a href="/technical">Technical Data →</a></p>
       </div>
     </div>
   </div></section>`;
@@ -719,7 +700,7 @@ function renderCompare(){
   setMeta({title:"Bagasse vs Wood Pellet Absorbent, Comparison | American BioCarbon",desc:"Compare bagasse absorbent pellets vs wood pellets and clay: absorption, bag count, disposal weight, and renewability.",slug:"/compare",keyword:"wood pellet alternative absorbent"});
   return `
   <section class="phead"><div class="wrap"><div style="max-width:820px">
-    <div class="crumb"><a href="#/">Home</a> / Compare</div>
+    ${crumbs([{label:"Home",href:"/"},{label:"Compare"}])}
     <h1>Bagasse vs Wood Pellets vs Clay</h1>
     <p class="sub">The same spill, roughly half the bags. Figures reflect available product data for non-viscous liquids, request the spec sheet for test conditions.</p>
     <div class="btn-row">${btn(CTA.sample)}${btn(CTA.spec,"btn-ghost-light")}</div>
@@ -824,7 +805,7 @@ function renderTechnical(){
   }).join("");
   return `
   <section class="phead"><div class="wrap"><div style="max-width:900px">
-    <div class="crumb"><a href="#/">Home</a> / Technical Data &amp; Research</div>
+    ${crumbs([{label:"Home",href:"/"},{label:"Technical Data &amp; Research"}])}
     <h1>Technical Data &amp; Research</h1>
     <p class="sub">Complete technical documentation, independent lab analyses, certifications, and peer reviewed research for industrial grade decision making.</p>
     <div class="btn-row">${btn(CTA.quote)}${btn(CTA.specialist,"btn-ghost-light")}</div>
@@ -857,7 +838,7 @@ function renderTechnical(){
       <p>No resources match the selected filters.</p>
       <button type="button" class="btn btn-ghost btn-sm" data-rf-reset>Reset filters</button>
     </div>
-    <div style="margin-top:28px;padding:20px;background:white;border-radius:4px;border-left:4px solid var(--brand-crimson)">
+    <div style="margin-top:28px;padding:20px;background:white;border-radius:4px;border-left:4px solid var(--crimson)">
       <p style="margin:0;font-size:14px;color:#555"><strong>How it works:</strong> Select the documents you need and we'll send a customized package to your inbox within one business day. Our specialists are available to discuss specifications and answer technical questions.</p>
     </div>
   </div></section>
@@ -897,7 +878,7 @@ function renderAbout(){
   setMeta({title:"About American BioCarbon | White Castle, LA",desc:"American BioCarbon converts sugarcane bagasse into industrial absorbents, biochar, and durable carbon removal at the Cora Texas Sugar Mill in White Castle, Louisiana.",slug:"/about"});
   return `
   <section class="phead"><div class="wrap"><div class="grid">
-    <div><div class="crumb"><a href="#/">Home</a> / About</div>
+    <div>${crumbs([{label:"Home",href:"/"},{label:"About"}])}
       <h1>Renewable products, engineered for industrial performance</h1>
       <p class="sub">We convert sugarcane bagasse, an agricultural byproduct, into high capacity absorbents, biochar, and durable carbon removal, co-located with the Cora Texas Sugar Mill in White Castle, Louisiana.</p>
       <div class="btn-row">${btn(CTA.specialist)}${btn(CTA.sample,"btn-ghost-light")}</div>
@@ -923,17 +904,91 @@ function renderAbout(){
 /* ---- helpers ---- */
 function prodId(p){ return Object.keys(PRODUCTS).find(k=>PRODUCTS[k]===p); }
 function linkLabel(href){
-  if(href.startsWith("#/product/")){ const p=PRODUCTS[href.split("/").pop()]; return p?p.name:"Product"; }
-  if(href.startsWith("#/industry/")){ const n=INDUSTRIES[href.split("/").pop()]; return n?n.name:"Industry"; }
+  if(href.startsWith("/product/")){ const p=PRODUCTS[href.split("/").pop()]; return p?p.name:"Product"; }
+  if(href.startsWith("/industry/")){ const n=INDUSTRIES[href.split("/").pop()]; return n?n.name:"Industry"; }
   if(href.includes("technical")) return "Technical Data";
   return "Learn";
 }
-function setMeta(seo){
-  if(!seo) return;
-  document.title = seo.title || document.title;
-  let m=document.querySelector('meta[name="description"]'); if(m&&seo.desc) m.setAttribute("content",seo.desc);
+const SITE = { origin:"https://americanbiocarbon.com", name:"American BioCarbon", locale:"en_US", ogImage:"/assets/og-image.png" };
+function _meta(sel, attr, key, val){
+  let m=document.head.querySelector(sel);
+  if(!m){ m=document.createElement("meta"); m.setAttribute(attr,key); document.head.appendChild(m); }
+  m.setAttribute("content", val);
 }
-function notFound(){ return `<section class="block"><div class="wrap"><h1>Page not found</h1><p class="lead">Try the <a href="#/">homepage</a>.</p></div></section>`; }
+function _link(rel, href){
+  let l=document.head.querySelector(`link[rel="${rel}"]`);
+  if(!l){ l=document.createElement("link"); l.setAttribute("rel",rel); document.head.appendChild(l); }
+  l.setAttribute("href", href);
+}
+/* Per-route SEO: title, description, canonical, Open Graph, Twitter, robots.
+   opts: { canonical:"/clean-path" override (E7 dedup), image:"/path", type:"website|article|product", noindex:true } */
+function setMeta(seo, opts={}){
+  seo = seo || {};
+  const title = seo.title || document.title;
+  const desc  = seo.desc || (document.querySelector('meta[name="description"]')||{}).content || "";
+  document.title = title;
+  let dm=document.querySelector('meta[name="description"]'); if(dm) dm.setAttribute("content", desc);
+  const path = (location.pathname||"/").replace(/\/+$/,"") || "/";
+  const canonical = SITE.origin + (opts.canonical || (path==="/" ? "/" : path));
+  const image = SITE.origin + (opts.image || SITE.ogImage);
+  _link("canonical", canonical);
+  _meta('meta[property="og:site_name"]','property','og:site_name', SITE.name);
+  _meta('meta[property="og:locale"]','property','og:locale', SITE.locale);
+  _meta('meta[property="og:type"]','property','og:type', opts.type||"website");
+  _meta('meta[property="og:title"]','property','og:title', title);
+  _meta('meta[property="og:description"]','property','og:description', desc);
+  _meta('meta[property="og:url"]','property','og:url', canonical);
+  _meta('meta[property="og:image"]','property','og:image', image);
+  _meta('meta[name="twitter:card"]','name','twitter:card','summary_large_image');
+  _meta('meta[name="twitter:title"]','name','twitter:title', title);
+  _meta('meta[name="twitter:description"]','name','twitter:description', desc);
+  _meta('meta[name="twitter:image"]','name','twitter:image', image);
+  let rb=document.head.querySelector('meta[name="robots"]');
+  if(opts.noindex){ if(!rb){ rb=document.createElement("meta"); rb.setAttribute("name","robots"); document.head.appendChild(rb); } rb.setAttribute("content","noindex,follow"); }
+  else if(rb){ rb.remove(); }
+}
+/* Route-scoped JSON-LD (Product / BreadcrumbList). Replaces any prior route graph. */
+function setJsonLd(nodes){
+  let s=document.getElementById("ld-route");
+  if(!s){ s=document.createElement("script"); s.type="application/ld+json"; s.id="ld-route"; document.head.appendChild(s); }
+  s.textContent = JSON.stringify(nodes.length===1 ? nodes[0] : { "@context":"https://schema.org", "@graph":nodes });
+}
+function clearJsonLd(){ const s=document.getElementById("ld-route"); if(s) s.remove(); }
+/* C1: serve local raster images as WebP via <picture>, original path as graceful fallback.
+   Transforms the HTML string BEFORE insertion so the <source> is parsed before the <img>
+   loads (no double fetch). A missing .webp simply falls through to the original <img>. */
+function webpify(html){
+  return html.replace(
+    /<img\b([^>]*?)\ssrc="(assets\/[^"?]+)\.(png|jpe?g)(\?[^"]*)?"([^>]*?)>/gi,
+    (m,pre,path,ext,q,post)=>`<picture><source type="image/webp" srcset="${path}.webp${q||""}"><img${pre} src="${path}.${ext}${q||""}"${post}></picture>`
+  );
+}
+function setNoindex(on){ let rb=document.head.querySelector('meta[name="robots"]'); if(on){ if(!rb){ rb=document.createElement("meta"); rb.setAttribute("name","robots"); document.head.appendChild(rb); } rb.setAttribute("content","noindex,follow"); } else if(rb){ rb.remove(); } }
+function setCanonical(p){ const u=SITE.origin+p; _link("canonical", u); _meta('meta[property="og:url"]','property','og:url', u); }
+function breadcrumbLd(items){ // items: [{name, path}]
+  return { "@context":"https://schema.org", "@type":"BreadcrumbList",
+    itemListElement: items.map((it,i)=>({ "@type":"ListItem", position:i+1, name:it.name,
+      ...(it.path ? { item: SITE.origin+it.path } : {}) })) };
+}
+function productLd(p){
+  const certs = ["OMRI Listed","IBI Certified","Puro.earth Certified"];
+  return { "@context":"https://schema.org", "@type":"Product",
+    name: p.name, description: (p.seo&&p.seo.desc)||p.sub||p.claim||"",
+    category: "Industrial Absorbent", brand: { "@type":"Brand", name: SITE.name },
+    image: SITE.origin+SITE.ogImage,
+    manufacturer: { "@type":"Organization", name: SITE.name },
+    hasCertification: certs.map(c=>({ "@type":"Certification", name:c })) };
+}
+function notFound(){ setMeta({title:"Page not found | American BioCarbon", desc:"The page you requested could not be found."}, {noindex:true}); clearJsonLd(); return `<section class="block"><div class="wrap"><h1>Page not found</h1><p class="lead">Try the <a href="/">homepage</a>.</p></div></section>`; }
+/* Semantic breadcrumb: crumbs([{label,href}], ...) - last item is the current page (aria-current). */
+function crumbs(items, style=""){
+  const lis = items.map((it,idx)=>{
+    const last = idx===items.length-1;
+    const inner = (it.href && !last) ? `<a href="${it.href}">${raw(it.label)}</a>` : `<span${last?' aria-current="page"':''}>${raw(it.label)}</span>`;
+    return `<li>${inner}</li>`;
+  }).join("");
+  return `<nav class="crumb" aria-label="Breadcrumb"${style?` style="${style}"`:""}><ol>${lis}</ol></nav>`;
+}
 
 /* ================= ANIMAL BEDDING (dedicated) ================= */
 function renderAnimalBedding(){
@@ -947,7 +1002,7 @@ function renderAnimalBedding(){
   return `
   <section class="ab-hero"><div class="wrap"><div class="ab-hero-grid">
     <div class="ab-hero-copy">
-      <div class="crumb"><a href="#/">Home</a> / Industries / Animal Bedding</div>
+      ${crumbs([{label:"Home",href:"/"},{label:"Industries"},{label:"Animal Bedding"}])}
       <div class="ab-eyebrow">${raw(P.eyebrow)}</div>
       <h1 class="ab-h1">${raw(P.h1)}</h1>
       <p class="ab-lead">${raw(P.heroCopy)}</p>
@@ -1013,7 +1068,7 @@ function renderEnvironmentalRemediation(){
   setMeta(p.seo);
   return `
   <section class="phead"><div class="wrap"><div class="grid">
-    <div><div class="crumb"><a href="#/">Home</a> / <a href="#/industry/environmental-remediation">Environmental Remediation</a></div>
+    <div>${crumbs([{label:"Home",href:"/"},{label:"Environmental Remediation"}])}
       <h1>${raw(p.h1)}</h1>
       <p class="sub">${raw(p.sub)}</p>
       <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}</div>
@@ -1031,7 +1086,7 @@ function renderEnvironmentalRemediation(){
     <p class="lead" style="margin-bottom:22px">Four reasons site managers switch and stay.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:22px">
       ${p.whyABC.map(w=>`<div>
-        <h3 style="font-size:16px;margin-bottom:8px;color:#D7153F">${raw(w.title)}</h3>
+        <h3 style="font-size:16px;margin-bottom:8px;color:var(--crimson)">${raw(w.title)}</h3>
         <p style="font-size:14px;line-height:1.6;color:#555">${raw(w.desc)}</p>
       </div>`).join("")}
     </div>
@@ -1040,23 +1095,24 @@ function renderEnvironmentalRemediation(){
   <section class="block"><div class="wrap">
     <div class="split">
       <div>
-        <div class="eyebrow-line"></div><h2 style="margin-top:6px">Real world impact</h2>
+        <div class="eyebrow-line"></div><h2 style="margin-top:6px">Illustrative impact model</h2>
         <p class="lead" style="margin:10px 0 18px">${raw(p.caseStudy.scenario)}</p>
-        <div style="background:white;padding:16px;border-left:4px solid #D7153F;margin:16px 0">
-          <div style="font-size:13px;color:#666;margin-bottom:6px">Standard absorbent:</div>
+        <div style="background:white;padding:16px;border-left:4px solid var(--crimson);margin:16px 0">
+          <div style="font-size:13px;color:var(--mute);margin-bottom:6px">Standard absorbent:</div>
           <b>${raw(p.caseStudy.previous)}</b>
         </div>
-        <div style="background:white;padding:16px;border-left:4px solid #D7153F">
-          <div style="font-size:13px;color:#666;margin-bottom:6px">American BioCarbon:</div>
+        <div style="background:white;padding:16px;border-left:4px solid var(--crimson)">
+          <div style="font-size:13px;color:var(--mute);margin-bottom:6px">American BioCarbon:</div>
           <b>${raw(p.caseStudy.result)}</b>
         </div>
+        <p style="font-size:12px;color:var(--mute);margin-top:10px">Modeled scenario based on up-to-5:1 absorption versus a typical wood or clay sorbent - not a specific customer result.</p>
       </div>
       <div>
         <div class="eyebrow-line"></div><h2 style="margin-top:6px">How we work with you</h2>
         <div style="margin-top:18px">
           ${p.procurement.map(prc=>`<div style="margin-bottom:20px">
             <div style="display:flex;align-items:baseline;margin-bottom:6px">
-              <span style="font-weight:700;color:#D7153F;margin-right:12px;font-size:18px">${raw(prc.step)}</span>
+              <span style="font-weight:700;color:var(--crimson);margin-right:12px;font-size:18px">${raw(prc.step)}</span>
               <span style="font-weight:600;font-size:15px">${raw(prc.label)}</span>
             </div>
             <p style="margin:0;font-size:14px;line-height:1.5;color:#666">${raw(prc.desc)}</p>
@@ -1083,7 +1139,7 @@ function renderResellersIndustries(){
   setMeta(p.seo);
   return `
   <section class="phead"><div class="wrap"><div class="grid">
-    <div><div class="crumb"><a href="#/">Home</a> / <a href="#/industry/distributors">Distributors & Resellers</a></div>
+    <div>${crumbs([{label:"Home",href:"/"},{label:"Distributors & Resellers"}])}
       <h1>${raw(p.h1)}</h1>
       <p class="sub">${raw(p.sub)}</p>
       <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}</div>
@@ -1106,7 +1162,7 @@ function renderResellersIndustries(){
     <div class="eyebrow-line"></div><h2>Why American BioCarbon is different</h2>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:22px">
       ${p.whyABC.map(w=>`<div>
-        <h3 style="font-size:16px;margin-bottom:8px;color:#D7153F">${raw(w.title)}</h3>
+        <h3 style="font-size:16px;margin-bottom:8px;color:var(--crimson)">${raw(w.title)}</h3>
         <p style="font-size:14px;line-height:1.6">${raw(w.desc)}</p>
       </div>`).join("")}
     </div>
@@ -1122,7 +1178,7 @@ function renderResellersIndustries(){
     <p class="lead" style="margin-bottom:22px">Built around YOUR success, not ours.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px">
       ${p.program.map(prog=>`<div>
-        <h3 style="font-size:16px;margin-bottom:12px;color:#D7153F">${raw(prog.title)}</h3>
+        <h3 style="font-size:16px;margin-bottom:12px;color:var(--crimson)">${raw(prog.title)}</h3>
         <ul style="list-style:none;padding:0">
           ${prog.bullets.map(b=>`<li style="font-size:14px;margin-bottom:8px;line-height:1.4">✓ ${raw(b)}</li>`).join("")}
         </ul>
@@ -1132,7 +1188,7 @@ function renderResellersIndustries(){
 
   <section class="block" style="padding-top:96px;padding-bottom:96px"><div class="wrap" style="min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:28px">
     <p style="margin:0;font-size:40px;line-height:1.15;font-weight:700;max-width:16ch">Enterprise grade supply, one simple step away.</p>
-    <a class="btn btn-primary" href="#/request-quote">Request Quote</a>
+    <a class="btn btn-primary" href="/request-quote">Request Quote</a>
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap"><div class="split proc-split">
@@ -1152,7 +1208,7 @@ function renderResellersAgriculture(){
   setMeta(p.seo);
   return `
   <section class="phead"><div class="wrap"><div class="grid">
-    <div><div class="crumb"><a href="#/">Home</a> / <a href="#/industry/distributors">Distributors & Resellers</a></div>
+    <div>${crumbs([{label:"Home",href:"/"},{label:"Distributors & Resellers"}])}
       <h1>${raw(p.h1)}</h1>
       <p class="sub">${raw(p.sub)}</p>
       <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}</div>
@@ -1175,7 +1231,7 @@ function renderResellersAgriculture(){
     <div class="eyebrow-line"></div><h2>Why growers choose American BioCarbon</h2>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:22px">
       ${p.whyABC.map(w=>`<div>
-        <h3 style="font-size:16px;margin-bottom:8px;color:#D7153F">${raw(w.title)}</h3>
+        <h3 style="font-size:16px;margin-bottom:8px;color:var(--crimson)">${raw(w.title)}</h3>
         <p style="font-size:14px;line-height:1.6">${raw(w.desc)}</p>
       </div>`).join("")}
     </div>
@@ -1191,7 +1247,7 @@ function renderResellersAgriculture(){
     <p class="lead" style="margin-bottom:22px">Grower trials, dedicated support, premium margins.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px">
       ${p.program.map(prog=>`<div>
-        <h3 style="font-size:16px;margin-bottom:12px;color:#D7153F">${raw(prog.title)}</h3>
+        <h3 style="font-size:16px;margin-bottom:12px;color:var(--crimson)">${raw(prog.title)}</h3>
         <ul style="list-style:none;padding:0">
           ${prog.bullets.map(b=>`<li style="font-size:14px;margin-bottom:8px;line-height:1.4">✓ ${raw(b)}</li>`).join("")}
         </ul>
@@ -1203,8 +1259,8 @@ function renderResellersAgriculture(){
     <div class="eyebrow-line"></div><h2 style="margin-top:6px">Your order to delivery timeline</h2>
     <p class="lead" style="margin-bottom:22px">Predictable, committed, transparent.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px">
-      ${p.timeline.map(t=>`<div style="padding:14px;background:var(--paper-2);border-left:4px solid #D7153F;border-radius:2px">
-        <div style="font-weight:700;color:#D7153F;margin-bottom:4px">${raw(t.day)}</div>
+      ${p.timeline.map(t=>`<div style="padding:14px;background:var(--paper-2);border-left:4px solid var(--crimson);border-radius:2px">
+        <div style="font-weight:700;color:var(--crimson);margin-bottom:4px">${raw(t.day)}</div>
         <b style="display:block;font-size:14px;margin-bottom:4px">${raw(t.label)}</b>
         <p style="font-size:12px;line-height:1.4;color:#666;margin:0">${raw(t.desc)}</p>
       </div>`).join("")}
@@ -1216,7 +1272,7 @@ function renderResellersAgriculture(){
     <p class="lead" style="margin-bottom:22px">Communication, transparency, and partnership.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:20px">
       ${p.communication.map(c=>`<div style="padding:14px;background:var(--paper-2);border-radius:4px">
-        <b style="display:block;margin-bottom:6px;font-size:14px;color:#D7153F">${raw(c.title)}</b>
+        <b style="display:block;margin-bottom:6px;font-size:14px;color:var(--crimson)">${raw(c.title)}</b>
         <p style="font-size:13px;line-height:1.5;color:#666;margin:0">${raw(c.desc)}</p>
       </div>`).join("")}
     </div>
@@ -1227,8 +1283,8 @@ function renderResellersAgriculture(){
     <p class="lead" style="margin-bottom:22px">Our platform makes it effortless. Place orders, track shipments, manage inventory all in one place.</p>
     <div class="btn-row" style="justify-content:center;gap:12px;margin-top:20px">
       ${btn(p.primary)}
-      <a class="btn btn-ghost-light" href="#/request-quote">Get a Custom Quote</a>
-      <a class="btn btn-ghost-light" href="#/request-quote">Check Order Status</a>
+      <a class="btn btn-ghost-light" href="/request-quote">Get a Custom Quote</a>
+      <a class="btn btn-ghost-light" href="/request-quote">Check Order Status</a>
     </div>
   </div></section>
 
@@ -1246,8 +1302,8 @@ function renderResellersAgriculture(){
 
 /* ================= ROUTER ================= */
 function router(){
-  const hash = location.hash.replace(/^#/,"") || "/";
-  const [path, query] = hash.split("?");
+  const path = (location.pathname || "/").replace(/^\/+/,"").replace(/\/+$/,"");
+  const query = location.search.replace(/^\?/,"");
   const parts = path.split("/").filter(Boolean); // e.g. ['product','absorbent-pellets']
   let html, formToBuild=null, formMount="#pform";
   if(parts.length===0){ html=renderHome(); setMeta(HOME.seo); }
@@ -1274,7 +1330,27 @@ function router(){
   else if(parts[0]==="distributors-resellers-industries"){ html=renderResellersIndustries(); formToBuild="distributor"; formMount="#mainform"; }
   else if(parts[0]==="distributors-resellers-agriculture"){ html=renderResellersAgriculture(); formToBuild="distributor"; formMount="#mainform"; }
   else { html=notFound(); }
-  $("#app").innerHTML = html;
+
+  // ---- centralized per-route SEO: JSON-LD, robots noindex, E7 canonical ----
+  const NOINDEX = new Set(["request-sample","request-quote","contact","request-docs","download-spec","buy"]);
+  const home = { name:"Home", path:"/" };
+  if(parts.length===0){ setNoindex(false); clearJsonLd(); }
+  else if(NOINDEX.has(parts[0])){ setNoindex(true); clearJsonLd(); }
+  else if(parts[0]==="product"){ setNoindex(false); const p=PRODUCTS[parts[1]]; p ? setJsonLd([productLd(p), breadcrumbLd([home,{name:p.name,path:"/product/"+parts[1]}])]) : clearJsonLd(); }
+  else if(parts[0]==="shop"){ setNoindex(false); const p=PRODUCTS[parts[1]]; p ? setJsonLd([productLd(p), breadcrumbLd([home,{name:"Products",path:"/buy"},{name:p.name,path:"/shop/"+parts[1]}])]) : clearJsonLd(); }
+  else if(parts[0]==="industry"){ setNoindex(false); const n=INDUSTRIES[parts[1]];
+    if(parts[1]==="environmental-remediation") setCanonical("/environmental-remediation-solutions");
+    else if(parts[1]==="distributors") setCanonical("/distributors-resellers-industries");
+    n ? setJsonLd([breadcrumbLd([home,{name:"Industries"},{name:n.name,path:"/industry/"+parts[1]}])]) : clearJsonLd(); }
+  else if(parts[0]==="compare"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Compare",path:"/compare"}])]); }
+  else if(parts[0]==="technical"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Technical Data & Research",path:"/technical"}])]); }
+  else if(parts[0]==="about"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"About",path:"/about"}])]); }
+  else if(parts[0]==="environmental-remediation-solutions"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Environmental Remediation",path:"/environmental-remediation-solutions"}])]); }
+  else if(parts[0]==="distributors-resellers-industries"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Distributors & Resellers",path:"/distributors-resellers-industries"}])]); }
+  else if(parts[0]==="distributors-resellers-agriculture"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Distributors & Resellers - Agriculture",path:"/distributors-resellers-agriculture"}])]); }
+  else { /* notFound() already set noindex + cleared JSON-LD */ }
+
+  $("#app").innerHTML = webpify(html);
   if(formToBuild) buildForm(formToBuild, formMount);
   if(parts[0]==="technical") bindResourceFilters();
   if(parts.length===0) initHeroCarousel();
@@ -1285,5 +1361,19 @@ function router(){
 function parseType(q){ if(!q) return null; const p=new URLSearchParams(q); return p.get("type"); }
 
 renderChrome();
-window.addEventListener("hashchange", router);
+// History API navigation: intercept internal clean-path links, pushState, and route.
+document.addEventListener("click", e=>{
+  if(e.defaultPrevented || e.button!==0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target.closest && e.target.closest('a[href^="/"]');
+  if(!a) return;
+  if(a.target === "_blank" || a.hasAttribute("download")) return;
+  const href = a.getAttribute("href");
+  if(!href || href.startsWith("//")) return;              // protocol-relative / external
+  if(href === "/sales/" || href.startsWith("/sales/")) return; // separate app, real nav
+  if(/\.[a-z0-9]+($|\?)/i.test(href)) return;             // asset/file links (e.g. .pdf)
+  e.preventDefault();
+  if((location.pathname + location.search) !== href) history.pushState(null, "", href);
+  router();
+});
+window.addEventListener("popstate", router);
 router();

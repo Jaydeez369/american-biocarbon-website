@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://americanbiocarbon.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+
+  <!-- Products -->
+  <url><loc>https://americanbiocarbon.com/product/absorbent-pellets</loc><priority>0.9</priority></url>
+  <url><loc>https://americanbiocarbon.com/product/absorbent-crumble</loc><priority>0.9</priority></url>
+  <url><loc>https://americanbiocarbon.com/product/absorbent-fiber</loc><priority>0.8</priority></url>
+  <url><loc>https://americanbiocarbon.com/product/agricultural-biochar</loc><priority>0.9</priority></url>
+  <url><loc>https://americanbiocarbon.com/product/biochar-infused-soil</loc><priority>0.8</priority></url>
+  <url><loc>https://americanbiocarbon.com/product/carbon-removal</loc><priority>0.8</priority></url>
+
+  <!-- Industries (canonical set; environmental-remediation & distributors resolve to dedicated pages below) -->
+  <url><loc>https://americanbiocarbon.com/industry/oil-gas</loc><priority>0.8</priority></url>
+  <url><loc>https://americanbiocarbon.com/industry/industrial-remediation</loc><priority>0.8</priority></url>
+  <url><loc>https://americanbiocarbon.com/industry/spill-response</loc><priority>0.8</priority></url>
+  <url><loc>https://americanbiocarbon.com/industry/landfill-leachate</loc><priority>0.8</priority></url>
+  <url><loc>https://americanbiocarbon.com/industry/soil-blenders</loc><priority>0.8</priority></url>
+  <url><loc>https://americanbiocarbon.com/industry/animal-bedding</loc><priority>0.8</priority></url>
+
+  <!-- Dedicated solution / channel landing pages (canonical for remediation & distributor topics) -->
+  <url><loc>https://americanbiocarbon.com/environmental-remediation-solutions</loc><priority>0.8</priority></url>
+  <url><loc>https://americanbiocarbon.com/distributors-resellers-industries</loc><priority>0.7</priority></url>
+  <url><loc>https://americanbiocarbon.com/distributors-resellers-agriculture</loc><priority>0.7</priority></url>
+
+  <!-- Shop -->
+  <url><loc>https://americanbiocarbon.com/shop/absorbent-pellets</loc><priority>0.7</priority></url>
+  <url><loc>https://americanbiocarbon.com/shop/agricultural-biochar</loc><priority>0.7</priority></url>
+
+  <!-- Reference -->
+  <url><loc>https://americanbiocarbon.com/compare</loc><priority>0.7</priority></url>
+  <url><loc>https://americanbiocarbon.com/technical</loc><priority>0.7</priority></url>
+  <url><loc>https://americanbiocarbon.com/about</loc><priority>0.6</priority></url>
+</urlset>
