@@ -1,7 +1,8 @@
 # Netlify Configuration for American BioCarbon Website
 
 [build]
-  command = "# No build step required - static site"
+  # Static site: no bundling, but enforce the brand kit (no em/en dashes) on every deploy.
+  command = "node scripts/check-dashes.mjs"
   publish = "."
 
 # Redirect rules for hash-based routing

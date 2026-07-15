@@ -1,4 +1,4 @@
-/* ============ American BioCarbon — industrial B2B site ============ */
+/* ============ American BioCarbon - industrial B2B site ============ */
 :root{
   --ink:#1a1a1a; --graphite:#1a376c; --graphite-2:#24478a; --slate:#3e4a5f;
   --paper:#f7f8fa; --paper-2:#eef1f5; --white:#ffffff; --line:#e2e6ee; --line-2:#c4cfe6;
@@ -62,7 +62,7 @@ section.block{padding:72px 0;border-bottom:1px solid var(--line)}
 .lead{color:var(--dim);font-size:17px;max-width:680px}
 .eyebrow-line{width:44px;height:3px;background:var(--gold);border-radius:2px;margin-bottom:18px}
 
-/* ---------- Hero — full-bleed cinematic carousel ---------- */
+/* ---------- Hero - full-bleed cinematic carousel ---------- */
 .hero{position:relative;height:88vh;min-height:600px;max-height:900px;width:100%;overflow:hidden;background:#0a1226;color:#fff}
 /* delayed visibility keeps the outgoing slide painted through the crossfade (no dark flash) */
 .hslide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity 1.1s ease,visibility 0s linear 1.1s;pointer-events:none}
@@ -70,7 +70,7 @@ section.block{padding:72px 0;border-bottom:1px solid var(--line)}
 .hslide-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 55%;display:block;image-rendering:auto;
   transform:scale(var(--z,1.02));transform-origin:var(--o,center 55%);transition:transform 8s ease-out}
 .hslide.active .hslide-img{transform:scale(calc(var(--z,1.02) + .04))}
-/* legibility scrim — darker at the bottom, feathered up */
+/* legibility scrim - darker at the bottom, feathered up */
 .hslide-scrim{position:absolute;inset:0;background:
   linear-gradient(180deg,rgba(8,15,32,.55) 0%,rgba(8,15,32,.15) 32%,rgba(8,15,32,.35) 62%,rgba(8,15,32,.82) 100%),
   radial-gradient(120% 90% at 50% 46%,transparent 40%,rgba(8,15,32,.5) 100%)}
@@ -521,7 +521,7 @@ tbody td:first-child{font-weight:650;color:var(--ink)}
 .faq summary{padding:15px 18px;font-weight:700;cursor:pointer;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:12px}
 .faq summary::-webkit-details-marker{display:none}
 .faq summary::after{content:"+";color:var(--gold-d);font-weight:800;font-size:20px}
-.faq details[open] summary::after{content:"–"}
+.faq details[open] summary::after{content:"-"}
 .faq details[open] summary{border-bottom:1px solid var(--line)}
 .faq .a{padding:14px 18px;color:var(--dim);font-size:14.5px}
 
@@ -598,7 +598,7 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
 }
 
 /* ============================================================
-   Animal Bedding — dedicated industrial page (scoped .ab-*)
+   Animal Bedding - dedicated industrial page (scoped .ab-*)
    Brand kit: Navy #1A376C (headers/dark bands), Deep Navy #162C53,
    Red #D7153F (accent/CTA), Cane Gray #929292 (muted), Paper #F5F5F5.
    Fonts: DM Serif Display / DM Sans / IBM Plex Mono (site tokens).
@@ -626,7 +626,7 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
 .ab-btn-row .btn-ghost{background:transparent;color:var(--ab-navy);border-color:var(--ab-line-2)}
 .ab-btn-row .btn-ghost:hover{border-color:var(--ab-navy);background:#fff}
 
-/* Spec strip — navy product-data band */
+/* Spec strip - navy product-data band */
 .ab-strip{background:#fff;color:var(--ab-ink);padding:0;border-bottom:1px solid var(--ab-line)}
 .ab-strip-row{display:grid;grid-template-columns:repeat(3,1fr)}
 .ab-stat{padding:26px 28px;border-left:1px solid var(--ab-line)}
@@ -641,7 +641,7 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
 .ab-h2{font-family:var(--f-head);color:var(--ab-navy);font-size:30px;line-height:1.14;margin:0 0 28px}
 .ab-note{font-size:13px;color:var(--ab-mute);line-height:1.55;margin:18px 0 0;max-width:74ch}
 
-/* Buyer problem — two-column rows with strong dividers */
+/* Buyer problem - two-column rows with strong dividers */
 .ab-problem{margin:0;border-top:1px solid var(--ab-line-2)}
 .ab-problem-row{display:grid;grid-template-columns:260px 1fr;gap:32px;padding:20px 0;border-bottom:1px solid var(--ab-line-2)}
 .ab-problem dt{font-weight:700;color:var(--ab-navy);font-size:15px}
@@ -673,7 +673,7 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
 .ab-check li{display:flex;align-items:flex-start;gap:12px;font-size:15px;color:var(--ab-ink);padding:12px 0;border-bottom:1px solid var(--ab-line);min-height:44px}
 .ab-check svg{width:20px;height:20px;color:var(--ab-red);flex:0 0 auto;margin-top:1px}
 
-/* Final CTA — deep navy, restrained */
+/* Final CTA - deep navy, restrained */
 .ab-final{background:var(--ab-navy-deep);color:#dfe6f2;padding:72px 0;text-align:left;border-bottom:1px solid var(--ab-navy-deep)}
 .ab-final-h{font-family:var(--f-head);font-size:30px;color:#fff;margin:0 0 12px;max-width:22ch}
 .ab-final-sub{color:#a9bcda;font-size:16px;line-height:1.6;margin:0 0 26px;max-width:60ch}
