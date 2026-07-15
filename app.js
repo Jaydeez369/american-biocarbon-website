@@ -263,15 +263,9 @@ function renderHome(){
   </section>
   ${proofBand()}
 
-
-  <section class="block" id="specs"><div class="wrap">
-    <div class="eyebrow-line"></div>
-    <div class="kicker">Specifications · vs. the status quo</div>
-    <h2 style="margin-top:6px">${raw(H.comparison.h)}</h2>
-    <p class="lead" style="margin-bottom:6px">Our sugarcane bagasse holds up to 5× its weight in liquid, roughly double what wood or clay manages. It holds its weight where the status quo can't: the same spill takes about half the bags and sends less weight to disposal.</p>
-    <p class="lead" style="margin-bottom:22px">${raw(H.comparison.sub)}</p>
-    <div class="tbl tbl-hi"><table><thead><tr>${H.comparison.cols.map(c=>`<th>${raw(c)}</th>`).join("")}</tr></thead>
-      <tbody>${H.comparison.rows.map(r=>`<tr>${r.map(x=>`<td>${raw(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+  <section class="block" id="used-most"><div class="wrap">
+    <h2 style="margin-top:6px">Where our products are used most</h2>
+    <div style="margin-top:26px">${H.fieldApps?appCards(H.fieldApps):ucGrid(H.useCases)}</div>
   </div></section>
 
   <section class="block" style="padding-bottom:0"><div class="wrap">
@@ -281,11 +275,6 @@ function renderHome(){
   ${zig}
 
   ${carbonPillar(H.carbon)}
-
-  <section class="block"><div class="wrap">
-    <h2 style="margin-top:6px">Where our products are used most</h2>
-    <div style="margin-top:26px">${H.fieldApps?appCards(H.fieldApps):ucGrid(H.useCases)}</div>
-  </div></section>
 
   ${ctaBand(H.finalCta)}`;
 }
