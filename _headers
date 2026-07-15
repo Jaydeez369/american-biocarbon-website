@@ -1,0 +1,19 @@
+# Cloudflare Pages headers (replaces netlify.toml [[headers]] rules)
+
+/
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/app.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/data.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/styles.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
