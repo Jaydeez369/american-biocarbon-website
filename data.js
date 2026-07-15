@@ -655,7 +655,7 @@ const PRODUCTS = {
       body:"Commodity amendments compete on price alone, every reorder shaves the margin thinner, and an undifferentiated bag only moves when it's the cheapest on the shelf. Growers increasingly ask for water efficiency, organic inputs, and a carbon story, and composters and blenders need throughput and consistent quality, not another line that races price to the bottom." },
     explanation:{ h:"Louisiana sourced biochar: a versatile soil amendment",
       body:"Bagasse biochar's honeycomb pore structure holds up to 3 to 3.5× its weight in water, retains nutrients, and provides protected habitat for soil microbes. Unlike most wood biochar, it carries inherent nutrients (~0.6-0.2-0.7 NPK plus calcium and magnesium). It's OMRI listed and IBI certified, with heavy metals well below IBI and EPA Class A thresholds. Use it standalone for soil amendment and composting, or blended into your own potting and growing mixes for peat moss performance." },
-    appsKicker:"", appsHeading:"Soil applications",
+    specsFirst:true, appsKicker:"", appsHeading:"Soil applications",
     useCases:["Physical habitat for fungal networks","Improved soil structure &amp; root penetration","Nutrient retention &amp; availability","pH &amp; moisture benefits","Synergistic effects in agriculture"],
     fieldApps:[
       { title:"Physical Habitat for Fungal Networks", detail:"Mycorrhizal shelter",

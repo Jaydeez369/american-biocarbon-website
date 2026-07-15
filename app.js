@@ -285,6 +285,36 @@ function renderHome(){
 function renderProduct(id){
   const p = PRODUCTS[id]; if(!p) return notFound();
   setMeta(p.seo);
+  // Problem / Why-it's-different block. Omitted on pages that lead with specs (e.g. biochar).
+  const problemSection = `
+  <section class="block"><div class="wrap two-col-copy">
+    <div><div class="kicker">The problem</div><h2 style="font-size:26px;margin:8px 0 12px">${raw(p.problem.h)}</h2><p class="lead">${raw(p.problem.body)}</p></div>
+    <div><div class="kicker">Why it's different</div><h2 style="font-size:26px;margin:8px 0 12px">${raw(p.explanation.h)}</h2><p class="lead">${raw(p.explanation.body)}</p></div>
+  </div></section>`;
+
+  const appsSection = grey => `
+  <section class="block"${grey?` style="background:var(--paper-2)"`:""}><div class="wrap">
+    ${p.appsKicker===""?"":`<div class="kicker">${raw(p.appsKicker||"Applications")}</div>`}<h2 style="margin-top:6px">${raw(p.appsHeading||"Field applications")}</h2>
+    <div style="margin-top:26px">${p.fieldApps?appCards(p.fieldApps):ucGrid(p.useCases)}</div>
+  </div></section>`;
+
+  const specsSection = grey => `
+  <section class="block"${grey?` style="background:var(--paper-2)"`:""}><div class="wrap"><div class="split">
+    <div><div class="eyebrow-line"></div><h2 style="font-size:28px">Specifications</h2>
+      <p class="lead" style="margin:10px 0 18px">Request the full spec sheet and SDS for test conditions and handling.</p>
+      ${specTable(p.specs)}
+      ${(id==="absorbent-pellets" || id==="agricultural-biochar") ? `<div style="margin-top:18px"><a class="btn btn-sm btn-ghost" href="javascript:void(0)" onclick="downloadSpecSheet('${id==="absorbent-pellets"?"absorbent-pellets":"biochar"}')">Download Full Spec Sheet</a></div>` : ""}</div>
+    <div><div class="eyebrow-line"></div><h2 style="font-size:28px">${raw(p.comparison.h)}</h2>
+      <div style="margin-top:18px">${cmpTable(p.comparison)}</div>
+      ${p.comparison.image?`<figure class="cmp-fig"><img src="${p.comparison.image}" alt="${raw(p.comparison.imageAlt||"")}" loading="lazy"><figcaption>${raw(p.comparison.imageAlt||"")}</figcaption></figure>`:""}</div>
+  </div></div></section>`;
+
+  // Biochar leads with Specifications (incl. Bagasse vs wood comparison + SEM image) right after the hero,
+  // dropping the problem/why-it's-different block. Other products keep the original flow.
+  const flow = p.specsFirst
+    ? specsSection(true) + appsSection(false)
+    : problemSection + appsSection(true) + specsSection(false);
+
   return `
   <section class="phead"><div class="wrap"><div class="grid">
     <div>
@@ -297,25 +327,7 @@ function renderProduct(id){
     <div class="media"><img src="${p.image}" alt="${raw(p.name)}"></div>
   </div></div></section>
 
-  <section class="block"><div class="wrap two-col-copy">
-    <div><div class="kicker">The problem</div><h2 style="font-size:26px;margin:8px 0 12px">${raw(p.problem.h)}</h2><p class="lead">${raw(p.problem.body)}</p></div>
-    <div><div class="kicker">Why it's different</div><h2 style="font-size:26px;margin:8px 0 12px">${raw(p.explanation.h)}</h2><p class="lead">${raw(p.explanation.body)}</p></div>
-  </div></section>
-
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    ${p.appsKicker===""?"":`<div class="kicker">${raw(p.appsKicker||"Applications")}</div>`}<h2 style="margin-top:6px">${raw(p.appsHeading||"Field applications")}</h2>
-    <div style="margin-top:26px">${p.fieldApps?appCards(p.fieldApps):ucGrid(p.useCases)}</div>
-  </div></section>
-
-  <section class="block"><div class="wrap"><div class="split">
-    <div><div class="eyebrow-line"></div><h2 style="font-size:28px">Specifications</h2>
-      <p class="lead" style="margin:10px 0 18px">Request the full spec sheet and SDS for test conditions and handling.</p>
-      ${specTable(p.specs)}
-      ${(id==="absorbent-pellets" || id==="agricultural-biochar") ? `<div style="margin-top:18px"><a class="btn btn-sm btn-ghost" href="javascript:void(0)" onclick="downloadSpecSheet('${id==="absorbent-pellets"?"absorbent-pellets":"biochar"}')">Download Full Spec Sheet</a></div>` : ""}</div>
-    <div><div class="eyebrow-line"></div><h2 style="font-size:28px">${raw(p.comparison.h)}</h2>
-      <div style="margin-top:18px">${cmpTable(p.comparison)}</div>
-      ${p.comparison.image?`<figure class="cmp-fig"><img src="${p.comparison.image}" alt="${raw(p.comparison.imageAlt||"")}" loading="lazy"><figcaption>${raw(p.comparison.imageAlt||"")}</figcaption></figure>`:""}</div>
-  </div></div></section>
+  ${flow}
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="split proc-split">
