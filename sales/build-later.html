@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VEJ Sales OS — Biochar Sales Department</title>
+  <title>Sales OS — Build Later (parked)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -16,22 +16,21 @@
       <div class="brand">
         <div class="brand-mark">VEJ</div>
         <div class="brand-text">
-          <strong>Sales OS</strong>
-          <!-- BRAND: American BioCarbon primary now; flip to "ProGreaux" at the Aug-17 rebrand launch -->
-          <span>American BioCarbon</span>
+          <strong>Build Later</strong>
+          <span>Parked · add when ready</span>
         </div>
       </div>
       <nav class="nav" id="nav"><!-- injected --></nav>
       <div class="sidebar-foot">
-        <div><span class="dot"></span> Beachhead: Gulf South</div>
-        <a href="build-later.html" style="display:block;margin-top:10px;color:var(--text-mute);font-size:11.5px;text-decoration:none">⏸ Build Later — CRM · Dashboard · Market model →</a>
+        <div><span class="dot"></span> Heavy build + strategy</div>
+        <a href="index.html" style="display:block;margin-top:10px;color:var(--text-mute);font-size:11.5px;text-decoration:none">← Back to the daily Sales OS</a>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
         <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">☰</button>
-        <div class="topbar-title" id="topbarTitle">Daily Plan</div>
+        <div class="topbar-title" id="topbarTitle">Build Later</div>
         <div class="topbar-actions">
           <div class="app-switch" role="tablist" aria-label="Switch app">
             <a class="app-switch-btn" href="/">Website</a>
@@ -46,7 +45,8 @@
 
   <div class="toast" id="toast">Copied to clipboard</div>
 
-  <!-- LEAN daily-driver view. load order: data → gtm-data → gtm (exposes window.GTMB) → app -->
+  <!-- BUILD view: same code as the lean OS, OS_VIEW flag selects the parked modules -->
+  <script>window.OS_VIEW = "build";</script>
   <script src="data.js?v=cons4"></script>
   <script src="gtm-data.js?v=cons4"></script>
   <script src="gtm.js?v=cons4"></script>

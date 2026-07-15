@@ -1,32 +1,31 @@
-/* ============ GTM Command Center — scoped polish ============ */
-/* Reuses the Sales OS design system; only adds GTM-specific accents. */
+/* ============ GTM Command Center — scoped polish (v3) ============ */
+/* Reuses the Sales OS design system; only adds module-specific accents.
+   Section ids remapped after the 34→9+parked consolidation:
+     outreach = sequences/calling/scripts/linkedin/social/long-term
+     b-crm    = pipeline + CRM/scoring + landing map (parked)
+     b-dashboard = KPIs + dashboard (parked) */
 
-/* Distinct accent bar on GTM nav groups so the module reads as one system */
-.nav-group{position:relative}
-
-/* GTM campaign cards get a subtle left accent */
-.gtm-cmp{border-left:3px solid var(--green);}
+/* Campaign cards get a subtle left accent so they read as one system */
+.gtm-cmp{border-left:3px solid var(--green-bright)}
 .gtm-cmp h4{flex-wrap:wrap;gap:6px;line-height:1.5}
 
-/* Pre-launch + sequence blocks spacing */
-.gtm-pre-block,.gtm-seq{animation:fade .2s ease}
+/* Pre-launch + sequence + script blocks fade in cleanly */
+.gtm-pre-block,.gtm-seq,.gtm-scr{animation:fade .22s cubic-bezier(.2,.8,.2,1)}
 
-/* Wide GTM tables (30-day, social, dashboard) get more room + tighter cells */
-#sec-gtm-30day table,#sec-gtm-social table{min-width:1180px;font-size:12px}
-#sec-gtm-30day td,#sec-gtm-social td{padding:8px 10px}
-#sec-gtm-crm table{min-width:760px}
-#sec-gtm-landing table{min-width:1080px}
+/* Wide data tables (social calendar, campaign↔landing) get room + tighter cells */
+#sec-outreach table{font-size:12px}
+#sec-outreach td{padding:9px 11px}
+#sec-b-crm table{min-width:760px}
+#sec-b-crm #sec-gtm-landing table,#sec-b-crm table{min-width:820px}
 
 /* Keep long review questions readable */
-#sec-gtm-30day td em{font-size:11.5px;line-height:1.4;display:inline-block}
+#sec-outreach td em{font-size:11.5px;line-height:1.45;display:inline-block}
 
 /* Script copy blocks inside grid cards shouldn't overflow */
-.gtm-seq .script,.card .script{margin:6px 0}
+.gtm-seq .script,.gtm-scr .script,.card .script{margin:7px 0}
 
-/* Status pills row wraps cleanly */
-#sec-gtm-crm .filters .pill{font-size:11px}
+/* Status-workflow pills row wraps cleanly */
+#sec-b-crm .filters .pill{font-size:11px}
 
-/* Responsive: let the big tables scroll rather than break layout */
-@media(max-width:960px){
-  #sec-gtm-30day table,#sec-gtm-social table{min-width:1180px}
-}
+/* Sub-section merge divider between stacked modules reads as a seam, not a gap */
+.section .hr{opacity:.6}

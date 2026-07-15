@@ -1,4 +1,4 @@
-/* ============ VEJ Sales OS · app shell & renderers ============ */
+/* ============ VEJ Sales OS — app shell & renderers ============ */
 const $ = (s,el=document)=>el.querySelector(s);
 const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const nl = s => esc(s).replace(/\n/g,"<br>");
@@ -7,7 +7,7 @@ const nl = s => esc(s).replace(/\n/g,"<br>");
 const CHECK_KEY = "vej_checks_v1";
 function getChecks(){ try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch(e){ return {}; } }
 function setCheck(k,on){ const c=getChecks(); c[k]= on?1:0; try{ localStorage.setItem(CHECK_KEY, JSON.stringify(c)); }catch(e){} }
-/* chk(key, labelHTML, def): labelHTML is trusted HTML; def = default-checked when never touched */
+/* chk(key, labelHTML, def) — labelHTML is trusted HTML; def = default-checked when never touched */
 function chk(key, labelHTML, def){ const v=getChecks()[key]; const on = (v===undefined? !!def : !!v) ? " done" : ""; return `<label class="chk${on}" data-k="${esc(key)}" onclick="toggleChk(this)"><span class="box">✓</span><span class="lbl">${labelHTML}</span></label>`; }
 function checkStats(keys, defs){ const c=getChecks(); let done=0; keys.forEach((k,i)=>{ const v=c[k]; if(v===undefined? (defs&&defs[i]):v) done++; }); return {done, total:keys.length}; }
 window.toggleChk = el => { const on = !el.classList.contains("done"); el.classList.toggle("done", on); setCheck(el.dataset.k, on); };
@@ -20,73 +20,7 @@ window.copyEl = id => { const e=document.getElementById(id); if(e) copyText(e.da
 
 /* ---- helpers ---- */
 const tier = t => { const p=DATA.proofTiers.find(x=>x.t===t); return `<span class="proof proof-${t}" title="${esc(p?.name||'')}">T${t}</span>`; };
-/* ============================================================
-   Badge system — single source of truth
-   ------------------------------------------------------------
-   Presentation is expressed as a small set of semantic TONES.
-   Business/workflow state is mapped to a tone in STATE below, so
-   pages never contain scattered `x==="Done"?"green":...` logic and
-   raw enum values are never shown unformatted. Unknown values fail
-   safe (neutral tone + a dev-visible warning) — they are never
-   silently styled as success/active/approved.
-   ============================================================ */
-const TONES = ["neutral","info","positive","warning","critical","pending","active","inactive","category"];
-/* Legacy colour class -> semantic tone (for un-migrated literal calls) */
-const TONE_ALIAS = {"badge-muted":"neutral","badge-blue":"info","badge-green":"positive",
-  "badge-gold":"warning","badge-red":"critical","pri-1":"critical","pri-2":"warning","pri-3":"neutral"};
-function toneClass(tone){
-  if(TONES.includes(tone)) return "badge--"+tone;
-  if(TONE_ALIAS[tone]) return "badge--"+TONE_ALIAS[tone];
-  return tone && /^(badge-|pri-)/.test(tone) ? tone : "badge--neutral";
-}
-/* badge(text, tone) — tone is a semantic name (preferred) or a legacy class. */
-const badge = (txt,tone="neutral",opts={})=>{
-  const sr = opts.sr ? `<span class="sr-only">${esc(opts.sr)} </span>` : "";
-  return `<span class="badge ${toneClass(tone)}"${opts.title?` title="${esc(opts.title)}"`:""}>${sr}${esc(txt)}</span>`;
-};
-
-/* Exhaustive state maps: raw value -> {label, tone}. Presentation boundary
-   only — raw values stay intact for sorting/filtering/persistence. */
-const STATE = {
-  dealStage: {
-    Prospect:{label:"Prospect",tone:"neutral"}, Contacted:{label:"Contacted",tone:"info"},
-    Discovery:{label:"Discovery",tone:"info"}, Sample:{label:"Sample sent",tone:"pending"},
-    Trial:{label:"Trial",tone:"pending"}, Negotiation:{label:"Negotiation",tone:"warning"},
-    Won:{label:"Won",tone:"positive"}, Lost:{label:"Lost",tone:"critical"},
-    Blocked:{label:"Blocked",tone:"critical"}
-  },
-  taskStatus: {
-    todo:{label:"To do",tone:"neutral"}, doing:{label:"In progress",tone:"active"},
-    blocked:{label:"Blocked",tone:"critical"}, done:{label:"Done",tone:"positive"},
-    "To do":{label:"To do",tone:"neutral"}, Doing:{label:"In progress",tone:"active"},
-    Done:{label:"Done",tone:"positive"}, Todo:{label:"To do",tone:"neutral"}
-  },
-  priority: {
-    P0:{label:"P0",tone:"critical"}, P1:{label:"P1",tone:"warning"},
-    P2:{label:"P2",tone:"neutral"}, P3:{label:"P3",tone:"neutral"}
-  },
-  confidence: {
-    High:{label:"High",tone:"positive"}, Med:{label:"Med",tone:"warning"}, Low:{label:"Low",tone:"critical"}
-  },
-  freightZone: {
-    A:{label:"Zone A",tone:"positive"}, B:{label:"Zone B",tone:"warning"}, C:{label:"Zone C",tone:"critical"}
-  },
-  requirement: {
-    Req:{label:"Required",tone:"positive"}, Required:{label:"Required",tone:"positive"},
-    Recommended:{label:"Recommended",tone:"warning"}, Auto:{label:"Auto",tone:"info"},
-    Optional:{label:"Optional",tone:"neutral"}
-  }
-};
-/* Resolve a state and render its badge. Unknown -> neutral + dev warning. */
-function stateInfo(domain, value){
-  const map = STATE[domain]||{};
-  const hit = map[value];
-  if(hit) return hit;
-  if(typeof console!=="undefined" && value!=null)
-    console.warn(`[badge] unmapped ${domain} value: ${JSON.stringify(value)} — falling back to neutral`);
-  return {label:(value==null||value==="")?"—":String(value), tone:"neutral"};
-}
-const stateBadge = (domain, value)=>{ const i=stateInfo(domain,value); return badge(i.label, i.tone, {sr:i.sr}); };
+const badge = (txt,cls="badge-muted")=>`<span class="badge ${cls}">${esc(txt)}</span>`;
 function table(headers,rows){
   return `<div class="tbl-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
   <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
@@ -100,35 +34,38 @@ function script(label,body){
 }
 
 /* ================= NAV ================= */
-const NAV=[
+/* ===== Consolidated IA (v3) — enterprise-audited split =====
+   LEAN = the daily-driver sales tool (index.html).
+   BUILD = parked heavy build/strategy modules (build-later.html),
+           selected via window.OS_VIEW==='build'. Same code, two entry pages. */
+const LEAN_NAV=[
   {group:"Focus",items:[
-    {id:"tasks",ic:"◎",t:"Tasks"},
-    {id:"today",ic:"☰",t:"Daily Action Plan"},
+    {id:"daily",ic:"◎",t:"Daily Plan"},
   ]},
   {group:"Strategy",items:[
-    {id:"overview",ic:"◆",t:"Executive Overview"},
-    {id:"assumptions",ic:"◇",t:"Assumptions & Inputs"},
-    {id:"segments",ic:"◈",t:"ICP & Segments"},
-    {id:"personas",ic:"◉",t:"Buyer Personas"},
-    {id:"messaging",ic:"❝",t:"Messaging & Proof"},
-    {id:"biochar",ic:"🌱",t:"Biochar Specs & Avatars"},
-    {id:"market",ic:"▤",t:"TAM / SAM / SOM"},
-    {id:"barge",ic:"⚓",t:"Barge Cost Analysis"},
+    {id:"overview",ic:"◆",t:"Overview & Thesis"},
+    {id:"icp",ic:"◈",t:"ICP & Campaigns"},
+    {id:"product",ic:"❝",t:"Product & Messaging"},
   ]},
   {group:"Execution",items:[
-    {id:"pipeline",ic:"▦",t:"Pipeline Builder"},
     {id:"accounts",ic:"▥",t:"Target Accounts"},
-    {id:"outreach",ic:"✉",t:"Outreach Engine"},
-    {id:"collateral",ic:"▣",t:"Collateral Library"},
-    {id:"pricing",ic:"$",t:"Pricing & Economics"},
-    {id:"playbook",ic:"▷",t:"Sales Playbook"},
+    {id:"outreach",ic:"✉",t:"Outreach & Scripts"},
+    {id:"assets",ic:"▣",t:"Assets & Samples"},
+    {id:"playbook",ic:"▷",t:"Playbook"},
   ]},
   {group:"Operate",items:[
-    {id:"kpis",ic:"▲",t:"Metrics & KPIs"},
-    {id:"roadmap",ic:"◐",t:"30/60/90 Roadmap"},
-    {id:"checklist",ic:"✓",t:"Launch Checklist"},
+    {id:"roadmap",ic:"◐",t:"Roadmap & Checklist"},
   ]},
 ];
+const BUILD_NAV=[
+  {group:"Build Later · parked",items:[
+    {id:"b-overview",ic:"◆",t:"Architecture & Assumptions"},
+    {id:"b-market",ic:"▤",t:"Market & Economics"},
+    {id:"b-crm",ic:"▦",t:"CRM & Pipeline Spec"},
+    {id:"b-dashboard",ic:"▲",t:"Metrics & Dashboard"},
+  ]},
+];
+const NAV = (window.OS_VIEW==="build") ? BUILD_NAV : LEAN_NAV;
 
 function buildNav(){
   $("#nav").innerHTML = NAV.map(g=>`<div class="nav-group">${g.group}</div>`+
@@ -151,127 +88,6 @@ function page(id,inner){return `<section class="section" id="sec-${id}">${inner}
 function head(t,sub){return `<h1 class="page-h">${t}</h1><p class="page-sub">${sub}</p>`;}
 function sec(num,t){return `<h2 class="sec"><span class="num">${num}</span>${t}</h2>`;}
 
-/* ================= TASKS (daily home) ================= */
-const taskPriBadge = p => stateBadge("priority", p);
-const PRW = {P0:0,P1:1,P2:2};
-
-/* small clickable badge injected into connected views ("N open tasks") */
-function openTaskBadge(view){
-  if(typeof TasksAPI==="undefined") return "";
-  const n=TasksAPI.openForView(view); if(!n) return "";
-  return `<button class="badge badge--warning task-badge" onclick="go('tasks')" title="Open tasks linked to this view"><span class="count count--alert">${n}</span> open task${n>1?"s":""}</button>`;
-}
-
-function taskRow(t){
-  const done=t.done?" done":"";
-  const stLabel = stateInfo("taskStatus", t.status).label;
-  const st = t.done ? "" : `<button type="button" class="tstatus s-${t.status}" onclick="tCycle('${t.id}')" aria-label="Status: ${esc(stLabel)}. Change status">${esc(stLabel)}</button>`;
-  const od = (t.overdue) ? `<span class="badge badge--critical tood">${-t.dueRel}d overdue</span>` : "";
-  const link = t.link ? `<button class="tlink" onclick="tGo('${t.link.view}','${esc(t.link.anchor||"")}')">Open →</button>` : "";
-  return `<div class="task${done}" data-owner="${esc(t.owner)}">
-    <span class="tbox" role="checkbox" tabindex="0" aria-checked="${t.done?"true":"false"}" aria-label="Mark task done" onclick="tTog('${esc(t.checkKey)}')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();tTog('${esc(t.checkKey)}')}">✓</span>
-    <div class="tmain">
-      <div class="thead">${whoBadge(t.owner)}${taskPriBadge(t.priority)}${st?" "+st:""}${od?" "+od:""}<span class="ttitle">${esc(t.title)}</span></div>
-      ${t.detail?`<div class="tdetail">${esc(t.detail)}</div>`:""}
-    </div>
-    <div class="tactions">${link}</div>
-  </div>`;
-}
-
-function ownerGroup(title,cls,rows){
-  if(!rows.length) return "";
-  return `<div class="towner"><div class="towner-h ${cls}">${esc(title)} <span class="chk-progress">${rows.length}</span></div>${rows.map(taskRow).join("")}</div>`;
-}
-
-function punchBlock(pl,idx){
-  const keys=pl.items.map((_,i)=>`punch:${pl.id}:${i}`);
-  const st=checkStats(keys, pl.items.map(()=>false));
-  const pct=st.total?Math.round(st.done/st.total*100):0;
-  const rows=pl.items.map((it,i)=>chk(keys[i],esc(it),false)).join("");
-  const rec=pl.recurring?badge("daily","info"):"";
-  const link=pl.link?`<button class="tlink" onclick="tGo('${pl.link.view}','')">View →</button>`:"";
-  const open=idx===0?" open":""; const openh=idx===0?" open-h":"";
-  return `<div class="punch">
-    <div class="punch-h${openh}" onclick="punchToggle(${idx})">
-      <div class="punch-t">${esc(pl.title)} ${rec}</div>
-      <div class="punch-meta"><div class="tprog"><span style="width:${pct}%"></span></div><span class="chk-progress">${st.done}/${st.total}</span><span class="chev">▸</span></div>
-    </div>
-    <div class="punch-b${open}" id="punch-${idx}">${rows}
-      <div class="chk-head"><span>${link}</span><span class="chk-reset" onclick="resetChecks('punch:${pl.id}:')">Reset</span></div>
-    </div>
-  </div>`;
-}
-window.punchToggle=i=>{const b=document.getElementById("punch-"+i);const h=b.previousElementSibling;b.classList.toggle("open");h.classList.toggle("open-h");};
-
-function rTasks(){
-  if(typeof TasksAPI==="undefined") return page("tasks",head("Tasks","Task engine unavailable."));
-  const all=TasksAPI.all();
-  const total=all.length, done=all.filter(t=>t.done).length, pct=total?Math.round(done/total*100):0;
-
-  // Today = due today or overdue, not done; sort P0>P1>P2 then most overdue first
-  const bySort=(a,b)=>(PRW[a.priority]-PRW[b.priority])||(a.dueRel-b.dueRel);
-  const todayItems=all.filter(t=>!t.done && t.dueRel<=0).sort(bySort);
-  const byOwner=o=>todayItems.filter(t=>t.owner===o);
-  const todayHTML = todayItems.length
-    ? ownerGroup("Jesse · demand & the machine","j",byOwner("jesse"))
-      +ownerGroup("Victor · product, proof & fulfillment","v",byOwner("victor"))
-      +ownerGroup("Both","both",byOwner("both"))
-    : `<div class="note ok">Nothing due or overdue today. Pull ahead from This Week, or add a task below.</div>`;
-
-  // This Week = the calendar week containing today
-  const cd=TasksAPI.todayCalDay();
-  const cwk=((typeof GTM!=="undefined"&&GTM.calendar||[]).find(d=>d.d===cd)||{}).wk||1;
-  const weekItems=all.filter(t=>t.wk===cwk).sort((a,b)=>(a.calDay-b.calDay)||bySort(a,b));
-  const wdone=weekItems.filter(t=>t.done).length;
-  const weekHTML = weekItems.length
-    ? weekItems.map(taskRow).join("")
-    : `<div class="note">No calendar tasks scheduled for this week.</div>`;
-
-  const punches=(TasksAPI.punchlists||[]).map(punchBlock).join("");
-
-  return page("tasks",
-    head("Tasks","Your daily home. Today's action items, this week's calendar, and every punch list — all check-off-able and interlinked with accounts, pipeline, outreach and the roadmap. State persists locally; the morning cron agent keeps it fresh.")+
-    `<div class="daily-mission card pad-lg">
-       <div class="dm-row"><span class="dm-tag">ALL TASKS</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${done}/${total} · ${pct}%</span></div>
-       <p class="dm-mission">${esc((typeof DATA!=="undefined"&&DATA.daily&&DATA.daily.mission)||"Get free performance samples of both live products into buyers' hands — the only Month-1 win.")}</p>
-       <div class="note" style="margin-top:10px"><b>Deep day-by-day plan →</b> <a href="#today" onclick="go('today');return false" style="color:var(--gold-soft)">Daily Action Plan</a> · roll-up in the <a href="#roadmap" onclick="go('roadmap');return false" style="color:var(--gold-soft)">30/60/90 Roadmap</a>.</div>
-     </div>`+
-    sec("","Today · due or overdue")+todayHTML+
-    `<div class="chk-head"><h3 class="sub" style="margin:0">This Week · Week ${cwk}</h3><span class="chk-progress">${wdone}/${weekItems.length} done</span></div>`+
-    `<p class="lead" style="margin:2px 0 8px">The current calendar week rendered as live, checkable tasks. Checking one here also ticks it on the <a href="#gtm-30day" onclick="go('gtm-30day');return false" style="color:var(--gold-soft)">30-Day calendar</a>.</p>`+
-    weekHTML+
-    sec("","Punch lists")+
-    `<p class="lead" style="margin:2px 0 10px">Collapsible, check-off-able, progress-tracked. State persists across reloads.</p>`+
-    punches+
-    sec("","Quick add")+
-    `<div class="calc"><div class="qa-grid">
-      <div class="field" style="grid-column:span 2"><label>Task title</label><input type="text" id="qa_title" placeholder="e.g. Follow up with Pelican Oilfield on sample"></div>
-      <div class="field"><label>Owner</label><select id="qa_owner"><option value="jesse">Jesse</option><option value="victor">Victor</option><option value="both">Both</option></select></div>
-      <div class="field"><label>Priority</label><select id="qa_pri"><option value="P1">P1</option><option value="P0">P0</option><option value="P2">P2</option></select></div>
-      <div class="field"><label>Due</label><input type="date" id="qa_due" value="${TasksAPI.todayYMD()}"></div>
-      <div class="field" style="justify-content:flex-end"><button class="btn btn-green" onclick="tAdd()">Add task</button></div>
-    </div><div class="note" style="margin:12px 0 0">Quick-adds persist in your browser (overlay). Base tasks & punch lists live in <code>tasks-data.js</code> and are refreshed by the morning cron agent.</div></div>`
-  );
-}
-
-/* re-render only the tasks section in place (keeps router + nav intact) */
-window.renderTasks=function(){
-  const cur=document.getElementById("sec-tasks"); if(!cur) return;
-  const tmp=document.createElement("div"); tmp.innerHTML=rTasks();
-  const fresh=tmp.firstElementChild;
-  if(cur.classList.contains("active")) fresh.classList.add("active");
-  cur.replaceWith(fresh);
-};
-window.tTog=key=>{ const on=!getChecks()[key]; setCheck(key,on); renderTasks(); };
-window.tCycle=id=>{ const t=TasksAPI.all().find(x=>x.id===id); if(!t)return; const order=["todo","doing","blocked"]; TasksAPI.setStatus(id, order[(order.indexOf(t.status)+1)%order.length]); renderTasks(); };
-window.tGo=(view,anchor)=>{ go(view); if(anchor){ const el=document.getElementById(anchor); if(el) setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),60); } };
-window.tAdd=function(){
-  const el=document.getElementById("qa_title"); const title=el?el.value.trim():"";
-  if(!title){ toast("Enter a task title"); return; }
-  TasksAPI.add({ title, owner:document.getElementById("qa_owner").value, priority:document.getElementById("qa_pri").value, due:document.getElementById("qa_due").value||TasksAPI.todayYMD() });
-  toast("Task added"); renderTasks();
-};
-
 /* --- Daily Action Plan (top-of-app focus) --- */
 function rDaily(){
   const D=DATA.daily;
@@ -289,7 +105,7 @@ function rDaily(){
     const lanes=day.lanes.map(l=>{
       const s=secMap[l.k]||{c:"#8a93a0",t:l.k};
       const rows=l.items.map((it,i)=>{
-        const pri=stateBadge("priority", it.pri);
+        const pri=badge(it.pri,it.pri==="P0"?"pri-1":it.pri==="P1"?"pri-2":"pri-3");
         const label=`${whoBadge(it.o)}${pri} ${esc(it.t)}<span class="del">→ ${esc(it.del)}</span>`;
         return chk(`daily:${day.d}:${l.k}:${i}`,label,false);
       }).join("");
@@ -305,16 +121,16 @@ function rDaily(){
     </div>`;
   }).join("");
   return page("today",
-    head("Daily Action Plan","Day-by-day, sector-by-sector, the exact plan to stay focused. Work top to bottom; every item is a checkbox that persists across reloads.")+
+    head("Daily Action Plan","Day-by-day, sector-by-sector — the exact plan to stay focused. Work top to bottom; every item is a checkbox that persists across reloads.")+
     `<div class="daily-mission card pad-lg">
        <div class="dm-row"><span class="dm-tag">THE MISSION</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
        <p class="dm-mission">${esc(D.mission)}</p>
        <div class="note" style="margin-top:10px"><b>2-week target:</b> ${esc(D.target)}</div>
      </div>`+
     legend+
-    sec("","The 2-week build-out · day by day")+
+    sec("","The 2-week build-out — day by day")+
     days+
-    `<div class="chk-head" style="margin-top:14px"><span class="note" style="margin:0;flex:1"><b>Days 11–90 →</b> continue in the <a href="#roadmap" onclick="go('roadmap');return false" style="color:var(--gold-soft)">30/60/90 Roadmap</a> and track hygiene in the <a href="#checklist" onclick="go('checklist');return false" style="color:var(--gold-soft)">Launch Checklist</a>.</span><span class="chk-reset" onclick="resetChecks('daily:')">Reset daily checkmarks</span></div>`
+    `<div class="chk-head" style="margin-top:14px"><span class="note" style="margin:0;flex:1"><b>Days 11–90 →</b> continue in the <a href="#roadmap" onclick="go('roadmap');return false" style="color:var(--gold-soft)">Roadmap &amp; Checklist</a> section (30/60/90 + launch gates live there now).</span><span class="chk-reset" onclick="resetChecks('daily:')">Reset daily checkmarks</span></div>`
   );
 }
 
@@ -335,7 +151,7 @@ function rOverview(){
     `<div class="note ok"><b>The molecule does double duty.</b> ${esc(DATA.messaging.dualStory)}</div>`+
     `<div class="grid g3">${e.reinforce.map(r=>`<div class="card"><p>${esc(r)}</p></div>`).join("")}</div>`+
     `<div class="note" style="margin-top:14px"><b>Fastest path to large offtake:</b> ${esc(e.fastOfftake)}</div>`+
-    sec("","Claim discipline · proof hierarchy")+
+    sec("","Claim discipline — proof hierarchy")+
     `<p class="lead">Every claim in this system is tagged to a tier. Never present a lower-tier claim as a higher one.</p>`+
     table(["Tier","Classification","Examples"],DATA.proofTiers.map(p=>[tier(p.t),`<strong>${esc(p.name)}</strong>`,esc(p.ex)]))
   );
@@ -348,7 +164,7 @@ function rAssumptions(){
     sec("2A","Assumptions")+
     table(["Assumption","Why it matters","Confidence","Verify"],DATA.assumptions.map(a=>[
       `<strong>${esc(a.a)}</strong>`,esc(a.why),
-      stateBadge("confidence", a.conf),esc(a.verify)]))+
+      badge(a.conf, a.conf==="High"?"badge-green":a.conf==="Med"?"badge-gold":"badge-red"),esc(a.verify)]))+
     sec("2B","Missing Inputs")+
     table(["Input needed","Owner","Impact if unknown","Temporary assumption"],DATA.missingInputs.map(m=>[
       `<strong>${esc(m.i)}</strong>`,esc(m.who),esc(m.impact),`<em style="color:var(--gold-soft)">${esc(m.tmp)}</em>`]))+
@@ -363,11 +179,11 @@ function rSegments(){
   // Month-1 beachhead score: weight speed-to-LOI heavily; carbon is parked (shown as a column, excluded from the score).
   const ranked=[...DATA.segments].map(s=>({s,score:s.rank.speed*3+s.rank.recurring+s.rank.margin+s.rank.strategic+s.rank.freight-s.rank.complexity})).sort((a,b)=>b.score-a.score);
   const top3=ranked.slice(0,3).map(r=>r.s.name);
-  const filters=`<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="segFilter(this,'all')">All</span>${groups.map(g=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="segFilter(this,'${esc(g)}')">${esc(g)}</span>`).join("")}</div>`;
+  const filters=`<div class="filters"><span class="pill active" onclick="segFilter(this,'all')">All</span>${groups.map(g=>`<span class="pill" onclick="segFilter(this,'${esc(g)}')">${esc(g)}</span>`).join("")}</div>`;
   const cards=DATA.segments.map(s=>segCard(s)).join("");
   return page("segments",
-    head("ICP Definition & Segmentation","Tight profiles for every buyer type, ranked by Month-1 speed-to-LOI (carbon is parked to days 61–90, shown as a column, excluded from the beachhead score).")+
-    `<div class="note ok"><b>Recommended beachhead (top 3):</b> ${top3.map(t=>badge(t,"positive")).join(" ")}</div>`+
+    head("ICP Definition & Segmentation","Tight profiles for every buyer type, ranked by Month-1 speed-to-LOI (carbon is parked to days 61–90 — shown as a column, excluded from the beachhead score).")+
+    `<div class="note ok"><b>Recommended beachhead (top 3):</b> ${top3.map(t=>badge(t,"badge-green")).join(" ")}</div>`+
     sec("3","Segment ranking")+
     table(["Segment","Group","Speed","Recurring","Margin","Carbon","Strategic","Freight","Composite"],
       ranked.map(r=>[`<strong>${esc(r.s.name)}</strong>`,esc(r.s.group),
@@ -379,7 +195,7 @@ function rSegments(){
 function rankbar(n){return `<div class="rank-bar"><span style="width:${n*20}%"></span></div>`;}
 function segCard(s){
   return `<div class="card seg-card" data-group="${esc(s.group)}">
-    <h4>${esc(s.name)} ${s.tag?badge(s.tag,s.tag.includes("#1")?"positive":s.tag.includes("Monetization")?"warning":"info"):""}</h4>
+    <h4>${esc(s.name)} ${s.tag?badge(s.tag,s.tag.includes("#1")?"badge-green":s.tag.includes("Monetization")?"badge-gold":"badge-blue"):""}</h4>
     <p style="margin-bottom:8px">${esc(s.summary)}</p>
     ${s.coreProblem?`<div class="note warn" style="margin:8px 0"><b>Core problem we solve:</b> ${esc(s.coreProblem)}</div>`:""}
     ${s.valueProp?`<div class="note ok" style="margin:8px 0"><b>Our value:</b> ${esc(s.valueProp)}</div>`:""}
@@ -396,23 +212,23 @@ function segCard(s){
       <div><b style="color:var(--text)">Order:</b> ${esc(s.order)} · <b style="color:var(--text)">Cycle:</b> ${esc(s.cycle)}</div>
       <div><b style="color:var(--text)">First offer:</b> ${esc(s.offer)}</div>
       <div><b style="color:var(--text)">Channel:</b> ${esc(s.channel)}</div>
-      <div><b style="color:var(--text)">Proof to lead with:</b> ${s.proof.map(p=>badge(p,"info")).join(" ")}</div>
-      <div style="margin-top:4px">${s.tags.map(t=>`<span class="badge badge--neutral" style="font-size:10px">${esc(t)}</span>`).join(" ")}</div>
+      <div><b style="color:var(--text)">Proof to lead with:</b> ${s.proof.map(p=>badge(p,"badge-blue")).join(" ")}</div>
+      <div style="margin-top:4px">${s.tags.map(t=>`<span class="badge badge-muted" style="font-size:10px">${esc(t)}</span>`).join(" ")}</div>
     </div>
   </div>`;
 }
 window.segFilter=(el,g)=>{
-  document.querySelectorAll("#sec-segments .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
+  document.querySelectorAll("#sec-segments .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
   document.querySelectorAll("#segCards .seg-card").forEach(c=>c.style.display=(g==="all"||c.dataset.group===g)?"":"none");
 };
 
 /* --- Personas --- */
 function rPersonas(){
   return page("personas",
-    head("Buyer Personas","What each buyer cares about, fears, and needs, with the discovery questions, opener, and CTA that land.")+
+    head("Buyer Personas","What each buyer cares about, fears, and needs — with the discovery questions, opener, and CTA that land.")+
     `<div class="grid g2">${DATA.personas.map(p=>`
       <div class="card pad-lg">
-        <h4>${esc(p.name)} ${badge(p.seg,"info")}</h4>
+        <h4>${esc(p.name)} ${badge(p.seg,"badge-blue")}</h4>
         <div style="display:grid;gap:6px;font-size:12.5px;margin-top:6px">
           <div><b style="color:var(--green-bright)">Cares about:</b> ${esc(p.cares)}</div>
           <div><b style="color:var(--red-soft)">Fears:</b> ${esc(p.fears)}</div>
@@ -436,14 +252,14 @@ function rMessaging(){
   const trackBlock=t=>`<div class="card pad-lg" style="border-top:3px solid ${accent(t.id)};margin-bottom:16px">
     <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
       <h3 style="margin:0;color:${accent(t.id)}">${esc(t.product)}</h3>
-      <span class="badge badge--neutral">${esc(t.audience)}</span>
+      <span class="badge badge-muted">${esc(t.audience)}</span>
     </div>
     <div class="note" style="margin:10px 0"><b>Avatar:</b> ${esc(t.avatar)}</div>
     <p style="color:var(--text);font-size:13.5px;line-height:1.6"><b style="color:${accent(t.id)}">Positioning:</b> ${esc(t.positioning)}</p>
     <div class="card" style="margin:10px 0"><h4>One-liner</h4><p style="color:var(--text)">${esc(t.oneLiner)}</p></div>
     <div class="grid g2">
-      <div class="card">${script(t.product+" · 30-second pitch",t.pitch30)}</div>
-      <div class="card">${script(t.product+" · 90-second pitch",t.pitch90)}</div>
+      <div class="card">${script(t.product+" — 30-second pitch",t.pitch30)}</div>
+      <div class="card">${script(t.product+" — 90-second pitch",t.pitch90)}</div>
     </div>
     <div class="grid g2" style="margin-top:10px">
       <div><b style="font-size:11px;color:var(--green-bright)">Proof to use</b><ul>${t.proof.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>
@@ -451,14 +267,14 @@ function rMessaging(){
     </div>
   </div>`;
   return page("messaging",
-    head("Value Proposition & Messaging","TWO separate avatars. Every pitch is single-product. Absorbent Pellets sell to industrial/EHS/spill buyers; Biochar sells to ag/soil/grower buyers. Different person, different pain, different proof.")+
+    head("Value Proposition & Messaging","TWO separate avatars — every pitch is single-product. Absorbent Pellets sell to industrial/EHS/spill buyers; Biochar sells to ag/soil/grower buyers. Different person, different pain, different proof.")+
     `<div class="note warn"><b>Split rule:</b> ${esc(m.splitRule)}</div>`+
-    sec("5","Track A · Absorbent Pellets (industrial)")+trackBlock(m.tracks[0])+
-    sec("","Track B · 100% Biochar (agriculture)")+trackBlock(m.tracks[1])+
+    sec("5","Track A — Absorbent Pellets (industrial)")+trackBlock(m.tracks[0])+
+    sec("","Track B — 100% Biochar (agriculture)")+trackBlock(m.tracks[1])+
     sec("","Comparison messaging (use only within the matching track)")+
     table(["Positioned against","Why we win"],m.comparisons.map(c=>[`<strong>${esc(c.vs)}</strong>`,esc(c.win)]))+
-    sec("","Proof-point map (claim safety, both products)")+
-    `<p class="lead">Match every claim to its tier. Use the safe wording. Avoid the risky wording. It creates legal & credibility exposure.</p>`+
+    sec("","Proof-point map (claim safety — both products)")+
+    `<p class="lead">Match every claim to its tier. Use the safe wording. Avoid the risky wording — it creates legal & credibility exposure.</p>`+
     table(["Claim","Tier","Buyer relevance","Source","✅ Safe wording","⛔ Avoid"],m.proofMap.map(p=>[
       `<strong>${esc(p.claim)}</strong>`,tier(p.tier),esc(p.rel),esc(p.src),
       `<span style="color:var(--green-bright)">${esc(p.safe)}</span>`,`<span style="color:var(--red-soft)">${esc(p.risk)}</span>`]))
@@ -471,7 +287,7 @@ function rBiochar(){
   const avatarCard=a=>`<div class="card pad-lg" style="border-top:3px solid var(--green-bright);margin-bottom:14px">
     <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
       <h4 style="margin:0;color:var(--green-bright)">${esc(a.name)}</h4>
-      <span class="badge badge--neutral">${esc(a.who)}</span>
+      <span class="badge badge-muted">${esc(a.who)}</span>
     </div>
     <div style="font-size:12.8px;display:grid;gap:5px;margin-top:8px">
       <div><b style="color:var(--red-soft)">Pain:</b> ${esc(a.pain)}</div>
@@ -482,17 +298,17 @@ function rBiochar(){
     </div>
   </div>`;
   return page("biochar",
-    head("Biochar · Specs, Data & Avatars","Biochar is the dynamic product: one material, MANY buyers. Full spec, benefit-by-mechanism, industry comparisons, and a differentiated avatar for each buyer type. Pull the ONE benefit + comparison that fits the buyer in front of you.")+
+    head("Biochar — Specs, Data & Avatars","Biochar is the dynamic product: one material, MANY buyers. Full spec, benefit-by-mechanism, industry comparisons, and a differentiated avatar for each buyer type. Pull the ONE benefit + comparison that fits the buyer in front of you.")+
     `<div class="card pad-lg"><p style="color:var(--text);font-size:13.5px;line-height:1.6">${esc(b.intro)}</p></div>`+
     sec("","Technical spec sheet")+
     table(["Property","Value"],b.spec.map(r=>[`<strong>${esc(r[0])}</strong>`,esc(r[1])]))+
-    sec("","Benefits by mechanism · match to the avatar")+
+    sec("","Benefits by mechanism — match to the avatar")+
     table(["Mechanism","What it does","Best for","Tier"],b.benefits.map(x=>[
       `<strong>${esc(x.mech)}</strong>`,esc(x.b),`<span style="color:var(--gold-soft)">${esc(x.who)}</span>`,tier(x.tier)]))+
-    sec("","Industry comparisons · how biochar stacks up")+
+    sec("","Industry comparisons — how biochar stacks up")+
     b.comparisons.map(c=>`<h3 class="sub">${esc(c.h)}</h3>`+table(c.cols.map(h=>esc(h)),c.rows.map(r=>r.map(x=>esc(x))))).join("")+
-    sec("","Biochar avatars · one material, differentiated per buyer")+
-    `<p class="lead">Absorbent Pellets have one industrial avatar; biochar sells across all of these. Each gets a different lead benefit and a different claim boundary, never a generic biochar pitch.</p>`+
+    sec("","Biochar avatars — one material, differentiated per buyer")+
+    `<p class="lead">Absorbent Pellets have one industrial avatar; biochar sells across all of these. Each gets a different lead benefit and a different claim boundary — never a generic biochar pitch.</p>`+
     b.avatars.map(avatarCard).join("")+
     sec("","Claim guardrails")+
     `<div class="note warn"><ul>${b.guardrails.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`
@@ -503,14 +319,14 @@ function rBiochar(){
 function rMarket(){
   const mk=DATA.market;
   return page("market",
-    head("TAM / SAM / SOM & Beachhead Strategy","A transport-aware model built from cited public anchors (USGS, USDA-AMS, IFEEDER/NARA, Grand View, Puro/CDR.fyi). [A] = stated assumption. Freight, not demand, caps the addressable market, differently per product by $/ton.")+
+    head("TAM / SAM / SOM & Beachhead Strategy","A transport-aware model built from cited public anchors (USGS, USDA-AMS, IFEEDER/NARA, Grand View, Puro/CDR.fyi). [A] = stated assumption. Freight — not demand — caps the addressable market, differently per product by $/ton.")+
     `<div class="note warn">${esc(mk.note)}</div>`+
-    sec("6","Market model · TAM / SAM / SOM (low / base / high)")+
+    sec("6","Market model — TAM / SAM / SOM (low / base / high)")+
     table(["Market","TAM (tons / $)","SAM (freight-viable)","SOM year 1 (low / base / high)","Mode & note"],mk.som.map(x=>[
       `<strong>${esc(x.m)}</strong>`,esc(x.tam),esc(x.sam),`<span style="color:var(--green-bright)">${esc(x.som)}</span>`,esc(x.note)]))+
     (mk.modeVerdict?sec("","Transport mode verdict by product")+
       table(["Product","Best truck radius","Rail verdict","Primary reason"],mk.modeVerdict.map(m=>[
-        `<strong>${esc(m.p)}</strong>`,`<span class="t-num">${esc(m.truck)}</span>`,badge(m.rail,/Strong|Material/.test(m.rail)?"positive":/Marginal|Amplifies/.test(m.rail)?"warning":"neutral"),esc(m.why)])):"")+
+        `<strong>${esc(m.p)}</strong>`,`<span class="t-num">${esc(m.truck)}</span>`,badge(m.rail,/Strong|Material/.test(m.rail)?"badge-green":/Marginal|Amplifies/.test(m.rail)?"badge-gold":"badge-muted"),esc(m.why)])):"")+
     (mk.transport?sec("","Transport & rail model")+
       `<div class="card"><ul>${mk.transport.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`:"")+
     (mk.priceRefs?sec("","Reference prices used")+
@@ -519,13 +335,13 @@ function rMarket(){
     table(["Filter","Rule"],mk.accountCriteria.map(c=>[`<strong>${esc(c.f)}</strong>`,esc(c.v)]))+
     (mk.assumptions?sec("","Key assumptions [A]")+
       `<div class="card"><ul>${mk.assumptions.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:"")+
-    (mk.gaps?sec("","Open gaps · treat as unverified")+
+    (mk.gaps?sec("","Open gaps — treat as unverified")+
       `<div class="note warn"><ul>${mk.gaps.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`:"")+
     (mk.verifyFirst?sec("","Verify-first (before any investor/lender deck)")+
       `<div class="card"><ul>${mk.verifyFirst.map(v=>`<li>${esc(v)}</li>`).join("")}</ul></div>`:"")+
-    sec("","Sourcing workflow · build the first 100")+
+    sec("","Sourcing workflow — build the first 100")+
     `<div class="card"><ul>${mk.sourcing.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`+
-    `<div class="note"><b>Enrichment:</b> Apollo.io is connected to this workspace. Use it to find contacts, verify emails, and push accounts into the app.</div>`
+    `<div class="note"><b>Enrichment:</b> Apollo.io is connected to this workspace — use it to find contacts, verify emails, and push accounts into the app.</div>`
   );
 }
 
@@ -537,19 +353,19 @@ function rBarge(){
     `<div class="note warn">${esc(b.headline)}</div>`+
     sec("6B·1","White Castle waterway geography")+
     `<div class="card"><ul>${b.geography.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`+
-    sec("6B·2","Mode comparison · the cost structure")+
+    sec("6B·2","Mode comparison — the cost structure")+
     table(["Mode","Linehaul","Fixed / handling","Payload","Note"],b.modeCompare.map(m=>[
       `<strong>${esc(m.mode)}</strong>`,`<span class="t-num">${esc(m.linehaul)}</span>`,esc(m.fixed),`<span class="t-num">${esc(m.cap)}</span>`,esc(m.note)]))+
-    sec("6B·3","Delivered cost/ton by lane · barge vs truck vs rail")+
+    sec("6B·3","Delivered cost/ton by lane — barge vs truck vs rail")+
     table(["Destination","River-mi","Barge $/ton","Truck $/ton","Rail $/ton","Verdict","Why"],b.lanes.map(x=>[
       `<strong>${esc(x.dest)}</strong>`,`<span class="t-num">${esc(x.mi)}</span>`,`<span class="t-num" style="color:var(--green-bright)">${esc(x.barge)}</span>`,`<span class="t-num">${esc(x.truck)}</span>`,`<span class="t-num">${esc(x.rail)}</span>`,badge(x.verdict,x.cls),esc(x.note)]))+
-    sec("6B·4","Break-even logic · when barge starts to pay")+
+    sec("6B·4","Break-even logic — when barge starts to pay")+
     `<div class="card"><ul>${b.breakeven.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
     sec("6B·5","Capacity reality check")+
     `<div class="note warn"><ul>${b.capacity.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
     sec("6B·6","Key assumptions [A]")+
     `<div class="card"><ul>${b.assumptions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
-    sec("6B·7","Verify-first · before quoting any barge lane")+
+    sec("6B·7","Verify-first — before quoting any barge lane")+
     `<div class="card"><ul>${b.verifyFirst.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`
   );
 }
@@ -561,18 +377,18 @@ function rPipeline(){
     <div class="kcol"><div class="kcol-h"><strong>${esc(s.s)}</strong><span class="prob">${s.prob}%</span></div>
     <div class="kcol-b">${esc(s.def)}
       <div class="crit"><b>Exit:</b> ${esc(s.exit)}</div>
-      <div class="crit"><b>Fields:</b> ${s.fields.map(f=>badge(f,"neutral")).join(" ")}</div>
+      <div class="crit"><b>Fields:</b> ${s.fields.map(f=>badge(f,"badge-muted")).join(" ")}</div>
       <div class="crit"><b>Next:</b> ${esc(s.next)}</div>
       <div class="crit" style="color:var(--red-soft)"><b>Don't advance:</b> ${esc(s.noAdv)}</div>
     </div></div>`).join("")}</div>`;
   return page("pipeline",
-    head("Sales Pipeline Design · for your Replit app","Object model, deal types, and three connected pipelines with stage exit criteria and the exact CRM fields to add. This is the build spec for your app's sales section.")+openTaskBadge("pipeline")+
+    head("Sales Pipeline Design — for your Replit app","Object model, deal types, and three connected pipelines with stage exit criteria and the exact CRM fields to add. This is the build spec for your app's sales section.")+
     sec("7A","Object model")+
     table(["Object","Key fields"],DATA.objectModel.map(o=>[`<strong>${esc(o.o)}</strong>`,esc(o.key)]))+
-    sec("7B","Deal types")+`<div class="filters">${DATA.dealTypes.map(d=>`<span class="pill is-static active">${esc(d)}</span>`).join("")}</div>`+
-    sec("7C","Pipeline 1 · Mid-market recurring")+kanban("",pl.midmarket)+
-    sec("","Pipeline 2 · Bulk offtake / supply")+kanban("",pl.offtake)+
-    sec("","Pipeline 3 · Carbon-credit buyer")+kanban("",pl.carbon)+
+    sec("7B","Deal types")+`<div class="filters">${DATA.dealTypes.map(d=>`<span class="pill active" style="cursor:default">${esc(d)}</span>`).join("")}</div>`+
+    sec("7C","Pipeline 1 — Mid-market recurring")+kanban("",pl.midmarket)+
+    sec("","Pipeline 2 — Bulk offtake / supply")+kanban("",pl.offtake)+
+    sec("","Pipeline 3 — Carbon-credit buyer")+kanban("",pl.carbon)+
     `<div class="note warn"><b>Carbon guardrail:</b> never contract more credits than deployable tons. Carbon supply = deployed + committed product tons only.</div>`+
     sec("7D","Required CRM fields")+
     `<div class="grid g2">
@@ -580,7 +396,7 @@ function rPipeline(){
       <div class="card"><h4>Product + carbon economics fields</h4><ul>${DATA.crmFields.economics.map(f=>`<li>${esc(f)}</li>`).join("")}</ul></div>
     </div>`+
     sec("7E","Dashboard views to build")+
-    `<div class="filters">${DATA.dashboards.map(d=>`<span class="pill is-static">${esc(d)}</span>`).join("")}</div>`+
+    `<div class="filters">${DATA.dashboards.map(d=>`<span class="pill" style="cursor:default">${esc(d)}</span>`).join("")}</div>`+
     sec("7F","Schema (TypeScript-style)")+schemaBlock()
   );
 }
@@ -628,8 +444,8 @@ function rAccounts(){
   const segs=[...new Set(SAMPLE_ACCOUNTS.map(a=>a[1]))];
   const rows=SAMPLE_ACCOUNTS.map((a,i)=>accRow(a,i)).join("");
   return page("accounts",
-    head("Target Accounts","A working account list view, filter by segment, sort by priority. This is a seeded demo; replace with your sourced Gulf South list (see TAM tab for the workflow).")+openTaskBadge("accounts")+
-    `<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="accFilter(this,'all')">All segments</span>${segs.map(s=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="accFilter(this,'${esc(s)}')">${esc(s)}</span>`).join("")}</div>`+
+    head("Target Accounts","A working account list view — filter by segment, sort by priority. This is a seeded demo; replace with your sourced Gulf South list (see TAM tab for the workflow).")+
+    `<div class="filters"><span class="pill active" onclick="accFilter(this,'all')">All segments</span>${segs.map(s=>`<span class="pill" onclick="accFilter(this,'${esc(s)}')">${esc(s)}</span>`).join("")}</div>`+
     `<div class="tbl-wrap"><table id="accTbl"><thead><tr>
       <th>Account</th><th>Segment</th><th>Location</th><th>Freight zone</th><th>Est. tons/yr</th><th>Priority</th><th>Status</th><th>Next action</th>
     </tr></thead><tbody>${rows}</tbody></table></div>`+
@@ -638,33 +454,34 @@ function rAccounts(){
 }
 function accRow(a,i){
   const [name,seg,loc,zone,tons,pri,status]=a;
-  const priTone=pri>=5?"critical":pri>=4?"warning":"neutral";
+  const priCls=pri>=5?"pri-1":pri>=4?"pri-2":"pri-3";
+  const zc=zone==="A"?"badge-green":zone==="B"?"badge-gold":"badge-red";
   const next={Prospect:"First touch",Contacted:"Book discovery",Discovery:"Ship sample",Sample:"Trial check-in"}[status]||"Advance";
   return `<tr data-seg="${esc(seg)}"><td><strong>${esc(name)}</strong></td><td>${esc(seg)}</td><td>${esc(loc)}</td>
-    <td>${stateBadge("freightZone",zone)}</td><td class="t-num">${tons?tons.toLocaleString():"-"}</td>
-    <td>${badge("P"+pri,priTone,{sr:"priority score"})}</td><td>${stateBadge("dealStage",status)}</td><td>${esc(next)}</td></tr>`;
+    <td>${badge("Zone "+zone,zc)}</td><td class="t-num">${tons?tons.toLocaleString():"—"}</td>
+    <td>${badge("P"+pri,priCls)}</td><td>${badge(status,"badge-blue")}</td><td>${esc(next)}</td></tr>`;
 }
 window.accFilter=(el,s)=>{
-  document.querySelectorAll("#sec-accounts .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
+  document.querySelectorAll("#sec-accounts .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
   document.querySelectorAll("#accTbl tbody tr").forEach(r=>r.style.display=(s==="all"||r.dataset.seg===s)?"":"none");
 };
 
 /* --- Outreach --- */
 function rOutreach(){
-  const filters=`<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="outFilter(this,'all')">All segments</span>${DATA.outreach.map((o,i)=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="outFilter(this,'${i}')">${esc(o.seg)}</span>`).join("")}</div>`;
+  const filters=`<div class="filters"><span class="pill active" onclick="outFilter(this,'all')">All segments</span>${DATA.outreach.map((o,i)=>`<span class="pill" onclick="outFilter(this,'${i}')">${esc(o.seg)}</span>`).join("")}</div>`;
   const blocks=DATA.outreach.map((o,i)=>`
     <div class="out-block" data-idx="${i}">
-      <h3 class="sub">${esc(o.seg)} · ${esc(o.persona)}</h3>
+      <h3 class="sub">${esc(o.seg)} — ${esc(o.persona)}</h3>
       ${o.steps.map(s=>script(s.t,s.b)).join("")}
       <div class="note"><b>Nurture:</b> ${esc(o.nurture)}</div>
     </div>`).join("");
   return page("outreach",
-    head("Outreach Engine","Human, direct, credible sequences per segment: email, call, voicemail, LinkedIn, breakup, and nurture. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+openTaskBadge("outreach")+
+    head("Outreach Engine","Human, direct, credible sequences per segment — email, call, voicemail, LinkedIn, breakup, and nurture. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
     filters+blocks
   );
 }
 window.outFilter=(el,i)=>{
-  document.querySelectorAll("#sec-outreach .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
+  document.querySelectorAll("#sec-outreach .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
   document.querySelectorAll(".out-block").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");
 };
 
@@ -672,12 +489,12 @@ window.outFilter=(el,i)=>{
 function rWindrow(){
   const w=DATA.windrowTrial;
   const sampleRows=[
-    ["0","___","118","120","55","54","N","Build day · baseline"],
+    ["0","___","118","120","55","54","N","Build day — baseline"],
     ["3","___","135","148","54","54","Y","Treatment heating faster"],
     ["7","___","150","158","52","53","Y","Both thermophilic"],
     ["…","___","…","…","…","…","…","…"],
   ];
-  return sec("","Windrow Trial Protocol · composter closing asset")+
+  return sec("","Windrow Trial Protocol — composter closing asset")+
     `<div class="note ok"><b>Purpose:</b> ${esc(w.goal)}</div>`+
     `<div class="grid g2">
       <div class="card"><h4>🧪 Trial design (A/B)</h4><p>${esc(w.design)}</p></div>
@@ -702,7 +519,7 @@ function rWindrow(){
     windrowCopy(w);
 }
 function windrowCopy(w){
-  const txt=`WINDROW TRIAL PROTOCOL · Biochar vs Control
+  const txt=`WINDROW TRIAL PROTOCOL — Biochar vs Control
 Goal: ${w.goal}
 
 DESIGN: ${w.design}
@@ -733,18 +550,18 @@ ${w.guardrails.map(g=>`- ${g}`).join("\n")}`;
 /* --- Collateral --- */
 function rCollateral(){
   return page("collateral",
-    head("Collateral Library","Pitch deck outline, one-pagers, calculator specs, sample workflow, and the objection battlecard, all build-ready.")+
+    head("Collateral Library","Pitch deck outline, one-pagers, calculator specs, sample workflow, and the objection battlecard — all build-ready.")+
     sec("9","Master pitch deck (10–12 slides)")+
     table(["#","Slide","Purpose","Key bullets","CTA"],DATA.deck.map((s,i)=>[
       `<strong>${i+1}</strong>`,`<strong>${esc(s.s)}</strong>`,esc(s.p),
       `<ul style="margin:0">${s.b.map(b=>`<li>${esc(b)}</li>`).join("")}</ul>`,esc(s.cta)]))+
     sec("","One-pagers to produce")+
-    `<div class="filters">${DATA.onePagers.map(o=>`<span class="pill is-static">${esc(o)}</span>`).join("")}</div>`+
+    `<div class="filters">${DATA.onePagers.map(o=>`<span class="pill" style="cursor:default">${esc(o)}</span>`).join("")}</div>`+
     sec("","ROI calculators (specs)")+
     `<div class="grid g2">${DATA.calculators.map(c=>`<div class="card"><h4>${esc(c.name)}</h4>
       <b style="font-size:11.5px;color:var(--gold-soft)">Inputs</b><ul>${c.inputs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
       <div style="font-size:12px;margin-top:6px"><b style="color:var(--text)">Formula:</b> <span style="font-family:var(--mono);color:var(--text-dim)">${esc(c.formula)}</span></div>
-      <div style="font-size:12px;margin-top:4px"><b style="color:var(--text)">Saves to CRM:</b> ${c.saves.map(s=>badge(s,"neutral")).join(" ")}</div>
+      <div style="font-size:12px;margin-top:4px"><b style="color:var(--text)">Saves to CRM:</b> ${c.saves.map(s=>badge(s,"badge-muted")).join(" ")}</div>
     </div>`).join("")}</div>`+
     `<div class="note">Two of these run live in the <b>Pricing & Economics</b> tab.</div>`+
     sec("","Sample request workflow")+
@@ -786,14 +603,14 @@ function rPricing(){
     table(["Product","Unit","Note"],p.tiers.map(x=>[`<strong>${esc(x.p)}</strong>`,`<span class="t-num">${esc(x.unit)}</span>`,esc(x.note)]))+
     sec("","Sample deal economics (placeholder)")+
     table(["Line","Value"],p.sampleDeal.map(x=>[`<strong>${esc(x.line)}</strong>`,`<span class="t-num">${esc(x.v)}</span>`]))+
-    `<div class="note"><b>Deal evaluation stack:</b> ${p.dealEval.map(d=>badge(d,"neutral")).join(" ")}</div>`+
-    sec("","Live calculator · Freight-aware delivered margin")+calcFreight()+
-    sec("","Live calculator · Product + Carbon blended value")+calcBlended()+
-    sec("","Live calculator · Absorbent cost-per-gallon")+calcAbsorbent()
+    `<div class="note"><b>Deal evaluation stack:</b> ${p.dealEval.map(d=>badge(d,"badge-muted")).join(" ")}</div>`+
+    sec("","Live calculator — Freight-aware delivered margin")+calcFreight()+
+    sec("","Live calculator — Product + Carbon blended value")+calcBlended()+
+    sec("","Live calculator — Absorbent cost-per-gallon")+calcAbsorbent()
   );
 }
 function field(id,label,val,step="any"){return `<div class="field"><label>${label}</label><input type="number" id="${id}" value="${val}" step="${step}" oninput="recalc()"></div>`;}
-function out(id,label,hero=false){return `<div class="o${hero?" hero":""}"><div class="ol">${label}</div><div class="ov" id="${id}">-</div></div>`;}
+function out(id,label,hero=false){return `<div class="o${hero?" hero":""}"><div class="ol">${label}</div><div class="ov" id="${id}">—</div></div>`;}
 function calcFreight(){
   return `<div class="calc"><div class="calc-grid">
     ${field("f_rev","Product revenue ($)",12000)}
@@ -805,7 +622,7 @@ function calcFreight(){
 }
 function calcBlended(){
   return `<div class="calc">
-    <div class="note" style="margin:0 0 12px"><b>Carbon figures are ESTIMATES</b>, excluded from committed margin until verified.</div>
+    <div class="note" style="margin:0 0 12px"><b>Carbon figures are ESTIMATES</b> — excluded from committed margin until verified.</div>
     <div class="calc-grid">
     ${field("b_tons","Tons",100)}
     ${field("b_pmargin","Product margin / ton ($)",70)}
@@ -824,15 +641,15 @@ function calcAbsorbent(){
     ${out("a_ours","Cost @ our ratio",true)}${out("a_wood","Cost @ wood 2.5:1")}${out("a_save","You save")}
   </div></div>`;
 }
-const money=n=>isFinite(n)?"$"+Math.round(n).toLocaleString():"-";
+const money=n=>isFinite(n)?"$"+Math.round(n).toLocaleString():"—";
 function recalc(){
   // freight
   const rev=+val("f_rev"),cogs=+val("f_cogs"),fr=+val("f_freight");
-  const dm=rev-cogs-fr; set("f_margin",money(dm)); set("f_pct",rev?Math.round(dm/rev*100)+"%":"-");
+  const dm=rev-cogs-fr; set("f_margin",money(dm)); set("f_pct",rev?Math.round(dm/rev*100)+"%":"—");
   // blended
   const tons=+val("b_tons"),pm=+val("b_pmargin"),tco=+val("b_tco2e"),pr=+val("b_price");
   const prod=tons*pm, carbon=tons*tco*pr; set("b_prod",money(prod)); set("b_carbon",money(carbon)); set("b_blended",money(prod+carbon));
-  // absorbent, water ~8.34 lb/gal
+  // absorbent — water ~8.34 lb/gal
   const gal=+val("a_gal"),price=+val("a_price"),ratio=+val("a_ratio");
   const lb=gal*8.34; const ours=(lb/ratio)*price, wood=(lb/2.5)*price;
   set("a_ours",money(ours)); set("a_wood",money(wood)); set("a_save",money(wood-ours));
@@ -847,7 +664,7 @@ function rPlaybook(){
     head("Sales Playbook","Operating principles, qualification, discovery scripts, proof-demo motion, proposal & close, and the fulfillment handoff.")+
     sec("11","Operating principles")+
     `<div class="grid g2">${pb.principles.map(p=>`<div class="card"><p style="color:var(--text)">→ ${esc(p)}</p></div>`).join("")}</div>`+
-    sec("","Qualification · "+esc(pb.qual.framework.split(":")[0]))+
+    sec("","Qualification — "+esc(pb.qual.framework.split(":")[0]))+
     `<div class="note">${esc(pb.qual.framework)}</div>`+
     `<div class="card"><ul>${pb.qual.criteria.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`+
     sec("","Discovery questions by area")+
@@ -863,7 +680,7 @@ function rPlaybook(){
     </div>`+
     sec("","Fulfillment & MRV handoff")+
     `<div class="card"><ul>${pb.handoff.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
-    `<div class="note warn"><b>Capture MRV data at delivery</b> (application, site/GPS, weights): no data, no carbon credit. This is the link between the product sale and the carbon revenue.</div>`
+    `<div class="note warn"><b>Capture MRV data at delivery</b> (application, site/GPS, weights) — no data, no carbon credit. This is the link between the product sale and the carbon revenue.</div>`
   );
 }
 
@@ -874,8 +691,8 @@ function rKpis(){
   return page("kpis",
     head("Metrics & KPIs","Leading and lagging indicators, conversion funnel, pipeline coverage, and dashboard-card specs for your app.")+
     sec("12","Indicators")+
-    `<div class="grid g2">${list("Leading indicators",k.leading,"positive")}${list("Lagging indicators",k.lagging,"warning")}</div>`+
-    `<div class="grid g2" style="margin-top:14px">${list("Conversion metrics",k.conversion,"info")}${list("Pipeline coverage",k.coverage,"neutral")}</div>`+
+    `<div class="grid g2">${list("Leading indicators",k.leading,"badge-green")}${list("Lagging indicators",k.lagging,"badge-gold")}</div>`+
+    `<div class="grid g2" style="margin-top:14px">${list("Conversion metrics",k.conversion,"badge-blue")}${list("Pipeline coverage",k.coverage,"badge-muted")}</div>`+
     sec("","Dashboard card specs")+
     table(["Card","Definition","Formula","Filters","Source","Warn threshold","Owner"],k.cards.map(c=>[
       `<strong>${esc(c.c)}</strong>`,esc(c.def),`<span class="t-num">${esc(c.formula)}</span>`,esc(c.filter),esc(c.src),
@@ -884,10 +701,10 @@ function rKpis(){
 }
 
 /* --- Roadmap --- */
-function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/both/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
+function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/daniel/i.test(o)?"daniel":/both|all/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
 function rRoadmap(){
   return page("roadmap",
-    head("30 / 60 / 90-Day Launch Roadmap","Every task is a checkbox, click to mark done; it stays done across reloads. Each shows who owns it (Jesse / Victor / Both) and the deliverable.")+openTaskBadge("roadmap")+
+    head("30 / 60 / 90-Day Launch Roadmap","Every task is a checkbox — click to mark done; it stays done across reloads. Each shows who owns it (Jesse / Victor / Both) and the deliverable.")+
     DATA.roadmap.map((ph,pi)=>{
       const keys=ph.tasks.map((t,ti)=>`roadmap:${pi}:${ti}`);
       const defs=ph.tasks.map(t=>!!t.done);
@@ -896,7 +713,7 @@ function rRoadmap(){
         `<span class="chk-progress">${st.done}/${st.total} done</span></div>`+
         (ph.note?`<p class="lead" style="margin:2px 0 8px">${esc(ph.note)}</p>`:"")+
         ph.tasks.map((t,ti)=>{
-          const pri=stateBadge("priority", t.pri);
+          const pri=badge(t.pri,t.pri==="P0"?"pri-1":t.pri==="P1"?"pri-2":"pri-3");
           const label=`${whoBadge(t.o)}${pri} ${esc(t.t)}<span class="del">→ ${esc(t.del)}${t.out?` · <i>${esc(t.out)}</i>`:""}</span>`;
           return chk(keys[ti],label,t.done);
         }).join("");
@@ -916,7 +733,7 @@ function rChecklist(){
       arr.map((x,i)=>{ const done=/\|done$/.test(x); const txt=x.replace(/\|done$/,""); return chk(keys[i],esc(txt),done); }).join("")+`</div>`;
   };
   return page("checklist",
-    head("Final Implementation Checklist","The concrete launch moves: website & product, app build, collateral, lists, first outbound, and the claims to verify. Every item is a checkbox that persists across reloads.")+
+    head("Final Implementation Checklist","The concrete launch moves — website & product, app build, collateral, lists, first outbound, and the claims to verify. Every item is a checkbox that persists across reloads.")+
     `<div class="grid g2">
       ${block("web","① Website & product launch",c.website)}
       ${block("build","② Build in the app",c.build)}
@@ -933,25 +750,46 @@ function rChecklist(){
 }
 
 /* ================= BOOT ================= */
-function render(){
-  const html=[rTasks(),rDaily(),rOverview(),rAssumptions(),rSegments(),rPersonas(),rMessaging(),rBiochar(),rMarket(),rBarge(),
-    rPipeline(),rAccounts(),rOutreach(),rCollateral(),rPricing(),rPlaybook(),rKpis(),rRoadmap(),rChecklist()].join("");
-  $("#content").innerHTML=html;
+/* Strip the outer <section…>…</section> wrapper that page() adds, so
+   several renderers can be stacked inside ONE consolidated section. */
+function stripBody(fn){
+  let h="";
+  try{ h=fn()||""; }catch(e){ console.error("renderer failed:",e&&e.message,e); return ""; }
+  return h.replace(/^\s*<section[^>]*>/,"").replace(/<\/section>\s*$/,"");
 }
-/* Keyboard activation for role="button" chips (filters) — Enter/Space fire
-   the same click handler, so interactive chips are fully keyboard operable. */
-document.addEventListener("keydown",e=>{
-  if(e.key!=="Enter"&&e.key!==" ")return;
-  const el=e.target.closest?.('[role="button"].pill');
-  if(el){ e.preventDefault(); el.click(); }
-});
+const G = k => (window.GTMB && GTMB[k]) ? GTMB[k] : (()=> "");
+const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
+/* newId → ordered list of renderer thunks it composes */
+function compose(id, thunks){
+  return page(id, thunks.map(stripBody).join(mergeDiv));
+}
+
+/* LEAN = daily-driver. BUILD = parked heavy modules (build-later.html). */
+const LEAN_SECTIONS=[
+  ["daily",    [rDaily, G("r30Day")]],
+  ["overview", [G("rSummary")]],
+  ["icp",      [rSegments, rPersonas, G("rCampaigns")]],
+  ["product",  [rMessaging, rBiochar]],
+  ["accounts", [rAccounts]],
+  ["outreach", [rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
+  ["assets",   [rCollateral, G("rSample")]],
+  ["playbook", [rPlaybook]],
+  ["roadmap",  [rRoadmap, G("rScale"), rChecklist, G("rPrelaunch"), G("rLaunch")]],
+];
+const BUILD_SECTIONS=[
+  ["b-overview",  [rOverview, rAssumptions]],
+  ["b-market",    [rMarket, rBarge, rPricing]],
+  ["b-crm",       [rPipeline, G("rCRM"), G("rLanding")]],
+  ["b-dashboard", [rKpis, G("rDashboard")]],
+];
+function render(){
+  const SECTIONS = (window.OS_VIEW==="build") ? BUILD_SECTIONS : LEAN_SECTIONS;
+  $("#content").innerHTML = SECTIONS.map(([id,thunks])=>compose(id,thunks)).join("");
+}
 buildNav();
 render();
 $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
-/* Preserve the original hash: plugins (gtm.js) register their own NAV views
-   after this boot runs, so a direct visit to e.g. #gtm-calling must be
-   remembered here before we fall back to "tasks". */
-const start=(location.hash||"#tasks").slice(1);
-window.__bootStart=start;
-go(NAV.flatMap(g=>g.items).some(i=>i.id===start)?start:"tasks");
+const defaultId = NAV[0].items[0].id;
+const start=(location.hash||"").slice(1);
+go(NAV.flatMap(g=>g.items).some(i=>i.id===start)?start:defaultId);
 recalc();
