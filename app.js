@@ -28,12 +28,12 @@ document.addEventListener("click", e=>{
 /* ---- spec sheet downloads ---- */
 const SPEC_SHEETS = {
   "absorbent-pellets": {
-    file: "/assets/spec sheets/Absorbent-Pellets-Specification-Sheet.pdf",
+    file: "assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf",
     name: "Absorbent-Pellets-Spec-Sheet.pdf"
   },
   "biochar": {
-    file: "/assets/spec sheets/Biochar-Premium-Specification-Sheet.pdf",
-    name: "Biochar-Premium-Spec-Sheet.pdf"
+    file: "assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf",
+    name: "ProGreaux-Bagasse-Biochar-Technical-Report.pdf"
   }
 };
 
@@ -217,7 +217,7 @@ function renderHome(){
     const isLive = p.avail==="live";
     // Homepage showcase sections 3, 4 & 5 (index 2, 3 & 4) use "Stay informed" instead of a free-sample CTA.
     const notifyPrimary = i===2 || i===3 || i===4;
-    const primary = isLive ? {label:"Get a free sample",href:(p.id==="absorbent-pellets"||p.id==="agricultural-biochar")?"#/shop/"+p.id:"#/request-sample?product="+p.id}
+    const primary = isLive ? {label:"Get a free sample",href:p.id==="agricultural-biochar"?"#/product/agricultural-biochar":p.id==="absorbent-pellets"?"#/shop/"+p.id:"#/request-sample?product="+p.id}
       : notifyPrimary ? {label:"Stay informed",href:"#/request-sample?preorder=1&product="+p.id}
       : {label:"Get a free sample",href:"#/request-sample?preorder=1&product="+p.id};
     const secondary = null;
@@ -274,7 +274,7 @@ function renderHome(){
   ${carbonPillar(H.carbon)}
 
   <section class="block"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Where our products are used most</h2>
+    <h2 style="margin-top:6px">Where our products are used most</h2>
     <div style="margin-top:26px">${H.fieldApps?appCards(H.fieldApps):ucGrid(H.useCases)}</div>
   </div></section>
 
@@ -303,7 +303,7 @@ function renderProduct(id){
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    ${p.appsKicker===""?"":`<div class="kicker">${raw(p.appsKicker||"Applications")}</div>`}<h2 style="margin-top:6px">${raw(p.appsHeading||"Field applications")}</h2>
     <div style="margin-top:26px">${p.fieldApps?appCards(p.fieldApps):ucGrid(p.useCases)}</div>
   </div></section>
 
@@ -313,7 +313,8 @@ function renderProduct(id){
       ${specTable(p.specs)}
       ${(id==="absorbent-pellets" || id==="agricultural-biochar") ? `<div style="margin-top:18px"><a class="btn btn-sm btn-ghost" href="javascript:void(0)" onclick="downloadSpecSheet('${id==="absorbent-pellets"?"absorbent-pellets":"biochar"}')">Download Full Spec Sheet</a></div>` : ""}</div>
     <div><div class="eyebrow-line"></div><h2 style="font-size:28px">${raw(p.comparison.h)}</h2>
-      <div style="margin-top:18px">${cmpTable(p.comparison)}</div></div>
+      <div style="margin-top:18px">${cmpTable(p.comparison)}</div>
+      ${p.comparison.image?`<figure class="cmp-fig"><img src="${p.comparison.image}" alt="${raw(p.comparison.imageAlt||"")}" loading="lazy"><figcaption>${raw(p.comparison.imageAlt||"")}</figcaption></figure>`:""}</div>
   </div></div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
@@ -959,15 +960,6 @@ function renderAnimalBedding(){
     <dl class="ab-problem">
       ${P.problem.rows.map(r=>`<div class="ab-problem-row"><dt>${raw(r.p)}</dt><dd>${raw(r.r)}</dd></div>`).join("")}
     </dl>
-  </div></section>
-
-  <section class="ab-block ab-block-alt"><div class="wrap">
-    <h2 class="ab-h2">${raw(P.comparison.h)}</h2>
-    <div class="ab-tbl-scroll"><table class="ab-tbl">
-      <thead><tr>${P.comparison.cols.map((c,i)=>`<th${i===0?' scope="col"':' scope="col"'}>${raw(c)}</th>`).join("")}</tr></thead>
-      <tbody>${P.comparison.rows.map(row=>`<tr>${row.map((x,i)=>i===0?`<th scope="row">${raw(x)}</th>`:`<td>${raw(x)}</td>`).join("")}</tr>`).join("")}</tbody>
-    </table></div>
-    <p class="ab-note">${raw(P.comparison.note)}</p>
   </div></section>
 
   <section class="ab-block"><div class="wrap"><div class="ab-trial-grid">
