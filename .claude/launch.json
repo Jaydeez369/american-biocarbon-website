@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "abc-website",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "5181"],
+      "port": 5181
+    }
+  ]
+}

@@ -554,34 +554,6 @@ function kraftBag(p){
     </div>
   </div>`;
 }
-// Flat truckload-leaving-facility scene, tinted to a product accent (aqua / amber / soil).
-function truckScene(accent, label){
-  const c = { aqua:{a:"#17b3a3",b:"#0c7d72",ink:"#06403a"}, amber:{a:"#f0a63a",b:"#d0781a",ink:"#7a3f06"}, soil:{a:"#8a9a5b",b:"#5f6f39",ink:"#333d1e"} }[accent] || {a:"#4d6ba3",b:"#24478a",ink:"#12264d"};
-  return `<div class="scene"><svg viewBox="0 0 600 440" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${raw(label||"Truckloads from our facility")}">
-    <defs><linearGradient id="g-${accent}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${c.a}"/><stop offset="1" stop-color="${c.b}"/></linearGradient></defs>
-    <rect width="600" height="440" fill="url(#g-${accent})"/>
-    <g opacity=".10" fill="#fff"><circle cx="80" cy="70" r="46"/><circle cx="520" cy="60" r="30"/></g>
-    <!-- facility -->
-    <g fill="#fff" opacity=".92">
-      <rect x="60" y="150" width="150" height="150" rx="4"/>
-      <rect x="92" y="110" width="26" height="45"/><rect x="150" y="96" width="26" height="60"/>
-      <polygon points="60,150 135,120 210,150"/>
-    </g>
-    <g fill="${c.ink}" opacity=".28"><rect x="80" y="185" width="30" height="30"/><rect x="125" y="185" width="30" height="30"/><rect x="170" y="185" width="26" height="30"/></g>
-    <!-- road -->
-    <rect x="0" y="330" width="600" height="70" fill="${c.ink}" opacity=".25"/>
-    <g stroke="#fff" stroke-width="5" stroke-dasharray="34 26" opacity=".6"><line x1="0" y1="365" x2="600" y2="365"/></g>
-    <!-- truck -->
-    <g>
-      <rect x="250" y="238" width="210" height="92" rx="6" fill="#fff"/>
-      <rect x="460" y="262" width="70" height="68" rx="6" fill="#fff"/>
-      <rect x="476" y="276" width="40" height="30" rx="3" fill="${c.ink}" opacity=".3"/>
-      <circle cx="300" cy="336" r="22" fill="${c.ink}"/><circle cx="300" cy="336" r="9" fill="#fff"/>
-      <circle cx="495" cy="336" r="22" fill="${c.ink}"/><circle cx="495" cy="336" r="9" fill="#fff"/>
-    </g>
-  </svg>${label?`<span class="scene-tag">${raw(label)}</span>`:""}</div>`;
-}
 const SHOP_DOMAIN = "https://americanbiocarbon.com";
 // Shopify cart permalinks - site product id to checkout URL (variant:qty).
 // Store: American BioCarbon (de7e4a). Both are $0 free-sample variants of the
