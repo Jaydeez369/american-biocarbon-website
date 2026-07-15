@@ -361,7 +361,7 @@ function renderIndustry(id){
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">${n.fieldApps?"Field applications":"Use cases"}</h2>
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
     <div style="margin-top:26px">${n.fieldApps?appCards(n.fieldApps):ucGrid(n.useCases)}</div>
   </div></section>
 
@@ -1106,6 +1106,11 @@ function renderResellersIndustries(){
       </div>`).join("")}
     </div>
   </div></section>
+
+  ${p.fieldApps?`<section class="block"><div class="wrap">
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
+  </div></section>`:""}
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="eyebrow-line"></div><h2 style="margin-top:6px">Our distributor program</h2>
