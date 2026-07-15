@@ -980,7 +980,7 @@ function productLd(p){
     hasCertification: certs.map(c=>({ "@type":"Certification", name:c })) };
 }
 function notFound(){ setMeta({title:"Page not found | American BioCarbon", desc:"The page you requested could not be found."}, {noindex:true}); clearJsonLd(); return `<section class="block"><div class="wrap"><h1>Page not found</h1><p class="lead">Try the <a href="/">homepage</a>.</p></div></section>`; }
-/* Semantic breadcrumb: crumbs([{label,href}], ...) — last item is the current page (aria-current). */
+/* Semantic breadcrumb: crumbs([{label,href}], ...) - last item is the current page (aria-current). */
 function crumbs(items, style=""){
   const lis = items.map((it,idx)=>{
     const last = idx===items.length-1;
@@ -1105,7 +1105,7 @@ function renderEnvironmentalRemediation(){
           <div style="font-size:13px;color:var(--mute);margin-bottom:6px">American BioCarbon:</div>
           <b>${raw(p.caseStudy.result)}</b>
         </div>
-        <p style="font-size:12px;color:var(--mute);margin-top:10px">Modeled scenario based on up-to-5:1 absorption versus a typical wood or clay sorbent — not a specific customer result.</p>
+        <p style="font-size:12px;color:var(--mute);margin-top:10px">Modeled scenario based on up-to-5:1 absorption versus a typical wood or clay sorbent - not a specific customer result.</p>
       </div>
       <div>
         <div class="eyebrow-line"></div><h2 style="margin-top:6px">How we work with you</h2>
@@ -1347,7 +1347,7 @@ function router(){
   else if(parts[0]==="about"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"About",path:"/about"}])]); }
   else if(parts[0]==="environmental-remediation-solutions"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Environmental Remediation",path:"/environmental-remediation-solutions"}])]); }
   else if(parts[0]==="distributors-resellers-industries"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Distributors & Resellers",path:"/distributors-resellers-industries"}])]); }
-  else if(parts[0]==="distributors-resellers-agriculture"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Distributors & Resellers — Agriculture",path:"/distributors-resellers-agriculture"}])]); }
+  else if(parts[0]==="distributors-resellers-agriculture"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Distributors & Resellers - Agriculture",path:"/distributors-resellers-agriculture"}])]); }
   else { /* notFound() already set noindex + cleared JSON-LD */ }
 
   $("#app").innerHTML = webpify(html);
