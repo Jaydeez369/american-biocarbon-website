@@ -303,8 +303,8 @@ function renderProduct(id){
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Use cases</h2>
-    <div style="margin-top:26px">${ucGrid(p.useCases)}</div>
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div style="margin-top:26px">${p.fieldApps?appCards(p.fieldApps):ucGrid(p.useCases)}</div>
   </div></section>
 
   <section class="block"><div class="wrap"><div class="split">
@@ -1182,6 +1182,11 @@ function renderResellersAgriculture(){
       </div>`).join("")}
     </div>
   </div></section>
+
+  ${p.fieldApps?`<section class="block"><div class="wrap">
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
+  </div></section>`:""}
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="eyebrow-line"></div><h2 style="margin-top:6px">Our agricultural reseller program</h2>
