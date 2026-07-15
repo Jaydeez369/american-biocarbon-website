@@ -648,7 +648,7 @@ const PRODUCTS = {
       schema:"Product + FAQPage + BreadcrumbList" },
     h1:"OMRI-Listed Bagasse Biochar for Water &amp; Nutrient Retention",
     sub:"A locally sourced, carbon-negative sugarcane biochar that improves water and nutrient retention, supports soil microbiology, and can help shorten compost turnover ~10 to 30%.",
-    primary:CTA.biochar, secondary:CTA.spec, image:ASSETS.biocharPhoto, mock:ASSETS.biocharMock,
+    primary:CTA.freeSampleBiochar, secondary:CTA.spec, image:ASSETS.biocharPhoto, mock:ASSETS.biocharMock,
     proofRow:["OMRI Listed · IBI Certified","Holds up to ~3 to 3.5× its weight in water","Inherent NPK + Ca/Mg","Free sample · volume supply Q4"],
     problem:{ h:"Distributors and blenders need a differentiated line that actually pulls through",
       body:"Commodity amendments compete on price alone, every reorder shaves the margin thinner, and an undifferentiated bag only moves when it's the cheapest on the shelf. Growers increasingly ask for water efficiency, organic inputs, and a carbon story, and composters and blenders need throughput and consistent quality, not another line that races price to the bottom." },
