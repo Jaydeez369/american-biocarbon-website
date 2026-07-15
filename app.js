@@ -28,11 +28,11 @@ document.addEventListener("click", e=>{
 /* ---- spec sheet downloads ---- */
 const SPEC_SHEETS = {
   "absorbent-pellets": {
-    file: "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf",
+    file: "/assets/spec sheets/Absorbent-Pellets-Specification-Sheet.pdf",
     name: "Absorbent-Pellets-Spec-Sheet.pdf"
   },
   "biochar": {
-    file: "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf",
+    file: "/assets/spec sheets/Biochar-Premium-Specification-Sheet.pdf",
     name: "Biochar-Premium-Spec-Sheet.pdf"
   }
 };
@@ -259,7 +259,7 @@ function renderHome(){
     <div class="eyebrow-line"></div>
     <div class="kicker">Specifications · vs. the status quo</div>
     <h2 style="margin-top:6px">${raw(H.comparison.h)}</h2>
-    <p class="lead" style="margin-bottom:6px">Our sugarcane-bagasse holds up to 5× its weight in liquid, roughly double what wood or clay manages. It holds its weight where the status quo can't: the same spill takes about half the bags and sends less weight to disposal.</p>
+    <p class="lead" style="margin-bottom:6px">Our sugarcane bagasse holds up to 5× its weight in liquid, roughly double what wood or clay manages. It holds its weight where the status quo can't: the same spill takes about half the bags and sends less weight to disposal.</p>
     <p class="lead" style="margin-bottom:22px">${raw(H.comparison.sub)}</p>
     <div class="tbl tbl-hi"><table><thead><tr>${H.comparison.cols.map(c=>`<th>${raw(c)}</th>`).join("")}</tr></thead>
       <tbody>${H.comparison.rows.map(r=>`<tr>${r.map(x=>`<td>${raw(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
@@ -320,7 +320,7 @@ function renderProduct(id){
     <div class="split proc-split">
       <div class="proc-left">
         <div class="proc-copy">
-          <div class="kicker">Proof</div><h2 style="font-size:26px;margin:8px 0 12px">Certified and lab-verified</h2>
+          <div class="kicker">Proof</div><h2 style="font-size:26px;margin:8px 0 12px">Certified and lab verified</h2>
           <ul class="checks">${PROOF.certs.filter(c=>c.status!=="pending").slice(0,4).map(c=>`<li><b>${raw(c.name)}</b>, ${raw(c.note)}</li>`).join("")}</ul>
           <p class="form-note">USDA Organic certification in progress.</p>
         </div>
@@ -484,7 +484,7 @@ function buyCard(p){
       <p class="claim">${raw(p.claim)}</p>
       ${p.uses?`<ul class="uses">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
       <div class="chips">${(p.chips||[]).filter(c=>/sample bag/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
-      <div class="availline">${isLive?"Free sample ships in 4 to 7 business days. Bulk and truckload by quote.":"Coming Q4. Request a sample on a 30-day lead time."}</div>
+      <div class="availline">${isLive?"Free sample ships in 4 to 7 business days. Bulk and truckload by quote.":"Coming Q4. Request a sample on a 30 day lead time."}</div>
       ${docs}
       ${cta}
     </div>
@@ -654,7 +654,7 @@ function renderBuy(){
   <section class="shop-head"><div class="wrap">
     <div class="crumb"><a href="#/">Home</a> / Products</div>
     <h1>Products</h1>
-    <p class="shop-sub">Free samples ship in 4 to 7 business days · bulk bag and truckload by freight-aware quote.</p>
+    <p class="shop-sub">Free samples ship in 4 to 7 business days · bulk bag and truckload by freight aware quote.</p>
   </div></section>
 
   <section class="block" style="padding-top:28px"><div class="wrap">
@@ -702,7 +702,7 @@ function renderCompare(){
   <section class="block"><div class="wrap">
     <div class="tbl tbl-hi"><table><thead><tr>${HOME.comparison.cols.map(c=>`<th>${raw(c)}</th>`).join("")}</tr></thead>
       <tbody>${HOME.comparison.rows.map(r=>`<tr>${r.map(x=>`<td>${raw(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
-    <div class="callout" style="margin-top:22px"><b>Why it matters for procurement:</b> higher absorption per bag lowers bag count, crew handling, and disposal weight, the three costs that add up on every job. A trial pallet lets you measure it head-to-head against what you use today.</div>
+    <div class="callout" style="margin-top:22px"><b>Why it matters for procurement:</b> higher absorption per bag lowers bag count, crew handling, and disposal weight, the three costs that add up on every job. A trial pallet lets you measure it head to head against what you use today.</div>
   </div></section>
   ${ctaBand({h:"See it hold twice the load",sub:"Request a sample kit and run bagasse against your current sorbent on the next spill.",primary:CTA.sample,secondary:CTA.quote})}`;
 }
@@ -771,9 +771,9 @@ function bindResourceFilters(){
   empty && empty.querySelector("[data-rf-reset]") && empty.querySelector("[data-rf-reset]").addEventListener("click", reset);
 }
 function renderTechnical(){
-  setMeta({title:"Technical Data & Research | American BioCarbon",desc:"Certifications, spec sheets, SDS, independent lab analyses, and peer-reviewed research for bagasse absorbents and biochar. Request the technical package.",slug:"/technical",keyword:"bagasse biochar technical data"});
-  const sBadge = s => ({verified:'<span class="badge b-ok">Verified</span>',lab:'<span class="badge b-lab">Lab-tested</span>',field:'<span class="badge b-lab">Field study</span>',pending:'<span class="badge b-pend">Pending</span>'}[s]||"");
-  const tBadge = t => ({peer:'<span class="badge b-ok">Peer-reviewed</span>',field:'<span class="badge b-lab">Field study</span>',lab:'<span class="badge b-lab">Lab report</span>'}[t]||"");
+  setMeta({title:"Technical Data & Research | American BioCarbon",desc:"Certifications, spec sheets, SDS, independent lab analyses, and peer reviewed research for bagasse absorbents and biochar. Request the technical package.",slug:"/technical",keyword:"bagasse biochar technical data"});
+  const sBadge = s => ({verified:'<span class="badge b-ok">Verified</span>',lab:'<span class="badge b-lab">Lab tested</span>',field:'<span class="badge b-lab">Field study</span>',pending:'<span class="badge b-pend">Pending</span>'}[s]||"");
+  const tBadge = t => ({peer:'<span class="badge b-ok">Peer reviewed</span>',field:'<span class="badge b-lab">Field study</span>',lab:'<span class="badge b-lab">Lab report</span>'}[t]||"");
   const docHref = d => d.file ? d.file : CTA.quote.href;
   const docCards = TECH.docs.map(d=>{
     const href = docHref(d); const dl = d.file ? `download` : "";
@@ -801,13 +801,13 @@ function renderTechnical(){
   <section class="phead"><div class="wrap"><div style="max-width:900px">
     <div class="crumb"><a href="#/">Home</a> / Technical Data &amp; Research</div>
     <h1>Technical Data &amp; Research</h1>
-    <p class="sub">Complete technical documentation, independent lab analyses, certifications, and peer-reviewed research for industrial-grade decision-making.</p>
+    <p class="sub">Complete technical documentation, independent lab analyses, certifications, and peer reviewed research for industrial grade decision making.</p>
     <div class="btn-row">${btn(CTA.quote)}${btn(CTA.specialist,"btn-ghost-light")}</div>
   </div></div></section>
 
   <section class="block"><div class="wrap">
-    <div class="eyebrow-line" style="margin-bottom:8px"></div><h2 style="margin-top:0">Certifications &amp; Third-Party Verification</h2>
-    <p class="lead" style="margin-bottom:20px">Our products are independently certified and lab-verified to meet industry standards and regulations.</p>
+    <div class="eyebrow-line" style="margin-bottom:8px"></div><h2 style="margin-top:0">Certifications &amp; Third Party Verification</h2>
+    <p class="lead" style="margin-bottom:20px">Our products are independently certified and lab verified to meet industry standards and regulations.</p>
     <div class="icert-grid">${(TECH.primaryCerts||[]).map(c=>{
       const badge = c.logo
         ? `<img class="icert-logo" src="${c.logo}" alt="${raw(c.item)} certification logo">`
@@ -845,8 +845,8 @@ function renderTechnical(){
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="eyebrow-line"></div><h2>Peer-Reviewed &amp; Field Research</h2>
-    <p class="lead" style="margin-bottom:20px">The scientific evidence base supporting performance claims. Full-text access included with technical documentation request.</p>
+    <div class="eyebrow-line"></div><h2>Peer Reviewed &amp; Field Research</h2>
+    <p class="lead" style="margin-bottom:20px">The scientific evidence base supporting performance claims. Full text access included with technical documentation request.</p>
     <div class="doclist">
       ${TECH.studies.map(s=>`<div class="docrow study">
         <div><div class="study-top">${tBadge(s.type)} <span class="study-note">${raw(s.note)}</span></div>
@@ -861,7 +861,7 @@ function renderTechnical(){
       <div class="kicker">Get your documentation package</div>
       <h2 style="font-size:28px;margin:8px 0 12px">Request technical data for your application</h2>
       <p class="lead">Select your industry and we'll send a curated package of specs, SDS, analyses, certifications, and research. A specialist will follow up to answer questions and discuss any custom specifications needed for your work.</p>
-      <ul class="checks">${["Spec sheets tailored to your product line","Complete Safety Data Sheets (SDS)","Independent lab analyses &amp; certificates","Peer-reviewed research package","Direct specialist access for technical questions"].map(x=>`<li>${raw(x)}</li>`).join("")}</ul>
+      <ul class="checks">${["Spec sheets tailored to your product line","Complete Safety Data Sheets (SDS)","Independent lab analyses &amp; certificates","Peer reviewed research package","Direct specialist access for technical questions"].map(x=>`<li>${raw(x)}</li>`).join("")}</ul>
     </div>
     <div class="formcard" id="pform"></div>
   </div></div></section>`;
@@ -874,23 +874,23 @@ function renderAbout(){
   <section class="phead"><div class="wrap"><div class="grid">
     <div><div class="crumb"><a href="#/">Home</a> / About</div>
       <h1>Renewable products, engineered for industrial performance</h1>
-      <p class="sub">We convert sugarcane bagasse, an agricultural byproduct, into high-capacity absorbents, biochar, and durable carbon removal, co-located with the Cora Texas Sugar Mill in White Castle, Louisiana.</p>
+      <p class="sub">We convert sugarcane bagasse, an agricultural byproduct, into high capacity absorbents, biochar, and durable carbon removal, co-located with the Cora Texas Sugar Mill in White Castle, Louisiana.</p>
       <div class="btn-row">${btn(CTA.specialist)}${btn(CTA.sample,"btn-ghost-light")}</div>
     </div>
     <div class="media"><img src="${ASSETS.hands}" alt="American BioCarbon"></div>
   </div></div></section>
   ${proofBand()}
   <section class="block"><div class="wrap two-col-copy">
-    <div><div class="kicker">What we do</div><h2 style="font-size:26px;margin:8px 0 12px">From ag byproduct to industrial-grade material</h2>
+    <div><div class="kicker">What we do</div><h2 style="font-size:26px;margin:8px 0 12px">From ag byproduct to industrial grade material</h2>
       <p class="lead">Using a patented separation process and controlled pyrolysis, we turn bagasse that would otherwise be burned or landfilled into absorbents that outperform wood pellets, biochar that improves soil, and verified carbon removal.</p></div>
     <div><div class="kicker">Why it matters</div><h2 style="font-size:26px;margin:8px 0 12px">Performance and carbon, together</h2>
       <p class="lead">Because our biochar locks carbon into a durable form, deploying the physical product also generates certified carbon removal. Product performance and carbon value move on the same molecule.</p></div>
   </div></section>
   <section class="block" style="background:var(--paper-2)"><div class="wrap two-col-copy">
-    <div><div class="kicker">Locally Sourced</div><h2 style="font-size:26px;margin:8px 0 12px">Louisiana-grown, responsibly sourced</h2>
-      <p class="lead">Every component comes from or is processed right here in Louisiana. Our multipurpose fiber, biochar, and coffee chaff are locally sourced and processed into renewable, locally grown alternatives to mined peat and wood-based products.</p></div>
+    <div><div class="kicker">Locally Sourced</div><h2 style="font-size:26px;margin:8px 0 12px">Louisiana grown, responsibly sourced</h2>
+      <p class="lead">Every component comes from or is processed right here in Louisiana. Our multipurpose fiber, biochar, and coffee chaff are locally sourced and processed into renewable, locally grown alternatives to mined peat and wood based products.</p></div>
     <div><div class="kicker">Supply with integrity</div><h2 style="font-size:26px;margin:8px 0 12px">Traceability from field to product</h2>
-      <p class="lead">We work directly with the Cora Texas Sugar Mill to capture bagasse, coffee processors for waste fiber, and local blenders to ensure every batch meets our performance standards. Local sourcing means faster turnaround, fresher materials, and complete supply-chain visibility.</p></div>
+      <p class="lead">We work directly with the Cora Texas Sugar Mill to capture bagasse, coffee processors for waste fiber, and local blenders to ensure every batch meets our performance standards. Local sourcing means faster turnaround, fresher materials, and complete supply chain visibility.</p></div>
   </div></section>
   ${ctaBand({h:"Work with us",sub:"Get a free sample, or talk to a specialist about volume.",primary:CTA.sample,secondary:CTA.quote})}`;
 }
@@ -1024,7 +1024,7 @@ function renderEnvironmentalRemediation(){
   <section class="block"><div class="wrap">
     <div class="split">
       <div>
-        <div class="eyebrow-line"></div><h2 style="margin-top:6px">Real-world impact</h2>
+        <div class="eyebrow-line"></div><h2 style="margin-top:6px">Real world impact</h2>
         <p class="lead" style="margin:10px 0 18px">${raw(p.caseStudy.scenario)}</p>
         <div style="background:white;padding:16px;border-left:4px solid #D7153F;margin:16px 0">
           <div style="font-size:13px;color:#666;margin-bottom:6px">Standard absorbent:</div>
@@ -1115,7 +1115,7 @@ function renderResellersIndustries(){
   </div></section>
 
   <section class="block" style="padding-top:96px;padding-bottom:96px"><div class="wrap" style="min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:28px">
-    <p style="margin:0;font-size:40px;line-height:1.15;font-weight:700;max-width:16ch">Enterprise-grade supply, one simple step away.</p>
+    <p style="margin:0;font-size:40px;line-height:1.15;font-weight:700;max-width:16ch">Enterprise grade supply, one simple step away.</p>
     <a class="btn btn-primary" href="#/request-quote">Request Quote</a>
   </div></section>
 
