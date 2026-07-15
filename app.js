@@ -274,7 +274,7 @@ function renderHome(){
   ${carbonPillar(H.carbon)}
 
   <section class="block"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Where it's used</h2>
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">Where our products are used most</h2>
     <div style="margin-top:26px">${H.fieldApps?appCards(H.fieldApps):ucGrid(H.useCases)}</div>
   </div></section>
 

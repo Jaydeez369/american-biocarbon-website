@@ -491,7 +491,7 @@ const PRODUCTS = {
       schema:"Product + FAQPage + BreadcrumbList" },
     h1:"Industrial Absorbent Pellets That Hold up to 5× Their Weight",
     sub:"A plant-based bagasse sorbent for drilling fluids, spills, and leachate, holding up to ~5× its weight vs about 2.5× for wood pellets means roughly half the bags and lighter saturated disposal per spill, plus low dust.",
-    primary:CTA.sample, secondary:CTA.quote, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
+    primary:CTA.freeSamplePellets, secondary:CTA.quote, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
     proofRow:["Up to 5:1 absorption","100% organic biomass (no additives)","~32 lb/ft³ bulk density","Free 1-lb sample · volume supply Q4"],
     problem:{ h:"You're paying to buy and dispose of material that barely holds its own weight",
       body:"At ~2.5:1, wood pellets take roughly 2× the bags per spill and send more saturated weight to disposal, and disposal is billed by the pound, so more weight means more tipping cost and more truckloads hauled. Clay is heavier still and adds non-renewable waste. Crews want fewer bags to handle; procurement wants documentation and reliable supply." },
