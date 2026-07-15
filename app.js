@@ -1120,20 +1120,8 @@ function renderResellersIndustries(){
     </div>
   </div></section>
 
-  <section class="block"><div class="wrap">
-    <div class="eyebrow-line"></div><h2 style="margin-top:6px">How we onboard distributors</h2>
-    <p class="lead" style="margin-bottom:22px">Fast, focused, and you're in control.</p>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:20px">
-      ${p.getStarted.map(g=>`<div style="padding:16px;background:var(--paper-2);border-radius:4px">
-        <div style="font-size:18px;font-weight:700;color:#D7153F;margin-bottom:6px">${raw(g.n || g.step)}</div>
-        <b style="display:block;margin-bottom:6px;font-size:14px">${raw(g.t || g.label)}</b>
-        <p style="font-size:13px;line-height:1.5;color:#666;margin:0">${raw(g.d || g.desc)}</p>
-      </div>`).join("")}
-    </div>
-  </div></section>
-
   <section class="block" style="padding-top:96px;padding-bottom:96px"><div class="wrap" style="min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:28px">
-    <p class="lead" style="margin:0">Enterprise-grade supply, one simple step away.</p>
+    <p style="margin:0;font-size:40px;line-height:1.15;font-weight:700;max-width:16ch">Enterprise-grade supply, one simple step away.</p>
     <a class="btn btn-primary" href="#/request-quote">Request Quote</a>
   </div></section>
 
