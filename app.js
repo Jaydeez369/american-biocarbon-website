@@ -283,13 +283,6 @@ function renderHome(){
 function renderProduct(id){
   const p = PRODUCTS[id]; if(!p) return notFound();
   setMeta(p.seo);
-  // Problem / Why-it's-different block. Omitted on pages that lead with specs (e.g. biochar).
-  const problemSection = `
-  <section class="block"><div class="wrap two-col-copy">
-    <div><div class="kicker">The problem</div><h2 style="font-size:26px;margin:8px 0 12px">${raw(p.problem.h)}</h2><p class="lead">${raw(p.problem.body)}</p></div>
-    <div><div class="kicker">Why it's different</div><h2 style="font-size:26px;margin:8px 0 12px">${raw(p.explanation.h)}</h2><p class="lead">${raw(p.explanation.body)}</p></div>
-  </div></section>`;
-
   const appsSection = grey => `
   <section class="block"${grey?` style="background:var(--paper-2)"`:""}><div class="wrap">
     ${p.appsKicker===""?"":`<div class="kicker">${raw(p.appsKicker||"Applications")}</div>`}<h2 style="margin-top:6px">${raw(p.appsHeading||"Field applications")}</h2>
@@ -307,11 +300,9 @@ function renderProduct(id){
       ${p.comparison.image?`<figure class="cmp-fig"><img src="${p.comparison.image}" alt="${raw(p.comparison.imageAlt||"")}" loading="lazy"><figcaption>${raw(p.comparison.imageAlt||"")}</figcaption></figure>`:""}</div>
   </div></div></section>`;
 
-  // Biochar leads with Specifications (incl. Bagasse vs wood comparison + SEM image) right after the hero,
-  // dropping the problem/why-it's-different block. Other products keep the original flow.
-  const flow = p.specsFirst
-    ? specsSection(true) + appsSection(false)
-    : problemSection + appsSection(true) + specsSection(false);
+  // Every product page leads with the "How ... Applications Help ..." section right below the hero,
+  // then Specifications. The old problem / why-it's-different block has been removed sitewide.
+  const flow = appsSection(false) + specsSection(true);
 
   return `
   <section class="phead"><div class="wrap"><div class="grid">
@@ -366,12 +357,7 @@ function renderIndustry(id){
     <div class="media"><img src="${n.image}" alt="${raw(n.name)}"></div>
   </div></div></section>
 
-  <section class="block"><div class="wrap two-col-copy">
-    <div><div class="kicker">The problem</div><h2 style="font-size:26px;margin:8px 0 12px">What you're up against</h2><p class="lead">${raw(n.problem)}</p></div>
-    <div><div class="kicker">The fit</div><h2 style="font-size:26px;margin:8px 0 12px">How we solve it</h2><p class="lead">${raw(n.fit)}</p></div>
-  </div></section>
-
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
+  <section class="block"><div class="wrap">
     <div class="kicker">Applications</div><h2 style="margin-top:6px">${raw(n.appsHeading||"How Our Applications Help Your Operation")}</h2>
     <div style="margin-top:26px">${n.fieldApps?appCards(n.fieldApps):ucGrid(n.useCases)}</div>
   </div></section>
@@ -982,6 +968,7 @@ function crumbs(items, style=""){
 /* ================= ANIMAL BEDDING (dedicated) ================= */
 function renderAnimalBedding(){
   const P = ANIMAL_BEDDING;
+  const AB = INDUSTRIES["animal-bedding"] || {};
   setMeta(P.seo);
   const specRow = r => {
     const isDoc = /^request document$/i.test(r[1]);
@@ -1011,12 +998,10 @@ function renderAnimalBedding(){
     <p class="ab-strip-note">${raw(P.specStripNote)}</p>
   </div></section>
 
-  <section class="ab-block"><div class="wrap">
-    <h2 class="ab-h2">${raw(P.problem.h)}</h2>
-    <dl class="ab-problem">
-      ${P.problem.rows.map(r=>`<div class="ab-problem-row"><dt>${raw(r.p)}</dt><dd>${raw(r.r)}</dd></div>`).join("")}
-    </dl>
-  </div></section>
+  ${AB.fieldApps?`<section class="ab-block"><div class="wrap">
+    <h2 class="ab-h2">${raw(AB.appsHeading||"How Bagasse Bedding Applications Help Your Operation")}</h2>
+    <div style="margin-top:26px">${appCards(AB.fieldApps)}</div>
+  </div></section>`:""}
 
   <section class="ab-block"><div class="wrap"><div class="ab-trial-grid">
     <div class="ab-trial-copy">
@@ -1035,13 +1020,6 @@ function renderAnimalBedding(){
       <tbody>${P.specs.rows.map(specRow).join("")}</tbody>
     </table></div>
     <p class="ab-note">Values are based on available product documentation. Confirm current specifications before procurement.</p>
-  </div></section>
-
-  <section class="ab-block"><div class="wrap">
-    <h2 class="ab-h2">${raw(P.fit.h)}</h2>
-    <ul class="ab-check">
-      ${P.fit.items.map(i=>`<li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5 8.5 15 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${raw(i)}</li>`).join("")}
-    </ul>
   </div></section>
 
   <section class="ab-final"><div class="wrap">
@@ -1069,17 +1047,6 @@ function renderEnvironmentalRemediation(){
     <div class="kicker">Applications</div><h2 style="margin-top:6px">${raw(p.appsHeading||"How Our Applications Help Your Industry")}</h2>
     <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
   </div></section>`:""}
-
-  <section class="block"><div class="wrap">
-    <div class="eyebrow-line"></div><h2>Why American BioCarbon wins on remediation</h2>
-    <p class="lead" style="margin-bottom:22px">Four reasons site managers switch and stay.</p>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:22px">
-      ${p.whyABC.map(w=>`<div>
-        <h3 style="font-size:16px;margin-bottom:8px;color:var(--crimson)">${raw(w.title)}</h3>
-        <p style="font-size:14px;line-height:1.6;color:#555">${raw(w.desc)}</p>
-      </div>`).join("")}
-    </div>
-  </div></section>
 
   <section class="block"><div class="wrap">
     <div class="split">
@@ -1136,33 +1103,12 @@ function renderResellersIndustries(){
     <div class="media"><img src="assets/industry/distributors.jpg" alt="Distributor warehouse and supply"></div>
   </div></div></section>
 
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="eyebrow-line"></div><h2 style="margin-top:6px">The distributor's dilemma</h2>
-    <p class="lead" style="margin-bottom:18px">Commodity industrial products compress margins. Here's what we hear, and what we solve.</p>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:22px">
-      ${p.painPoints.map(pp=>`<div style="padding:16px;background:white;border-radius:4px">
-        <b style="display:block;margin-bottom:8px;font-size:15px">${raw(pp.title)}</b>
-        <p style="font-size:14px;line-height:1.5;color:#666">${raw(pp.desc)}</p>
-      </div>`).join("")}
-    </div>
-  </div></section>
-
-  <section class="block"><div class="wrap">
-    <div class="eyebrow-line"></div><h2>Why American BioCarbon is different</h2>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:22px">
-      ${p.whyABC.map(w=>`<div>
-        <h3 style="font-size:16px;margin-bottom:8px;color:var(--crimson)">${raw(w.title)}</h3>
-        <p style="font-size:14px;line-height:1.6">${raw(w.desc)}</p>
-      </div>`).join("")}
-    </div>
-  </div></section>
-
-  ${p.fieldApps?`<section class="block"><div class="wrap">
+  ${p.fieldApps?`<section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="kicker">Applications</div><h2 style="margin-top:6px">${raw(p.appsHeading||"How Our Applications Help Your Industry")}</h2>
     <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
   </div></section>`:""}
 
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
+  <section class="block"><div class="wrap">
     <div class="eyebrow-line"></div><h2 style="margin-top:6px">Our distributor program</h2>
     <p class="lead" style="margin-bottom:22px">Built around YOUR success, not ours.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px">
@@ -1205,33 +1151,12 @@ function renderResellersAgriculture(){
     <div class="media"><img src="assets/industry/agricultural-biochar.jpg" alt="Agricultural reseller and grower supply"></div>
   </div></div></section>
 
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="eyebrow-line"></div><h2 style="margin-top:6px">The ag distributor's challenge</h2>
-    <p class="lead" style="margin-bottom:18px">Commodity soil amendments compress margins. Growers want something better. Here's what we solve.</p>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:22px">
-      ${p.painPoints.map(pp=>`<div style="padding:16px;background:white;border-radius:4px">
-        <b style="display:block;margin-bottom:8px;font-size:15px">${raw(pp.title)}</b>
-        <p style="font-size:14px;line-height:1.5;color:#666">${raw(pp.desc)}</p>
-      </div>`).join("")}
-    </div>
-  </div></section>
-
-  <section class="block"><div class="wrap">
-    <div class="eyebrow-line"></div><h2>Why growers choose American BioCarbon</h2>
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:22px">
-      ${p.whyABC.map(w=>`<div>
-        <h3 style="font-size:16px;margin-bottom:8px;color:var(--crimson)">${raw(w.title)}</h3>
-        <p style="font-size:14px;line-height:1.6">${raw(w.desc)}</p>
-      </div>`).join("")}
-    </div>
-  </div></section>
-
-  ${p.fieldApps?`<section class="block"><div class="wrap">
+  ${p.fieldApps?`<section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="kicker">Applications</div><h2 style="margin-top:6px">${raw(p.appsHeading||"How Our Applications Help Your Industry")}</h2>
     <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
   </div></section>`:""}
 
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
+  <section class="block"><div class="wrap">
     <div class="eyebrow-line"></div><h2 style="margin-top:6px">Our agricultural reseller program</h2>
     <p class="lead" style="margin-bottom:22px">Grower trials, dedicated support, premium margins.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px">
