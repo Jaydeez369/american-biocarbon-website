@@ -577,9 +577,9 @@ const PRODUCTS = {
       ["Form factors","Bulk · 1 metric ton bulk bag"],
       ["Documentation","SDS + spec sheet on request"],
     ],
-    comparison:{ h:"Crumble vs pellets",
-      cols:["","Crumble","Pellets"],
-      rows:[["Coverage speed","Faster","Standard"],["Best for","Large area / high volume","Targeted spills"],["Absorption","Up to ~5:1","Up to ~5:1"]] },
+    comparison:{ h:"Vs the status quo",
+      cols:["","Bagasse Crumble","Wood Pellets","Clay"],
+      rows:[["Absorption","Up to ~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
     faq:[
       { q:"When should I use crumble vs pellets?", a:"Choose crumble for large area or high volume spills where fast, broad coverage matters; choose pellets for targeted cleanup." },
       { q:"What volumes are available?", a:"Bulk and one metric ton bulk bags; truckload on request." },
