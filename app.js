@@ -264,7 +264,7 @@ function renderHome(){
   ${proofBand()}
 
   <section class="block" id="used-most"><div class="wrap">
-    <h2 style="margin-top:6px">Where our products are used most</h2>
+    <h2 style="margin-top:6px">How These Products&rsquo; Applications Help Industries &amp; Agriculture</h2>
     <div style="margin-top:26px">${H.fieldApps?appCards(H.fieldApps):ucGrid(H.useCases)}</div>
   </div></section>
 
@@ -372,7 +372,7 @@ function renderIndustry(id){
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">${raw(n.appsHeading||"How Our Applications Help Your Operation")}</h2>
     <div style="margin-top:26px">${n.fieldApps?appCards(n.fieldApps):ucGrid(n.useCases)}</div>
   </div></section>
 
@@ -1066,7 +1066,7 @@ function renderEnvironmentalRemediation(){
   </div></div></section>
 
   ${p.fieldApps?`<section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">${raw(p.appsHeading||"How Our Applications Help Your Industry")}</h2>
     <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
   </div></section>`:""}
 
@@ -1158,7 +1158,7 @@ function renderResellersIndustries(){
   </div></section>
 
   ${p.fieldApps?`<section class="block"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">${raw(p.appsHeading||"How Our Applications Help Your Industry")}</h2>
     <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
   </div></section>`:""}
 
@@ -1227,7 +1227,7 @@ function renderResellersAgriculture(){
   </div></section>
 
   ${p.fieldApps?`<section class="block"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">${raw(p.appsHeading||"How Our Applications Help Your Industry")}</h2>
     <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
   </div></section>`:""}
 

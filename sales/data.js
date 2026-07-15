@@ -723,6 +723,82 @@ const DATA = {
     expansion:["Reorder reminders on cycle","Usage check-ins","Volume expansion / new-SKU cross-sell","Case study request","Referral ask"],
   },
 
+  /* ============ 11b. CUSTOMER ONBOARDING (accounts) ============
+     The admin/accounting spine under the sample→win→PO motion. Two doc flows:
+     what WE send a new account (we're the vendor/payee) and what WE collect
+     from them before we can invoice or extend terms. Owners map to whoBadge. */
+  onboarding:{
+    intro:"How a biochar buyer becomes a paying account on the books. The sales motion (sample → trial win → PO/LOI) rides on top of an administrative spine: the moment a trial wins, Accounting stands the customer up as a real account BEFORE the first invoice ships. Get the paperwork done in the win window and the first PO invoices clean; skip it and the first order stalls in the customer's AP department.",
+    ownerNote:"Sales (Jesse) owns the relationship and hands off a won trial. Admin/Accounting (Victor) owns the packet, tax status, credit, and invoicing. Ops (Daniel) owns the physical shipment + compliance docs.",
+    journey:[
+      { stage:"1 · Qualified account", trigger:"Account passes MEDDIC-A qual", owner:"Jesse", admin:"Nothing yet — this is pure sales. Capture ship-to region + use case in the app so freight zone is known early.", exit:"Named buyer + real use case logged" },
+      { stage:"2 · Sample request", trigger:"Buyer agrees to test a free sample", owner:"Jesse", admin:"Collect a lightweight New Account intake: company legal name, ship-to address, AP/buyer contact, product + use case. No credit or tax step yet — samples are free.", exit:"Intake captured, sample queued" },
+      { stage:"3 · Sample shipped + trial", trigger:"Sample ships against agreed success metric", owner:"Daniel", admin:"Ship COA + SDS with the sample. Log tracking. Trial runs against the written success metric.", exit:"Trial underway, metric agreed" },
+      { stage:"4 · Trial win / intent", trigger:"Sample beats their current product; buyer signals intent to order", owner:"Jesse", admin:"⚡ HANDOFF TRIGGER. Sales notifies Accounting to open the onboarding packet. This is the window — do the admin now, while intent is hot.", exit:"Handoff logged; packet opened" },
+      { stage:"5 · Account setup (admin gate)", trigger:"Onboarding packet sent + returned", owner:"Victor", admin:"The accounting/administrative gate — see the two doc flows below. We send our W-9; we collect their tax/resale status, credit app (if they want terms), and bill-to/ship-to. NOTHING invoices until tax status is resolved.", exit:"W-9 exchanged · tax status set · terms or prepay decided · account created in books" },
+      { stage:"6 · First PO / order", trigger:"Signed quote or customer PO received", owner:"Victor", admin:"Convert quote → sales order. First order is prepay (CC/ACH) unless credit was approved in step 5. Confirm price, volume, freight terms (FOB), delivery date.", exit:"Order confirmed + payment method set" },
+      { stage:"7 · Fulfillment & delivery", trigger:"Order released to ship", owner:"Daniel", admin:"Ship against PO. COA/SDS travel with the load. Capture MRV data at delivery (application, GPS/site, weights) — the link to carbon revenue.", exit:"Delivered + MRV captured" },
+      { stage:"8 · Invoice & payment", trigger:"Goods delivered", owner:"Victor", admin:"Invoice per terms. Apply sales tax UNLESS a valid exemption/resale cert is on file. Reconcile payment (prepay clears before ship, or Net-30 clock starts at delivery).", exit:"Invoiced + payment received/scheduled" },
+      { stage:"9 · Reorder / account mgmt", trigger:"Delivery success confirmed", owner:"Jesse", admin:"Now a known account — reorders skip steps 1–5. Set reorder cadence, watch credit limit, refresh resale cert annually (most states expire).", exit:"Reorder date set; account recurring" },
+    ],
+    // What WE send the customer (ABC is the seller / payee / vendor)
+    docsOut:[
+      { doc:"ABC W-9", what:"Our completed IRS W-9 (legal name, EIN, address). Their AP needs it to set us up as a vendor — routine even though product sales usually aren't 1099-reportable.", when:"Step 5, on request", owner:"Victor" },
+      { doc:"Quote / price sheet", what:"Written quote: SKU, price, volume, freight terms (FOB origin/destination), payment terms, validity date.", when:"Step 4–5", owner:"Jesse" },
+      { doc:"Certificate of Analysis (COA)", what:"Lab spec for the batch — carbon %, moisture, particle size, pH. Required by ag/technical buyers.", when:"Ships with sample + every load", owner:"Daniel" },
+      { doc:"Safety Data Sheet (SDS)", what:"Product safety/handling sheet. Many buyers can't receive material without it on file.", when:"Ships with sample + on setup", owner:"Daniel" },
+      { doc:"Remittance / ACH details", what:"Our banking + remit-to instructions so they can pay by ACH/check.", when:"Step 5–6", owner:"Victor" },
+      { doc:"Cert package (as needed)", what:"OMRI/organic or other compliance proof where the buyer's process requires it.", when:"On request", owner:"Victor" },
+    ],
+    // What WE collect from the customer before invoicing / extending terms
+    docsIn:[
+      { doc:"New-account / vendor form", what:"Their standard vendor-setup form or our intake: legal entity, bill-to, ship-to, AP contact, phone/email.", req:"Required", when:"Step 2 (lite) → 5 (full)", owner:"Victor" },
+      { doc:"Resale / sales-tax exemption cert", what:"If they resell or are ag-exempt. MUST be on file to invoice tax-free — state-specific (LA, MS, AL, TX, FL). No cert = we charge sales tax.", req:"Required if claiming exemption", when:"Step 5 — before first invoice", owner:"Victor" },
+      { doc:"Customer W-9 / tax ID", what:"Their W-9 or tax ID for our vendor/customer master and 1099 handling where applicable.", req:"Recommended", when:"Step 5", owner:"Victor" },
+      { doc:"Credit application", what:"Only if they want Net-30 terms: entity info, trade references, bank ref, credit authorization. Otherwise first order is prepay.", req:"Required for terms", when:"Step 5", owner:"Victor" },
+      { doc:"Signed quote or Purchase Order", what:"Their PO or a counter-signed quote — the order authorization we invoice against.", req:"Required", when:"Step 6", owner:"Jesse" },
+      { doc:"Signed LOI (Q4 volume)", what:"For committed Q4 supply — non-binding volume/price/territory reservation. Separate from a spot PO.", req:"For offtake track", when:"Parallel", owner:"Jesse" },
+    ],
+    accounting:[
+      "First order = PREPAY (CC or ACH) by default. Net-30 terms only after a credit app is approved.",
+      "Sales tax: charge it UNLESS a valid resale/exemption certificate is on file. Ag/soil buyers are often exempt but the cert must be collected first — verify per state (LA, MS, AL, TX, FL).",
+      "We send our W-9 to their AP; we collect their resale cert + (for terms) a credit app. Two-way, don't confuse the directions.",
+      "Freight terms stated on every quote: FOB origin (buyer pays/arranges freight) vs delivered. Ties to the freight-zone model.",
+      "One system of record: create the account in the books (QuickBooks/Shopify) at step 5 so the first invoice isn't the first data entry.",
+      "Resale certs expire in most states — flag for annual refresh on recurring accounts.",
+    ],
+    // Setup tasks: build the reusable onboarding packet ONCE (persistent checks)
+    setup:[
+      "Draft ABC W-9 (final EIN + legal name) as a ready-to-send PDF|done",
+      "Build the New-Account / customer intake form (legal name, bill-to, ship-to, AP contact, tax status)",
+      "Assemble resale/exemption-cert guidance for each Gulf South state (LA, MS, AL, TX, FL)",
+      "Create a simple credit application (entity, trade refs, bank ref, authorization) for Net-30 requests",
+      "Write the standard quote template (SKU, price, volume, FOB freight terms, payment terms, validity)",
+      "Confirm COA + SDS are current and packaged to ship with every sample and load",
+      "Set the default payment policy: first order prepay, terms only after credit approval",
+      "Stand up the customer master in the books (QuickBooks/Shopify) with tax + terms fields",
+      "Create the sales→accounting handoff trigger in the app (fires at trial-win / step 4)",
+    ],
+    // Repeatable per-account checklist Accounting runs each time (defaults OFF)
+    perAccount:[
+      "New-account intake captured (legal name, bill-to, ship-to, AP contact)",
+      "Sent our W-9 to their AP",
+      "Tax status resolved — resale/exemption cert collected OR sales tax will apply",
+      "Terms decided — prepay confirmed OR credit app approved for Net-30",
+      "Signed quote or customer PO received",
+      "Account created in the books with tax + terms fields set",
+      "COA + SDS delivered / on file with the customer",
+      "First invoice issued against the PO",
+      "Reorder cadence + resale-cert refresh date set",
+    ],
+    faq:[
+      { q:"Do customers send us a W-9?", a:"It's the other way for payment — WE send THEM our W-9 so their AP can set us up as a vendor. We may collect their W-9/tax ID for our own customer master, but the one that unblocks their payment is ours going out." },
+      { q:"When do we collect the resale/tax cert?", a:"At account setup (step 5), before the first invoice. Without a valid cert on file we must charge sales tax — so collect it during the trial-win window, not after invoicing." },
+      { q:"Can a new customer buy on Net-30?", a:"Not on the first order. First order is prepay (CC/ACH). Net-30 opens only after they submit and we approve a credit application." },
+      { q:"What triggers onboarding?", a:"A trial win with buying intent (step 4). Sales hands off to Accounting, who opens the packet while intent is hot. Don't wait for the PO to start the paperwork." },
+    ],
+  },
+
   /* ============ 12. KPIS ============ */
   kpis:{
     leading:["New accounts added","Contacts found","Emails sent","Calls made","LinkedIn touches","Conversations started","Discovery/technical calls booked","Samples requested","Samples shipped","Sample follow-ups done","LOIs presented","Site visits scheduled"],
