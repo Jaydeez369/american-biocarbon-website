@@ -1,1 +1,4 @@
+# Sales OS is its own app under /sales/ - serve it directly, never via the SPA fallback
+/sales/*    /sales/:splat    200
+# Marketing site hash-router SPA fallback
 /*    /index.html    200
