@@ -298,8 +298,12 @@ td strong,th strong{color:var(--text);font-weight:600}
 .cal-day.sel{border-color:var(--green-bright);box-shadow:0 0 0 1px var(--green-bright),0 0 18px -4px rgba(132,180,123,.6)}
 .cal-day.rest{opacity:.5}
 .cal-day .dn{font-size:15px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.cal-day .cal-date{font-size:14px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1}
+.cal-day .cal-dow2{font-size:8.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-mute)}
 .cal-day .dt{font-size:10px;color:var(--text-dim);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
 .cal-day .dwk{font-size:9px;color:var(--text-mute);margin-top:auto}
+.cal-day.weekend{opacity:.62;background:linear-gradient(180deg,var(--slate-900),var(--slate-900))}
+.cal-blank{aspect-ratio:1/1;border:1px dashed var(--line);border-radius:var(--radius-sm);opacity:.25;pointer-events:none}
 .cal-day.done-day{border-color:var(--green-deep)}
 .cal-day .chkmark{position:absolute}
 .cal-empty{border:none;background:transparent;cursor:default;box-shadow:none}

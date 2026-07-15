@@ -16,6 +16,9 @@ window.resetChecks = pfx => { const c=getChecks(); Object.keys(c).forEach(k=>{ i
 /* ---- toast + copy ---- */
 function toast(msg="Copied to clipboard"){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1400);}
 function copyText(txt){navigator.clipboard?.writeText(txt).then(()=>toast()).catch(()=>toast("Copy failed"));}
+/* Live sellable inventory — biochar is Priority #1 (finished tonnage ready to ship now). */
+const BIOCHAR_INVENTORY_TONS = 80;
+const BIOCHAR_INVENTORY_LINE = `${BIOCHAR_INVENTORY_TONS} metric tons of finished 100% biochar are available to sell right now — real, shippable inventory. Biochar is bulk-capable today; samples still open the door, but this tonnage moves now.`;
 window.copyEl = id => { const e=document.getElementById(id); if(e) copyText(e.dataset.raw||e.textContent); };
 
 /* ---- helpers ---- */
@@ -54,7 +57,7 @@ const LEAN_NAV=[
     {id:"playbook",ic:"▷",t:"Playbook"},
   ]},
   {group:"Operate",items:[
-    {id:"roadmap",ic:"◐",t:"Roadmap & Checklist"},
+    {id:"roadmap",ic:"◐",t:"Scale · 60/90"},
   ]},
 ];
 const BUILD_NAV=[
@@ -89,48 +92,53 @@ function head(t,sub){return `<h1 class="page-h">${t}</h1><p class="page-sub">${s
 function sec(num,t){return `<h2 class="sec"><span class="num">${num}</span>${t}</h2>`;}
 
 /* --- Daily Action Plan (top-of-app focus) --- */
+/* Daily Plan is now the ONE canonical hub: this header + the clickable 30-day
+   calendar + foundation checklist + launch gates + 31–90 horizon are all composed
+   into a single "daily" section (see LEAN_SECTIONS). Progress is measured across
+   the calendar's per-day tasks (cal:* keys), so the mission bar reflects real work. */
 function rDaily(){
   const D=DATA.daily;
-  const secMap=Object.fromEntries(D.sectors.map(s=>[s.k,s]));
-  // overall progress across every daily task
-  const allKeys=[], allDefs=[];
-  D.days.forEach(day=>day.lanes.forEach(l=>l.items.forEach((it,i)=>{allKeys.push(`daily:${day.d}:${l.k}:${i}`);allDefs.push(false);})));
-  const st=checkStats(allKeys,allDefs);
+  const cal=(typeof GTM!=="undefined"&&GTM.calendar)||[];
+  const calKeys=[];
+  cal.forEach(c=>{ (c.jesse||[]).forEach((_,i)=>calKeys.push(`cal:${c.d}:j:${i}`)); (c.victor||[]).forEach((_,i)=>calKeys.push(`cal:${c.d}:v:${i}`)); });
+  const st=checkStats(calKeys, calKeys.map(()=>false));
   const pct=st.total?Math.round(st.done/st.total*100):0;
-  const legend=`<div class="daily-legend">${D.sectors.map(s=>`<span class="dsec"><i style="background:${s.c}"></i><b>${esc(s.t)}</b><em>${esc(s.d)}</em></span>`).join("")}</div>`;
-  const days=D.days.map(day=>{
-    const keys=[],defs=[];
-    day.lanes.forEach(l=>l.items.forEach((it,i)=>{keys.push(`daily:${day.d}:${l.k}:${i}`);defs.push(false);}));
-    const ds=checkStats(keys,defs);
-    const lanes=day.lanes.map(l=>{
-      const s=secMap[l.k]||{c:"#8a93a0",t:l.k};
-      const rows=l.items.map((it,i)=>{
-        const pri=badge(it.pri,it.pri==="P0"?"pri-1":it.pri==="P1"?"pri-2":"pri-3");
-        const label=`${whoBadge(it.o)}${pri} ${esc(it.t)}<span class="del">→ ${esc(it.del)}</span>`;
-        return chk(`daily:${day.d}:${l.k}:${i}`,label,false);
-      }).join("");
-      return `<div class="dlane" style="--sc:${s.c}"><div class="dlane-h"><span class="ddot" style="background:${s.c}"></span>${esc(s.t)}</div>${rows}</div>`;
-    }).join("");
-    return `<div class="card daily-day">
-      <div class="chk-head" style="align-items:flex-start">
-        <div><span class="dbadge">Day ${day.d}</span> <b class="dtheme">${esc(day.theme)}</b><div class="dwk">${esc(day.wk)}</div></div>
-        <span class="chk-progress">${ds.done}/${ds.total}</span>
-      </div>
-      <div class="note ok daily-focus"><b>Focus:</b> ${esc(day.focus)}</div>
-      <div class="dlanes">${lanes}</div>
-    </div>`;
-  }).join("");
   return page("today",
-    head("Daily Action Plan","Day-by-day, sector-by-sector — the exact plan to stay focused. Work top to bottom; every item is a checkbox that persists across reloads.")+
+    head("Daily Plan — run the whole day from here","One place for everything: the clickable 30-day calendar (all tasks for Jesse, Victor &amp; Daniel), the foundation checklist, the launch gates, and the 31–90 horizon. This is the single canonical checklist — tick anything off and it persists across reloads.")+
+    `<div class="note ok" style="border-left:4px solid var(--green-bright);font-size:14px;margin-bottom:14px">
+       <b style="color:var(--green-bright)">🔥 TOP PRIORITY — SELL THE BIOCHAR:</b> ${BIOCHAR_INVENTORY_LINE} Every day's tasks below are aimed at moving this inventory ASAP; absorbent pellets run second.
+     </div>`+
     `<div class="daily-mission card pad-lg">
-       <div class="dm-row"><span class="dm-tag">THE MISSION</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
+       <div class="dm-row"><span class="dm-tag">THE MISSION</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}% of calendar tasks</span></div>
        <p class="dm-mission">${esc(D.mission)}</p>
        <div class="note" style="margin-top:10px"><b>2-week target:</b> ${esc(D.target)}</div>
-     </div>`+
-    legend+
-    sec("","The 2-week build-out — day by day")+
-    days+
-    `<div class="chk-head" style="margin-top:14px"><span class="note" style="margin:0;flex:1"><b>Days 11–90 →</b> continue in the <a href="#roadmap" onclick="go('roadmap');return false" style="color:var(--gold-soft)">Roadmap &amp; Checklist</a> section (30/60/90 + launch gates live there now).</span><span class="chk-reset" onclick="resetChecks('daily:')">Reset daily checkmarks</span></div>`
+       <div class="note ok" style="margin-top:8px"><b>How to use this page:</b> work top-to-bottom — <b>① Calendar</b> (click a day for that day's tasks) → <b>② Foundation checklist</b> (what must be true to sell) → <b>③ Launch gates</b> (before outbound) → <b>④ Days 31–90 horizon</b>. Every checkbox persists.</div>
+     </div>`
+  );
+}
+
+/* Days 31–90 horizon — the later arc of DATA.roadmap (phases after the first 30
+   days, which the calendar now covers). Reuses the roadmap:* keys so any checks
+   already made carry over. */
+function rHorizon(){
+  const later=DATA.roadmap.slice(2);
+  return page("horizon",
+    head("④ Days 31–90 — Horizon","Once the 80 MT biochar motion is running, this is the longer arc: scale what converts, formalize the distributor channel, advance Q4 offtake, and open carbon. Every task persists.")+
+    later.map((ph,idx)=>{
+      const pi=idx+2; // original DATA.roadmap index → stable check keys
+      const keys=ph.tasks.map((t,ti)=>`roadmap:${pi}:${ti}`);
+      const defs=ph.tasks.map(t=>!!t.done);
+      const st=checkStats(keys,defs);
+      return `<div class="chk-head"><h3 class="sub" style="margin:0">${esc(ph.phase)}</h3>`+
+        `<span class="chk-progress">${st.done}/${st.total} done</span></div>`+
+        (ph.note?`<p class="lead" style="margin:2px 0 8px">${esc(ph.note)}</p>`:"")+
+        ph.tasks.map((t,ti)=>{
+          const pri=badge(t.pri,t.pri==="P0"?"pri-1":t.pri==="P1"?"pri-2":"pri-3");
+          const label=`${whoBadge(t.o)}${pri} ${esc(t.t)}<span class="del">→ ${esc(t.del)}${t.out?` · <i>${esc(t.out)}</i>`:""}</span>`;
+          return chk(keys[ti],label,t.done);
+        }).join("");
+    }).join("")+
+    `<div class="chk-head"><span></span><span class="chk-reset" onclick="resetChecks('roadmap:')">Reset horizon checkmarks</span></div>`
   );
 }
 
@@ -176,14 +184,17 @@ function rAssumptions(){
 const RANKKEYS=[["speed","Speed to LOI"],["recurring","Recurring"],["margin","Margin"],["carbon","Carbon gen"],["strategic","Strategic"],["freight","Freight fit"],["complexity","Complexity"]];
 function rSegments(){
   const groups=[...new Set(DATA.segments.map(s=>s.group))];
-  // Month-1 beachhead score: weight speed-to-LOI heavily; carbon is parked (shown as a column, excluded from the score).
-  const ranked=[...DATA.segments].map(s=>({s,score:s.rank.speed*3+s.rank.recurring+s.rank.margin+s.rank.strategic+s.rank.freight-s.rank.complexity})).sort((a,b)=>b.score-a.score);
+  // Month-1 beachhead score: BIOCHAR IS PRIORITY #1 (we have 80 MT to sell now), so Ag/Hort (biochar) buyers
+  // get a +6 priority bonus — they're now the fastest path to actual revenue, not just to LOIs. Carbon is parked
+  // (shown as a column, excluded from the score). Absorbent/Industrial segments run as the secondary track.
+  const bioBonus=s=>s.group==="Ag / Hort"?6:0;
+  const ranked=[...DATA.segments].map(s=>({s,score:s.rank.speed*3+s.rank.recurring+s.rank.margin+s.rank.strategic+s.rank.freight-s.rank.complexity+bioBonus(s)})).sort((a,b)=>b.score-a.score);
   const top3=ranked.slice(0,3).map(r=>r.s.name);
   const filters=`<div class="filters"><span class="pill active" onclick="segFilter(this,'all')">All</span>${groups.map(g=>`<span class="pill" onclick="segFilter(this,'${esc(g)}')">${esc(g)}</span>`).join("")}</div>`;
   const cards=DATA.segments.map(s=>segCard(s)).join("");
   return page("segments",
-    head("ICP Definition & Segmentation","Tight profiles for every buyer type, ranked by Month-1 speed-to-LOI (carbon is parked to days 61–90 — shown as a column, excluded from the beachhead score).")+
-    `<div class="note ok"><b>Recommended beachhead (top 3):</b> ${top3.map(t=>badge(t,"badge-green")).join(" ")}</div>`+
+    head("ICP Definition & Segmentation","Tight profiles for every buyer type. BIOCHAR (Ag / Hort) buyers are Priority #1 — we have 80 MT to move now, so they carry a priority weighting in the beachhead score. Industrial/absorbent buyers run as the secondary track; carbon is parked to days 61–90 (shown as a column, excluded from the score).")+
+    `<div class="note ok"><b>🔥 Recommended beachhead (top 3 — biochar-led):</b> ${top3.map(t=>badge(t,"badge-green")).join(" ")}</div>`+
     sec("3","Segment ranking")+
     table(["Segment","Group","Speed","Recurring","Margin","Carbon","Strategic","Freight","Composite"],
       ranked.map(r=>[`<strong>${esc(r.s.name)}</strong>`,esc(r.s.group),
@@ -266,11 +277,14 @@ function rMessaging(){
       <div><b style="font-size:11px;color:var(--red-soft)">NEVER say in this pitch</b><ul>${t.neverSay.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>
     </div>
   </div>`;
+  const tBiochar=m.tracks.find(t=>t.id==="biochar");
+  const tAbsorbent=m.tracks.find(t=>t.id==="absorbent");
   return page("messaging",
-    head("Value Proposition & Messaging","TWO separate avatars — every pitch is single-product. Absorbent Pellets sell to industrial/EHS/spill buyers; Biochar sells to ag/soil/grower buyers. Different person, different pain, different proof.")+
+    head("Value Proposition & Messaging","TWO separate avatars — every pitch is single-product. BIOCHAR IS PRIORITY #1 — 80 MT of finished inventory is ready to ship now, and it sells to ag/soil/grower buyers. Absorbent Pellets are the secondary track for industrial/EHS/spill buyers. Different person, different pain, different proof.")+
+    `<div class="note ok"><b>🔥 Priority #1 — Biochar:</b> ${BIOCHAR_INVENTORY_LINE}</div>`+
     `<div class="note warn"><b>Split rule:</b> ${esc(m.splitRule)}</div>`+
-    sec("5","Track A — Absorbent Pellets (industrial)")+trackBlock(m.tracks[0])+
-    sec("","Track B — 100% Biochar (agriculture)")+trackBlock(m.tracks[1])+
+    sec("5","Track A — 100% Biochar (PRIORITY — 80 MT available now)")+trackBlock(tBiochar)+
+    sec("","Track B — Absorbent Pellets (secondary / industrial)")+trackBlock(tAbsorbent)+
     sec("","Comparison messaging (use only within the matching track)")+
     table(["Positioned against","Why we win"],m.comparisons.map(c=>[`<strong>${esc(c.vs)}</strong>`,esc(c.win)]))+
     sec("","Proof-point map (claim safety — both products)")+
@@ -476,7 +490,7 @@ function rOutreach(){
       <div class="note"><b>Nurture:</b> ${esc(o.nurture)}</div>
     </div>`).join("");
   return page("outreach",
-    head("Outreach Engine","Human, direct, credible sequences per segment — email, call, voicemail, LinkedIn, breakup, and nurture. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
+    head("Outreach Engine","Human, direct, credible sequences per segment — email, call, voicemail, LinkedIn, breakup, and nurture. BIOCHAR segments (Soil Blenders, Ag Distributors) lead; absorbent runs as the secondary track. The cold ask is always a free sample — a winning biochar trial converts to an order against the 80 MT. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
     filters+blocks
   );
 }
@@ -700,27 +714,8 @@ function rKpis(){
   );
 }
 
-/* --- Roadmap --- */
+/* --- Roadmap owner badge (still used by rHorizon; the 30-day arc now lives in the calendar) --- */
 function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/daniel/i.test(o)?"daniel":/both|all/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
-function rRoadmap(){
-  return page("roadmap",
-    head("30 / 60 / 90-Day Launch Roadmap","Every task is a checkbox — click to mark done; it stays done across reloads. Each shows who owns it (Jesse / Victor / Both) and the deliverable.")+
-    DATA.roadmap.map((ph,pi)=>{
-      const keys=ph.tasks.map((t,ti)=>`roadmap:${pi}:${ti}`);
-      const defs=ph.tasks.map(t=>!!t.done);
-      const st=checkStats(keys,defs);
-      return `<div class="chk-head"><h3 class="sub" style="margin:0">${esc(ph.phase)}</h3>`+
-        `<span class="chk-progress">${st.done}/${st.total} done</span></div>`+
-        (ph.note?`<p class="lead" style="margin:2px 0 8px">${esc(ph.note)}</p>`:"")+
-        ph.tasks.map((t,ti)=>{
-          const pri=badge(t.pri,t.pri==="P0"?"pri-1":t.pri==="P1"?"pri-2":"pri-3");
-          const label=`${whoBadge(t.o)}${pri} ${esc(t.t)}<span class="del">→ ${esc(t.del)}${t.out?` · <i>${esc(t.out)}</i>`:""}</span>`;
-          return chk(keys[ti],label,t.done);
-        }).join("");
-    }).join("")+
-    `<div class="chk-head"><span></span><span class="chk-reset" onclick="resetChecks('roadmap:')">Reset roadmap checkmarks</span></div>`
-  );
-}
 
 /* --- Checklist --- */
 function rChecklist(){
@@ -733,19 +728,20 @@ function rChecklist(){
       arr.map((x,i)=>{ const done=/\|done$/.test(x); const txt=x.replace(/\|done$/,""); return chk(keys[i],esc(txt),done); }).join("")+`</div>`;
   };
   return page("checklist",
-    head("Final Implementation Checklist","The concrete launch moves — website & product, app build, collateral, lists, first outbound, and the claims to verify. Every item is a checkbox that persists across reloads.")+
+    head("② Foundation checklist — what must be true to sell","The concrete setup behind the calendar: get the 80 MT sellable, then website & product, app build, collateral, lists, first outbound, and the claims to verify. Every item persists across reloads.")+
     `<div class="grid g2">
+      ${block("bio","⓪ Biochar inventory → revenue (80 MT)",c.biochar)}
       ${block("web","① Website & product launch",c.website)}
       ${block("build","② Build in the app",c.build)}
       ${block("coll","③ Collateral (single-product each)",c.collateral)}
       ${block("lists","④ Lists to build first",c.lists)}
       ${block("first","⑤ First outbound actions (sample-first)",c.firstActions)}
       ${block("dash","⑥ First dashboard fields",c.dashFields)}
-      ${block("price","⑦ Pricing inputs (Q4 reference only)",c.priceInputs)}
+      ${block("price","⑦ Pricing inputs (biochar bulk now · pellets Q4 ref)",c.priceInputs)}
       ${block("claims","⑧ Claims to verify (legal)",c.claims)}
       ${block("hires","⑨ Team",c.hires)}
     </div>`+
-    `<div class="chk-head"><span class="note ok" style="margin:0;flex:1"><b>Sequence:</b> approve & publish site + sample SKUs → build app fields → source 150–200 accounts → produce two single-product kits → launch sample-first outbound → ship free samples → present LOIs on wins → sign & bank committed volume.</span><span class="chk-reset" onclick="resetChecks('launch:')">Reset</span></div>`
+    `<div class="chk-head"><span class="note ok" style="margin:0;flex:1"><b>Sequence:</b> get 80 MT ship-ready + priced → publish site + sample SKUs → build app fields → source biochar-weighted accounts → produce single-product kits → launch biochar-first outbound → ship free samples → convert wins to POs against the 80 MT → present Q4 LOIs on top.</span><span class="chk-reset" onclick="resetChecks('launch:')">Reset</span></div>`
   );
 }
 
@@ -766,15 +762,17 @@ function compose(id, thunks){
 
 /* LEAN = daily-driver. BUILD = parked heavy modules (build-later.html). */
 const LEAN_SECTIONS=[
-  ["daily",    [rDaily, G("r30Day")]],
+  // Daily Plan is the single canonical hub: header → clickable calendar → foundation
+  // checklist → launch gates → 31–90 horizon. Roadmap/Checklist merged in here.
+  ["daily",    [rDaily, G("r30Day"), rChecklist, G("rPrelaunch"), G("rLaunch"), rHorizon]],
   ["overview", [G("rSummary")]],
   ["icp",      [rSegments, rPersonas, G("rCampaigns")]],
-  ["product",  [rMessaging, rBiochar]],
+  ["product",  [rBiochar, rMessaging]],
   ["accounts", [rAccounts]],
   ["outreach", [rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
   ["assets",   [rCollateral, G("rSample")]],
   ["playbook", [rPlaybook]],
-  ["roadmap",  [rRoadmap, G("rScale"), rChecklist, G("rPrelaunch"), G("rLaunch")]],
+  ["roadmap",  [G("rScale")]],
 ];
 const BUILD_SECTIONS=[
   ["b-overview",  [rOverview, rAssumptions]],

@@ -9,6 +9,15 @@
 (function(){
   if (typeof GTM === "undefined") { console.warn("GTM data missing"); return; }
 
+  /* --- Calendar dating: the 30-day plan starts Fri Jul 17, 2026 (Day 1) and runs
+     consecutive calendar days. Shared by the calendar grid and the day panel. --- */
+  const CAL_START = new Date(2026, 6, 17); // month is 0-indexed: 6 = July
+  const CAL_MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const CAL_DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const calDate = n => new Date(CAL_START.getFullYear(), CAL_START.getMonth(), CAL_START.getDate() + (n - 1));
+  const calFull = d => `${CAL_DOW[d.getDay()]}, ${CAL_MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  const calLeadBlanks = () => (CAL_START.getDay() + 6) % 7; // Mon=0 … Sun=6
+
   /* small local helpers layered on the shared design system */
   const gbadgePri = p => badge(p, p==="P0"?"pri-1":p==="P1"?"pri-2":"pri-3");
   const gstatus = s => badge(s, s==="Done"?"badge-green":s==="Doing"?"badge-gold":"badge-muted");
@@ -51,7 +60,7 @@
         `<strong>${esc(it.i)}</strong>`,gbadgePri(it.p),esc(it.o),gstatus(it.s),esc(it.why),`<span style="color:var(--green-bright)">${esc(it.ac)}</span>`]))+
       `</div>`).join("");
     return page("gtm-prelaunch",
-      head("Pre-Launch Checklist","Everything that must be true before outbound begins. Nothing ships until the P0 rows are green.")+
+      head("③ Launch gate — pre-launch checklist","Everything that must be true before outbound begins. Nothing ships until the P0 rows are green.")+
       filters+blocks
     );
   }
@@ -60,9 +69,11 @@
 
   /* ---- 3. ICP Campaigns ---- */
   function rCampaigns(){
-    const cs=GTM.campaigns;
+    // BIOCHAR IS PRIORITY #1 — sort biochar campaigns (primary/bioPriority) to the top, absorbent secondary after.
+    const rank=c=>c.primary?0:c.bioPriority?1:c.secondaryTrack?2:c.tag==="CMP-CDR"?4:3;
+    const cs=[...GTM.campaigns].sort((a,b)=>rank(a)-rank(b));
     const card=c=>`<div class="card pad-lg gtm-cmp">
-      <h4>${esc(c.name)} ${c.primary?badge("PRIMARY","badge-green"):""} ${badge(c.alloc,"badge-gold")} ${badge(c.tag,"badge-blue")}</h4>
+      <h4>${esc(c.name)} ${c.primary?badge("PRIMARY · BIOCHAR","badge-green"):c.bioPriority?badge("BIOCHAR","badge-green"):c.secondaryTrack?badge("SECONDARY","badge-muted"):""} ${badge(c.alloc,"badge-gold")} ${badge(c.tag,"badge-blue")}</h4>
       ${c.guardrail?`<div class="note warn" style="margin:8px 0"><b>⚠ Guardrail:</b> ${esc(c.guardrail)}</div>`:""}
       <div class="note warn" style="margin:8px 0"><b>Pain:</b> ${esc(c.pain)}</div>
       <div class="note ok" style="margin:8px 0"><b>Offer:</b> ${esc(c.offer)}</div>
@@ -84,7 +95,7 @@
       <div style="font-size:12px"><b style="color:var(--text)">Success metric:</b> ${esc(c.metric)}</div>
     </div>`;
     return page("gtm-campaigns",
-      head("ICP Campaign Strategy","Nine coordinated campaigns — oil & gas heavily weighted. Each has one specific CTA, its own proof, and a dedicated landing destination.")+
+      head("ICP Campaign Strategy","Nine coordinated campaigns — BIOCHAR-LED (we have 80 MT to move now). Biochar campaigns carry ~65% of effort and run first; absorbent is the secondary track. Each has one specific CTA, its own proof, and a dedicated landing destination.")+
       `<div class="note ok"><b>Effort weighting:</b> ${GTM.summary.allocation.map(a=>badge(a.icp.split(" ")[0]+" "+a.pct, a.cls)).join(" ")}</div>`+
       `<div class="grid" style="grid-template-columns:1fr;gap:14px">${cs.map(card).join("")}</div>`
     );
@@ -101,14 +112,23 @@
         <div><b style="color:var(--text)">Outputs:</b> ${esc(w.outputs)}</div>
       </div></div>`;
     const dow=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-    const cells=cal.map(c=>`<div class="cal-day${c.light?" rest":""}" data-d="${c.d}" onclick="gtmCalPick(${c.d})">
-      <div class="dn">${c.d}</div><div class="dt">${esc(c.theme)}</div><div class="dwk">Week ${c.wk}</div></div>`).join("");
+    const blanks=Array(calLeadBlanks()).fill('<div class="cal-blank"></div>').join("");
+    const cells=cal.map(c=>{
+      const d=calDate(c.d);
+      const wd=d.getDay();
+      const weekend=(wd===0||wd===6)?" weekend":"";
+      return `<div class="cal-day${c.light?" rest":""}${weekend}" data-d="${c.d}" onclick="gtmCalPick(${c.d})">
+      <div class="cal-date">${CAL_MON[d.getMonth()]} ${d.getDate()}</div>
+      <div class="cal-dow2">${CAL_DOW[wd]} · Day ${c.d}</div>
+      <div class="dt">${esc(c.theme)}</div><div class="dwk">Week ${c.wk}</div></div>`;
+    }).join("");
+    const start=calDate(1), end=calDate(cal.length);
     return page("gtm-30day",
-      head("30-Day Daily Plan — Calendar","Click any day to see the exact tasks for Jesse and Victor. Check tasks off as you go — they persist. Jesse = demand & the machine · Victor + Daniel = product, proof, website & fulfillment (split between them).")+
+      head("① The 30-Day Calendar — click a day",`The canonical day-by-day plan, ${calFull(start)} → ${calFull(end)}. Click any day to open the exact tasks for Jesse, Victor &amp; Daniel — check them off as you go, they persist. Jesse = demand &amp; the machine · Victor + Daniel = product, proof, website &amp; fulfillment. Everything is aimed at moving the 80 MT of biochar.`)+
       sec("","Weekly themes")+`<div class="grid g2">${weeks.map(wk).join("")}</div>`+
-      `<div class="note warn"><b>Quality controls:</b> max ~20→40 sends/inbox/day ramped; bounce <2% or slow down; monitor replies daily; A/B subject lines; SAMPLE-FIRST only (no LOI/bulk talk in cold outreach); never spam.</div>`+
-      sec("","Calendar — click a day")+
-      `<div class="cal">${dow.map(d=>`<div class="cal-dow">${d}</div>`).join("")}${cells}</div>`+
+      `<div class="note warn"><b>Quality controls:</b> max ~20→40 sends/inbox/day ramped; bounce <2% or slow down; monitor replies daily; A/B subject lines; BIOCHAR campaigns first; the cold ask is always a free sample (no bulk/LOI pitch cold) — convert the order from the 80 MT after a trial wins; never spam.</div>`+
+      sec("",`Calendar — click a day · starts ${CAL_MON[start.getMonth()]} ${start.getDate()}`)+
+      `<div class="cal">${dow.map(d=>`<div class="cal-dow">${d}</div>`).join("")}${blanks}${cells}</div>`+
       `<div id="gtmCalPanel"></div>`
     );
   }
@@ -117,7 +137,7 @@
     document.querySelectorAll("#sec-gtm-30day .cal-day, .cal-day").forEach(el=>el.classList.toggle("sel", +el.dataset.d===d));
     const lane=(who,arr,cls)=>`<div class="cal-lane ${cls}"><h4>${who}</h4>${arr.map((t,i)=>chk(`cal:${d}:${cls}:${i}`,esc(t))).join("")}</div>`;
     const html=`<div class="cal-panel">
-      <div class="cal-panel-h"><h3>Day ${c.d} — ${esc(c.theme)}</h3><div class="sub">Week ${c.wk}${c.light?" · lighter / review day":""}</div></div>
+      <div class="cal-panel-h"><h3>${calFull(calDate(c.d))} — ${esc(c.theme)}</h3><div class="sub">Day ${c.d} · Week ${c.wk}${c.light?" · lighter / review day":""}</div></div>
       <div class="cal-lanes">${lane("Jesse — demand & the machine",c.jesse,"j")}${lane("Victor + Daniel — product, proof, website & fulfillment",c.victor,"v")}</div>
       <div class="cal-meta">Tick each task as done — it stays checked across reloads. Victor + Daniel split this track: certs/spec sheets, company discovery, product photos, testing, website approval, then Shopify install & go-live, and sample fulfillment.</div>
     </div>`;
@@ -138,16 +158,18 @@
   }
 
   /* ---- 6. Outbound Sequences ---- */
+  // BIOCHAR IS PRIORITY #1 — sort biochar segments (AGD/SOIL/NUR) first, CDR last.
+  const bioSeqRank=t=>/AGD|SOIL|NUR/.test(t)?0:t==="CMP-CDR"?3:2;
   function rSequences(){
-    const seqs=GTM.sequences;
+    const seqs=[...GTM.sequences].sort((a,b)=>bioSeqRank(a.tag)-bioSeqRank(b.tag));
     const filters=`<div class="filters"><span class="pill active" onclick="gtmSeqFilter(this,'all')">All</span>${seqs.map((o,i)=>`<span class="pill" onclick="gtmSeqFilter(this,'${i}')">${esc(o.tag)}</span>`).join("")}</div>`;
     const blocks=seqs.map((o,i)=>`<div class="gtm-seq" data-idx="${i}">
-      <h3 class="sub">${esc(o.seg)} — ${esc(o.persona)} ${badge(o.tag,"badge-blue")}</h3>
+      <h3 class="sub">${esc(o.seg)} — ${esc(o.persona)} ${badge(o.tag,"badge-blue")}${/AGD|SOIL|NUR/.test(o.tag)?" "+badge("BIOCHAR","badge-green"):""}</h3>
       ${o.steps.map(st=>script(st.t,st.b)).join("")}
     </div>`).join("");
     return page("gtm-sequences",
-      head("Outbound Sequences","Human, short, specific, credible — email 1–4, breakup, call opener, voicemail, and three LinkedIn steps per segment. Copy any block. Replace {First}/{Me}/{phone} before sending.")+
-      `<div class="note"><b>Primary O&G angle:</b> Plant-based absorbent from sugarcane bagasse, absorbs up to ~5x its weight (est.) → potentially less material + lighter disposal vs wood/clay, with a cleaner sustainability story. Always tag ratio claims as estimates.</div>`+
+      head("Outbound Sequences","Human, short, specific, credible — email 1–4, breakup, call opener, voicemail, and three LinkedIn steps per segment. BIOCHAR segments lead; absorbent runs second. Copy any block. Replace {First}/{Me}/{phone} before sending.")+
+      `<div class="note ok"><b>Primary biochar angle:</b> OMRI-listed sugarcane-bagasse biochar with an ordered honeycomb pore structure — holds ~3–3.5× its weight in water and can shorten compost cycles ~10–30% (per research). We have 80 MT ready to ship, so a winning free-sample trial converts straight to an order. The cold ask is always the free sample — never a bulk/LOI pitch. <b>Secondary absorbent angle:</b> plant-based bagasse absorbent, ~5× its weight (est.) → fewer bags + lighter disposal vs wood/clay. Always tag ratio claims as estimates.</div>`+
       filters+blocks
     );
   }
@@ -175,9 +197,10 @@
   /* ---- 7b. Phone Script Library (A/B) ---- */
   function rScriptLibrary(){
     const L=GTM.scriptLibrary;
-    const filters=`<div class="filters"><span class="pill active" onclick="gtmScrFilter(this,'all')">All</span>${L.segments.map((s,i)=>`<span class="pill" onclick="gtmScrFilter(this,'${i}')">${esc(s.tag)}</span>`).join("")}</div>`;
+    const segs=[...L.segments].sort((a,b)=>bioSeqRank(a.tag)-bioSeqRank(b.tag));
+    const filters=`<div class="filters"><span class="pill active" onclick="gtmScrFilter(this,'all')">All</span>${segs.map((s,i)=>`<span class="pill" onclick="gtmScrFilter(this,'${i}')">${esc(s.tag)}</span>`).join("")}</div>`;
     const block=(s,i)=>`<div class="gtm-scr" data-idx="${i}">
-      <h3 class="sub">${esc(s.seg)} ${badge(s.tag,"badge-blue")} ${s.claimCaution?badge("CLAIM-CONTROLLED","badge-gold"):""}</h3>
+      <h3 class="sub">${esc(s.seg)} ${badge(s.tag,"badge-blue")}${/AGD|SOIL|NUR/.test(s.tag)?" "+badge("BIOCHAR","badge-green"):""} ${s.claimCaution?badge("CLAIM-CONTROLLED","badge-gold"):""}</h3>
       ${s.claimCaution?`<div class="note warn" style="margin:8px 0"><b>⚠ Claim control:</b> absorbent / moisture-management framing only — no animal-health, feed, or veterinary claims.</div>`:""}
       <h4 style="margin-top:10px;color:var(--gold-soft)">Openers — A/B these (${s.openers.length} variants)</h4>
       <div class="grid g2">${s.openers.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
@@ -192,7 +215,7 @@
       head("Phone Script Library (A/B)","A deep bank of call openers, gatekeeper lines, objection turns, and voicemails per segment — every one built to earn a yes to a FREE SAMPLE. No LOIs, no bulk on a cold call. Copy any block; swap {First}/{Me}/{Company}/{phone}.")+
       `<div class="note ok"><b>The whole point:</b> ${esc(L.intro)}</div>`+
       sec("","A/B testing rules")+`<div class="card">${ul(L.abRules)}</div>`+
-      filters+L.segments.map(block).join("")
+      filters+segs.map(block).join("")
     );
   }
   window.gtmScrFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-scripts .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
@@ -329,7 +352,7 @@
   function rLaunch(){
     const l=GTM.launch;
     return page("gtm-launch",
-      head("Final Execution Checklist","The gate before outbound, the exact first-48-hours moves, and week-one outputs with iteration rules.")+
+      head("③ Launch gate — first-48h execution","The gate before outbound, the exact first-48-hours moves, and week-one outputs with iteration rules.")+
       sec("","Before outreach (gate)")+`<div class="card">${ul(l.before)}</div>`+
       sec("","First 48 hours — exact tasks")+
       table(["Task","What to do"],l.first48.map(t=>[`<strong>${esc(t.t)}</strong>`,esc(t.d)]))+
@@ -339,7 +362,7 @@
         <div class="card"><h4>Review checkpoints</h4>${ul(l.firstWeek.checkpoints)}</div>
         <div class="card"><h4>Iteration rules</h4>${ul(l.firstWeek.iteration)}</div>
       </div>`+
-      `<div class="note ok"><b>Launch sequence:</b> pass the pre-launch gate → verify infra & pages (48h) → launch CMP-OG Email 1 to top 30 → dial for sourcing contacts → ship first sample kits → convert to first quote → document a claim-safe win → expand allocation into ENV/landfill, then ag, then carbon.</div>`
+      `<div class="note ok"><b>Launch sequence:</b> pass the pre-launch gate → verify infra & pages (48h) → launch CMP-AGD (biochar) Email 1 to top 30 ag distributors/blenders → dial for new-product decision-makers → ship first biochar sample kits → convert a winning trial to a paid order against the 80 MT → document a claim-safe win → expand into compost/nursery biochar, then layer the absorbent secondary track (O&G/ENV/landfill), then carbon (days 61–90).</div>`
     );
   }
 
