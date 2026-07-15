@@ -12,26 +12,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=navy61" />
+  <link rel="stylesheet" href="styles.css?v=clean10" />
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to content</a>
-  <div class="app-switch-bar">
-    <div class="wrap">
-      <div class="app-switch" role="tablist" aria-label="Switch app">
-        <a class="app-switch-btn active" href="index.html" aria-current="page">Website</a>
-        <a class="app-switch-btn" href="concept-a.html">Concept A</a>
-        <a class="app-switch-btn" href="concept-b.html">Concept B</a>
-        <a class="app-switch-btn" href="sales/">Sales OS</a>
-      </div>
-    </div>
-  </div>
   <header class="site">
     <div class="wrap nav">
       <a href="#/" aria-label="American BioCarbon home"><img class="logo" id="navLogo" alt="American BioCarbon" /></a>
       <div class="spring"></div>
       <nav class="menu" id="menu" aria-label="Primary"><!-- injected --></nav>
-      <a class="cta-mini" href="#/request-sample">Request quote</a>
+      <a class="cta-mini" href="#/request-quote">Request Quote</a>
       <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">☰</button>
     </div>
   </header>
@@ -39,13 +29,29 @@
   <main id="app" tabindex="-1"><!-- injected --></main>
 
   <div class="mobile-cta">
-    <a class="btn btn-primary" href="#/request-sample">Request quote</a>
-    <a class="btn btn-ghost-light" href="#/request-quote">Talk to volume</a>
+    <a class="btn btn-primary" href="#/request-quote">Request Quote</a>
+    <a class="btn btn-ghost-light" href="#/request-docs">Request Specifications</a>
   </div>
 
   <footer class="site"><div class="wrap" id="footer"><!-- injected --></div></footer>
 
-  <script src="data.js?v=navy61"></script>
-  <script src="app.js?v=navy61"></script>
+  <script>
+    /* Clean-path compatibility: the site is a hash router, but public/SEO URLs
+       like /industry/animal-bedding are served index.html by the SPA redirect.
+       Translate a non-root pathname into the equivalent hash route once, on load,
+       so a direct visit or refresh to /industry/animal-bedding resolves correctly. */
+    (function(){
+      var p = window.location.pathname;
+      if(p && p !== "/" && !/\/(index\.html)?$/.test(p.replace(/\/[^\/]*\.[a-z0-9]+$/i,"/"))){
+        var clean = p.replace(/\/+$/,"");
+        if(clean && clean !== "/index.html"){
+          var hash = window.location.hash && window.location.hash !== "#/" ? window.location.hash : "#" + clean + (window.location.search||"");
+          window.history.replaceState(null, "", "/" + (window.location.search||"") + hash);
+        }
+      }
+    })();
+  </script>
+  <script src="data.js?v=clean10"></script>
+  <script src="app.js?v=clean10"></script>
 </body>
 </html>

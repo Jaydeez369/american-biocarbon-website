@@ -20,7 +20,73 @@ window.copyEl = id => { const e=document.getElementById(id); if(e) copyText(e.da
 
 /* ---- helpers ---- */
 const tier = t => { const p=DATA.proofTiers.find(x=>x.t===t); return `<span class="proof proof-${t}" title="${esc(p?.name||'')}">T${t}</span>`; };
-const badge = (txt,cls="badge-muted")=>`<span class="badge ${cls}">${esc(txt)}</span>`;
+/* ============================================================
+   Badge system — single source of truth
+   ------------------------------------------------------------
+   Presentation is expressed as a small set of semantic TONES.
+   Business/workflow state is mapped to a tone in STATE below, so
+   pages never contain scattered `x==="Done"?"green":...` logic and
+   raw enum values are never shown unformatted. Unknown values fail
+   safe (neutral tone + a dev-visible warning) — they are never
+   silently styled as success/active/approved.
+   ============================================================ */
+const TONES = ["neutral","info","positive","warning","critical","pending","active","inactive","category"];
+/* Legacy colour class -> semantic tone (for un-migrated literal calls) */
+const TONE_ALIAS = {"badge-muted":"neutral","badge-blue":"info","badge-green":"positive",
+  "badge-gold":"warning","badge-red":"critical","pri-1":"critical","pri-2":"warning","pri-3":"neutral"};
+function toneClass(tone){
+  if(TONES.includes(tone)) return "badge--"+tone;
+  if(TONE_ALIAS[tone]) return "badge--"+TONE_ALIAS[tone];
+  return tone && /^(badge-|pri-)/.test(tone) ? tone : "badge--neutral";
+}
+/* badge(text, tone) — tone is a semantic name (preferred) or a legacy class. */
+const badge = (txt,tone="neutral",opts={})=>{
+  const sr = opts.sr ? `<span class="sr-only">${esc(opts.sr)} </span>` : "";
+  return `<span class="badge ${toneClass(tone)}"${opts.title?` title="${esc(opts.title)}"`:""}>${sr}${esc(txt)}</span>`;
+};
+
+/* Exhaustive state maps: raw value -> {label, tone}. Presentation boundary
+   only — raw values stay intact for sorting/filtering/persistence. */
+const STATE = {
+  dealStage: {
+    Prospect:{label:"Prospect",tone:"neutral"}, Contacted:{label:"Contacted",tone:"info"},
+    Discovery:{label:"Discovery",tone:"info"}, Sample:{label:"Sample sent",tone:"pending"},
+    Trial:{label:"Trial",tone:"pending"}, Negotiation:{label:"Negotiation",tone:"warning"},
+    Won:{label:"Won",tone:"positive"}, Lost:{label:"Lost",tone:"critical"},
+    Blocked:{label:"Blocked",tone:"critical"}
+  },
+  taskStatus: {
+    todo:{label:"To do",tone:"neutral"}, doing:{label:"In progress",tone:"active"},
+    blocked:{label:"Blocked",tone:"critical"}, done:{label:"Done",tone:"positive"},
+    "To do":{label:"To do",tone:"neutral"}, Doing:{label:"In progress",tone:"active"},
+    Done:{label:"Done",tone:"positive"}, Todo:{label:"To do",tone:"neutral"}
+  },
+  priority: {
+    P0:{label:"P0",tone:"critical"}, P1:{label:"P1",tone:"warning"},
+    P2:{label:"P2",tone:"neutral"}, P3:{label:"P3",tone:"neutral"}
+  },
+  confidence: {
+    High:{label:"High",tone:"positive"}, Med:{label:"Med",tone:"warning"}, Low:{label:"Low",tone:"critical"}
+  },
+  freightZone: {
+    A:{label:"Zone A",tone:"positive"}, B:{label:"Zone B",tone:"warning"}, C:{label:"Zone C",tone:"critical"}
+  },
+  requirement: {
+    Req:{label:"Required",tone:"positive"}, Required:{label:"Required",tone:"positive"},
+    Recommended:{label:"Recommended",tone:"warning"}, Auto:{label:"Auto",tone:"info"},
+    Optional:{label:"Optional",tone:"neutral"}
+  }
+};
+/* Resolve a state and render its badge. Unknown -> neutral + dev warning. */
+function stateInfo(domain, value){
+  const map = STATE[domain]||{};
+  const hit = map[value];
+  if(hit) return hit;
+  if(typeof console!=="undefined" && value!=null)
+    console.warn(`[badge] unmapped ${domain} value: ${JSON.stringify(value)} — falling back to neutral`);
+  return {label:(value==null||value==="")?"—":String(value), tone:"neutral"};
+}
+const stateBadge = (domain, value)=>{ const i=stateInfo(domain,value); return badge(i.label, i.tone, {sr:i.sr}); };
 function table(headers,rows){
   return `<div class="tbl-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
   <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
@@ -36,7 +102,8 @@ function script(label,body){
 /* ================= NAV ================= */
 const NAV=[
   {group:"Focus",items:[
-    {id:"today",ic:"◎",t:"Daily Action Plan"},
+    {id:"tasks",ic:"◎",t:"Tasks"},
+    {id:"today",ic:"☰",t:"Daily Action Plan"},
   ]},
   {group:"Strategy",items:[
     {id:"overview",ic:"◆",t:"Executive Overview"},
@@ -84,6 +151,127 @@ function page(id,inner){return `<section class="section" id="sec-${id}">${inner}
 function head(t,sub){return `<h1 class="page-h">${t}</h1><p class="page-sub">${sub}</p>`;}
 function sec(num,t){return `<h2 class="sec"><span class="num">${num}</span>${t}</h2>`;}
 
+/* ================= TASKS (daily home) ================= */
+const taskPriBadge = p => stateBadge("priority", p);
+const PRW = {P0:0,P1:1,P2:2};
+
+/* small clickable badge injected into connected views ("N open tasks") */
+function openTaskBadge(view){
+  if(typeof TasksAPI==="undefined") return "";
+  const n=TasksAPI.openForView(view); if(!n) return "";
+  return `<button class="badge badge--warning task-badge" onclick="go('tasks')" title="Open tasks linked to this view"><span class="count count--alert">${n}</span> open task${n>1?"s":""}</button>`;
+}
+
+function taskRow(t){
+  const done=t.done?" done":"";
+  const stLabel = stateInfo("taskStatus", t.status).label;
+  const st = t.done ? "" : `<button type="button" class="tstatus s-${t.status}" onclick="tCycle('${t.id}')" aria-label="Status: ${esc(stLabel)}. Change status">${esc(stLabel)}</button>`;
+  const od = (t.overdue) ? `<span class="badge badge--critical tood">${-t.dueRel}d overdue</span>` : "";
+  const link = t.link ? `<button class="tlink" onclick="tGo('${t.link.view}','${esc(t.link.anchor||"")}')">Open →</button>` : "";
+  return `<div class="task${done}" data-owner="${esc(t.owner)}">
+    <span class="tbox" role="checkbox" tabindex="0" aria-checked="${t.done?"true":"false"}" aria-label="Mark task done" onclick="tTog('${esc(t.checkKey)}')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();tTog('${esc(t.checkKey)}')}">✓</span>
+    <div class="tmain">
+      <div class="thead">${whoBadge(t.owner)}${taskPriBadge(t.priority)}${st?" "+st:""}${od?" "+od:""}<span class="ttitle">${esc(t.title)}</span></div>
+      ${t.detail?`<div class="tdetail">${esc(t.detail)}</div>`:""}
+    </div>
+    <div class="tactions">${link}</div>
+  </div>`;
+}
+
+function ownerGroup(title,cls,rows){
+  if(!rows.length) return "";
+  return `<div class="towner"><div class="towner-h ${cls}">${esc(title)} <span class="chk-progress">${rows.length}</span></div>${rows.map(taskRow).join("")}</div>`;
+}
+
+function punchBlock(pl,idx){
+  const keys=pl.items.map((_,i)=>`punch:${pl.id}:${i}`);
+  const st=checkStats(keys, pl.items.map(()=>false));
+  const pct=st.total?Math.round(st.done/st.total*100):0;
+  const rows=pl.items.map((it,i)=>chk(keys[i],esc(it),false)).join("");
+  const rec=pl.recurring?badge("daily","badge-blue"):"";
+  const link=pl.link?`<button class="tlink" onclick="tGo('${pl.link.view}','')">View →</button>`:"";
+  const open=idx===0?" open":""; const openh=idx===0?" open-h":"";
+  return `<div class="punch">
+    <div class="punch-h${openh}" onclick="punchToggle(${idx})">
+      <div class="punch-t">${esc(pl.title)} ${rec}</div>
+      <div class="punch-meta"><div class="tprog"><span style="width:${pct}%"></span></div><span class="chk-progress">${st.done}/${st.total}</span><span class="chev">▸</span></div>
+    </div>
+    <div class="punch-b${open}" id="punch-${idx}">${rows}
+      <div class="chk-head"><span>${link}</span><span class="chk-reset" onclick="resetChecks('punch:${pl.id}:')">Reset</span></div>
+    </div>
+  </div>`;
+}
+window.punchToggle=i=>{const b=document.getElementById("punch-"+i);const h=b.previousElementSibling;b.classList.toggle("open");h.classList.toggle("open-h");};
+
+function rTasks(){
+  if(typeof TasksAPI==="undefined") return page("tasks",head("Tasks","Task engine unavailable."));
+  const all=TasksAPI.all();
+  const total=all.length, done=all.filter(t=>t.done).length, pct=total?Math.round(done/total*100):0;
+
+  // Today = due today or overdue, not done; sort P0>P1>P2 then most overdue first
+  const bySort=(a,b)=>(PRW[a.priority]-PRW[b.priority])||(a.dueRel-b.dueRel);
+  const todayItems=all.filter(t=>!t.done && t.dueRel<=0).sort(bySort);
+  const byOwner=o=>todayItems.filter(t=>t.owner===o);
+  const todayHTML = todayItems.length
+    ? ownerGroup("Jesse · demand & the machine","j",byOwner("jesse"))
+      +ownerGroup("Victor · product, proof & fulfillment","v",byOwner("victor"))
+      +ownerGroup("Both","both",byOwner("both"))
+    : `<div class="note ok">Nothing due or overdue today. Pull ahead from This Week, or add a task below.</div>`;
+
+  // This Week = the calendar week containing today
+  const cd=TasksAPI.todayCalDay();
+  const cwk=((typeof GTM!=="undefined"&&GTM.calendar||[]).find(d=>d.d===cd)||{}).wk||1;
+  const weekItems=all.filter(t=>t.wk===cwk).sort((a,b)=>(a.calDay-b.calDay)||bySort(a,b));
+  const wdone=weekItems.filter(t=>t.done).length;
+  const weekHTML = weekItems.length
+    ? weekItems.map(taskRow).join("")
+    : `<div class="note">No calendar tasks scheduled for this week.</div>`;
+
+  const punches=(TasksAPI.punchlists||[]).map(punchBlock).join("");
+
+  return page("tasks",
+    head("Tasks","Your daily home. Today's action items, this week's calendar, and every punch list — all check-off-able and interlinked with accounts, pipeline, outreach and the roadmap. State persists locally; the morning cron agent keeps it fresh.")+
+    `<div class="daily-mission card pad-lg">
+       <div class="dm-row"><span class="dm-tag">ALL TASKS</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${done}/${total} · ${pct}%</span></div>
+       <p class="dm-mission">${esc((typeof DATA!=="undefined"&&DATA.daily&&DATA.daily.mission)||"Get free performance samples of both live products into buyers' hands — the only Month-1 win.")}</p>
+       <div class="note" style="margin-top:10px"><b>Deep day-by-day plan →</b> <a href="#today" onclick="go('today');return false" style="color:var(--gold-soft)">Daily Action Plan</a> · roll-up in the <a href="#roadmap" onclick="go('roadmap');return false" style="color:var(--gold-soft)">30/60/90 Roadmap</a>.</div>
+     </div>`+
+    sec("","Today · due or overdue")+todayHTML+
+    `<div class="chk-head"><h3 class="sub" style="margin:0">This Week · Week ${cwk}</h3><span class="chk-progress">${wdone}/${weekItems.length} done</span></div>`+
+    `<p class="lead" style="margin:2px 0 8px">The current calendar week rendered as live, checkable tasks. Checking one here also ticks it on the <a href="#gtm-30day" onclick="go('gtm-30day');return false" style="color:var(--gold-soft)">30-Day calendar</a>.</p>`+
+    weekHTML+
+    sec("","Punch lists")+
+    `<p class="lead" style="margin:2px 0 10px">Collapsible, check-off-able, progress-tracked. State persists across reloads.</p>`+
+    punches+
+    sec("","Quick add")+
+    `<div class="calc"><div class="qa-grid">
+      <div class="field" style="grid-column:span 2"><label>Task title</label><input type="text" id="qa_title" placeholder="e.g. Follow up with Pelican Oilfield on sample"></div>
+      <div class="field"><label>Owner</label><select id="qa_owner"><option value="jesse">Jesse</option><option value="victor">Victor</option><option value="both">Both</option></select></div>
+      <div class="field"><label>Priority</label><select id="qa_pri"><option value="P1">P1</option><option value="P0">P0</option><option value="P2">P2</option></select></div>
+      <div class="field"><label>Due</label><input type="date" id="qa_due" value="${TasksAPI.todayYMD()}"></div>
+      <div class="field" style="justify-content:flex-end"><button class="btn btn-green" onclick="tAdd()">Add task</button></div>
+    </div><div class="note" style="margin:12px 0 0">Quick-adds persist in your browser (overlay). Base tasks & punch lists live in <code>tasks-data.js</code> and are refreshed by the morning cron agent.</div></div>`
+  );
+}
+
+/* re-render only the tasks section in place (keeps router + nav intact) */
+window.renderTasks=function(){
+  const cur=document.getElementById("sec-tasks"); if(!cur) return;
+  const tmp=document.createElement("div"); tmp.innerHTML=rTasks();
+  const fresh=tmp.firstElementChild;
+  if(cur.classList.contains("active")) fresh.classList.add("active");
+  cur.replaceWith(fresh);
+};
+window.tTog=key=>{ const on=!getChecks()[key]; setCheck(key,on); renderTasks(); };
+window.tCycle=id=>{ const t=TasksAPI.all().find(x=>x.id===id); if(!t)return; const order=["todo","doing","blocked"]; TasksAPI.setStatus(id, order[(order.indexOf(t.status)+1)%order.length]); renderTasks(); };
+window.tGo=(view,anchor)=>{ go(view); if(anchor){ const el=document.getElementById(anchor); if(el) setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"start"}),60); } };
+window.tAdd=function(){
+  const el=document.getElementById("qa_title"); const title=el?el.value.trim():"";
+  if(!title){ toast("Enter a task title"); return; }
+  TasksAPI.add({ title, owner:document.getElementById("qa_owner").value, priority:document.getElementById("qa_pri").value, due:document.getElementById("qa_due").value||TasksAPI.todayYMD() });
+  toast("Task added"); renderTasks();
+};
+
 /* --- Daily Action Plan (top-of-app focus) --- */
 function rDaily(){
   const D=DATA.daily;
@@ -101,7 +289,7 @@ function rDaily(){
     const lanes=day.lanes.map(l=>{
       const s=secMap[l.k]||{c:"#8a93a0",t:l.k};
       const rows=l.items.map((it,i)=>{
-        const pri=badge(it.pri,it.pri==="P0"?"pri-1":it.pri==="P1"?"pri-2":"pri-3");
+        const pri=stateBadge("priority", it.pri);
         const label=`${whoBadge(it.o)}${pri} ${esc(it.t)}<span class="del">→ ${esc(it.del)}</span>`;
         return chk(`daily:${day.d}:${l.k}:${i}`,label,false);
       }).join("");
@@ -160,7 +348,7 @@ function rAssumptions(){
     sec("2A","Assumptions")+
     table(["Assumption","Why it matters","Confidence","Verify"],DATA.assumptions.map(a=>[
       `<strong>${esc(a.a)}</strong>`,esc(a.why),
-      badge(a.conf, a.conf==="High"?"badge-green":a.conf==="Med"?"badge-gold":"badge-red"),esc(a.verify)]))+
+      stateBadge("confidence", a.conf),esc(a.verify)]))+
     sec("2B","Missing Inputs")+
     table(["Input needed","Owner","Impact if unknown","Temporary assumption"],DATA.missingInputs.map(m=>[
       `<strong>${esc(m.i)}</strong>`,esc(m.who),esc(m.impact),`<em style="color:var(--gold-soft)">${esc(m.tmp)}</em>`]))+
@@ -175,7 +363,7 @@ function rSegments(){
   // Month-1 beachhead score: weight speed-to-LOI heavily; carbon is parked (shown as a column, excluded from the score).
   const ranked=[...DATA.segments].map(s=>({s,score:s.rank.speed*3+s.rank.recurring+s.rank.margin+s.rank.strategic+s.rank.freight-s.rank.complexity})).sort((a,b)=>b.score-a.score);
   const top3=ranked.slice(0,3).map(r=>r.s.name);
-  const filters=`<div class="filters"><span class="pill active" onclick="segFilter(this,'all')">All</span>${groups.map(g=>`<span class="pill" onclick="segFilter(this,'${esc(g)}')">${esc(g)}</span>`).join("")}</div>`;
+  const filters=`<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="segFilter(this,'all')">All</span>${groups.map(g=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="segFilter(this,'${esc(g)}')">${esc(g)}</span>`).join("")}</div>`;
   const cards=DATA.segments.map(s=>segCard(s)).join("");
   return page("segments",
     head("ICP Definition & Segmentation","Tight profiles for every buyer type, ranked by Month-1 speed-to-LOI (carbon is parked to days 61–90, shown as a column, excluded from the beachhead score).")+
@@ -214,7 +402,7 @@ function segCard(s){
   </div>`;
 }
 window.segFilter=(el,g)=>{
-  document.querySelectorAll("#sec-segments .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  document.querySelectorAll("#sec-segments .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
   document.querySelectorAll("#segCards .seg-card").forEach(c=>c.style.display=(g==="all"||c.dataset.group===g)?"":"none");
 };
 
@@ -378,10 +566,10 @@ function rPipeline(){
       <div class="crit" style="color:var(--red-soft)"><b>Don't advance:</b> ${esc(s.noAdv)}</div>
     </div></div>`).join("")}</div>`;
   return page("pipeline",
-    head("Sales Pipeline Design · for your Replit app","Object model, deal types, and three connected pipelines with stage exit criteria and the exact CRM fields to add. This is the build spec for your app's sales section.")+
+    head("Sales Pipeline Design · for your Replit app","Object model, deal types, and three connected pipelines with stage exit criteria and the exact CRM fields to add. This is the build spec for your app's sales section.")+openTaskBadge("pipeline")+
     sec("7A","Object model")+
     table(["Object","Key fields"],DATA.objectModel.map(o=>[`<strong>${esc(o.o)}</strong>`,esc(o.key)]))+
-    sec("7B","Deal types")+`<div class="filters">${DATA.dealTypes.map(d=>`<span class="pill active" style="cursor:default">${esc(d)}</span>`).join("")}</div>`+
+    sec("7B","Deal types")+`<div class="filters">${DATA.dealTypes.map(d=>`<span class="pill is-static active">${esc(d)}</span>`).join("")}</div>`+
     sec("7C","Pipeline 1 · Mid-market recurring")+kanban("",pl.midmarket)+
     sec("","Pipeline 2 · Bulk offtake / supply")+kanban("",pl.offtake)+
     sec("","Pipeline 3 · Carbon-credit buyer")+kanban("",pl.carbon)+
@@ -392,7 +580,7 @@ function rPipeline(){
       <div class="card"><h4>Product + carbon economics fields</h4><ul>${DATA.crmFields.economics.map(f=>`<li>${esc(f)}</li>`).join("")}</ul></div>
     </div>`+
     sec("7E","Dashboard views to build")+
-    `<div class="filters">${DATA.dashboards.map(d=>`<span class="pill" style="cursor:default">${esc(d)}</span>`).join("")}</div>`+
+    `<div class="filters">${DATA.dashboards.map(d=>`<span class="pill is-static">${esc(d)}</span>`).join("")}</div>`+
     sec("7F","Schema (TypeScript-style)")+schemaBlock()
   );
 }
@@ -440,8 +628,8 @@ function rAccounts(){
   const segs=[...new Set(SAMPLE_ACCOUNTS.map(a=>a[1]))];
   const rows=SAMPLE_ACCOUNTS.map((a,i)=>accRow(a,i)).join("");
   return page("accounts",
-    head("Target Accounts","A working account list view, filter by segment, sort by priority. This is a seeded demo; replace with your sourced Gulf South list (see TAM tab for the workflow).")+
-    `<div class="filters"><span class="pill active" onclick="accFilter(this,'all')">All segments</span>${segs.map(s=>`<span class="pill" onclick="accFilter(this,'${esc(s)}')">${esc(s)}</span>`).join("")}</div>`+
+    head("Target Accounts","A working account list view, filter by segment, sort by priority. This is a seeded demo; replace with your sourced Gulf South list (see TAM tab for the workflow).")+openTaskBadge("accounts")+
+    `<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="accFilter(this,'all')">All segments</span>${segs.map(s=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="accFilter(this,'${esc(s)}')">${esc(s)}</span>`).join("")}</div>`+
     `<div class="tbl-wrap"><table id="accTbl"><thead><tr>
       <th>Account</th><th>Segment</th><th>Location</th><th>Freight zone</th><th>Est. tons/yr</th><th>Priority</th><th>Status</th><th>Next action</th>
     </tr></thead><tbody>${rows}</tbody></table></div>`+
@@ -450,21 +638,20 @@ function rAccounts(){
 }
 function accRow(a,i){
   const [name,seg,loc,zone,tons,pri,status]=a;
-  const priCls=pri>=5?"pri-1":pri>=4?"pri-2":"pri-3";
-  const zc=zone==="A"?"badge-green":zone==="B"?"badge-gold":"badge-red";
+  const priTone=pri>=5?"critical":pri>=4?"warning":"neutral";
   const next={Prospect:"First touch",Contacted:"Book discovery",Discovery:"Ship sample",Sample:"Trial check-in"}[status]||"Advance";
   return `<tr data-seg="${esc(seg)}"><td><strong>${esc(name)}</strong></td><td>${esc(seg)}</td><td>${esc(loc)}</td>
-    <td>${badge("Zone "+zone,zc)}</td><td class="t-num">${tons?tons.toLocaleString():"-"}</td>
-    <td>${badge("P"+pri,priCls)}</td><td>${badge(status,"badge-blue")}</td><td>${esc(next)}</td></tr>`;
+    <td>${stateBadge("freightZone",zone)}</td><td class="t-num">${tons?tons.toLocaleString():"-"}</td>
+    <td>${badge("P"+pri,priTone,{sr:"priority score"})}</td><td>${stateBadge("dealStage",status)}</td><td>${esc(next)}</td></tr>`;
 }
 window.accFilter=(el,s)=>{
-  document.querySelectorAll("#sec-accounts .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  document.querySelectorAll("#sec-accounts .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
   document.querySelectorAll("#accTbl tbody tr").forEach(r=>r.style.display=(s==="all"||r.dataset.seg===s)?"":"none");
 };
 
 /* --- Outreach --- */
 function rOutreach(){
-  const filters=`<div class="filters"><span class="pill active" onclick="outFilter(this,'all')">All segments</span>${DATA.outreach.map((o,i)=>`<span class="pill" onclick="outFilter(this,'${i}')">${esc(o.seg)}</span>`).join("")}</div>`;
+  const filters=`<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="outFilter(this,'all')">All segments</span>${DATA.outreach.map((o,i)=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="outFilter(this,'${i}')">${esc(o.seg)}</span>`).join("")}</div>`;
   const blocks=DATA.outreach.map((o,i)=>`
     <div class="out-block" data-idx="${i}">
       <h3 class="sub">${esc(o.seg)} · ${esc(o.persona)}</h3>
@@ -472,12 +659,12 @@ function rOutreach(){
       <div class="note"><b>Nurture:</b> ${esc(o.nurture)}</div>
     </div>`).join("");
   return page("outreach",
-    head("Outreach Engine","Human, direct, credible sequences per segment: email, call, voicemail, LinkedIn, breakup, and nurture. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
+    head("Outreach Engine","Human, direct, credible sequences per segment: email, call, voicemail, LinkedIn, breakup, and nurture. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+openTaskBadge("outreach")+
     filters+blocks
   );
 }
 window.outFilter=(el,i)=>{
-  document.querySelectorAll("#sec-outreach .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  document.querySelectorAll("#sec-outreach .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
   document.querySelectorAll(".out-block").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");
 };
 
@@ -552,7 +739,7 @@ function rCollateral(){
       `<strong>${i+1}</strong>`,`<strong>${esc(s.s)}</strong>`,esc(s.p),
       `<ul style="margin:0">${s.b.map(b=>`<li>${esc(b)}</li>`).join("")}</ul>`,esc(s.cta)]))+
     sec("","One-pagers to produce")+
-    `<div class="filters">${DATA.onePagers.map(o=>`<span class="pill" style="cursor:default">${esc(o)}</span>`).join("")}</div>`+
+    `<div class="filters">${DATA.onePagers.map(o=>`<span class="pill is-static">${esc(o)}</span>`).join("")}</div>`+
     sec("","ROI calculators (specs)")+
     `<div class="grid g2">${DATA.calculators.map(c=>`<div class="card"><h4>${esc(c.name)}</h4>
       <b style="font-size:11.5px;color:var(--gold-soft)">Inputs</b><ul>${c.inputs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
@@ -700,7 +887,7 @@ function rKpis(){
 function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/both/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
 function rRoadmap(){
   return page("roadmap",
-    head("30 / 60 / 90-Day Launch Roadmap","Every task is a checkbox, click to mark done; it stays done across reloads. Each shows who owns it (Jesse / Victor / Both) and the deliverable.")+
+    head("30 / 60 / 90-Day Launch Roadmap","Every task is a checkbox, click to mark done; it stays done across reloads. Each shows who owns it (Jesse / Victor / Both) and the deliverable.")+openTaskBadge("roadmap")+
     DATA.roadmap.map((ph,pi)=>{
       const keys=ph.tasks.map((t,ti)=>`roadmap:${pi}:${ti}`);
       const defs=ph.tasks.map(t=>!!t.done);
@@ -709,7 +896,7 @@ function rRoadmap(){
         `<span class="chk-progress">${st.done}/${st.total} done</span></div>`+
         (ph.note?`<p class="lead" style="margin:2px 0 8px">${esc(ph.note)}</p>`:"")+
         ph.tasks.map((t,ti)=>{
-          const pri=badge(t.pri,t.pri==="P0"?"pri-1":t.pri==="P1"?"pri-2":"pri-3");
+          const pri=stateBadge("priority", t.pri);
           const label=`${whoBadge(t.o)}${pri} ${esc(t.t)}<span class="del">→ ${esc(t.del)}${t.out?` · <i>${esc(t.out)}</i>`:""}</span>`;
           return chk(keys[ti],label,t.done);
         }).join("");
@@ -747,13 +934,20 @@ function rChecklist(){
 
 /* ================= BOOT ================= */
 function render(){
-  const html=[rDaily(),rOverview(),rAssumptions(),rSegments(),rPersonas(),rMessaging(),rBiochar(),rMarket(),rBarge(),
+  const html=[rTasks(),rDaily(),rOverview(),rAssumptions(),rSegments(),rPersonas(),rMessaging(),rBiochar(),rMarket(),rBarge(),
     rPipeline(),rAccounts(),rOutreach(),rCollateral(),rPricing(),rPlaybook(),rKpis(),rRoadmap(),rChecklist()].join("");
   $("#content").innerHTML=html;
 }
+/* Keyboard activation for role="button" chips (filters) — Enter/Space fire
+   the same click handler, so interactive chips are fully keyboard operable. */
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  const el=e.target.closest?.('[role="button"].pill');
+  if(el){ e.preventDefault(); el.click(); }
+});
 buildNav();
 render();
 $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
-const start=(location.hash||"#today").slice(1);
-go(NAV.flatMap(g=>g.items).some(i=>i.id===start)?start:"today");
+const start=(location.hash||"#tasks").slice(1);
+go(NAV.flatMap(g=>g.items).some(i=>i.id===start)?start:"tasks");
 recalc();

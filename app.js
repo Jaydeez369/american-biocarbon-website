@@ -28,12 +28,12 @@ document.addEventListener("click", e=>{
 /* ---- spec sheet downloads ---- */
 const SPEC_SHEETS = {
   "absorbent-pellets": {
-    file: "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.txt",
-    name: "Absorbent-Pellets-Spec-Sheet.txt"
+    file: "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf",
+    name: "Absorbent-Pellets-Spec-Sheet.pdf"
   },
   "biochar": {
-    file: "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.txt",
-    name: "Biochar-Premium-Spec-Sheet.txt"
+    file: "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf",
+    name: "Biochar-Premium-Spec-Sheet.pdf"
   }
 };
 
@@ -100,14 +100,15 @@ function carbonPillar(c){
   </div></section>`;
 }
 function socialProof(s){
-  if(!s) return "";
-  const ph = s.placeholder ? `<div class="dev-note" style="margin-top:22px">↳ Placeholder scaffold, replace logos, stats, and the quote with real, attributable proof before publishing.</div>` : "";
+  // Only render once real, attributable proof is in place. While the data is
+  // still placeholder scaffold, render nothing rather than fake logos/stats/quotes.
+  if(!s || s.placeholder) return "";
   return `<section class="block social-proof"><div class="wrap">
     <div class="eyebrow-line"></div>
     <div class="kicker">${raw(s.kicker)}</div>
     <h2>${raw(s.h)}</h2>
     <p class="lead" style="margin-bottom:26px">${raw(s.sub)}</p>
-    <div class="logo-strip">${s.logos.map(l=>`<div class="logo-tile" role="img" aria-label="${raw(l)} (placeholder)">${raw(l)}</div>`).join("")}</div>
+    <div class="logo-strip">${s.logos.map(l=>`<div class="logo-tile" role="img" aria-label="${raw(l)}">${raw(l)}</div>`).join("")}</div>
     <div class="proof-stats">
       ${s.stats.map(st=>`<div class="ps"><b>${raw(st.n)}</b><span>${raw(st.l)}</span><em>${raw(st.note)}</em></div>`).join("")}
     </div>
@@ -115,7 +116,6 @@ function socialProof(s){
       <blockquote>${raw(s.quote.text)}</blockquote>
       <figcaption>${raw(s.quote.who)} · <span>${raw(s.quote.org)}</span></figcaption>
     </figure>
-    ${ph}
   </div></section>`;
 }
 function audienceRouter(a){
@@ -147,6 +147,18 @@ function faqBlock(items){
 function ucGrid(list){
   return `<div class="ucgrid">${list.map((u,i)=>`<div class="uc"><span class="uc-i">${String(i+1).padStart(2,"0")}</span><span class="uc-t">${raw(u)}</span><svg class="uc-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M17 7H9M17 7v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`).join("")}</div>`;
 }
+// Field-application cards: title, operational detail, explanation, benefit, and
+// the associated product line. Used for Oil & Gas and Environmental Remediation.
+function appCards(list){
+  return `<div class="appgrid">${list.map((a,i)=>`<div class="appcard">
+    <span class="ac-n">${String(i+1).padStart(2,"0")}</span>
+    <h3 class="ac-t">${raw(a.title)}</h3>
+    ${a.detail?`<span class="ac-d">${raw(a.detail)}</span>`:""}
+    <p class="ac-b">${raw(a.body)}</p>
+    ${a.benefit?`<p class="ac-benefit"><span>Benefit</span>${raw(a.benefit)}</p>`:""}
+    ${a.product?`<div class="ac-prod">${raw(a.product)}</div>`:""}
+  </div>`).join("")}</div>`;
+}
 function specTable(rows){
   return `<div class="tbl"><table><tbody>${rows.map(r=>`<tr><td>${raw(r[0])}</td><td>${raw(r[1])}</td></tr>`).join("")}</tbody></table></div>`;
 }
@@ -167,7 +179,7 @@ function renderChrome(){
     <div>
       <img class="logo" src="${ASSETS.logoRev}" alt="American BioCarbon">
       <p class="addr">${raw(BRAND.legal)}<br>${raw(BRAND.address)}<br>${raw(BRAND.location)}</p>
-      <div class="foot-cta"><a class="btn btn-primary btn-sm" href="#/request-sample">Request quote</a><a class="cta-link-light" href="#/request-quote">Talk to us about volume</a></div>
+      <div class="foot-cta"><a class="btn btn-primary btn-sm" href="#/request-quote">Request quote</a><a class="cta-link-light" href="#/request-quote">Talk to us about volume</a></div>
     </div>
     <div><h4>Products</h4>
       <a href="#/product/absorbent-pellets">Absorbent Pellets</a><a href="#/product/absorbent-crumble">Absorbent Crumble</a>
@@ -181,10 +193,9 @@ function renderChrome(){
     <div><h4>Resources</h4>
       <a href="#/technical">Certifications &amp; Technical Data</a><a href="#/compare">Compare vs Wood Pellets</a>
       <a href="#/about">About</a><a href="#/contact">Contact</a>
-      <a href="#/request-sample">Request Sample</a><a href="#/request-quote">Request Quote</a></div>
+      <a href="#/request-sample">Get a free sample</a><a href="#/request-quote">Request Quote</a></div>
   </div>
-  <div class="legal"><span>© ${new Date().getFullYear()} ${raw(BRAND.name)}. All rights reserved.</span>
-    <span class="mono">Preview build · copy pending final claim verification</span></div>`;
+  <div class="legal"><span>© ${new Date().getFullYear()} ${raw(BRAND.name)}. All rights reserved.</span></div>`;
   const burger = $("#burger");
   burger.onclick = () => {
     const open = $("#menu").classList.toggle("open");
@@ -205,12 +216,12 @@ function renderHome(){
   // custom kraft sample bag (6 bags total, tailored per product).
   const zig = (HOME.buy.products||[]).map((p,i)=>{
     const isLive = p.avail==="live";
-    // Homepage showcase sections 3, 4 & 5 (index 2, 3 & 4) use "Notify me" instead of a free-sample CTA.
+    // Homepage showcase sections 3, 4 & 5 (index 2, 3 & 4) use "Stay informed" instead of a free-sample CTA.
     const notifyPrimary = i===2 || i===3 || i===4;
-    const primary = isLive ? {label:"Shop",href:"#/shop/"+p.id}
-      : notifyPrimary ? {label:"Notify me",href:"#/request-sample?preorder=1&product="+p.id}
+    const primary = isLive ? {label:"Get a free sample",href:p.id==="absorbent-pellets"?"#/shop/absorbent-pellets":"#/request-sample?product="+p.id}
+      : notifyPrimary ? {label:"Stay informed",href:"#/request-sample?preorder=1&product="+p.id}
       : {label:"Get a free sample",href:"#/request-sample?preorder=1&product="+p.id};
-    const secondary = isLive ? {label:"Get a free sample",href:"#/request-sample?product="+p.id} : null;
+    const secondary = null;
     return `
   <section class="block" style="background:${i%2?'var(--paper-2)':'var(--white)'}"><div class="wrap"><div class="split${i%2?' rev':''} bleed">
     <div class="media"><img src="${p.img}" alt="${raw(p.name)}"></div>
@@ -314,7 +325,7 @@ function renderProduct(id){
           <ul class="checks">${PROOF.certs.filter(c=>c.status!=="pending").slice(0,4).map(c=>`<li><b>${raw(c.name)}</b>, ${raw(c.note)}</li>`).join("")}</ul>
           <p class="form-note">USDA Organic certification pending. Verify current certification language before publishing.</p>
         </div>
-        <img class="procimg" src="assets/industry/${id}.jpg" alt="${raw(p.name)}" loading="lazy">
+        <img class="procimg" src="assets/industry/${id}.jpg?v=v2" alt="${raw(p.name)}" loading="lazy">
       </div>
       <div class="formcard" id="pform"></div>
     </div>
@@ -351,8 +362,8 @@ function renderIndustry(id){
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
-    <div class="kicker">Applications</div><h2 style="margin-top:6px">Use cases</h2>
-    <div style="margin-top:26px">${ucGrid(n.useCases)}</div>
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">${n.fieldApps?"Field applications":"Use cases"}</h2>
+    <div style="margin-top:26px">${n.fieldApps?appCards(n.fieldApps):ucGrid(n.useCases)}</div>
   </div></section>
 
   <section class="block"><div class="wrap"><div class="split proc-split">
@@ -362,7 +373,7 @@ function renderIndustry(id){
         <ul class="checks">${n.procurement.map(x=>`<li>${raw(x)}</li>`).join("")}</ul>
         ${prods.length?`<div class="btn-row" style="margin-top:18px">${prods.map(p=>`<a class="btn btn-ghost btn-sm" href="#/product/${prodId(p)}">${raw(p.name)} →</a>`).join("")}</div>`:""}
       </div>
-      <img class="procimg" src="assets/industry/${id}.jpg" alt="${raw(n.name)} application" loading="lazy">
+      <img class="procimg" src="assets/industry/${id}.jpg?v=v2" alt="${raw(n.name)} application" loading="lazy">
     </div>
     <div class="formcard" id="pform"></div>
   </div></div></section>
@@ -422,9 +433,16 @@ function buildForm(kind, mountSel){
   });
   $("#lf").addEventListener("submit", e=>{
     e.preventDefault();
+    const form = e.currentTarget;
+    if(form.dataset.submitted==="1") return;      // guard against accidental double-submit
+    if(!form.checkValidity()){ form.reportValidity(); return; }
+    form.dataset.submitted="1";
+    const btn = form.querySelector('button[type="submit"]');
+    if(btn){ btn.disabled=true; btn.textContent="Sending…"; }
     track("lead_submit", { form: kind, routing: (f.routing||"").split(".")[0] }); // event only, no field values
-    mount.innerHTML = `<div class="form-success">✓ ${raw(f.confirm)}</div>
+    mount.innerHTML = `<div class="form-success" role="status" tabindex="-1">✓ ${raw(f.confirm)}</div>
       <div class="dev-note" style="margin-top:16px"><b>Auto-reply preview:</b><br>${raw(f.autoreply).replace(/\n/g,"<br>")}</div>`;
+    const ok = mount.querySelector(".form-success"); if(ok) ok.focus();
     window.scrollTo({top:mount.getBoundingClientRect().top+window.scrollY-120,behavior:"smooth"});
   });
 }
@@ -451,7 +469,7 @@ function buyCard(p){
     ? `<div class="buy-docs">${(p.docIds||[]).map(docLink).join("<span>·</span>")}</div>`
     : `<div class="buy-docs muted">Spec sheet coming</div>`;
   const primary = isLive
-    ? `<a class="btn btn-primary btn-sm" href="#/shop/${p.id}">Shop</a>`
+    ? `<a class="btn btn-primary btn-sm" href="${p.id==="absorbent-pellets"?"#/shop/absorbent-pellets":"#/request-sample?product="+p.id}">Get a free sample</a>`
     : `<a class="btn btn-primary btn-sm" href="#/request-sample?preorder=1&product=${p.id}">Get a free sample</a>`;
   const cta = isLive
     ? `<div class="btn-row">${primary}</div>
@@ -576,7 +594,7 @@ function renderShopProduct(id){
   const slideHTML = (s,i,ctx)=> `<div class="pdp-slide${i===0?" active":""}" data-slide="${i}"><img src="${s.src}" alt="${raw(p.name)}"></div>`;
   return `
   <section class="block" style="padding-top:34px"><div class="wrap">
-    <div class="crumb" style="margin-bottom:22px"><a href="#/buy">Shop</a> / ${raw(p.name)}</div>
+    <div class="crumb" style="margin-bottom:22px"><a href="#/buy">Products</a> / ${raw(p.name)}</div>
     <div class="pdp">
       <div class="pdp-media">
         <div class="pdp-main">${slides.map((s,i)=>slideHTML(s,i,"m")).join("")}</div>
@@ -636,7 +654,7 @@ function renderBuy(){
   return `
   <section class="shop-head"><div class="wrap">
     <div class="crumb"><a href="#/">Home</a> / Products</div>
-    <h1>Shop</h1>
+    <h1>Products</h1>
     <p class="shop-sub">Free samples ship in 4 to 7 business days · bulk bag and truckload by freight-aware quote.</p>
   </div></section>
 
@@ -691,6 +709,68 @@ function renderCompare(){
 }
 
 /* ================= TECHNICAL DATA / RESOURCES (gated) ================= */
+// Accessible filter bar for the resource library. Groups: Product, Use Case,
+// Industry. Rendered as radio-style toggle buttons so one option per group is
+// active; each group has an "All" reset.
+function resourceFilterBar(){
+  const rf = TECH.resourceFilters;
+  const group = (name, label, opts) => `<div class="rf-group" role="group" aria-label="Filter by ${raw(label)}">
+    <span class="rf-label">${raw(label)}</span>
+    <div class="rf-btns">
+      <button type="button" class="rf-btn is-active" data-rf-group="${name}" data-rf-key="" aria-pressed="true">All</button>
+      ${opts.map(o=>`<button type="button" class="rf-btn" data-rf-group="${name}" data-rf-key="${raw(o.key)}" aria-pressed="false">${raw(o.label)}</button>`).join("")}
+    </div></div>`;
+  return `<div class="rfbar" id="rfbar">
+    ${group("product","Product",rf.product)}
+    ${group("useCase","Use Case",rf.useCase)}
+    ${group("industry","Industry",rf.industry)}
+    <button type="button" class="btn btn-ghost btn-sm rf-clear" data-rf-reset>Clear all</button>
+  </div>`;
+}
+function bindResourceFilters(){
+  const bar = $("#rfbar"), grid = $("#docgrid"), empty = $("#docEmpty");
+  if(!bar || !grid) return;
+  const rf = TECH.resourceFilters;
+  const active = { product:"", useCase:"", industry:"" };
+  const idsFor = (groupName, key) => {
+    if(!key) return null; // "All" → no constraint
+    const opt = (rf[groupName]||[]).find(o=>o.key===key);
+    return opt ? opt.ids : [];
+  };
+  const apply = () => {
+    let shown = 0;
+    grid.querySelectorAll(".doccard").forEach(card=>{
+      const id = card.getAttribute("data-id");
+      const ok = Object.keys(active).every(g=>{
+        const ids = idsFor(g, active[g]);
+        return ids === null || ids.includes(id);
+      });
+      card.hidden = !ok;
+      if(ok) shown++;
+    });
+    if(empty) empty.hidden = shown !== 0;
+    grid.hidden = shown === 0;
+  };
+  bar.querySelectorAll("[data-rf-group]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const g = btn.getAttribute("data-rf-group");
+      active[g] = btn.getAttribute("data-rf-key");
+      bar.querySelectorAll(`[data-rf-group="${g}"]`).forEach(b=>{
+        const on = b===btn; b.classList.toggle("is-active", on); b.setAttribute("aria-pressed", on?"true":"false");
+      });
+      apply();
+    });
+  });
+  const reset = () => {
+    active.product=active.useCase=active.industry="";
+    bar.querySelectorAll(".rf-btn").forEach(b=>{
+      const on = b.getAttribute("data-rf-key")===""; b.classList.toggle("is-active", on); b.setAttribute("aria-pressed", on?"true":"false");
+    });
+    apply();
+  };
+  bar.querySelector("[data-rf-reset]") && bar.querySelector("[data-rf-reset]").addEventListener("click", reset);
+  empty && empty.querySelector("[data-rf-reset]") && empty.querySelector("[data-rf-reset]").addEventListener("click", reset);
+}
 function renderTechnical(){
   setMeta({title:"Technical Data & Research | American BioCarbon",desc:"Certifications, spec sheets, SDS, independent lab analyses, and peer-reviewed research for bagasse absorbents and biochar. Request the technical package.",slug:"/technical",keyword:"bagasse biochar technical data"});
   const sBadge = s => ({verified:'<span class="badge b-ok">Verified</span>',lab:'<span class="badge b-lab">Lab-tested</span>',field:'<span class="badge b-lab">Field study</span>',pending:'<span class="badge b-pend">Pending</span>'}[s]||"");
@@ -698,12 +778,12 @@ function renderTechnical(){
   const docHref = d => d.file ? d.file : CTA.quote.href;
   const docCards = TECH.docs.map(d=>{
     const href = docHref(d); const dl = d.file ? `download` : "";
-    return `<div class="doccard">
+    return `<div class="doccard" data-id="${raw(d.id)}">
       <div class="dc-top"><span class="fmt">▼ ${raw(d.fmt||"PDF")}</span><span class="cat">${raw(d.cat)}</span></div>
       <a class="dc-title" href="${href}" ${dl}>${raw(d.name)}</a>
       <p class="dc-desc">${raw(d.desc)}</p>
       <div class="dc-actions">
-        <a class="dc-dl btn btn-sm ${d.file?'btn-ghost':'btn-primary'}" href="${href}" ${dl}>${d.file?"Download":"Notify me"} ${raw(d.fmt||"PDF")}</a>
+        <a class="dc-dl btn btn-sm ${d.file?'btn-ghost':'btn-primary'}" href="${href}" ${dl}>${d.file?"Download":"Stay informed"} ${raw(d.fmt||"PDF")}</a>
       </div></div>`;
   }).join("");
   const indRows = Object.keys(TECH.byIndustry).map(id=>{
@@ -714,7 +794,7 @@ function renderTechnical(){
     const spec = docObjs.find(d=>d.file);
     const action = spec
       ? `<a class="btn btn-primary btn-sm" href="${spec.file}" download>Download spec ${raw(spec.fmt||"PDF")}</a>`
-      : `<a class="btn btn-primary btn-sm" href="${CTA.quote.href}">Notify me</a>`;
+      : `<a class="btn btn-primary btn-sm" href="${CTA.quote.href}">Stay informed</a>`;
     return `<tr><td><strong>${raw(n?n.name:id)}</strong></td><td>${docs.map(d=>raw(d)).join(" · ")}</td>
       <td>${action}</td></tr>`;
   }).join("");
@@ -729,16 +809,30 @@ function renderTechnical(){
   <section class="block"><div class="wrap">
     <div class="eyebrow-line" style="margin-bottom:8px"></div><h2 style="margin-top:0">Certifications &amp; Third-Party Verification</h2>
     <p class="lead" style="margin-bottom:20px">Our products are independently certified and lab-verified to meet industry standards and regulations.</p>
-    <div class="certgrid">${TECH.compliance.map(c=>`<div class="certcard">
+    <div class="icert-grid">${(TECH.primaryCerts||[]).map(c=>{
+      const badge = c.logo
+        ? `<img class="icert-logo" src="${c.logo}" alt="${raw(c.item)} certification logo">`
+        : `<span class="icert-mono" aria-hidden="true">${raw(c.short||c.item)}</span>`;
+      const inner = `${badge}<b class="icert-name">${raw(c.item)}</b><span class="icert-label">${raw(c.label)}</span>${sBadge(c.status)}`;
+      return c.url
+        ? `<a class="icert-card is-link" href="${c.url}" target="_blank" rel="noopener noreferrer" aria-label="${raw(c.item)} — ${raw(c.label)} (opens official program page)">${inner}<span class="icert-ext" aria-hidden="true">↗</span></a>`
+        : `<div class="icert-card">${inner}</div>`;
+    }).join("")}</div>
+    <h3 style="font-size:17px;margin:26px 0 12px">Additional verification</h3>
+    <div class="certgrid">${TECH.compliance.filter(c=>c.status!=="verified"||!(TECH.primaryCerts||[]).some(p=>c.item.startsWith(p.short))).map(c=>`<div class="certcard">
       <div class="ct-top"><b>${raw(c.item)}</b>${sBadge(c.status)}</div>
       <span>${raw(c.scope)}</span></div>`).join("")}</div>
-    <p class="form-note" style="margin-top:14px">USDA Organic certification is in progress and is not presented as certified.</p>
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="eyebrow-line"></div><h2>Complete Technical Documentation</h2>
     <p class="lead" style="margin-bottom:20px">Spec sheets, SDS, lab analyses, certificates, and complete research documentation.</p>
-    <div class="docgrid">${docCards}</div>
+    ${resourceFilterBar()}
+    <div class="docgrid" id="docgrid">${docCards}</div>
+    <div class="doc-empty" id="docEmpty" hidden>
+      <p>No resources match the selected filters.</p>
+      <button type="button" class="btn btn-ghost btn-sm" data-rf-reset>Reset filters</button>
+    </div>
     <div style="margin-top:28px;padding:20px;background:white;border-radius:4px;border-left:4px solid var(--brand-crimson)">
       <p style="margin:0;font-size:14px;color:#555"><strong>How it works:</strong> Select the documents you need and we'll send a customized package to your inbox within one business day. Our specialists are available to discuss specifications and answer technical questions.</p>
     </div>
@@ -799,7 +893,7 @@ function renderAbout(){
     <div><div class="kicker">Supply with integrity</div><h2 style="font-size:26px;margin:8px 0 12px">Traceability from field to product</h2>
       <p class="lead">We work directly with the Cora Texas Sugar Mill to capture bagasse, coffee processors for waste fiber, and local blenders to ensure every batch meets our performance standards. Local sourcing means faster turnaround, fresher materials, and complete supply-chain visibility.</p></div>
   </div></section>
-  ${ctaBand({h:"Work with us",sub:"Get a free sample, or talk to a specialist about volume.",primary:CTA.sample,secondary:CTA.quote,tertiary:CTA.specialist})}`;
+  ${ctaBand({h:"Work with us",sub:"Get a free sample, or talk to a specialist about volume.",primary:CTA.sample,secondary:CTA.quote})}`;
 }
 
 /* ---- helpers ---- */
@@ -816,6 +910,87 @@ function setMeta(seo){
   let m=document.querySelector('meta[name="description"]'); if(m&&seo.desc) m.setAttribute("content",seo.desc);
 }
 function notFound(){ return `<section class="block"><div class="wrap"><h1>Page not found</h1><p class="lead">Try the <a href="#/">homepage</a>.</p></div></section>`; }
+
+/* ================= ANIMAL BEDDING (dedicated) ================= */
+function renderAnimalBedding(){
+  const P = ANIMAL_BEDDING;
+  setMeta(P.seo);
+  const specRow = r => {
+    const isDoc = /^request document$/i.test(r[1]);
+    const val = isDoc ? `<a href="${CTA.beddingSpecs.href}">Request document</a>` : raw(r[1]);
+    return `<tr><th scope="row">${raw(r[0])}</th><td>${val}</td></tr>`;
+  };
+  return `
+  <section class="ab-hero"><div class="wrap"><div class="ab-hero-grid">
+    <div class="ab-hero-copy">
+      <div class="crumb"><a href="#/">Home</a> / Industries / Animal Bedding</div>
+      <div class="ab-eyebrow">${raw(P.eyebrow)}</div>
+      <h1 class="ab-h1">${raw(P.h1)}</h1>
+      <p class="ab-lead">${raw(P.heroCopy)}</p>
+      <div class="ab-btn-row">${btn(CTA.beddingSample)}${btn(CTA.beddingSpecs,"btn-ghost")}</div>
+      <p class="ab-qualify">${raw(P.heroQualify)}</p>
+    </div>
+    <figure class="ab-hero-fig">
+      <img src="${P.heroImage}" alt="Sugarcane bagasse absorbent pellets for animal bedding">
+      <figcaption>${raw(P.heroCaption)}</figcaption>
+    </figure>
+  </div></div></section>
+
+  <section class="ab-strip"><div class="wrap">
+    <div class="ab-strip-row">
+      ${P.specStrip.map(s=>`<div class="ab-stat"><div class="ab-stat-v">${raw(s.v)}</div><div class="ab-stat-l">${raw(s.l)}</div></div>`).join("")}
+    </div>
+    <p class="ab-strip-note">${raw(P.specStripNote)}</p>
+  </div></section>
+
+  <section class="ab-block"><div class="wrap">
+    <h2 class="ab-h2">${raw(P.problem.h)}</h2>
+    <dl class="ab-problem">
+      ${P.problem.rows.map(r=>`<div class="ab-problem-row"><dt>${raw(r.p)}</dt><dd>${raw(r.r)}</dd></div>`).join("")}
+    </dl>
+  </div></section>
+
+  <section class="ab-block ab-block-alt"><div class="wrap">
+    <h2 class="ab-h2">${raw(P.comparison.h)}</h2>
+    <div class="ab-tbl-scroll"><table class="ab-tbl">
+      <thead><tr>${P.comparison.cols.map((c,i)=>`<th${i===0?' scope="col"':' scope="col"'}>${raw(c)}</th>`).join("")}</tr></thead>
+      <tbody>${P.comparison.rows.map(row=>`<tr>${row.map((x,i)=>i===0?`<th scope="row">${raw(x)}</th>`:`<td>${raw(x)}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table></div>
+    <p class="ab-note">${raw(P.comparison.note)}</p>
+  </div></section>
+
+  <section class="ab-block"><div class="wrap"><div class="ab-trial-grid">
+    <div class="ab-trial-copy">
+      <h2 class="ab-h2">${raw(P.process.h)}</h2>
+      <ol class="ab-steps">
+        ${P.process.steps.map((s,i)=>`<li><span class="ab-step-n">${String(i+1).padStart(2,"0")}</span><div class="ab-step-body"><b>${raw(s.t)}</b><p>${raw(s.d)}</p></div></li>`).join("")}
+      </ol>
+      <div class="ab-btn-row">${btn({label:"Request a Qualified Sample",href:CTA.beddingSample.href})}${btn(CTA.beddingSpecialist,"btn-ghost")}</div>
+    </div>
+    <div class="ab-formcard"><h3 class="ab-form-h">Request Animal Bedding Sample</h3><div class="formcard" id="mainform"></div></div>
+  </div></div></section>
+
+  <section class="ab-block ab-block-alt"><div class="wrap">
+    <h2 class="ab-h2">${raw(P.specs.h)}</h2>
+    <div class="ab-tbl-scroll"><table class="ab-tbl ab-spec-tbl">
+      <tbody>${P.specs.rows.map(specRow).join("")}</tbody>
+    </table></div>
+    <p class="ab-note">Values are based on available product documentation. Confirm current specifications before procurement.</p>
+  </div></section>
+
+  <section class="ab-block"><div class="wrap">
+    <h2 class="ab-h2">${raw(P.fit.h)}</h2>
+    <ul class="ab-check">
+      ${P.fit.items.map(i=>`<li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5 8.5 15 16 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>${raw(i)}</li>`).join("")}
+    </ul>
+  </div></section>
+
+  <section class="ab-final"><div class="wrap">
+    <h2 class="ab-final-h">${raw(P.finalCta.h)}</h2>
+    <p class="ab-final-sub">${raw(P.finalCta.sub)}</p>
+    <div class="ab-btn-row">${btn(CTA.beddingSample)}${btn(CTA.beddingSpecs,"btn-ghost-light")}</div>
+  </div></section>`;
+}
 
 /* ================= DEEP INDUSTRY PAGES ================= */
 function renderEnvironmentalRemediation(){
@@ -889,7 +1064,7 @@ function renderEnvironmentalRemediation(){
         <div class="eyebrow-line"></div><h2 style="font-size:28px;margin-bottom:10px">Ready to cut costs and stay on timeline?</h2>
         <p class="lead">Talk to a remediation specialist. We'll scope your project and get a pilot test scheduled within 48 hours.</p>
       </div>
-      <img class="procimg" src="assets/industry/environmental-remediation.jpg" alt="Environmental remediation site" loading="lazy">
+      <img class="procimg" src="assets/industry/environmental-remediation.jpg?v=v2" alt="Environmental remediation site" loading="lazy">
     </div>
     <div class="formcard" id="mainform"></div>
   </div></div></section>`;
@@ -963,7 +1138,7 @@ function renderResellersIndustries(){
     <div class="proc-left">
       <div class="proc-copy">
         <div class="eyebrow-line"></div><h2 style="font-size:28px;margin-bottom:10px">Ready to differentiate your catalog?</h2>
-        <p class="lead">Let's talk territory, margin, and how we can support your growth. Reserve your distributor territory and lock pricing.</p>
+        <p class="lead">Let's talk margin, volume, and how we can support your growth. Start with a free sample and a preview of the margin model.</p>
       </div>
       <img class="procimg" src="assets/industry/reseller-industries.jpg" alt="Distribution and logistics" loading="lazy">
     </div>
@@ -1055,7 +1230,7 @@ function renderResellersAgriculture(){
     <div class="proc-left">
       <div class="proc-copy">
         <div class="eyebrow-line"></div><h2 style="font-size:28px;margin-bottom:10px">Ready to add premium biochar to your line?</h2>
-        <p class="lead">Let's talk territory, grower needs, and how we build this together. Reserve your territory and start with a free sample.</p>
+        <p class="lead">Let's talk grower needs and how we build this together. Start with a free sample.</p>
       </div>
       <img class="procimg" src="assets/industry/reseller-agriculture.jpg" alt="Agricultural fields" loading="lazy">
     </div>
@@ -1071,8 +1246,9 @@ function router(){
   let html, formToBuild=null, formMount="#pform";
   if(parts.length===0){ html=renderHome(); setMeta(HOME.seo); }
   else if(parts[0]==="product"){ html=renderProduct(parts[1]); const p=PRODUCTS[parts[1]]; if(p) formToBuild=p.form; }
+  else if(parts[0]==="industry" && parts[1]==="animal-bedding"){ html=renderAnimalBedding(); formToBuild="bedding"; formMount="#mainform"; }
   else if(parts[0]==="industry"){ html=renderIndustry(parts[1]); const n=INDUSTRIES[parts[1]]; if(n) formToBuild=n.form; }
-  else if(parts[0]==="request-sample"){ html=renderForm(parseType(query)==="biochar"?"biochar":"sample"); formToBuild=parseType(query)==="biochar"?"biochar":"sample"; formMount="#mainform"; }
+  else if(parts[0]==="request-sample"){ const t=parseType(query); const k=t==="biochar"?"biochar":t==="bedding"?"bedding":"sample"; html=renderForm(k); formToBuild=k; formMount="#mainform"; }
   else if(parts[0]==="request-quote"){ html=renderForm(parseType(query)==="distributor"?"distributor":"quote"); formToBuild=parseType(query)==="distributor"?"distributor":"quote"; formMount="#mainform"; }
   else if(parts[0]==="contact"){ html=renderForm(parseType(query)==="carbon"?"carbon":"contact"); formToBuild=parseType(query)==="carbon"?"carbon":"contact"; formMount="#mainform"; }
   else if(parts[0]==="request-docs"){ html=renderForm("docs"); formToBuild="docs"; formMount="#mainform"; }
@@ -1094,6 +1270,7 @@ function router(){
   else { html=notFound(); }
   $("#app").innerHTML = html;
   if(formToBuild) buildForm(formToBuild, formMount);
+  if(parts[0]==="technical") bindResourceFilters();
   if(parts.length===0) initHeroCarousel();
   $("#menu").classList.remove("open");
   window.scrollTo(0,0);
