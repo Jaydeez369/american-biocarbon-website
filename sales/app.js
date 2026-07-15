@@ -16,6 +16,9 @@ window.resetChecks = pfx => { const c=getChecks(); Object.keys(c).forEach(k=>{ i
 /* ---- toast + copy ---- */
 function toast(msg="Copied to clipboard"){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1400);}
 function copyText(txt){navigator.clipboard?.writeText(txt).then(()=>toast()).catch(()=>toast("Copy failed"));}
+/* Live sellable inventory — biochar is Priority #1 (finished tonnage ready to ship now). */
+const BIOCHAR_INVENTORY_TONS = 80;
+const BIOCHAR_INVENTORY_LINE = `${BIOCHAR_INVENTORY_TONS} metric tons of finished 100% biochar are available to sell right now — real, shippable inventory. Biochar is bulk-capable today; samples still open the door, but this tonnage moves now.`;
 window.copyEl = id => { const e=document.getElementById(id); if(e) copyText(e.dataset.raw||e.textContent); };
 
 /* ---- helpers ---- */
@@ -122,6 +125,9 @@ function rDaily(){
   }).join("");
   return page("today",
     head("Daily Action Plan","Day-by-day, sector-by-sector — the exact plan to stay focused. Work top to bottom; every item is a checkbox that persists across reloads.")+
+    `<div class="note ok" style="border-left:4px solid var(--green-bright);font-size:14px;margin-bottom:14px">
+       <b style="color:var(--green-bright)">🔥 TOP PRIORITY — BIOCHAR:</b> ${BIOCHAR_INVENTORY_LINE} Lead every day with biochar; absorbent pellets are now the secondary track.
+     </div>`+
     `<div class="daily-mission card pad-lg">
        <div class="dm-row"><span class="dm-tag">THE MISSION</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
        <p class="dm-mission">${esc(D.mission)}</p>
@@ -176,14 +182,17 @@ function rAssumptions(){
 const RANKKEYS=[["speed","Speed to LOI"],["recurring","Recurring"],["margin","Margin"],["carbon","Carbon gen"],["strategic","Strategic"],["freight","Freight fit"],["complexity","Complexity"]];
 function rSegments(){
   const groups=[...new Set(DATA.segments.map(s=>s.group))];
-  // Month-1 beachhead score: weight speed-to-LOI heavily; carbon is parked (shown as a column, excluded from the score).
-  const ranked=[...DATA.segments].map(s=>({s,score:s.rank.speed*3+s.rank.recurring+s.rank.margin+s.rank.strategic+s.rank.freight-s.rank.complexity})).sort((a,b)=>b.score-a.score);
+  // Month-1 beachhead score: BIOCHAR IS PRIORITY #1 (we have 80 MT to sell now), so Ag/Hort (biochar) buyers
+  // get a +6 priority bonus — they're now the fastest path to actual revenue, not just to LOIs. Carbon is parked
+  // (shown as a column, excluded from the score). Absorbent/Industrial segments run as the secondary track.
+  const bioBonus=s=>s.group==="Ag / Hort"?6:0;
+  const ranked=[...DATA.segments].map(s=>({s,score:s.rank.speed*3+s.rank.recurring+s.rank.margin+s.rank.strategic+s.rank.freight-s.rank.complexity+bioBonus(s)})).sort((a,b)=>b.score-a.score);
   const top3=ranked.slice(0,3).map(r=>r.s.name);
   const filters=`<div class="filters"><span class="pill active" onclick="segFilter(this,'all')">All</span>${groups.map(g=>`<span class="pill" onclick="segFilter(this,'${esc(g)}')">${esc(g)}</span>`).join("")}</div>`;
   const cards=DATA.segments.map(s=>segCard(s)).join("");
   return page("segments",
-    head("ICP Definition & Segmentation","Tight profiles for every buyer type, ranked by Month-1 speed-to-LOI (carbon is parked to days 61–90 — shown as a column, excluded from the beachhead score).")+
-    `<div class="note ok"><b>Recommended beachhead (top 3):</b> ${top3.map(t=>badge(t,"badge-green")).join(" ")}</div>`+
+    head("ICP Definition & Segmentation","Tight profiles for every buyer type. BIOCHAR (Ag / Hort) buyers are Priority #1 — we have 80 MT to move now, so they carry a priority weighting in the beachhead score. Industrial/absorbent buyers run as the secondary track; carbon is parked to days 61–90 (shown as a column, excluded from the score).")+
+    `<div class="note ok"><b>🔥 Recommended beachhead (top 3 — biochar-led):</b> ${top3.map(t=>badge(t,"badge-green")).join(" ")}</div>`+
     sec("3","Segment ranking")+
     table(["Segment","Group","Speed","Recurring","Margin","Carbon","Strategic","Freight","Composite"],
       ranked.map(r=>[`<strong>${esc(r.s.name)}</strong>`,esc(r.s.group),
@@ -266,11 +275,14 @@ function rMessaging(){
       <div><b style="font-size:11px;color:var(--red-soft)">NEVER say in this pitch</b><ul>${t.neverSay.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>
     </div>
   </div>`;
+  const tBiochar=m.tracks.find(t=>t.id==="biochar");
+  const tAbsorbent=m.tracks.find(t=>t.id==="absorbent");
   return page("messaging",
-    head("Value Proposition & Messaging","TWO separate avatars — every pitch is single-product. Absorbent Pellets sell to industrial/EHS/spill buyers; Biochar sells to ag/soil/grower buyers. Different person, different pain, different proof.")+
+    head("Value Proposition & Messaging","TWO separate avatars — every pitch is single-product. BIOCHAR IS PRIORITY #1 — 80 MT of finished inventory is ready to ship now, and it sells to ag/soil/grower buyers. Absorbent Pellets are the secondary track for industrial/EHS/spill buyers. Different person, different pain, different proof.")+
+    `<div class="note ok"><b>🔥 Priority #1 — Biochar:</b> ${BIOCHAR_INVENTORY_LINE}</div>`+
     `<div class="note warn"><b>Split rule:</b> ${esc(m.splitRule)}</div>`+
-    sec("5","Track A — Absorbent Pellets (industrial)")+trackBlock(m.tracks[0])+
-    sec("","Track B — 100% Biochar (agriculture)")+trackBlock(m.tracks[1])+
+    sec("5","Track A — 100% Biochar (PRIORITY — 80 MT available now)")+trackBlock(tBiochar)+
+    sec("","Track B — Absorbent Pellets (secondary / industrial)")+trackBlock(tAbsorbent)+
     sec("","Comparison messaging (use only within the matching track)")+
     table(["Positioned against","Why we win"],m.comparisons.map(c=>[`<strong>${esc(c.vs)}</strong>`,esc(c.win)]))+
     sec("","Proof-point map (claim safety — both products)")+
@@ -769,7 +781,7 @@ const LEAN_SECTIONS=[
   ["daily",    [rDaily, G("r30Day")]],
   ["overview", [G("rSummary")]],
   ["icp",      [rSegments, rPersonas, G("rCampaigns")]],
-  ["product",  [rMessaging, rBiochar]],
+  ["product",  [rBiochar, rMessaging]],
   ["accounts", [rAccounts]],
   ["outreach", [rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
   ["assets",   [rCollateral, G("rSample")]],

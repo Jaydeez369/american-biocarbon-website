@@ -29,8 +29,8 @@ const DATA = {
 
   /* ============ 1. EXECUTIVE SUMMARY ============ */
   exec: {
-    thesis: "Month 1 is SAMPLES-FIRST — NOT bulk selling and NOT LOI-selling. Production capacity (~400 MT/mo) isn't ready to commit tonnage, so we do not quote or sell bulk yet. The single goal is to get free performance samples of our two live products (Absorbent Pellets, 100% Biochar) into buyers' hands — that is the first win we optimize the entire machine for. Outreach never mentions LOIs, contracts, or commitments; the only ask is 'test a free sample against what you use now.' The engine follows the ReRoofGen / Instantly playbook: 1,000+ verified contacts, warmed multi-inbox domains, many short hyper-targeted-to-ICP campaigns, and heavy A/B testing. LOIs, reorders, bulk orders, and the CDR/carbon layer are all quiet later steps that only happen 1:1 after a sample wins a trial and Q4 capacity firms up.",
-    wedge: "Absorbent Pellets into oil & gas, spill-response, landfill, and industrial EHS buyers are the fastest free-sample yes: active, budgeted, recurring absorbent demand and short eval cycles — they'll test on the next job. Biochar into ag distributors, compost/soil blenders, nurseries, and growers is the highest-leverage channel to seed with samples — one distributor represents many acres of future volume. Everything beyond these two products shows as 'Coming Q4.' A free sample is the low-friction yes; the trial win is what everything downstream (reorders, LOIs, offtake) is built on.",
+    thesis: "BIOCHAR IS NOW PRIORITY #1 and is BULK-CAPABLE: we hold 80 metric tons of finished biochar ready to ship, so winning biochar trials can convert straight to paid orders against inventory on hand. Absorbent Pellets stay SAMPLES-FIRST for now — ongoing production capacity (~400 MT/mo) isn't committed for pellet tonnage yet, so we don't quote bulk pellets. Across both products the door-opener is the same: get free performance samples of our two live products (100% Biochar first, Absorbent Pellets second) into buyers' hands — that is the first win we optimize the entire machine for. Outreach never mentions LOIs, contracts, or commitments; the only ask is 'test a free sample against what you use now.' The engine follows the ReRoofGen / Instantly playbook: 1,000+ verified contacts, warmed multi-inbox domains, many short hyper-targeted-to-ICP campaigns, and heavy A/B testing. LOIs, reorders, bulk orders, and the CDR/carbon layer are all quiet later steps that only happen 1:1 after a sample wins a trial and Q4 capacity firms up.",
+    wedge: "BIOCHAR IS PRIORITY #1. We now hold 80 metric tons of finished 100% biochar ready to ship — real, sellable tonnage, not a future promise. Biochar into ag distributors, compost/soil blenders, nurseries, ranchers, and growers is both the highest-leverage channel (one distributor represents many acres) AND, uniquely, bulk-capable today: samples open the door and winning trials convert straight into paid orders against inventory on hand. Absorbent Pellets into oil & gas, spill-response, landfill, and industrial EHS buyers are now the SECONDARY track — still a fast free-sample yes with recurring demand, run in parallel but never ahead of biochar. Everything beyond these two products shows as 'Coming Q4.'",
     reinforce: [
       "Free sample in hand IS the Month-1 conversion event. Nothing is asked for beyond a test — no PO, no LOI, no commitment.",
       "Run it like ReRoofGen: many parallel hyper-ICP-targeted email campaigns + calls + DMs, A/B tested on subject line, opener, and angle. Same free-sample offer, packaging tuned per segment.",
@@ -741,8 +741,8 @@ const DATA = {
 
   /* ============ 12b. DAILY ACTION PLAN (top-of-app focus) ============ */
   daily:{
-    mission:"Get free performance samples of our two live products (Absorbent Pellets, 100% Biochar) into buyers' hands. That is the ONLY Month-1 win. No bulk, no LOI talk in cold outreach — samples first, LOIs follow a win.",
-    target:"By end of Week 2: 15–25 free samples shipped, both tracks live, first LOIs presented on positive results.",
+    mission:"Move our 80 MT of finished biochar. Biochar is Priority #1 and bulk-capable now: get free samples into ag/soil/grower buyers' hands, then convert winning trials straight to paid orders against inventory on hand. Absorbent Pellets run in parallel as the secondary track — samples-first, LOIs follow a win. Cold outreach still leads with a free sample, never a bulk pitch.",
+    target:"By end of Week 2: biochar sample→order motion live with 15–25 samples shipped (biochar-weighted), first biochar reorders/POs against the 80 MT, both tracks live.",
     sectors:[
       {k:"bizdev",   t:"Business Development", c:"#5b9bd5", d:"Lists, accounts, calls, LOI conversations"},
       {k:"outreach", t:"Outreach Engine",      c:"#d9a441", d:"Domains, sequences, cold email + call"},
@@ -824,33 +824,33 @@ const DATA = {
           {k:"ops", items:[
             {t:"Week-1 gate: bounce <2%, pipeline live, sample SOP tested", o:"Both", pri:"P0", del:"Green-light Week 2"}]},
         ]},
-      { d:6, wk:"Week 2 · Launch at volume", theme:"Scale outbound (absorbent wedge)",
-        focus:"Ramp the absorbent EHS/spill/oilfield track and ship the first samples.",
+      { d:6, wk:"Week 2 · Launch at volume", theme:"Scale outbound — BIOCHAR wedge (primary)",
+        focus:"Ramp the biochar ag/distributor/blender track first and ship the first biochar samples against the 80 MT.",
         lanes:[
           {k:"outreach", items:[
-            {t:"Ramp to full daily send volume — absorbent track primary", o:"Jesse", pri:"P0", del:"Conversations opening"}]},
+            {t:"Ramp to full daily send volume — biochar track primary (distributors, blenders, composters, growers)", o:"Jesse", pri:"P0", del:"Biochar conversations opening"}]},
           {k:"bizdev", items:[
-            {t:"Add 50 accounts; book first discovery/technical calls (Victor on technical)", o:"Jesse", pri:"P0", del:"Calls booked"}]},
+            {t:"Add 50 biochar-ICP accounts; book first discovery/technical calls (Victor on technical)", o:"Jesse", pri:"P0", del:"Calls booked"}]},
           {k:"product", items:[
-            {t:"Ship first free samples within 48h of qualification", o:"Victor + Daniel", pri:"P0", del:"Product in buyers' hands"}]},
+            {t:"Ship first free biochar samples within 48h of qualification (8 oz + bulk sample for blenders)", o:"Victor + Daniel", pri:"P0", del:"Biochar in buyers' hands"}]},
           {k:"media", items:[
-            {t:"Follow-up media touches; pitch 1 trade outlet the samples story", o:"Jesse", pri:"P2", del:"1 pitch out"}]},
+            {t:"Follow-up media touches; pitch 1 ag/soil trade outlet the biochar samples story", o:"Jesse", pri:"P2", del:"1 pitch out"}]},
           {k:"ops", items:[
-            {t:"Daily sales rhythm — log activity targets", o:"Jesse", pri:"P1", del:"Cadence running"}]},
+            {t:"Daily sales rhythm — log activity targets; track 80 MT inventory drawdown", o:"Jesse", pri:"P1", del:"Cadence running"}]},
         ]},
-      { d:7, wk:"Week 2 · Launch at volume", theme:"Open the biochar distributor track",
-        focus:"Launch distributor/blender outreach and open the first LOI conversations.",
+      { d:7, wk:"Week 2 · Launch at volume", theme:"Add the absorbent secondary track",
+        focus:"With biochar ramping, layer in the absorbent EHS/spill/oilfield sequences in parallel.",
         lanes:[
           {k:"outreach", items:[
-            {t:"Launch biochar distributor/blender sequences", o:"Jesse", pri:"P0", del:"Distributor conversations"}]},
+            {t:"Launch absorbent (remediation/oilfield/landfill) sequences as the secondary track", o:"Jesse", pri:"P1", del:"Absorbent conversations"}]},
           {k:"bizdev", items:[
-            {t:"Open 2–3 distributor LOI conversations (program preview — not cold)", o:"Jesse + Victor + Daniel", pri:"P1", del:"Distributor pipeline"}]},
+            {t:"Open 2–3 biochar distributor bulk-order + LOI conversations (we can ship now against 80 MT)", o:"Jesse + Victor + Daniel", pri:"P0", del:"Biochar order pipeline"}]},
           {k:"product", items:[
-            {t:"Ship next samples; log results into the tracker", o:"Victor + Daniel", pri:"P0", del:"Sample data building"}]},
+            {t:"Ship next biochar samples; log results into the tracker", o:"Victor + Daniel", pri:"P0", del:"Sample data building"}]},
           {k:"media", items:[
-            {t:"Engage distributor networks on LinkedIn; share a proof post", o:"Jesse", pri:"P2", del:"Distributor reach"}]},
+            {t:"Engage ag/distributor networks on LinkedIn; share a biochar proof post", o:"Jesse", pri:"P2", del:"Distributor reach"}]},
           {k:"ops", items:[
-            {t:"Dashboard: samples shipped, sample→LOI, reply rate by ICP", o:"Jesse", pri:"P1", del:"Metrics live"}]},
+            {t:"Dashboard: biochar samples shipped, sample→order rate, MT sold vs 80 MT, reply rate by ICP", o:"Jesse", pri:"P1", del:"Metrics live"}]},
         ]},
       { d:8, wk:"Week 2 · Launch at volume", theme:"First calls & trials",
         focus:"Run discovery/technical calls and lock each trial's success criteria.",
@@ -866,13 +866,13 @@ const DATA = {
           {k:"ops", items:[
             {t:"Mid-week metrics check; cut dead segments", o:"Jesse", pri:"P1", del:"Tighter focus"}]},
         ]},
-      { d:9, wk:"Week 2 · Launch at volume", theme:"Convert samples → LOI",
-        focus:"Present the first LOIs on positive sample results — this is the funding proof.",
+      { d:9, wk:"Week 2 · Launch at volume", theme:"Convert biochar wins → paid orders",
+        focus:"Turn winning biochar trials into POs/reorders against the 80 MT now; use LOIs for Q4 forward supply on top.",
         lanes:[
           {k:"bizdev", items:[
-            {t:"Present first LOIs on wins (Q4 supply, reserve pricing)", o:"Victor + Daniel", pri:"P0", del:"LOIs presented"}]},
+            {t:"Close first biochar POs against the 80 MT on winning trials; present Q4-supply LOIs on top", o:"Victor + Daniel", pri:"P0", del:"First paid biochar orders + LOIs"}]},
           {k:"ops", items:[
-            {t:"Tally committed volume from signed LOIs", o:"Both", pri:"P0", del:"Committed-volume book"}]},
+            {t:"Tally MT sold vs 80 MT + committed volume from signed LOIs", o:"Both", pri:"P0", del:"Inventory + committed-volume book"}]},
           {k:"outreach", items:[
             {t:"Keep top-of-funnel full — 50 more accounts sequenced", o:"Jesse", pri:"P0", del:"Sustained volume"}]},
           {k:"product", items:[
@@ -884,7 +884,7 @@ const DATA = {
         focus:"Score against the 15–25 sample target, keep what converts, lock the winning cadence.",
         lanes:[
           {k:"ops", items:[
-            {t:"2-week scorecard: samples shipped, sample→LOI rate, LOIs signed, committed volume", o:"Both", pri:"P0", del:"Scorecard vs target"}]},
+            {t:"2-week scorecard: biochar samples shipped, sample→order rate, MT sold vs 80 MT, LOIs signed, committed volume", o:"Both", pri:"P0", del:"Scorecard vs target"}]},
           {k:"bizdev", items:[
             {t:"Double down on the converting segment; prune the rest", o:"Jesse", pri:"P1", del:"Segment focus"}]},
           {k:"outreach", items:[
@@ -916,10 +916,10 @@ const DATA = {
       { t:"Launch first soft outbound batch (25 accounts, both tracks)", o:"Jesse", pri:"P1", eff:"S", out:"First conversations", dep:"List + copy + warm-up", app:"Activity", del:"25 sequences live" },
     ]},
     { phase:"Days 8–30", tasks:[
-      { t:"Run outbound: absorbent wedge (primary) + biochar distributors", o:"Jesse (consultant)", pri:"P0", eff:"L", out:"Discovery/technical calls booked", dep:"List", app:"Deal/Activity", del:"Pipeline built" },
-      { t:"Ship 15–25 free samples (Pellets 1 lb / Biochar 8 oz)", o:"Victor + Ops", pri:"P0", eff:"M", out:"Product in buyers' hands", dep:"Sample SKUs live", app:"Sample Request", del:"Samples out" },
-      { t:"Open 2–3 distributor LOI conversations", o:"Jesse + Victor", pri:"P1", eff:"M", out:"High-leverage LOIs opening", dep:"Program preview", app:"Distributor pipeline", del:"Distributor LOI pipeline" },
-      { t:"Present first LOIs; sign first 5–10", o:"Victor + Daniel", pri:"P0", eff:"M", out:"Committed Q4 volume (funding proof)", dep:"Positive sample results", app:"LOI", del:"≥5 signed LOIs" },
+      { t:"Run outbound: biochar wedge (primary — ag distributors/blenders/composters/growers) + absorbent secondary", o:"Jesse (consultant)", pri:"P0", eff:"L", out:"Discovery/technical calls booked", dep:"List", app:"Deal/Activity", del:"Pipeline built" },
+      { t:"Ship 15–25 free samples (biochar-weighted: Biochar 8 oz + bulk blend samples / Pellets 1 lb)", o:"Victor + Ops", pri:"P0", eff:"M", out:"Product in buyers' hands", dep:"Sample SKUs live", app:"Sample Request", del:"Samples out" },
+      { t:"Convert winning biochar trials → first POs against the 80 MT; open 2–3 distributor bulk + LOI conversations", o:"Jesse + Victor", pri:"P0", eff:"M", out:"Paid biochar orders + high-leverage LOIs", dep:"Positive sample results", app:"Distributor pipeline", del:"First biochar revenue + LOI pipeline" },
+      { t:"Present Q4-supply LOIs on top of orders; sign first 5–10", o:"Victor + Daniel", pri:"P1", eff:"M", out:"Committed Q4 volume (funding proof)", dep:"Positive sample results", app:"LOI", del:"≥5 signed LOIs" },
       { t:"Daily sales rhythm (activity targets)", o:"Jesse", pri:"P1", eff:"S", out:"Consistent volume", dep:"—", app:"Activity dash", del:"Cadence" },
     ]},
     { phase:"Days 31–60", tasks:[
@@ -945,7 +945,7 @@ const DATA = {
     build:["CRM objects + fields (Account/Contact/Deal/Sample/LOI/Activity)","Sample→LOI funnel: statuses + sample tracker","Dashboards (samples shipped, sample→LOI, committed volume)","Target account list view (both tracks, freight-zoned)"],
     collateral:["Absorbent 1-pager (industrial — single-product)","Biochar 1-pager (ag — single-product)","Sample-kit insert + test protocol","Spec sheets + SDS (from Victor)","Comparison: pellets vs wood/clay · biochar vs wood biochar","Product photos (real close-ups + facility)"],
     lists:["150–200 accounts across BOTH product ICPs (Gulf South + freight-viable)","Contacts + verified emails (Apollo)","ICP-tagged + freight-zoned; shared with Victor"],
-    firstActions:["Free-sample outreach ONLY (no LOI/bulk talk in cold touch)","Absorbent track: EHS/spill/oilfield emails + calls","Biochar track: distributor/blender emails + calls","Ship free samples within 48h of qualification","Book discovery/technical calls (Victor takes technical)"],
+    firstActions:["Free-sample outreach ONLY (no bulk talk in cold touch — sample is the door-opener)","BIOCHAR track (PRIORITY): distributor/blender/composter/grower emails + calls","Absorbent track (secondary): EHS/spill/oilfield emails + calls","Ship free samples within 48h of qualification (biochar first)","Convert winning biochar trials → POs against the 80 MT on hand","Book discovery/technical calls (Victor takes technical)"],
     dashFields:["samples requested / shipped","sample → LOI rate","LOIs signed + committed volume","positive reply rate by ICP","deliverability (bounce <2%)"],
     priceInputs:["(Q4 reference only — NOT quoted now) COGS/SKU","freight zones A–D","Q4 price band per product","distributor territory/volume terms","CDR $/tCO2e (days 61–90)"],
     claims:["Keep the two product pitches SEPARATE — never mix in one asset","Confirm OMRI/IBI/Puro language (Victor)","USDA Organic = pending only, never 'certified'","Feed/health claims = gated (AAFCO/FDA-CVM) — bedding/absorbency framing only","Lock proof hierarchy (T1–T5) on all assets"],

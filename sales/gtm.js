@@ -60,9 +60,11 @@
 
   /* ---- 3. ICP Campaigns ---- */
   function rCampaigns(){
-    const cs=GTM.campaigns;
+    // BIOCHAR IS PRIORITY #1 — sort biochar campaigns (primary/bioPriority) to the top, absorbent secondary after.
+    const rank=c=>c.primary?0:c.bioPriority?1:c.secondaryTrack?2:c.tag==="CMP-CDR"?4:3;
+    const cs=[...GTM.campaigns].sort((a,b)=>rank(a)-rank(b));
     const card=c=>`<div class="card pad-lg gtm-cmp">
-      <h4>${esc(c.name)} ${c.primary?badge("PRIMARY","badge-green"):""} ${badge(c.alloc,"badge-gold")} ${badge(c.tag,"badge-blue")}</h4>
+      <h4>${esc(c.name)} ${c.primary?badge("PRIMARY · BIOCHAR","badge-green"):c.bioPriority?badge("BIOCHAR","badge-green"):c.secondaryTrack?badge("SECONDARY","badge-muted"):""} ${badge(c.alloc,"badge-gold")} ${badge(c.tag,"badge-blue")}</h4>
       ${c.guardrail?`<div class="note warn" style="margin:8px 0"><b>⚠ Guardrail:</b> ${esc(c.guardrail)}</div>`:""}
       <div class="note warn" style="margin:8px 0"><b>Pain:</b> ${esc(c.pain)}</div>
       <div class="note ok" style="margin:8px 0"><b>Offer:</b> ${esc(c.offer)}</div>
@@ -84,7 +86,7 @@
       <div style="font-size:12px"><b style="color:var(--text)">Success metric:</b> ${esc(c.metric)}</div>
     </div>`;
     return page("gtm-campaigns",
-      head("ICP Campaign Strategy","Nine coordinated campaigns — oil & gas heavily weighted. Each has one specific CTA, its own proof, and a dedicated landing destination.")+
+      head("ICP Campaign Strategy","Nine coordinated campaigns — BIOCHAR-LED (we have 80 MT to move now). Biochar campaigns carry ~65% of effort and run first; absorbent is the secondary track. Each has one specific CTA, its own proof, and a dedicated landing destination.")+
       `<div class="note ok"><b>Effort weighting:</b> ${GTM.summary.allocation.map(a=>badge(a.icp.split(" ")[0]+" "+a.pct, a.cls)).join(" ")}</div>`+
       `<div class="grid" style="grid-template-columns:1fr;gap:14px">${cs.map(card).join("")}</div>`
     );
@@ -339,7 +341,7 @@
         <div class="card"><h4>Review checkpoints</h4>${ul(l.firstWeek.checkpoints)}</div>
         <div class="card"><h4>Iteration rules</h4>${ul(l.firstWeek.iteration)}</div>
       </div>`+
-      `<div class="note ok"><b>Launch sequence:</b> pass the pre-launch gate → verify infra & pages (48h) → launch CMP-OG Email 1 to top 30 → dial for sourcing contacts → ship first sample kits → convert to first quote → document a claim-safe win → expand allocation into ENV/landfill, then ag, then carbon.</div>`
+      `<div class="note ok"><b>Launch sequence:</b> pass the pre-launch gate → verify infra & pages (48h) → launch CMP-AGD (biochar) Email 1 to top 30 ag distributors/blenders → dial for new-product decision-makers → ship first biochar sample kits → convert a winning trial to a paid order against the 80 MT → document a claim-safe win → expand into compost/nursery biochar, then layer the absorbent secondary track (O&G/ENV/landfill), then carbon (days 61–90).</div>`
     );
   }
 
