@@ -10,9 +10,9 @@
   if (typeof GTM === "undefined") { console.warn("GTM data missing"); return; }
 
   /* small local helpers layered on the shared design system */
-  const gbadgePri = p => badge(p, p==="P0"?"pri-1":p==="P1"?"pri-2":"pri-3");
-  const gstatus = s => badge(s, s==="Done"?"badge-green":s==="Doing"?"badge-gold":"badge-muted");
-  const pill = t => `<span class="badge badge-muted" style="font-size:10.5px">${esc(t)}</span>`;
+  const gbadgePri = p => stateBadge("priority", p);
+  const gstatus = s => stateBadge("taskStatus", s);
+  const pill = t => `<span class="badge badge--category">${esc(t)}</span>`;
   const chips = arr => arr.map(pill).join(" ");
   const ul = arr => `<ul>${arr.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
 
@@ -44,7 +44,7 @@
   /* ---- 2. Pre-Launch Checklist ---- */
   function rPrelaunch(){
     const cats=GTM.prelaunch;
-    const filters=`<div class="filters"><span class="pill active" onclick="gtmPreFilter(this,'all')">All</span>${cats.map((c,i)=>`<span class="pill" onclick="gtmPreFilter(this,'${i}')">${esc(c.cat)}</span>`).join("")}</div>`;
+    const filters=`<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="gtmPreFilter(this,'all')">All</span>${cats.map((c,i)=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="gtmPreFilter(this,'${i}')">${esc(c.cat)}</span>`).join("")}</div>`;
     const blocks=cats.map((c,i)=>`<div class="gtm-pre-block" data-idx="${i}">`+
       sec("",esc(c.cat))+
       table(["Item","Pri","Owner","Status","Why it matters","Acceptance criteria"],c.items.map(it=>[
@@ -55,14 +55,14 @@
       filters+blocks
     );
   }
-  window.gtmPreFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-prelaunch .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  window.gtmPreFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-prelaunch .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
     document.querySelectorAll(".gtm-pre-block").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
 
   /* ---- 3. ICP Campaigns ---- */
   function rCampaigns(){
     const cs=GTM.campaigns;
     const card=c=>`<div class="card pad-lg gtm-cmp">
-      <h4>${esc(c.name)} ${c.primary?badge("PRIMARY","badge-green"):""} ${badge(c.alloc,"badge-gold")} ${badge(c.tag,"badge-blue")}</h4>
+      <h4>${esc(c.name)} ${c.primary?badge("Primary","positive"):""} ${badge(c.alloc,"warning")} ${badge(c.tag,"category")}</h4>
       ${c.guardrail?`<div class="note warn" style="margin:8px 0"><b>⚠ Guardrail:</b> ${esc(c.guardrail)}</div>`:""}
       <div class="note warn" style="margin:8px 0"><b>Pain:</b> ${esc(c.pain)}</div>
       <div class="note ok" style="margin:8px 0"><b>Offer:</b> ${esc(c.offer)}</div>
@@ -101,8 +101,15 @@
         <div><b style="color:var(--text)">Outputs:</b> ${esc(w.outputs)}</div>
       </div></div>`;
     const dow=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-    const cells=cal.map(c=>`<div class="cal-day${c.light?" rest":""}" data-d="${c.d}" onclick="gtmCalPick(${c.d})">
-      <div class="dn">${c.d}</div><div class="dt">${esc(c.theme)}</div><div class="dwk">Week ${c.wk}</div></div>`).join("");
+    const dayStats=c=>{ const ch=(typeof getChecks==="function")?getChecks():{}; let done=0,total=0;
+      (c.jesse||[]).forEach((_,i)=>{total++; if(ch[`cal:${c.d}:j:${i}`])done++;});
+      (c.victor||[]).forEach((_,i)=>{total++; if(ch[`cal:${c.d}:v:${i}`])done++;});
+      return {done,total,open:total-done}; };
+    const cells=cal.map(c=>{ const s=dayStats(c);
+      const dc=(s.total&&s.done===s.total)?" done-day":"";
+      const tag=s.total?(s.open?`<div class="cal-open">${s.open}</div>`:`<div class="cal-open ok">✓</div>`):"";
+      return `<div class="cal-day${c.light?" rest":""}${dc}" data-d="${c.d}" onclick="gtmCalPick(${c.d})">
+      <div class="dn">${c.d}</div><div class="dt">${esc(c.theme)}</div><div class="dwk">Week ${c.wk}</div>${tag}</div>`; }).join("");
     return page("gtm-30day",
       head("30-Day Daily Plan · Calendar","Click any day to see the exact tasks for Jesse and Victor. Check tasks off as you go, they persist. Jesse = demand & the machine · Victor = product, proof, website & fulfillment.")+
       sec("","Weekly themes")+`<div class="grid g2">${weeks.map(wk).join("")}</div>`+
@@ -140,9 +147,9 @@
   /* ---- 6. Outbound Sequences ---- */
   function rSequences(){
     const seqs=GTM.sequences;
-    const filters=`<div class="filters"><span class="pill active" onclick="gtmSeqFilter(this,'all')">All</span>${seqs.map((o,i)=>`<span class="pill" onclick="gtmSeqFilter(this,'${i}')">${esc(o.tag)}</span>`).join("")}</div>`;
+    const filters=`<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="gtmSeqFilter(this,'all')">All</span>${seqs.map((o,i)=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="gtmSeqFilter(this,'${i}')">${esc(o.tag)}</span>`).join("")}</div>`;
     const blocks=seqs.map((o,i)=>`<div class="gtm-seq" data-idx="${i}">
-      <h3 class="sub">${esc(o.seg)} · ${esc(o.persona)} ${badge(o.tag,"badge-blue")}</h3>
+      <h3 class="sub">${esc(o.seg)} · ${esc(o.persona)} ${badge(o.tag,"info")}</h3>
       ${o.steps.map(st=>script(st.t,st.b)).join("")}
     </div>`).join("");
     return page("gtm-sequences",
@@ -151,7 +158,7 @@
       filters+blocks
     );
   }
-  window.gtmSeqFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-sequences .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  window.gtmSeqFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-sequences .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
     document.querySelectorAll(".gtm-seq").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
 
   /* ---- 7. Calling Plan ---- */
@@ -175,9 +182,9 @@
   /* ---- 7b. Phone Script Library (A/B) ---- */
   function rScriptLibrary(){
     const L=GTM.scriptLibrary;
-    const filters=`<div class="filters"><span class="pill active" onclick="gtmScrFilter(this,'all')">All</span>${L.segments.map((s,i)=>`<span class="pill" onclick="gtmScrFilter(this,'${i}')">${esc(s.tag)}</span>`).join("")}</div>`;
+    const filters=`<div class="filters"><span class="pill active" role="button" tabindex="0" aria-pressed="true" onclick="gtmScrFilter(this,'all')">All</span>${L.segments.map((s,i)=>`<span class="pill" role="button" tabindex="0" aria-pressed="false" onclick="gtmScrFilter(this,'${i}')">${esc(s.tag)}</span>`).join("")}</div>`;
     const block=(s,i)=>`<div class="gtm-scr" data-idx="${i}">
-      <h3 class="sub">${esc(s.seg)} ${badge(s.tag,"badge-blue")} ${s.claimCaution?badge("CLAIM-CONTROLLED","badge-gold"):""}</h3>
+      <h3 class="sub">${esc(s.seg)} ${badge(s.tag,"category")} ${s.claimCaution?badge("Claim-controlled","warning"):""}</h3>
       ${s.claimCaution?`<div class="note warn" style="margin:8px 0"><b>⚠ Claim control:</b> absorbent / moisture-management framing only, no animal-health, feed, or veterinary claims.</div>`:""}
       <h4 style="margin-top:10px;color:var(--gold-soft)">Openers · A/B these (${s.openers.length} variants)</h4>
       <div class="grid g2">${s.openers.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
@@ -195,14 +202,14 @@
       filters+L.segments.map(block).join("")
     );
   }
-  window.gtmScrFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-scripts .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  window.gtmScrFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-scripts .pill").forEach(p=>{p.classList.remove("active");if(p.hasAttribute("aria-pressed"))p.setAttribute("aria-pressed","false")});el.classList.add("active");if(el.hasAttribute("aria-pressed"))el.setAttribute("aria-pressed","true");
     document.querySelectorAll(".gtm-scr").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
 
   /* ---- 9b. Long-Term / Compounding Channels ---- */
   function rLongTerm(){
     const L=GTM.longTerm;
     const card=c=>`<div class="card pad-lg">
-      <h4>${esc(c.name)} ${badge(c.horizon,"badge-blue")} ${badge(c.cost,"badge-muted")}</h4>
+      <h4>${esc(c.name)} ${badge(c.horizon,"info")} ${badge(c.cost,"neutral")}</h4>
       <div class="note ok" style="margin:8px 0"><b>Why:</b> ${esc(c.why)}</div>
       <div class="grid g2" style="gap:8px">
         <div><b style="font-size:11px;color:var(--gold-soft)">Plays</b>${ul(c.plays)}</div>
@@ -241,7 +248,7 @@
       `<div class="card" style="margin-top:12px"><h4>Search queries</h4>${ul(l.searches)}</div>`+
       sec("","Social pages to create")+
       table(["Page","Priority","Why"],l.socialPages.map(p=>[`<strong>${esc(p.p)}</strong>`,
-        badge(p.need,p.need==="Required"?"badge-green":p.need==="Recommended"?"badge-gold":"badge-muted"),esc(p.why)]))+
+        stateBadge("requirement",p.need),esc(p.why)]))+
       `<div class="note">These are recommendations. No external accounts are auto-created. Build the LinkedIn company page first; it's the only required one for a founder-led B2B motion.</div>`
     );
   }
@@ -249,7 +256,7 @@
   /* ---- 9. Social Calendar ---- */
   function rSocial(){
     const s=GTM.social;
-    const rows=s.posts.map(p=>[`<strong class="t-num">D${p.d}</strong>`,badge(p.pl,"badge-blue"),`<strong>${esc(p.topic)}</strong>`,
+    const rows=s.posts.map(p=>[`<strong class="t-num">D${p.d}</strong>`,badge(p.pl,"info"),`<strong>${esc(p.topic)}</strong>`,
       `<em>${esc(p.hook)}</em>`,esc(p.body),esc(p.vis),`<span style="color:var(--green-bright)">${esc(p.cta)}</span>`,pill(p.icp)]);
     return page("gtm-social",
       head("30-Day Social & Content Calendar","Credibility over viral fluff. Every post has a hook, body, visual, CTA, and the ICP it serves, plus five product-demo video scripts.")+
@@ -266,7 +273,7 @@
       head("Campaign ↔ Landing Page Coordination","Every campaign points to the right page with the right CTA, form, sequence, tag, and sales next step. No message-market mismatches.")+
       table(["ICP","Campaign","Outbound CTA","Landing page","Required section","Form","Sequence","Tag","Sales next step"],
         m.map(r=>[`<strong>${esc(r.icp)}</strong>`,esc(r.cmp),`<span style="color:var(--green-bright)">${esc(r.cta)}</span>`,
-          `<span class="t-num">${esc(r.lp)}</span>`,esc(r.section),esc(r.form),badge(r.seq,"badge-blue"),badge(r.tag,"badge-muted"),esc(r.next)]))+
+          `<span class="t-num">${esc(r.lp)}</span>`,esc(r.section),esc(r.form),badge(r.seq,"info"),badge(r.tag,"category"),esc(r.next)]))+
       sec("","Coordination rules (guardrails)")+
       `<div class="card">${GTM.landingRules.map(r=>`<div class="note warn" style="margin:6px 0">${esc(r)}</div>`).join("")}</div>`
     );
@@ -278,7 +285,7 @@
     const objBlock=o=>sec("",o.obj+" object")+
       table(["Field","Type","Req","Options","Description","Dashboard use"],o.fields.map(f=>[
         `<strong>${esc(f.n)}</strong>`,`<span class="t-num">${esc(f.t)}</span>`,
-        badge(f.r,f.r==="Req"?"badge-green":f.r==="Auto"?"badge-blue":"badge-muted"),esc(f.o),esc(f.d),esc(f.dash)]));
+        stateBadge("requirement",f.r),esc(f.o),esc(f.d),esc(f.dash)]));
     return page("gtm-crm",
       head("CRM & App Tracking Spec","Objects, fields, lead scoring, and the status workflow to build into the app. Aligns with the Pipeline schema in the main Sales OS.")+
       objs.map(objBlock).join("")+
@@ -286,7 +293,7 @@
       table(["Factor","Weight","How it's scored","Note"],GTM.scoring.map(s=>[`<strong>${esc(s.f)}</strong>`,
         `<span class="t-num">${esc(s.w)}</span>`,esc(s.how),`<em>${esc(s.note)}</em>`]))+
       sec("","Status workflow")+
-      `<div class="filters">${GTM.statuses.map((st,i)=>`<span class="pill" style="cursor:default">${i+1}. ${esc(st)}</span>`).join("")}</div>`+
+      `<div class="filters">${GTM.statuses.map((st,i)=>`<span class="pill is-static">${i+1}. ${esc(st)}</span>`).join("")}</div>`+
       `<div class="note ok"><b>Flow:</b> New Target → Researched → Contact Found → Sequenced → Replied → Call Booked → Sample Requested → Sample Sent → Trial Active → Result: Positive → LOI Presented → LOI Signed → Offtake (Q4). Off-ramps: Nurture / Disqualified.</div>`
     );
   }
