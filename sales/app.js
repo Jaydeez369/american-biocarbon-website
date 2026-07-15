@@ -57,6 +57,7 @@ const LEAN_NAV=[
     {id:"playbook",ic:"▷",t:"Playbook"},
   ]},
   {group:"Operate",items:[
+    {id:"onboarding",ic:"✍",t:"Customer Onboarding"},
     {id:"roadmap",ic:"◐",t:"Scale · 60/90"},
   ]},
 ];
@@ -698,6 +699,49 @@ function rPlaybook(){
   );
 }
 
+/* --- Customer Onboarding (accounts) --- */
+function rOnboarding(){
+  const o=DATA.onboarding;
+  const ownIc=who=>whoBadge(who);
+  const chkBlock=(gid,arr)=>{
+    const keys=arr.map((x,i)=>`onb:${gid}:${i}`);
+    const defs=arr.map(x=>/\|done$/.test(x));
+    const st=checkStats(keys,defs);
+    return {st,html:arr.map((x,i)=>{ const done=/\|done$/.test(x); const txt=x.replace(/\|done$/,""); return chk(keys[i],esc(txt),done); }).join("")};
+  };
+  const setup=chkBlock("setup",o.setup);
+  const per=chkBlock("per",o.perAccount);
+  const docRow=d=>[`<strong>${esc(d.doc)}</strong>${d.req?` <span class="badge ${/Required/i.test(d.req)?"badge-green":"badge-muted"}" style="margin-left:4px">${esc(d.req)}</span>`:""}`,esc(d.what),esc(d.when),ownIc(d.owner)];
+  return page("onboarding",
+    head("Customer Onboarding — accounts","Turn a won trial into a paying account on the books. The sales motion rides on an admin/accounting spine: the moment a trial wins, stand the customer up BEFORE the first invoice ships.")+
+    `<div class="note ok" style="font-size:13.5px"><b>Owner split:</b> ${esc(o.ownerNote)}</div>`+
+    `<div class="card pad-lg" style="margin-top:12px"><p style="color:var(--text);font-size:14px;line-height:1.6">${esc(o.intro)}</p></div>`+
+    sec("A","The account journey — sample to recurring")+
+    `<p class="lead">Each stage has an owner and the administrative action behind it. Step 5 is the accounting gate — nothing invoices until it clears.</p>`+
+    table(["Stage","Trigger","Owner","Administrative action","Exit criteria"],o.journey.map(j=>[
+      `<strong>${esc(j.stage)}</strong>`,esc(j.trigger),ownIc(j.owner),esc(j.admin),`<span style="color:var(--green-bright)">${esc(j.exit)}</span>`]))+
+    sec("B","Document flows — two directions, don't confuse them")+
+    `<div class="grid g2">
+      <div class="card"><h4>→ What WE send the customer <span class="badge badge-blue">we're the vendor</span></h4>
+        ${table(["Doc","What / why","When","Owner"],o.docsOut.map(docRow))}</div>
+      <div class="card"><h4>← What WE collect before invoicing <span class="badge badge-gold">gate</span></h4>
+        ${table(["Doc","What / why","When","Owner"],o.docsIn.map(docRow))}</div>
+    </div>`+
+    sec("C","Accounting & administrative rules")+
+    `<div class="grid g2">${o.accounting.map(a=>`<div class="card"><p style="color:var(--text)">→ ${esc(a)}</p></div>`).join("")}</div>`+
+    sec("D","Set up the onboarding packet once")+
+    `<div class="chk-head" style="margin:0 0 6px"><h4 style="margin:0">Build the reusable packet</h4><span class="chk-progress">${setup.st.done}/${setup.st.total}</span></div>`+
+    `<div class="card">${setup.html}</div>`+
+    `<div class="chk-head"><span></span><span class="chk-reset" onclick="resetChecks('onb:setup:')">Reset</span></div>`+
+    sec("E","Per-account onboarding checklist (run each new account)")+
+    `<div class="chk-head" style="margin:0 0 6px"><h4 style="margin:0">Accounting runs this every time a trial wins</h4><span class="chk-progress">${per.st.done}/${per.st.total}</span></div>`+
+    `<div class="card">${per.html}</div>`+
+    `<div class="chk-head"><span class="note warn" style="margin:0;flex:1"><b>Tip:</b> reset this block when you start a new account.</span><span class="chk-reset" onclick="resetChecks('onb:per:')">Reset for new account</span></div>`+
+    sec("F","FAQ — the questions that trip people up")+
+    `<div class="grid g2">${o.faq.map(f=>`<div class="card"><h4>${esc(f.q)}</h4><p>${esc(f.a)}</p></div>`).join("")}</div>`
+  );
+}
+
 /* --- KPIs --- */
 function rKpis(){
   const k=DATA.kpis;
@@ -772,6 +816,7 @@ const LEAN_SECTIONS=[
   ["outreach", [rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
   ["assets",   [rCollateral, G("rSample")]],
   ["playbook", [rPlaybook]],
+  ["onboarding",[rOnboarding]],
   ["roadmap",  [G("rScale")]],
 ];
 const BUILD_SECTIONS=[
