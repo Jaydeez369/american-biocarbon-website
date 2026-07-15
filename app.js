@@ -815,7 +815,7 @@ function renderTechnical(){
         : `<span class="icert-mono" aria-hidden="true">${raw(c.short||c.item)}</span>`;
       const inner = `${badge}<b class="icert-name">${raw(c.item)}</b><span class="icert-label">${raw(c.label)}</span>${sBadge(c.status)}`;
       return c.url
-        ? `<a class="icert-card is-link" href="${c.url}" target="_blank" rel="noopener noreferrer" aria-label="${raw(c.item)} — ${raw(c.label)} (opens official program page)">${inner}<span class="icert-ext" aria-hidden="true">↗</span></a>`
+        ? `<a class="icert-card is-link" href="${c.url}" target="_blank" rel="noopener noreferrer" aria-label="${raw(c.item)}: ${raw(c.label)} (opens official program page)">${inner}<span class="icert-ext" aria-hidden="true">↗</span></a>`
         : `<div class="icert-card">${inner}</div>`;
     }).join("")}</div>
     <h3 style="font-size:17px;margin:26px 0 12px">Additional verification</h3>
@@ -1029,7 +1029,12 @@ function renderEnvironmentalRemediation(){
     </div>
   </div></section>
 
-  <section class="block" style="background:var(--paper-2)"><div class="wrap">
+  ${p.fieldApps?`<section class="block" style="background:var(--paper-2)"><div class="wrap">
+    <div class="kicker">Applications</div><h2 style="margin-top:6px">Field applications</h2>
+    <div style="margin-top:26px">${appCards(p.fieldApps)}</div>
+  </div></section>`:""}
+
+  <section class="block"><div class="wrap">
     <div class="split">
       <div>
         <div class="eyebrow-line"></div><h2 style="margin-top:6px">Real-world impact</h2>

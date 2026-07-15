@@ -143,13 +143,13 @@ const TECH = {
     { title:"Multi-Year Field Application of Sugarcane Bagasse Biochar", authors:"Lima, White & Webber, USDA-ARS", venue:"US Biochar Initiative Conference, 2019", type:"field",
       finding:"Multi-year Louisiana field trials evaluating bagasse and cane-trash biochar effects on sugarcane and soil.", note:"Specific to sugarcane bagasse biochar.", url:"https://www.usda.gov" },
     { title:"Biochar addition reduces nitrogen loss and accelerates the composting process", authors:"Bioresource Technology", venue:"Elsevier, 2021", type:"peer",
-      finding:"Biochar shortened the composting cycle and reduced nitrogen loss by shifting the core microbial community.", note:"General biochar research.", url:"https://doi.org/10.1016/j.biortech.2021" },
+      finding:"Biochar shortened the composting cycle and reduced nitrogen loss by shifting the core microbial community.", note:"General biochar research.", url:"https://doi.org/10.1016/j.biortech.2021.125492" },
     { title:"Enhancing composting efficiency using biochar amendments", authors:"Scientific Reports", venue:"Nature, 2025", type:"peer",
-      finding:"Biochar raised pile temperature and accelerated maturation while cutting greenhouse-gas emissions.", note:"General biochar research.", url:"https://doi.org/10.1038/s41598-025" },
+      finding:"Biochar raised pile temperature and accelerated maturation while cutting greenhouse-gas emissions.", note:"General biochar research.", url:"https://www.nature.com/articles/s41598-025-21144-w" },
     { title:"Biochar's effect in the composting mechanism: a review", authors:"Bioresource Technology", venue:"Elsevier, 2023", type:"peer",
-      finding:"Review: biochar shortens time to thermophilic phase, raises peak temperature, and speeds organic-matter degradation.", note:"General biochar research.", url:"https://doi.org/10.1016/j.biortech.2023" },
+      finding:"Review: biochar shortens time to thermophilic phase, raises peak temperature, and speeds organic-matter degradation.", note:"General biochar research.", url:"https://doi.org/10.1016/j.biortech.2023.129329" },
     { title:"American BioCarbon Bagasse Biochar, IBI Laboratory Analyses", authors:"Control Laboratories", venue:"IBI Certification Program", type:"lab",
-      finding:"Independent IBI panels: organic carbon 58 to 65%, H/C < 0.7, surface area ~230 to 260 m²/g, heavy metals well below thresholds.", note:"Product-specific lab data.", url:"https://www.biocharinitiative.org" },
+      finding:"Independent IBI panels: organic carbon 58 to 65%, H/C < 0.7, surface area ~230 to 260 m²/g, heavy metals well below thresholds.", note:"Product-specific lab data.", url:"https://biochar-international.org/certification/" },
   ],
   // Which documents matter to each industry (all gated)
   byIndustry:{
@@ -718,6 +718,23 @@ const INDUSTRIES = {
     problem:"Remediation crews carry and dispose of enormous absorbent volume, and disposal is priced by the ton. At ~2.5:1, a lower-capacity sorbent takes roughly twice the sorbent mass to capture the same liquid, heavier saturated loads to the landfill, plus the extra bags and labor to move it. Clients increasingly want a sustainability story behind the cleanup too.",
     fit:"Bagasse pellets and crumble absorb up to 5× their weight in non-viscous liquids (vs ~2.5:1 wood), up to about half the sorbent mass per job, so fewer bags to move and less saturated weight billed at the disposal scale, with SDS and spec documentation and reliable bulk supply.",
     useCases:["Spill cleanup","Aqueous waste solidification","Site remediation","Industrial washdown"],
+    fieldApps:[
+      { title:"Tank &amp; vessel cleaning residuals", detail:"Bottoms, rinsate &amp; wash residuals",
+        body:"Solidify the free liquids pulled during tank, vessel, and process-equipment cleanouts so residuals can be profiled and hauled as a solid.",
+        benefit:"Turns sludgy bottoms and rinsate into a handleable solid with less sorbent mass.", product:"Absorbent Pellets · Crumble" },
+      { title:"Secondary containment &amp; dike recovery", detail:"Bunds, berms &amp; containment sumps",
+        body:"Recover liquid that has collected in secondary containment, bunds, and dike sumps after a release or rainfall event.",
+        benefit:"Clears containment fast so it's ready for the next event.", product:"Absorbent Pellets · Crumble" },
+      { title:"Process-water &amp; aqueous waste solidification", detail:"Batch &amp; washdown streams",
+        body:"Bind non-viscous process water, batch residuals, and washdown streams ahead of transport and disposal.",
+        benefit:"Meets free-liquids limits using up to about half the sorbent mass.", product:"Absorbent Pellets · Crumble" },
+      { title:"Sump, pit &amp; trench dewatering", detail:"Standing liquid in low points",
+        body:"Solidify standing liquid in sumps, pits, and trenches so the low point can be firmed up and cleared.",
+        benefit:"Keeps work areas dry and cuts saturated weight to haul.", product:"Absorbent Pellets · Crumble" },
+      { title:"Machinery, hydraulic &amp; lubricant spills", detail:"Plant-floor &amp; equipment spills",
+        body:"Contain and clean oil, hydraulic fluid, and lubricant spills on plant floors and around equipment.",
+        benefit:"Sprinkle, absorb, sweep up, and dispose per your requirements.", product:"Absorbent Pellets · Crumble" },
+    ],
     proof:["Up to 5:1 absorption","SDS + spec on request","Bulk & truckload supply","Renewable, low-dust"],
     procurement:["Documentation package (SDS, spec)","Bulk / bulk-bag / truckload","Freight-aware pricing","Trial before switching"],
     faq:[
@@ -778,6 +795,23 @@ const INDUSTRIES = {
     problem:"On a spill, every bag is truck space, labor, and disposal weight you pay for. At ~2.5:1, a low-capacity sorbent takes roughly twice the mass to soak up the same volume, more bags loaded, more saturated weight hauled, more trips to the disposal scale.",
     fit:"Pellets for targeted spills, crumble for large-area coverage, both absorb up to 5× their weight (vs ~2.5:1 wood), so crews can capture the same spill with up to about half the sorbent mass: fewer bags on the truck, less saturated weight to the disposal scale.",
     useCases:["Oil & fuel spills","Non-viscous chemical spills","Flood & disaster cleanup","Roadway & site incidents"],
+    fieldApps:[
+      { title:"Oil &amp; fuel spill cleanup", detail:"Roadway, yard &amp; site spills",
+        body:"Contain and absorb oil, diesel, and fuel spills on pavement, in yards, and across work sites.",
+        benefit:"Soaks up more per bag, so crews carry less and haul lighter.", product:"Absorbent Pellets · Crumble" },
+      { title:"Non-viscous chemical spill containment", detail:"Contain, absorb, recover",
+        body:"Knock down and recover non-viscous chemical releases before they spread or reach a drain.",
+        benefit:"Fast capture on contact for easier recovery and disposal.", product:"Absorbent Pellets · Crumble" },
+      { title:"Traffic-incident &amp; roadway response", detail:"Vehicle fluids on pavement",
+        body:"Clear spilled vehicle fluids from roadways and shoulders to reopen lanes and restore traction.",
+        benefit:"Low-dust coverage that sweeps up clean off pavement.", product:"Absorbent Crumble · Pellets" },
+      { title:"Flood &amp; water-intrusion cleanup", detail:"Standing water &amp; wet debris",
+        body:"Solidify standing water and saturate wet debris during flood and disaster response.",
+        benefit:"Broad, fast coverage with the coarser crumble grade.", product:"Absorbent Crumble · Pellets" },
+      { title:"Storm-drain &amp; waterway protection", detail:"Perimeter &amp; inlet defense",
+        body:"Build absorbent barriers around inlets and drains to intercept fluids before they enter storm systems.",
+        benefit:"Keeps releases out of waterways while cleanup proceeds.", product:"Absorbent Pellets · Crumble" },
+    ],
     proof:["Up to 5:1 absorption","Pellet & crumble forms","Low dust","SDS on request"],
     procurement:["Rapid-ship bulk supply","SDS + spec","Trial pallet","Standing reorder terms"],
     faq:[
@@ -799,6 +833,23 @@ const INDUSTRIES = {
     problem:"Leachate and aqueous waste handling is a recurring, weight-billed disposal cost and a compliance exposure. At ~2.5:1, a low-capacity sorbent takes roughly twice the sorbent mass to solidify the same volume, heavier saturated tonnage back out the gate, and dusty product adds handling and air exposure on top.",
     fit:"Bagasse pellets and crumble solidify aqueous waste at up to 5× their weight (vs ~2.5:1 wood), up to about half the sorbent mass per volume solidified, so less saturated tonnage leaves the gate each cycle, with a renewable material and documentation for compliance.",
     useCases:["Leachate solidification","Aqueous waste streams","Pond & pit handling","Storm & overflow events"],
+    fieldApps:[
+      { title:"Leachate pond &amp; lagoon solidification", detail:"Standing aqueous waste",
+        body:"Solidify accumulated leachate in ponds and lagoons so the waste can be profiled and disposed as a solid.",
+        benefit:"Less saturated tonnage leaves the gate each cycle.", product:"Absorbent Pellets · Crumble" },
+      { title:"Tanker &amp; roll-off solidification", detail:"Free-liquids compliance for transport",
+        body:"Bind residual free liquids in tankers and roll-offs so loads pass the paint-filter test before transport.",
+        benefit:"Meets free-liquids limits with up to about half the sorbent mass.", product:"Absorbent Pellets · Crumble" },
+      { title:"Storm &amp; overflow event capture", detail:"High-volume surge handling",
+        body:"Absorb surge volume during storm and overflow events to keep collection systems within capacity.",
+        benefit:"Broad, fast coverage with the coarser crumble grade.", product:"Absorbent Crumble · Pellets" },
+      { title:"Collection-sump &amp; riser handling", detail:"Rig-side of the collection system",
+        body:"Solidify standing liquid pulled from leachate sumps, risers, and collection lines during maintenance.",
+        benefit:"Keeps the collection system clear and dry.", product:"Absorbent Pellets · Crumble" },
+      { title:"Sludge &amp; dewatered-cake conditioning", detail:"Firming wet residuals",
+        body:"Condition wet sludge and dewatered cake so residuals firm up enough to load, transport, and place.",
+        benefit:"Wet residuals become a stackable, haulable solid.", product:"Absorbent Pellets · Crumble" },
+    ],
     proof:["Up to 5:1 absorption","Renewable, low-dust","SDS + spec","Bulk supply"],
     procurement:["Pilot for the budget cycle","RFP-ready documentation kit","Bulk / truckload","Freight-aware pricing"],
     faq:[
@@ -900,7 +951,7 @@ const FORMS = {
     confirm:"Thanks, your animal bedding sample request is in. A bedding supply specialist will reply within one business day to confirm the sample, the ship-to, and the measurements for your side-by-side comparison, and to send the product specifications.",
     autoreply:"Subject: Your American BioCarbon bedding sample\n\nThanks for requesting a bagasse animal bedding sample. The product specifications are attached. A bedding supply specialist will follow up within one business day to confirm your ship-to and the comparison you want to run against your current bedding., American BioCarbon, White Castle, LA",
     routing:"Bedding → bedding supply specialist queue. Create Account + Contact + Deal (type: Bedding Sample) + Sample Request; attach product specifications.",
-    scoring:"+ commercial operation, + named current material, + defined measurement, + in-region ship-to; − personal email, − no measurable need.",
+    scoring:"+ commercial operation, + named current material, + defined measurement, + in-region ship-to; - personal email, - no measurable need.",
   },
   sample:{
     name:"Request a Sample Kit",
@@ -923,7 +974,7 @@ const FORMS = {
     confirm:"Thanks, your request for one complimentary sample bag is in (shipping and handling included). A remediation specialist will reply within one business day with the SDS and spec sheet attached. Need more than one bag? Just reply and we'll set up a purchase.",
     autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. Attached are the SDS and spec sheet for our bagasse absorbent. A specialist will follow up within one business day to confirm your use case, volume, and ship-to., American BioCarbon, White Castle, LA",
     routing:"Industrial → remediation specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach SDS/spec.",
-    scoring:"+ truckload volume, + zone A/B, + active-now timeline, + named use case; − personal email, − 'just researching'.",
+    scoring:"+ truckload volume, + zone A/B, + active-now timeline, + named use case; - personal email, - 'just researching'.",
   },
   quote:{
     name:"Get Bulk Absorbent Quote",
@@ -965,7 +1016,7 @@ const FORMS = {
     confirm:"Thanks, your free biochar sample request is in (shipping and handling included). We'll follow up within one business day with the sample, spec sheet, and (for composters) a side-by-side windrow trial protocol.",
     autoreply:"Subject: Your American BioCarbon biochar sample\n\nThanks for your interest. The spec sheet is attached; we'll confirm your sample and ship-to shortly. Composters: ask about our side-by-side windrow trial protocol., American BioCarbon",
     routing:"Create Account + Contact + Deal (type: Sample, segment: ag); route to distributor/ag lead.",
-    scoring:"+ distributor/blender/composter, + resale, + volume; − consumer/home use.",
+    scoring:"+ distributor/blender/composter, + resale, + volume; - consumer/home use.",
   },
   distributor:{
     name:"Get Distributor Pricing",
@@ -984,7 +1035,7 @@ const FORMS = {
     confirm:"Thanks, we'll send the distributor margin model and stocking-pilot options within one business day.",
     autoreply:"Subject: American BioCarbon distributor program\n\nThanks for your interest in carrying our line. We're preparing the margin model and stocking-pilot details for your geography., American BioCarbon",
     routing:"Create Account + Distributor Agreement (draft) + Deal; route to founder/distributor lead.",
-    scoring:"+ multi-branch, + organic demand region, + volume; − national-exclusivity-first.",
+    scoring:"+ multi-branch, + organic demand region, + volume; - national-exclusivity-first.",
   },
   carbon:{
     name:"Request Carbon Removal Info",
@@ -1003,7 +1054,7 @@ const FORMS = {
     confirm:"Thanks, we'll follow up with current carbon-removal data and forward-purchase options tied to our deployment pipeline.",
     autoreply:"Subject: American BioCarbon carbon removal\n\nThanks for your interest in durable, deployment-backed carbon removal. We'll share current methodology data and forward-purchase options aligned to our deployment pipeline., American BioCarbon",
     routing:"Create Account + Deal (type: CDR); route to founder/carbon lead; link to deployment forecast.",
-    scoring:"+ annual volume, + this-year timeline, + Puro/standard match; − credits-without-deployment expectation.",
+    scoring:"+ annual volume, + this-year timeline, + Puro/standard match; - credits-without-deployment expectation.",
   },
   docs:{
     name:"Request Technical Documentation",
@@ -1022,7 +1073,7 @@ const FORMS = {
     confirm:"Thanks, check your inbox. We've routed the requested documents to your email and a specialist will follow up if a spec or SDS needs tailoring to your application.",
     autoreply:"Subject: Your American BioCarbon technical documents\n\nThanks for your request. Attached are the spec sheets, SDS, and/or lab data for your application. Our full peer-reviewed research package is included where requested. A specialist will follow up within one business day., American BioCarbon, White Castle, LA",
     routing:"Gated download. Create Contact + Activity (doc request) + Deal if volume signal; tag by role + industry + documents; deliver files by email.",
-    scoring:"+ procurement/EHS role, + oil&gas/remediation industry, + 'all documents', + named use case; − personal email, − student/research-only.",
+    scoring:"+ procurement/EHS role, + oil&gas/remediation industry, + 'all documents', + named use case; - personal email, - student/research-only.",
   },
   contact:{
     name:"Talk to a Specialist",
@@ -1143,7 +1194,7 @@ const ENV_REMEDIATION = {
   sub:"For site managers who own the cost of containment and disposal",
   primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/environmental-remediation.jpg?v=v2",
   painPoints:[
-    { title:"Site Containment Costs", desc:"Holding saturated material on-site ties up pad space and cash flow. Lower absorption rates force you to deploy 2–3× more volume per job." },
+    { title:"Site Containment Costs", desc:"Holding saturated material on-site ties up pad space and cash flow. Lower absorption rates force you to deploy 2-3× more volume per job." },
     { title:"Disposal Tonnage Billing", desc:"Waste disposal is charged by the ton. Lower-capacity sorbents mean heavier saturated loads and higher bills per cubic yard of remediated soil." },
     { title:"Regulatory & ESG Exposure", desc:"Persistent synthetic polymers in landfill streams invite scrutiny. Your clients and regulators want genuine waste reduction and natural degradation." },
     { title:"Supply Chain Friction", desc:"Last-minute shortages or quality variance from commodity suppliers derail project timelines and inflate emergency logistics costs." }
@@ -1155,6 +1206,23 @@ const ENV_REMEDIATION = {
     { title:"Predictable supply", desc:"We commit to delivery windows. No stockouts. No timeline slippage." }
   ],
   applications:["Dredged-sediment dewatering","Slurry-wall & trench-spoil management","Hydrocarbon-impacted soil","Brownfield & frac-out response","Groundwater remediation","Landfill leachate handling"],
+  fieldApps:[
+    { title:"Dredged-sediment dewatering", detail:"Firming wet sediment for transport",
+      body:"Bind free water in dredged sediment so it firms up enough to load, transport, and place.",
+      benefit:"Less free liquid to manage and lighter loads to move.", product:"Absorbent Pellets · Crumble" },
+    { title:"Slurry-wall &amp; trench-spoil management", detail:"Handling wet spoil",
+      body:"Solidify slurry and trench spoil so saturated material can be handled and hauled instead of pumped.",
+      benefit:"Wet spoil becomes a stackable, haulable solid.", product:"Absorbent Pellets · Crumble" },
+    { title:"Hydrocarbon-impacted soil &amp; free product", detail:"Excavation &amp; cleanup",
+      body:"Absorb free product and soak up non-viscous hydrocarbons during excavation and impacted-soil cleanup.",
+      benefit:"Captures free liquid on contact for easier recovery.", product:"Absorbent Pellets · Crumble" },
+    { title:"Landfill-leachate handling", detail:"Aqueous waste solidification",
+      body:"Solidify leachate and aqueous waste streams so they can be profiled and disposed as a solid.",
+      benefit:"Fewer bags per volume and lighter loads to disposal.", product:"Absorbent Pellets · Crumble" },
+    { title:"Brownfield, pipeline-spill &amp; HDD frac-out response", detail:"Rapid field response",
+      body:"Respond to brownfield cleanups, pipeline spills, and HDD frac-outs with fast, broad coverage.",
+      benefit:"Coarser crumble spreads quickly across a wide footprint.", product:"Absorbent Crumble · Pellets" },
+  ],
   caseStudy:{
     scenario:"2-acre brownfield with soil contamination and dewatering need.",
     previous:"Standard absorbent: 18 truck deliveries, 120 tons saturated waste.",
@@ -1190,7 +1258,7 @@ const RESELLERS_INDUSTRIES = {
   ],
   program:[
     { title:"Tiered Margin Model", bullets:["Volume discounts that scale with growth","Quarterly rebates for hitting targets","No first-year exclusivity"] },
-    { title:"Order Fulfillment", bullets:["48–72 hour turnaround","Dedicated logistics coordination","Real-time tracking"] },
+    { title:"Order Fulfillment", bullets:["48-72 hour turnaround","Dedicated logistics coordination","Real-time tracking"] },
     { title:"Sales Tools", bullets:["Co-branded case studies","Product docs for your reps","Joint webinars & content"] },
     { title:"Technical Support", bullets:["Direct access to our team","Field trial support","Application guidance"] },
     { title:"Communication", bullets:["Monthly forecasts","Real-time order status","Quarterly business reviews"] }
@@ -1218,7 +1286,7 @@ const RESELLERS_AGRICULTURE = {
   ],
   whyABC:[
     { title:"OMRI-listed premium", desc:"Organic certification means certified growers and regenerative operations can use it immediately. Premium margin tier, instant." },
-    { title:"Proven field performance", desc:"Up to 3–3.5× water holding with inherent N-P-K. Growers see real results, not just promises. That drives repeat purchases." },
+    { title:"Proven field performance", desc:"Up to 3-3.5× water holding with inherent N-P-K. Growers see real results, not just promises. That drives repeat purchases." },
     { title:"Unique value story", desc:"Carbon durability, honeycomb microstructure, inherent minerals. Growers have a reason to pay premium price and tell their peers." },
     { title:"Agronomic co-selling", desc:"We provide trial protocols, field study data, and direct education. Your reps sell with confidence and proof." },
     { title:"Scalable co-op", desc:"Joint marketing, demo kits, field trials that drive real volume, not just catalogs." }
@@ -1232,9 +1300,9 @@ const RESELLERS_AGRICULTURE = {
   ],
   timeline:[
     { day:"Day 0", label:"Order confirmed", desc:"Payment terms set, material allocated." },
-    { day:"Day 1–2", label:"Packaging & logistics", desc:"Material ready for staging. Logistics confirmed." },
-    { day:"Day 3–5", label:"In transit", desc:"Real-time tracking link provided." },
-    { day:"Day 5–7", label:"Delivery complete", desc:"Inspected. Follow-up on reorder timing." }
+    { day:"Day 1-2", label:"Packaging & logistics", desc:"Material ready for staging. Logistics confirmed." },
+    { day:"Day 3-5", label:"In transit", desc:"Real-time tracking link provided." },
+    { day:"Day 5-7", label:"Delivery complete", desc:"Inspected. Follow-up on reorder timing." }
   ],
   communication:[
     { title:"Monthly Forecasts", desc:"Review your velocity, adjust inventory positioning so you never run short." },
