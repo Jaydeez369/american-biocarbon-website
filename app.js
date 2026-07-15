@@ -217,7 +217,7 @@ function renderHome(){
     const isLive = p.avail==="live";
     // Homepage showcase sections 3, 4 & 5 (index 2, 3 & 4) use "Stay informed" instead of a free-sample CTA.
     const notifyPrimary = i===2 || i===3 || i===4;
-    const primary = isLive ? {label:"Get a free sample",href:p.id==="absorbent-pellets"?"#/shop/absorbent-pellets":"#/request-sample?product="+p.id}
+    const primary = isLive ? {label:"Get a free sample",href:(p.id==="absorbent-pellets"||p.id==="agricultural-biochar")?"#/shop/"+p.id:"#/request-sample?product="+p.id}
       : notifyPrimary ? {label:"Stay informed",href:"#/request-sample?preorder=1&product="+p.id}
       : {label:"Get a free sample",href:"#/request-sample?preorder=1&product="+p.id};
     const secondary = null;

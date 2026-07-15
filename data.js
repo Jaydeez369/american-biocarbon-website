@@ -46,7 +46,7 @@ const BRAND = {
 const CTA = {
   sample:  { label:"Request quote",         href:"#/request-sample" },
   freeSamplePellets: { label:"Get a free sample", href:"#/shop/absorbent-pellets" },
-  freeSampleBiochar: { label:"Get a free sample", href:"#/request-sample?product=agricultural-biochar" },
+  freeSampleBiochar: { label:"Get a free sample", href:"#/shop/agricultural-biochar" },
   quote:   { label:"Talk to us about volume",       href:"#/request-quote" },
   compare: { label:"Compare vs Wood Pellets",       href:"#/compare" },
   spec:    { label:"Get spec sheet",           href:"#/request-docs?doc=spec" },
