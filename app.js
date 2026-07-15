@@ -583,6 +583,14 @@ function truckScene(accent, label){
   </svg>${label?`<span class="scene-tag">${raw(label)}</span>`:""}</div>`;
 }
 const SHOP_DOMAIN = "https://americanbiocarbon.com";
+// Shopify cart permalinks - site product id to checkout URL (variant:qty).
+// Store: American BioCarbon (de7e4a). Both are $0 free-sample variants of the
+// "Product Samples" product (10493867753764). Clicking sends the shopper to
+// Shopify's hosted cart/checkout on SHOP_DOMAIN.
+const SHOPIFY_CHECKOUT = {
+  "absorbent-pellets":   SHOP_DOMAIN + "/cart/54185346302244:1",
+  "agricultural-biochar": SHOP_DOMAIN + "/cart/54185346335012:1",
+};
 function renderShopProduct(id){
   const p = (HOME.buy.products||[]).find(x=>x.id===id);
   if(!p) return notFound();
@@ -606,7 +614,9 @@ function renderShopProduct(id){
         <p class="pdp-lead">${raw(p.claim)}</p>
         ${p.uses?`<ul class="uses" style="margin:12px 0 14px">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
         <div class="chips" style="margin:0 0 18px">${(p.chips||[]).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
-        <a class="btn btn-primary" href="#/request-sample?product=${p.id}" style="width:100%;justify-content:center">Get a free sample</a>
+        ${SHOPIFY_CHECKOUT[p.id]
+          ? `<a class="btn btn-primary" href="${SHOPIFY_CHECKOUT[p.id]}" style="width:100%;justify-content:center">Order free sample</a>`
+          : `<a class="btn btn-primary" href="#/request-sample?product=${p.id}" style="width:100%;justify-content:center">Get a free sample</a>`}
         <div class="pdp-links" style="margin-top:12px">
           <a href="#/request-quote?product=${p.id}">Talk to us about volume</a>
           <span>·</span>
@@ -626,7 +636,9 @@ function renderShopProduct(id){
       <div class="btn-row" style="margin-top:26px">
         <a class="btn btn-dark" href="#/request-docs?doc=spec&product=${p.id}">Download Spec Sheet</a>
         <a class="btn btn-ghost" href="#/request-docs?doc=sds&product=${p.id}">Download SDS</a>
-        <a class="btn btn-ghost" href="#/request-sample?product=${p.id}">Get a free sample</a>
+        ${SHOPIFY_CHECKOUT[p.id]
+          ? `<a class="btn btn-ghost" href="${SHOPIFY_CHECKOUT[p.id]}">Order free sample</a>`
+          : `<a class="btn btn-ghost" href="#/request-sample?product=${p.id}">Get a free sample</a>`}
       </div>
       <p class="pdp-meta" style="margin-top:16px">Ships from White Castle, Louisiana. ${p.truckloadQ4?"Truckload supply available Q4.":""}</p>
     </div>
