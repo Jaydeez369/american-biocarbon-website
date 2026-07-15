@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Gated conversion/form routes carry a noindex meta; no crawl value.
+Disallow: /request-quote
+Disallow: /request-sample
+Disallow: /request-docs
+Disallow: /contact
+Disallow: /download-spec
+Disallow: /buy
+
+Sitemap: https://americanbiocarbon.com/sitemap.xml

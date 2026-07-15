@@ -2,30 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Root base so relative asset/script paths resolve on deep links (/product/x etc.) -->
+  <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Industrial Absorbents & Bagasse Biochar | American BioCarbon</title>
   <meta name="description" content="A sugarcane-bagasse industrial absorbent that holds up to 5× its weight in liquid, fewer bags, less disposal weight. Bulk, bulk-bag & truckload supply. SDS and spec sheet available." />
+  <link rel="canonical" href="https://americanbiocarbon.com/" />
+  <meta property="og:site_name" content="American BioCarbon" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://americanbiocarbon.com/" />
   <meta property="og:title" content="Industrial Absorbents & Bagasse Biochar | American BioCarbon" />
   <meta property="og:description" content="A high-capacity bagasse absorbent for oilfield, spill response, and remediation, up to 5× absorption vs ~2.5× for wood. Bulk supply, SDS and spec available." />
-  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://americanbiocarbon.com/assets/og-image.png" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Industrial Absorbents & Bagasse Biochar | American BioCarbon" />
+  <meta name="twitter:description" content="A high-capacity bagasse absorbent for oilfield, spill response, and remediation, up to 5× absorption vs ~2.5× for wood. Bulk supply, SDS and spec available." />
+  <meta name="twitter:image" content="https://americanbiocarbon.com/assets/og-image.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.shopify.com" crossorigin />
+  <link rel="preload" as="image" href="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164" fetchpriority="high" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=clean14" />
+  <link rel="stylesheet" href="styles.css?v=clean20" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "American BioCarbon",
+    "url": "https://americanbiocarbon.com/",
+    "logo": "https://americanbiocarbon.com/assets/og-image.png",
+    "description": "American BioCarbon converts sugarcane bagasse into industrial absorbents, biochar, and durable carbon removal at the Cora Texas Sugar Mill in White Castle, Louisiana.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "32525 Highway 1 South",
+      "addressLocality": "White Castle",
+      "addressRegion": "LA",
+      "postalCode": "70788",
+      "addressCountry": "US"
+    }
+  }
+  </script>
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to content</a>
   <header class="site">
     <div class="wrap nav">
-      <a href="#/" aria-label="American BioCarbon home"><img class="logo" id="navLogo" alt="American BioCarbon" /></a>
+      <a href="/" aria-label="American BioCarbon home"><img class="logo" id="navLogo" alt="American BioCarbon" /></a>
       <div class="app-tabs" role="tablist" aria-label="Switch app">
-        <a class="app-tab active" href="#/" aria-current="page">Website</a>
+        <a class="app-tab active" href="/" aria-current="page">Website</a>
         <a class="app-tab" href="/sales/">Sales OS</a>
       </div>
       <div class="spring"></div>
       <nav class="menu" id="menu" aria-label="Primary"><!-- injected --></nav>
-      <a class="cta-mini" href="#/request-quote">Request Quote</a>
+      <a class="cta-mini" href="/request-quote">Request Quote</a>
       <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">☰</button>
     </div>
   </header>
@@ -33,29 +63,13 @@
   <main id="app" tabindex="-1"><!-- injected --></main>
 
   <div class="mobile-cta">
-    <a class="btn btn-primary" href="#/request-quote">Request Quote</a>
-    <a class="btn btn-ghost-light" href="#/request-docs">Request Specifications</a>
+    <a class="btn btn-primary" href="/request-quote">Request Quote</a>
+    <a class="btn btn-ghost-light" href="/request-docs">Request Specifications</a>
   </div>
 
   <footer class="site"><div class="wrap" id="footer"><!-- injected --></div></footer>
 
-  <script>
-    /* Clean-path compatibility: the site is a hash router, but public/SEO URLs
-       like /industry/animal-bedding are served index.html by the SPA redirect.
-       Translate a non-root pathname into the equivalent hash route once, on load,
-       so a direct visit or refresh to /industry/animal-bedding resolves correctly. */
-    (function(){
-      var p = window.location.pathname;
-      if(p && p !== "/" && !/\/(index\.html)?$/.test(p.replace(/\/[^\/]*\.[a-z0-9]+$/i,"/"))){
-        var clean = p.replace(/\/+$/,"");
-        if(clean && clean !== "/index.html"){
-          var hash = window.location.hash && window.location.hash !== "#/" ? window.location.hash : "#" + clean + (window.location.search||"");
-          window.history.replaceState(null, "", "/" + (window.location.search||"") + hash);
-        }
-      }
-    })();
-  </script>
-  <script src="data.js?v=clean14"></script>
-  <script src="app.js?v=clean14"></script>
+  <script src="data.js?v=clean20" defer></script>
+  <script src="app.js?v=clean20" defer></script>
 </body>
 </html>
