@@ -51,7 +51,7 @@
         `<strong>${esc(it.i)}</strong>`,gbadgePri(it.p),esc(it.o),gstatus(it.s),esc(it.why),`<span style="color:var(--green-bright)">${esc(it.ac)}</span>`]))+
       `</div>`).join("");
     return page("gtm-prelaunch",
-      head("Pre-Launch Checklist","Everything that must be true before outbound begins. Nothing ships until the P0 rows are green.")+
+      head("③ Launch gate — pre-launch checklist","Everything that must be true before outbound begins. Nothing ships until the P0 rows are green.")+
       filters+blocks
     );
   }
@@ -106,9 +106,9 @@
     const cells=cal.map(c=>`<div class="cal-day${c.light?" rest":""}" data-d="${c.d}" onclick="gtmCalPick(${c.d})">
       <div class="dn">${c.d}</div><div class="dt">${esc(c.theme)}</div><div class="dwk">Week ${c.wk}</div></div>`).join("");
     return page("gtm-30day",
-      head("30-Day Daily Plan — Calendar","Click any day to see the exact tasks for Jesse and Victor. Check tasks off as you go — they persist. Jesse = demand & the machine · Victor + Daniel = product, proof, website & fulfillment (split between them).")+
+      head("① The 30-Day Calendar — click a day","The canonical day-by-day plan. Click any day to open the exact tasks for Jesse, Victor &amp; Daniel — check them off as you go, they persist. Jesse = demand &amp; the machine · Victor + Daniel = product, proof, website &amp; fulfillment (split between them). Everything is aimed at moving the 80 MT of biochar.")+
       sec("","Weekly themes")+`<div class="grid g2">${weeks.map(wk).join("")}</div>`+
-      `<div class="note warn"><b>Quality controls:</b> max ~20→40 sends/inbox/day ramped; bounce <2% or slow down; monitor replies daily; A/B subject lines; SAMPLE-FIRST only (no LOI/bulk talk in cold outreach); never spam.</div>`+
+      `<div class="note warn"><b>Quality controls:</b> max ~20→40 sends/inbox/day ramped; bounce <2% or slow down; monitor replies daily; A/B subject lines; BIOCHAR campaigns first; the cold ask is always a free sample (no bulk/LOI pitch cold) — convert the order from the 80 MT after a trial wins; never spam.</div>`+
       sec("","Calendar — click a day")+
       `<div class="cal">${dow.map(d=>`<div class="cal-dow">${d}</div>`).join("")}${cells}</div>`+
       `<div id="gtmCalPanel"></div>`
@@ -331,7 +331,7 @@
   function rLaunch(){
     const l=GTM.launch;
     return page("gtm-launch",
-      head("Final Execution Checklist","The gate before outbound, the exact first-48-hours moves, and week-one outputs with iteration rules.")+
+      head("③ Launch gate — first-48h execution","The gate before outbound, the exact first-48-hours moves, and week-one outputs with iteration rules.")+
       sec("","Before outreach (gate)")+`<div class="card">${ul(l.before)}</div>`+
       sec("","First 48 hours — exact tasks")+
       table(["Task","What to do"],l.first48.map(t=>[`<strong>${esc(t.t)}</strong>`,esc(t.d)]))+

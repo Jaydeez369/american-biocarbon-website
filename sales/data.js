@@ -941,6 +941,7 @@ const DATA = {
 
   /* ============ 15. FINAL CHECKLIST ============ */
   checklist:{
+    biochar:["Confirm the 80 MT of finished biochar is packaged, QC'd & ship-ready","Set biochar bulk price + minimum order qty by freight zone (internal)","Get freight/LTL quotes from White Castle for the top biochar zones","Stand up a biochar bulk-order / PO path (Shopify or manual invoice)","Sample→order SOP: on a winning trial, quote from the 80 MT within 24h","Track MT sold vs 80 MT on the dashboard"],
     website:["✅ Temporary website build-out complete (localhost + combined-site)|done","Victor reviews & approves site copy + both product tracks","Create 2 sample SKUs in Shopify (Pellets 1 lb, Biochar 8 oz)","Wire Shopify variant IDs into the site sample forms","Publish certs/spec sheets to the site (SDS/OMRI/IBI/Puro)","Install/stage approved site in Shopify → publish over current site","Sample + reserve-supply forms route to Jesse + Victor + Daniel (tested end-to-end)"],
     build:["CRM objects + fields (Account/Contact/Deal/Sample/LOI/Activity)","Sample→LOI funnel: statuses + sample tracker","Dashboards (samples shipped, sample→LOI, committed volume)","Target account list view (both tracks, freight-zoned)"],
     collateral:["Absorbent 1-pager (industrial — single-product)","Biochar 1-pager (ag — single-product)","Sample-kit insert + test protocol","Spec sheets + SDS (from Victor)","Comparison: pellets vs wood/clay · biochar vs wood biochar","Product photos (real close-ups + facility)"],
