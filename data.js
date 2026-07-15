@@ -732,6 +732,7 @@ const PRODUCTS = {
     ],
     specs:[
       ["Base","Carbon negative bagasse biochar blend"],
+      ["Nutrients","Inherent NPK ~1.4-0.7-1.4 + Ca/Mg"],
       ["Benefit","Water retention · nutrient holding · aeration"],
       ["Prep","Ready to use, no mixing"],
       ["Form factors","Bagged · bulk"],

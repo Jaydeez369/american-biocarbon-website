@@ -695,3 +695,8 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
 @media (prefers-reduced-motion:reduce){
   .ab-btn-row .btn,.ab-check svg{transition:none}
 }
+
+/* Biochar SEM structure figure, sits below the comparison table (bottom-right of Specifications) */
+.cmp-fig{margin:20px 0 0;padding:0}
+.cmp-fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#000}
+.cmp-fig figcaption{margin-top:8px;font-size:12.5px;line-height:1.45;color:var(--mute)}
