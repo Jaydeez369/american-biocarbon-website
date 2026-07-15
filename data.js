@@ -31,7 +31,7 @@ const ASSETS = {
   heroBagasse:CDN+"Hero_Options_1.png?v=1710183683&width=2560",
   icCert:     CDN+"values.svg?v=1710184994",
   icLeaf:     CDN+"leaf.svg?v=1710185049",
-  icTech:     CDN+"tech.svg?v=1710185049",
+  icTech:     CDN+"tech.svg?v=1710185049"
 };
 
 const BRAND = {
@@ -59,7 +59,7 @@ const CTA = {
   carbon:  { label:"Request Carbon Removal Info",   href:"/contact?type=carbon" },
   beddingSample: { label:"Request Animal Bedding Sample",  href:"/request-sample?type=bedding" },
   beddingSpecs:  { label:"Request Product Specifications", href:"/request-docs?ind=animal-bedding" },
-  beddingSpecialist:{ label:"Talk to a Bedding Supply Specialist", href:"/contact?type=bedding" },
+  beddingSpecialist:{ label:"Talk to a Bedding Supply Specialist", href:"/contact?type=bedding" }
 };
 
 /* Top navigation */
@@ -104,7 +104,7 @@ const PROOF = {
     { name:"Independent lab analyses", status:"lab", note:"Heavy metals well below IBI / EPA Class A thresholds" },
     { name:"USDA-ARS field study", status:"field", note:"Multi-year sugarcane bagasse biochar study" },
     { name:"USDA Organic", status:"pending", note:"PENDING, never present as certified" },
-  ],
+  ]
 };
 
 /* ============ TECHNICAL DATA / RESOURCES (gated) ============ */
@@ -161,7 +161,7 @@ const TECH = {
     "landfill-leachate":["abs-spec","abs-sds","abs-disposal"],
     "animal-bedding":["abs-spec","abs-sds"],
     "distributors":["bio-spec","bio-lab","omri-cert"],
-    "soil-blenders":["bio-spec","bio-lab","omri-cert","studies"],
+    "soil-blenders":["bio-spec","bio-lab","omri-cert","studies"]
   },
   gateNote:"Spec sheets, SDS, lab analyses, and the research package are provided on request. Submit your details and we'll email the documents relevant to your application.",
   // Product-accurate certification sets (absorbents don't carry organic listings)
@@ -182,14 +182,14 @@ const TECH = {
       { item:"Puro.earth Certified", scope:"CORC carbon-removal methodology", status:"verified" },
       { item:"Lab-verified permanence", scope:"H/C molar ratio < 0.7", status:"lab" },
       { item:"MRV documentation", scope:"Deployment-based measurement & reporting", status:"verified" },
-    ],
+    ]
   },
   byProduct:{
     "absorbent-pellets":["abs-spec","abs-sds","abs-disposal"],
     "absorbent-crumble":["abs-spec","abs-sds","abs-disposal"],
     "agricultural-biochar":["bio-spec","bio-lab","omri-cert"],
     "biochar-infused-soil":["bio-spec","omri-cert"],
-    "carbon-removal":["carbon-mrv","bio-lab"],
+    "carbon-removal":["carbon-mrv","bio-lab"]
   },
   // Resource-library filters. Each option lists the doc ids it matches, so a
   // resource shows only when it matches the active option in every used group
@@ -217,8 +217,8 @@ const TECH = {
       { key:"landfill-leachate",         label:"Landfill Leachate",        ids:["abs-spec","abs-sds","abs-disposal"] },
       { key:"soil-blenders",             label:"Soil Blenders & Compost",  ids:["bio-spec","bio-lab","omri-cert","studies"] },
       { key:"distributors",              label:"Distributors",             ids:["bio-spec","bio-lab","omri-cert"] },
-    ],
-  },
+    ]
+  }
 };
 
 /* ============ HOME (11 sections) ============ */
@@ -258,7 +258,7 @@ const HOME = {
         h:"Ready to use soil,<br>biochar built in.",
         sub:"A ready to use growing soil pre-blended with our carbon negative bagasse biochar for water retention, nutrient holding, and aeration with no mixing. Coming Q4.",
         primary:{label:"Stay informed",href:CTA.biochar.href}, secondary:CTA.specDownload, specProduct:"biochar-infused-soil" },
-    ],
+    ]
   },
   offer:{
     kicker:"Test It On Your Terms",
@@ -269,18 +269,9 @@ const HOME = {
       { n:"02", t:"Test it head to head", d:"Run it beside your current absorbent on a real job." },
       { n:"03", t:"Scale on the numbers", d:"Fewer bags and lighter disposal earn the bulk contract." },
     ],
-    primary:CTA.sample, secondary:CTA.quote,
+    primary:CTA.sample, secondary:CTA.quote
   },
-  problem:{
-    h:"Standard absorbents make you buy, handle, and dispose of more than you should",
-    body:"Wood and clay sorbents typically hold about 2.5× their weight or less. So you open more bags per spill, your crew handles more material, and you haul more truckloads to disposal, where you pay by the ton. Procurement needs three things at once: field performance, dependable supply, and documentation. Most absorbents deliver one.",
-    points:[
-      "More bags per job = more labor and more truck space",
-      "More saturated weight = more disposal truckloads = more cost",
-      "Dust and non-renewable waste add handling and ESG friction",
-      "Hard to get specs, SDS, and a real bulk quote quickly",
-    ],
-  },
+
   buy:{
     kicker:"Products · Samples & Bulk",
     h:"Order samples. Request bulk quotes.",
@@ -361,7 +352,7 @@ const HOME = {
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE, BIOCHAR AND COFFEE CHAFF", omri:true } },
     ],
     filters:["All","Absorbents","Biochar","Soil"],
-    bbqFootnote:{ label:"Louisiana Sweet BBQ Smoker Pellets (consumer/retail)", href:"https://americanbiocarbon.com/products/louisiana-sweet-bbq-smoker-pellets" },
+    bbqFootnote:{ label:"Louisiana Sweet BBQ Smoker Pellets (consumer/retail)", href:"https://americanbiocarbon.com/products/louisiana-sweet-bbq-smoker-pellets" }
   },
   categories:[
     { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, lighter disposal, low dust. Sample bags ship now.", cta:CTA.sample, href:"/product/absorbent-pellets", img:ASSETS.pelletsBag, avail:"live" },
@@ -381,7 +372,7 @@ const HOME = {
       { n:"N/A", l:"Bags saved per average spill", note:"Add a real, sourced figure" },
       { n:"N/A", l:"Tons deployed / CORCs issued", note:"Add a real, sourced figure" },
     ],
-    quote:{ text:"Add a real customer quote here, the specific, measurable outcome a buyer got after switching. Keep it defensible and attributable.", who:"Name, Title", org:"Company (with permission to cite)" },
+    quote:{ text:"Add a real customer quote here, the specific, measurable outcome a buyer got after switching. Keep it defensible and attributable.", who:"Name, Title", org:"Company (with permission to cite)" }
   },
   feature:{
     kicker:"Oil & Gas · Industrial Remediation",
@@ -395,7 +386,7 @@ const HOME = {
       "Bulk, bulk bag & truckload supply",
       "SDS + spec sheet on request",
     ],
-    primary:CTA.specialist, secondary:CTA.sample, image:ASSETS.pelletsPhoto,
+    primary:CTA.specialist, secondary:CTA.sample, image:ASSETS.pelletsPhoto
   },
   comparison:{
     h:"Up to 5:1 vs 2.5:1, the same spill, roughly half the bags",
@@ -408,14 +399,14 @@ const HOME = {
       ["Renewable / plant based","Yes","Yes","No"],
       ["Dust","Low","Moderate","High"],
       ["Carbon story","Carbon negative","Neutral","None"],
-    ],
+    ]
   },
   ag:{
     kicker:"Agriculture & Soil",
     h:"Healthier soil, faster compost",
     body:"OMRI listed bagasse biochar holds up to ~3 to 3.5× its weight in water (per technical report) and improves nutrient retention, so blends hold moisture through dry spells and leach less fertilizer. Based on peer reviewed research on biochar in composting, it can help shorten compost turnover ~10 to 30% (validate in your own process). For distributors, soil blenders, compost yards, growers, and landscape supply.",
     bullets:["Holds up to ~3 to 3.5× its weight in water","Can help shorten compost cycles ~10 to 30% (research)","Inherent nutrients + microbial habitat","Bulk, bulk bag & bagged formats"],
-    primary:CTA.biochar, secondary:CTA.quote, image:ASSETS.biocharLg,
+    primary:CTA.biochar, secondary:CTA.quote, image:ASSETS.biocharLg
   },
   carbon:{
     kicker:"The dual revenue engine",
@@ -431,7 +422,7 @@ const HOME = {
       { n:"Puro.earth", l:"Certified CORC methodology" },
       { n:"MRV-backed", l:"Deployment based measurement & reporting" },
     ],
-    primary:CTA.carbon, secondary:CTA.spec, image:ASSETS.hands,
+    primary:CTA.carbon, secondary:CTA.spec, image:ASSETS.hands
   },
   audience:{
     kicker:"Find your line in 10 seconds",
@@ -444,40 +435,40 @@ const HOME = {
       { tag:"Ag Distributors & Growers", desc:"Add a carbon negative, OMRI listed biochar line with a margin model.", href:"/distributors-resellers-industries", cta:"Distributor program" },
       { tag:"Soil Blenders & Composters", desc:"Research points to ~10 to 30% faster compost turnover (validate in your process); holds up to ~3 to 3.5× its weight in water in blends.", href:"/industry/soil-blenders", cta:"Blender & compost" },
       { tag:"Corporate ESG & Carbon", desc:"Durable, deployment backed CORCs via Puro.earth, not paper offsets.", href:"/product/carbon-removal", cta:"Carbon removal" },
-    ],
+    ]
   },
   useCases:["Soil amendment","Compost & blending","Carbon removal","Drilling & frac fluids","Spill response","Flood & disaster cleanup","Landfill leachate","Animal bedding"],
   fieldApps:[
-    { title:"Soil amendment", detail:"Water &amp; nutrient retention",
-      body:"Work OMRI listed bagasse biochar into sandy or degraded soils to hold water and nutrients in the root zone.",
-      benefit:"Up to ~3 to 3.5× its weight in water, retained for the crop." },
-    { title:"Compost &amp; blending", detail:"Windrow throughput &amp; blends",
-      body:"Blend biochar into windrows and soil mixes to raise pile temperature and steady moisture.",
-      benefit:"Research shows ~10 to 30% shorter compost cycles (validate in your process)." },
-    { title:"Carbon removal", detail:"Durable, deployment backed CORCs",
-      body:"Generate Puro.earth-certified carbon removal when our biochar is physically deployed in the field.",
-      benefit:"Real, deployment backed tons with a full MRV trail." },
-    { title:"Drilling &amp; frac fluid solidification", detail:"Oilfield fluids &amp; pits",
-      body:"Solidify aqueous drilling and frac fluids so free liquid becomes a handleable solid for pit closeout and disposal.",
-      benefit:"Up to 5:1 capacity, so up to about half the sorbent mass per job." },
-    { title:"Spill response", detail:"Oil, fuel &amp; non-viscous chemicals",
-      body:"Absorb oil, fuel, and non-viscous chemical spills on pads, floors, and pavement, then sweep up and dispose.",
-      benefit:"Soaks up more per bag, so crews carry less and haul lighter." },
-    { title:"Flood &amp; disaster cleanup", detail:"Standing water &amp; wet debris",
-      body:"Knock down standing water and saturate wet debris during flood and disaster response.",
-      benefit:"Broad, fast coverage firms wet material for removal." },
-    { title:"Landfill leachate", detail:"Aqueous waste solidification",
-      body:"Solidify leachate and aqueous waste so loads meet free liquids limits before transport.",
-      benefit:"Less saturated tonnage leaves the gate each cycle." },
-    { title:"Animal bedding", detail:"Bedding &amp; absorbency",
-      body:"Spread bagasse pellets, crumble, or fiber as high absorbency bedding across houses and stalls.",
-      benefit:"Holds up to ~5× its weight in moisture, so bedding stays drier longer." },
-  ],
+      { title:"Soil amendment", detail:"Water &amp; nutrient retention",
+        body:"Sandy soils lose water and nutrients fast, so biochar holds both in the root zone.",
+        benefit:"Holds up to 3 to 3.5× its weight in water." },
+      { title:"Compost &amp; blending", detail:"Windrow throughput &amp; blends",
+        body:"Compost piles run cold and turn slowly, so blend biochar into windrows to raise temperature and steady moisture.",
+        benefit:"Research shows 10 to 30% shorter compost cycles." },
+      { title:"Carbon removal", detail:"Durable, deployment backed CORCs",
+        body:"Paper offsets lack proof, so we generate Puro.earth certified removal when biochar is physically deployed in the field.",
+        benefit:"Real, deployment backed tons with a full MRV trail." },
+      { title:"Drilling &amp; frac fluid solidification", detail:"Oilfield fluids &amp; pits",
+        body:"Free drilling and frac liquids fail transport limits, so solidify them at up to 5:1 for disposal.",
+        benefit:"Up to 5:1 capacity, so about half the sorbent per job." },
+      { title:"Spill response", detail:"Oil, fuel &amp; non-viscous chemicals",
+        body:"Low-capacity sorbents mean more bags to haul, so bagasse absorbs oil, fuel, and non-viscous spills for sweep-up.",
+        benefit:"Soaks up more per bag, so crews haul lighter." },
+      { title:"Flood &amp; disaster cleanup", detail:"Standing water &amp; wet debris",
+        body:"Standing water and wet debris stall flood response, so bagasse knocks down the water and firms saturated material.",
+        benefit:"Broad, fast coverage firms wet material for removal." },
+      { title:"Landfill leachate", detail:"Aqueous waste solidification",
+        body:"Leachate loads exceed free liquids limits, so solidify the aqueous waste before it leaves the gate.",
+        benefit:"Less saturated tonnage leaves the gate each cycle." },
+      { title:"Animal bedding", detail:"Bedding &amp; absorbency",
+        body:"Wet bedding fouls stalls and needs frequent changes, so spread bagasse pellets, crumble, or fiber for high absorbency.",
+        benefit:"Holds up to 5× its weight, so bedding stays drier." },
+    ],
   finalCta:{
     h:"Put it to the test",
     sub:"Request an industrial sample kit or a bulk quote. A specialist replies within one business day, with the SDS and spec sheet attached.",
-    primary:CTA.sample, secondary:CTA.quote,
-  },
+    primary:CTA.sample, secondary:CTA.quote
+  }
 };
 
 /* ============ PRODUCTS ============ */
@@ -494,30 +485,27 @@ const PRODUCTS = {
     sub:"A plant based bagasse sorbent for drilling fluids, spills, and leachate, holding up to ~5× its weight vs about 2.5× for wood pellets means roughly half the bags and lighter saturated disposal per spill, plus low dust.",
     primary:CTA.freeSamplePellets, secondary:CTA.quote, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
     proofRow:["Up to 5:1 absorption","100% organic biomass (no additives)","~32 lb/ft³ bulk density","Free 1 lb sample · volume supply Q4"],
-    problem:{ h:"You're paying to buy and dispose of material that barely holds its own weight",
-      body:"At ~2.5:1, wood pellets take roughly 2× the bags per spill and send more saturated weight to disposal, and disposal is billed by the pound, so more weight means more tipping cost and more truckloads hauled. Clay is heavier still and adds non-renewable waste. Crews want fewer bags to handle; procurement wants documentation and reliable supply." },
-    explanation:{ h:"Why bagasse absorbs more",
-      body:"Sugarcane bagasse has a naturally ordered, honeycomb-like pore structure. Carbonized and processed into pellets, that structure gives it a high capacity to draw in and hold liquid, up to roughly 5× its weight for non-viscous liquids. It's 100% organic biomass with no chemical additives, low dust, and renewable." },
+
     appsHeading:"How Absorbent Pellets Applications Help Your Spill Response &amp; Remediation Operations",
     useCases:["Drilling &amp; Frac Fluid Solidification","Oil &amp; Fuel Spill Cleanup","Non-Viscous Chemical &amp; Aqueous Spills","Landfill Leachate &amp; Aqueous Waste","Flood &amp; Disaster Cleanup","Soil Runoff Absorption"],
     fieldApps:[
       { title:"Drilling &amp; Frac Fluid Solidification", detail:"Reserve pits &amp; produced water",
-        body:"Free liquids in reserve pits and produced water tanks fail transport limits and stall closeout, and wood pellets at about 2.5:1 take roughly twice the sorbent to firm the same fluid. Bagasse pellets solidify aqueous drilling and frac fluid at up to 5:1, turning free liquid into a handleable solid ahead of pit closeout.",
-        benefit:"Locks up the same fluid with up to about half the sorbent mass." },
+        body:"Free liquids in reserve pits stall closeout, so bagasse pellets solidify them at up to 5:1.",
+        benefit:"Locks up the same fluid with about half the sorbent." },
       { title:"Oil &amp; Fuel Spill Cleanup", detail:"Hard-surface spills",
-        body:"Every saturated bag from a pad or floor spill is billed by the pound at disposal and adds truckloads, and a lower-capacity sorbent doubles both. Sprinkle bagasse pellets over oil and fuel on pads, floors, and pavement, let them absorb, then sweep up and dispose.",
+        body:"Disposal bills saturated bags by the pound, so sprinkle bagasse pellets over the spill, then sweep and dispose.",
         benefit:"Fewer bags per spill and lighter saturated weight to haul." },
       { title:"Non-Viscous Chemical &amp; Aqueous Spills", detail:"Process leaks &amp; washdown",
-        body:"A non-viscous release spreads toward a drain while crews stage equipment, and slow capture widens the recovery area. Bagasse pellets absorb non-viscous chemical and aqueous washdown on contact before the release migrates.",
+        body:"A non-viscous release spreads toward the drain, so bagasse pellets absorb it on contact before it migrates.",
         benefit:"Fast capture on contact for easier recovery and disposal." },
       { title:"Landfill Leachate &amp; Aqueous Waste", detail:"Free liquids solidification",
-        body:"Loads that hold free liquid are turned away at disposal, and heavier sorbent adds tonnage you pay to haul out each cycle. Bagasse pellets solidify leachate and aqueous waste so loads meet free liquids limits before transport.",
+        body:"Loads holding free liquid are turned away, so bagasse pellets solidify leachate to meet free-liquids limits.",
         benefit:"Less saturated tonnage leaves the gate each cycle." },
       { title:"Flood &amp; Disaster Cleanup", detail:"Standing water &amp; wet debris",
-        body:"Standing water and saturated debris slow every step of a response, and low-capacity sorbent means more material staged and more passes over the same footprint. Bagasse pellets knock down standing water and firm wet debris for removal.",
+        body:"Standing water and wet debris slow a response, so bagasse pellets knock it down and firm debris.",
         benefit:"Broad coverage that firms wet material for removal." },
       { title:"Soil Runoff Absorption", detail:"Site runoff control",
-        body:"Wet, mobile soil and runoff carry contamination off-site and complicate excavation and profiling. Bagasse pellets absorb runoff and firm saturated soil so material stays contained and workable, using a 100% organic biomass sorbent with no chemical additives.",
+        body:"Wet, mobile soil and runoff carry contamination off-site, so bagasse pellets absorb runoff and firm the soil.",
         benefit:"Contained, firmer soil that is easier to excavate and profile." },
     ],
     specs:[
@@ -538,7 +526,7 @@ const PRODUCTS = {
       { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request." },
     ],
     form:"sample",
-    internal:["/product/absorbent-crumble","/industry/oil-gas","/industry/landfill-leachate","/technical"],
+    internal:["/product/absorbent-crumble","/industry/oil-gas","/industry/landfill-leachate","/technical"]
   },
   "absorbent-crumble":{
     name:"Absorbent Crumble", icp:"Large area & high volume spill coverage",
@@ -552,31 +540,28 @@ const PRODUCTS = {
     sub:"A coarser bagasse form that spreads quickly across large area and high volume spills, same up to 5:1 performance, faster to lay down.",
     primary:CTA.quote, secondary:CTA.sample, image:ASSETS.crumblePhoto, mock:ASSETS.pelletsMock,
     proofRow:["Up to 5:1 absorption","Coarse, fast spreading","100% organic biomass","Bulk & truckload"],
-    problem:{ h:"Big spills need coverage speed, not just capacity",
-      body:"On large area or high volume events, how fast you can lay material down drives labor hours, every extra minute spreading is a crew on the clock and a spill still migrating. Fine pellets spread slower across a wide footprint, so they take more passes and more labor to cover the same area." },
-    explanation:{ h:"Coarser by design",
-      body:"Crumble is the same 100% bagasse sorbent in a coarser texture that spreads faster and covers more ground per pass, while still soaking up several times its weight in liquid." },
+
     appsHeading:"How Absorbent Crumble Applications Help Your Large Area Spill Response &amp; Remediation Operation",
     useCases:["Large Area Spill Coverage","Drilling &amp; Frac Fluid Solidification","High Volume &amp; Storm Events","Disaster &amp; Flood Cleanup","Industrial Washdown Areas","Oil &amp; Gas Fluid Remediation"],
     fieldApps:[
       { title:"Large Area Spill Coverage", detail:"Wide footprint events",
-        body:"On a wide spill, the liquid keeps migrating while crews make pass after pass with a fine sorbent that spreads slowly. The coarse crumble texture lays down fast and covers more ground per pass, so a spreading spill is contained in fewer passes.",
-        benefit:"More ground covered per pass cuts the spread labor on a wide footprint." },
+        body:"Fine sorbents spread slowly across wide spills, so the coarse crumble texture lays down fast in fewer passes.",
+        benefit:"More ground covered per pass cuts spread labor." },
       { title:"Drilling &amp; Frac Fluid Solidification", detail:"Pits &amp; high volume streams",
-        body:"Large reserve pits and high volume produced water leave a lot of free liquid to solidify before closeout, and slow-spreading sorbent stretches the job. Crumble spreads quickly across the surface and solidifies aqueous drilling and frac fluids into a handleable solid ahead of disposal.",
-        benefit:"Holds up to about 5:1 vs roughly 2.5:1 for wood, so you fill about half the bags." },
+        body:"Large pits leave lots of free liquid to solidify, and crumble spreads quickly to firm aqueous drilling fluids.",
+        benefit:"Up to 5:1 versus 2.5:1 for wood, about half the bags." },
       { title:"High Volume &amp; Storm Events", detail:"Surge and overflow",
-        body:"During storm surge and overflow, volume arrives faster than a slow-to-lay sorbent can keep up with, and systems run past capacity. Crumble broadcasts rapidly across a wide area to absorb surge volume as it spreads.",
-        benefit:"Rapid, broad coverage helps keep systems within capacity during peaks." },
+        body:"During storm surge, volume arrives faster than a slow sorbent handles, so crumble broadcasts rapidly to absorb it.",
+        benefit:"Rapid, broad coverage helps keep systems within capacity." },
       { title:"Disaster &amp; Flood Cleanup", detail:"Standing water &amp; wet debris",
-        body:"Flood response means standing water and saturated debris across a large area that crews cannot remove until it firms up. Spread crumble across the affected ground to solidify standing water and wet debris for removal.",
-        benefit:"Broad, fast coverage firms wet material so it can be hauled out." },
+        body:"Floods leave standing water and wet debris across wide ground, so spread crumble to firm it for removal.",
+        benefit:"Fast coverage firms wet material for hauling out." },
       { title:"Industrial Washdown Areas", detail:"Yard &amp; bay floors",
-        body:"Washdown bays and yard floors generate non-viscous runoff across a wide footprint that can reach a drain before it is captured. Cover the working area with crumble to absorb runoff on contact across the full floor.",
+        body:"Washdown runoff spreads across yard floors and can reach a drain, so crumble absorbs it on contact.",
         benefit:"Keeps large working areas dry with minimal passes." },
       { title:"Oil &amp; Gas Fluid Remediation", detail:"Field &amp; site cleanup",
-        body:"Field releases spread across open ground and drive up both recovery labor and the saturated tonnage sent to disposal. Broadcast crumble over the release to recover free liquid across a wide area, then sweep and dispose per the material's profile.",
-        benefit:"Lighter saturated weight per job means fewer pounds and fewer truckloads to disposal." },
+        body:"Field releases spread across open ground and raise disposal tonnage, so crumble recovers free liquid widely.",
+        benefit:"Lighter saturated weight means fewer truckloads to disposal." },
     ],
     specs:[
       ["Absorption ratio","Up to ~5:1, non-viscous"],
@@ -593,7 +578,7 @@ const PRODUCTS = {
       { q:"What volumes are available?", a:"Bulk and one metric ton bulk bags; truckload on request." },
     ],
     form:"quote",
-    internal:["/product/absorbent-pellets","/industry/spill-response","/industry/industrial-remediation","/technical"],
+    internal:["/product/absorbent-pellets","/industry/spill-response","/industry/industrial-remediation","/technical"]
   },
   "absorbent-fiber":{
     name:"Multipurpose Fiber", icp:"Spill response · animal bedding · soil blenders · remediation",
@@ -607,31 +592,28 @@ const PRODUCTS = {
     sub:"One loose bagasse fiber, grown and processed in Louisiana, that handles spill cleanup, animal bedding, and soil amendment. A renewable, carbon neutral replacement for mined peat and wood. Coming Q4.",
     primary:CTA.quote, secondary:CTA.sample, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
     proofRow:["Renewable peat replacement","Loose, fast spreading fiber","100% organic biomass","Locally grown in Louisiana"],
-    problem:{ h:"Growers and crews want one renewable fiber that does more than one job",
-      body:"Mined peat drains wetlands, and wood based absorbents and beddings fall short on capacity and sustainability. Most operations end up buying separate products for bedding, spill cleanup, and soil work, each with its own supplier, freight, and footprint." },
-    explanation:{ h:"One versatile bagasse fiber",
-      body:"Multipurpose fiber is microbe treated sugarcane bagasse in a loose form that absorbs several times its own weight in liquid, spreads fast over wide areas, and doubles as a renewable soil amendment and peat replacement. Carbon neutral, biodegradable, and locally grown." },
+
     appsHeading:"How Multipurpose Bagasse Fiber Applications Help Your Bedding, Cleanup &amp; Soil Operations",
     useCases:["Animal Bedding &amp; Litter","Spill Cleanup","Landfill Leachate Control","Oil &amp; Gas Fluid Remediation","Environmental Remediation","Soil Amendment &amp; Peat Replacement"],
     fieldApps:[
       { title:"Animal Bedding &amp; Litter", detail:"Stall, pen &amp; litter coverage",
-        body:"Wet bedding forces frequent changeouts, drives up material and labor cost, and holds odor and ammonia that stress livestock; broadcast the loose fiber across stalls, pens, and litter areas for fast, even coverage that pulls moisture off the surface.",
-        benefit:"Absorbs several times its own weight in liquid to keep bedding drier between changes." },
+        body:"Wet bedding forces frequent changeouts and traps ammonia, so broadcast the loose fiber for even, moisture-pulling coverage.",
+        benefit:"Absorbs several times its weight to keep bedding drier between changes." },
       { title:"Spill Cleanup", detail:"Oil, solvents &amp; non-viscous chemicals",
-        body:"A spreading spill of oil, solvents, or non-viscous chemicals stays a slip and compliance hazard until the free liquid is off the floor; broadcast the fiber over the release to soak up free liquid on contact and firm it for pickup.",
+        body:"Oil and chemical spills stay slip hazards until liquid is gone, so broadcast the fiber to absorb it.",
         benefit:"Fast, broad coverage captures the spill for easier recovery and disposal." },
       { title:"Landfill Leachate Control", detail:"Aqueous liquid capture",
-        body:"Free leachate and other aqueous liquids add weight and liability to every load leaving the site; apply the fiber to bind that free water into a handleable solid before transport.",
-        benefit:"Locks up several times its weight in liquid to cut haul volume and weight." },
+        body:"Free leachate adds weight and liability to hauled loads, so bind it into a handleable solid.",
+        benefit:"Locks up several times its weight to cut haul volume." },
       { title:"Oil &amp; Gas Fluid Remediation", detail:"Field &amp; site cleanup",
-        body:"Fluid releases across field and pad sites need a sorbent that covers ground fast without adding a mined or synthetic waste stream; spread the fiber over the release during remediation to recover free liquid across a wide area.",
+        body:"Fluid releases across field sites need fast, no-waste coverage, so spread the fiber to recover free liquid.",
         benefit:"Renewable, biodegradable sorbent that covers wide footprints quickly." },
       { title:"Environmental Remediation", detail:"Site restoration crews",
-        body:"Remediation crews want to close out a site without leaving behind a clay or synthetic absorbent that becomes its own disposal problem; the fiber captures free liquid and then biodegrades, so it fits restoration and cleanup work.",
+        body:"Clay and synthetic absorbents leave a disposal problem at closeout, so use fiber that captures liquid and biodegrades.",
         benefit:"100% organic, biodegradable biomass that supports low-residue cleanup." },
       { title:"Soil Amendment &amp; Peat Replacement", detail:"Renewable mined peat alternative",
-        body:"Growers and blenders relying on mined peat face draining wetlands, tightening supply, and a rising carbon question from buyers; work the bagasse fiber into soil and growing mixes as a locally grown replacement for mined peat and wood.",
-        benefit:"Carbon neutral, Louisiana grown input that holds moisture in the root zone." },
+        body:"Growers on mined peat face draining wetlands and buyer carbon questions, so work in the bagasse fiber instead.",
+        benefit:"Carbon neutral, Louisiana-grown input that holds root-zone moisture." },
     ],
     specs:[
       ["Material","100% microbe treated sugarcane bagasse fiber"],
@@ -649,7 +631,7 @@ const PRODUCTS = {
       { q:"When is volume supply available?", a:"Free 1 lb samples ship now (4 to 7 business days). Bulk and one metric ton bulk bag supply comes online with our Q4 capacity ramp, so you can reserve supply and lock pricing now." },
     ],
     form:"quote",
-    internal:["/product/absorbent-pellets","/industry/animal-bedding","/industry/soil-blenders","/technical"],
+    internal:["/product/absorbent-pellets","/industry/animal-bedding","/industry/soil-blenders","/technical"]
   },
   "agricultural-biochar":{
     name:"100% Biochar", icp:"Ag distributors · soil blenders · compost yards · growers",
@@ -663,37 +645,34 @@ const PRODUCTS = {
     sub:"A locally sourced, carbon negative sugarcane biochar that improves water and nutrient retention, supports soil microbiology, and can help shorten compost turnover ~10 to 30%.",
     primary:CTA.freeSampleBiochar, secondary:CTA.spec, image:ASSETS.biocharPhoto, mock:ASSETS.biocharMock,
     proofRow:["OMRI Listed · IBI Certified","Holds up to ~3 to 3.5× its weight in water","Inherent NPK + Ca/Mg","Free sample · volume supply Q4"],
-    problem:{ h:"Distributors and blenders need a differentiated line that actually pulls through",
-      body:"Commodity amendments compete on price alone, every reorder shaves the margin thinner, and an undifferentiated bag only moves when it's the cheapest on the shelf. Growers increasingly ask for water efficiency, organic inputs, and a carbon story, and composters and blenders need throughput and consistent quality, not another line that races price to the bottom." },
-    explanation:{ h:"Louisiana sourced biochar: a versatile soil amendment",
-      body:"Bagasse biochar's honeycomb pore structure holds up to 3 to 3.5× its weight in water, retains nutrients, and provides protected habitat for soil microbes. Unlike most wood biochar, it carries inherent nutrients (~0.6-0.2-0.7 NPK plus calcium and magnesium). It's OMRI listed and IBI certified, with heavy metals well below IBI and EPA Class A thresholds. Use it standalone for soil amendment and composting, or blended into your own potting and growing mixes for peat moss performance." },
+
     specsFirst:true, appsKicker:"", appsHeading:"How Bagasse Biochar Applications Help Your Soil &amp; Growing Operation",
     useCases:["Less irrigation &amp; water waste","Less fertilizer waste","Soil structure &amp; root penetration","Microbial &amp; fungal habitat","pH buffering","Faster composting","Drought resilience","Durable carbon sequestration"],
     fieldApps:[
       { title:"Cut Irrigation &amp; Water Waste", detail:"Stop water draining away",
-        body:"Water runs straight through sandy and degraded soils before roots can drink, so growers pay to irrigate more and still watch crops stress in the heat; biochar's honeycomb pores hold up to ~3 to 3.5× their weight in water and release it back to the root zone between waterings.",
-        benefit:"More plant-available water per pass and lower irrigation demand on soils that won't hold moisture." },
+        body:"Water drains through sandy soil before roots can drink it, so biochar's pores hold up to ~3 to 3.5x their weight and release it back.",
+        benefit:"More plant-available water and lower irrigation demand." },
       { title:"Cut Fertilizer Waste", detail:"Keep nutrients in the root zone",
-        body:"Costly fertilizer washes past the root zone and out with the next rain or irrigation, wasting inputs, forcing reapplications, and polluting runoff; biochar's charged surfaces grip those nutrients and hold them where roots can actually reach them.",
-        benefit:"Less leaching and fewer reapplications, so more of every fertilizer dollar feeds the crop." },
+        body:"Costly fertilizer leaches past the root zone with each rain, so biochar's charged surfaces grip nutrients and hold them where roots reach.",
+        benefit:"Less leaching and fewer reapplications per crop." },
       { title:"Soil Structure &amp; Root Penetration", detail:"Relieve compaction",
-        body:"Compacted, heavy soil chokes roots and stalls establishment; by lowering bulk density, biochar loosens the profile so roots can grow deeper and wider.",
-        benefit:"Deeper rooting and easier establishment in tight or worked-out soils." },
+        body:"Compacted heavy soil chokes roots and stalls establishment, so biochar lowers bulk density and loosens the profile for deeper growth.",
+        benefit:"Deeper rooting in tight or worked-out soils." },
       { title:"Microbial &amp; Fungal Habitat", detail:"Living-soil biology",
-        body:"Worn-out and heavily worked soils lose the living biology that feeds plants, leaving crops dependent on inputs; biochar's stable pore structure gives mycorrhizal fungi and beneficial microbes protected shelter to recolonize.",
-        benefit:"Studies report markedly higher mycorrhizal colonization in biochar-amended soils." },
+        body:"Overworked soils lose the living biology that feeds plants, so biochar's stable pores give fungi and microbes protected shelter to recolonize.",
+        benefit:"Studies report markedly higher mycorrhizal colonization." },
       { title:"pH Buffering", detail:"Steady the root zone",
-        body:"Acidic or swinging soil pH locks up nutrients and stresses roots even when fertility is adequate; biochar helps buffer pH toward a steadier, more crop-friendly range.",
-        benefit:"A more stable pH profile that keeps applied nutrients biologically available." },
+        body:"Acidic or swinging soil pH locks up nutrients and stresses roots, so biochar buffers pH toward a steadier, crop-friendly range.",
+        benefit:"A stable pH that keeps nutrients available." },
       { title:"Faster Composting", detail:"More batches per windrow",
-        body:"Slow compost cycles tie up windrow space and cap how much finished product a yard can turn out; adding biochar can raise pile temperature and shorten cycles ~10 to 30% in peer-reviewed trials.",
-        benefit:"Shorter turnover means more batches through the same windrow footprint." },
+        body:"Slow compost cycles tie up windrow space, so adding biochar raises pile temperature and shortens cycles ~10 to 30% in trials.",
+        benefit:"More batches through the same windrow footprint." },
       { title:"Drought Resilience", detail:"Buffer dry spells",
-        body:"Rising water costs and longer dry spells leave growers exposed when irrigation can't keep up; the extra water held in biochar-amended soil buys crops a longer buffer between waterings.",
-        benefit:"Greater tolerance of dry stretches and reduced irrigation demand." },
+        body:"Rising water costs and longer dry spells leave crops exposed, so extra water held in biochar-amended soil extends the buffer between waterings.",
+        benefit:"Greater dry-stretch tolerance and lower irrigation demand." },
       { title:"Durable Carbon Sequestration", detail:"A credible carbon story",
-        body:"Distributors and growers increasingly need a verifiable sustainability claim, not vague greenwashing; biochar's durable carbon (H/C molar ratio &lt;0.7) locks carbon in the soil for the long term.",
-        benefit:"A carbon-negative amendment that backs a real, sellable sustainability story." },
+        body:"Buyers need a verifiable sustainability claim, not greenwashing, so biochar's durable carbon (H/C molar ratio &lt;0.7) locks carbon in soil long term.",
+        benefit:"A carbon-negative amendment behind a real sustainability story." },
     ],
     specs:[
       ["Organic carbon","~58 to 65% (dry basis)"],
@@ -715,7 +694,7 @@ const PRODUCTS = {
       { q:"What are the distributor terms?", a:"Start with a free sample and a preview of the margin model. Full stocking volume comes online with our Q4 capacity ramp, and distributors can lock pricing now." },
     ],
     form:"biochar",
-    internal:["/distributors-resellers-industries","/industry/soil-blenders","/product/biochar-infused-soil","/technical"],
+    internal:["/distributors-resellers-industries","/industry/soil-blenders","/product/biochar-infused-soil","/technical"]
   },
   "biochar-infused-soil":{
     name:"Biochar-Infused Soil", icp:"Landscape · nursery · retail · growers",
@@ -729,31 +708,28 @@ const PRODUCTS = {
     sub:"A growing soil pre-blended with carbon negative bagasse biochar, so you get the water holding, nutrient retention, and aeration benefits from the first watering.",
     primary:CTA.biochar, secondary:CTA.spec, image:ASSETS.biocharLg, mock:ASSETS.biocharMock,
     proofRow:["Pre-blended, no mixing","OMRI listed biochar base","Water & nutrient retention","Bagged & bulk"],
-    problem:{ h:"Not everyone wants to blend biochar themselves",
-      body:"Landscapers, nurseries, and retail buyers want the performance without the guesswork of dosing and mixing raw biochar into their media." },
-    explanation:{ h:"The benefits, ready to use",
-      body:"Built on the same Louisiana sugarcane biochar as our standalone amendment, this blend delivers water retention, nutrient holding, and aeration with no mixing, fill a bed, pot, or planting hole and go." },
+
     appsHeading:"How Biochar-Infused Soil Applications Help Your Landscape, Nursery &amp; Growing Operation",
     useCases:["Raised Beds &amp; Garden Fill","Container &amp; Nursery Media","Tree &amp; Shrub Planting","Seedlings &amp; Transplants","Sandy or Fast Draining Soils","Retail &amp; Bagged Supply"],
     fieldApps:[
       { title:"Raised Beds &amp; Garden Fill", detail:"Fill and plant",
-        body:"Crews filling raised beds and garden plots lose time dosing and blending raw biochar into media, and inconsistent mixing gives uneven results. This pre-blended soil is filled and planted straight from the bag with no measuring or mixing step.",
-        benefit:"Water holding and nutrient retention from the first watering." },
+        body:"Crews waste time dosing and mixing raw biochar into bed media, and it blends unevenly. This soil is filled and planted straight from the bag.",
+        benefit:"Water and nutrient retention from the first watering." },
       { title:"Container &amp; Nursery Media", detail:"Pots and trays",
-        body:"Nurseries potting at volume cannot hand mix biochar into every container without slowing the line and varying the blend pot to pot. Used as a ready media, this soil delivers a consistent blend across every tray and container.",
-        benefit:"Consistent moisture without hand mixing raw biochar." },
+        body:"Nurseries potting at volume cannot hand mix biochar into every container without slowing the line. This ready media blends the same every time.",
+        benefit:"Consistent moisture without hand mixing biochar." },
       { title:"Tree &amp; Shrub Planting", detail:"Backfill at planting",
-        body:"New trees and shrubs often struggle after planting when backfill drains too fast and roots dry out between waterings. Backfilling the hole with this blend gives establishing roots steadier moisture and aeration.",
-        benefit:"Establishes roots with less watering stress." },
+        body:"New trees and shrubs dry out when fast draining backfill loses moisture between waterings. Backfilling with this blend holds steadier moisture and aeration.",
+        benefit:"Roots establish with less watering stress." },
       { title:"Seedlings &amp; Transplants", detail:"Propagation &amp; transplant",
-        body:"Tender seedlings and fresh transplants are set back by media that swings between wet and dry while roots are still fragile. Starting them in this moisture retentive blend holds a steadier moisture level through establishment.",
+        body:"Fragile seedlings and transplants stall in media that swings from wet to dry. This moisture retentive blend holds a steadier level through establishment.",
         benefit:"Even moisture for tender roots." },
       { title:"Sandy or Fast Draining Soils", detail:"Moisture correction",
-        body:"On sandy, fast draining beds, water and nutrients run straight past the root zone and drive up watering frequency. Amending with this blend holds water and inherent nutrients (NPK ~1.4-0.7-1.4 plus Ca/Mg) where roots can reach them.",
-        benefit:"Holds water and nutrients where roots can reach them." },
+        body:"On sandy beds, water and nutrients drain past the root zone and raise watering frequency. This blend holds both (NPK ~1.4-0.7-1.4 plus Ca/Mg) where roots reach.",
+        benefit:"Keeps water and nutrients within root reach." },
       { title:"Retail &amp; Bagged Supply", detail:"Shelf-ready blend",
-        body:"Retail buyers need a soil their customers can use without instructions or a separate biochar step at the register. This OMRI listed biochar blend ships bagged and bulk as a ready to use product with a carbon negative sustainability story behind it.",
-        benefit:"A shelf-ready amendment stocked in bagged and bulk form." },
+        body:"Retail buyers need a soil customers can use without instructions or a separate biochar step. This OMRI listed blend ships bagged and bulk, ready to use.",
+        benefit:"Shelf-ready amendment in bagged and bulk form." },
     ],
     specs:[
       ["Base","Carbon negative bagasse biochar blend"],
@@ -770,7 +746,7 @@ const PRODUCTS = {
       { q:"Is bulk available?", a:"Yes, alongside bagged. Request a sample or quote with your volume." },
     ],
     form:"biochar",
-    internal:["/product/agricultural-biochar","/distributors-resellers-industries","/technical"],
+    internal:["/product/agricultural-biochar","/distributors-resellers-industries","/technical"]
   },
   "carbon-removal":{
     name:"Carbon Removal Credits (CORCs)", icp:"Corporate ESG · carbon brokers · marketplaces",
@@ -784,30 +760,27 @@ const PRODUCTS = {
     sub:"Puro.earth certified CORCs generated when our biochar is physically deployed, backed by measurement, reporting, and verification.",
     primary:CTA.carbon, secondary:CTA.specialist, image:ASSETS.hands, mock:ASSETS.biocharMock,
     proofRow:["Puro.earth certified","H/C < 0.7 · durable","Physical deployment + MRV"],
-    problem:{ h:"Buyers need credits that survive scrutiny",
-      body:"Corporate buyers under pressure to source durable, verifiable carbon removal must defend every ton to auditors. Many credits are paper avoidance offsets with uncertain permanence that get written down or retired in doubt when scrutinized." },
-    explanation:{ h:"Real tons, documented from the ground up",
-      body:"Our biochar locks carbon into a stable form (H/C < 0.7) that persists long term. Credits are tied to documented, physical deployment of product through Puro.earth, grounding supply in real tons moved with a complete MRV trail." },
+
     appsHeading:"How Carbon Removal Credit Applications Help Your ESG &amp; Carbon Sourcing Operation",
     useCases:["Corporate Net Zero Procurement","Carbon Broker Sourcing","Forward Purchase Contracts","Marketplace &amp; Registry Supply","Disclosure &amp; Audit Defense","Permanence-Weighted Portfolios"],
     fieldApps:[
       { title:"Corporate Net Zero Procurement", detail:"Audit-ready portfolios",
-        body:"ESG teams building a net zero or SBTi aligned program have to defend every ton to auditors, and avoidance offsets often get written down when scrutinized. These CORCs are tied to physically deployed biochar with a full MRV trail, so each ton traces back to documented product movement.",
+        body:"ESG teams must defend every ton to auditors, so we tie each CORC to physically deployed biochar.",
         benefit:"Removal tons that hold up under third-party audit." },
       { title:"Carbon Broker Sourcing", detail:"Durable supply for resale",
-        body:"Brokers reselling removal need supply they can stand behind, but permanence questions on many credits create resale and reputational risk. Our CORCs are Puro.earth certified and backed by a stable biochar form (H/C < 0.7) with millennial-scale storage.",
+        body:"Brokers reselling removal face permanence doubts, so our Puro.earth certified CORCs use stable biochar (H/C < 0.7).",
         benefit:"A verifiable, deployment-backed product to place with buyers." },
       { title:"Forward Purchase Contracts", detail:"Pipeline-matched offtake",
-        body:"Buyers securing future volume worry about over-issued credits that outrun real delivery. We size forward contracts conservatively to our documented deployment schedule and never sell more credits than deployable tons.",
+        body:"Buyers securing future volume fear over-issued credits, so we size forward contracts to our documented deployment schedule.",
         benefit:"Contracted volume matched to real, scheduled deployment." },
       { title:"Marketplace &amp; Registry Supply", detail:"Listable certified tons",
-        body:"Marketplaces and registries need listings that clear verification and will not be flagged post-sale. These credits carry Puro.earth CORC certification and independent MRV, grounding each listing in documented physical deployment rather than paper claims.",
+        body:"Marketplaces need listings that clear verification, so each CORC carries Puro.earth certification and independent MRV.",
         benefit:"Certified tons ready to list with verification on file." },
       { title:"Disclosure &amp; Audit Defense", detail:"Documented removal evidence",
-        body:"Sustainability and finance teams face rising scrutiny on climate disclosures and need evidence, not assertions, behind reported removals. Each CORC ties to a stable biochar form and a complete measurement, reporting, and verification record.",
+        body:"Finance teams face scrutiny on climate disclosures, so every CORC ties to a full measurement and verification record.",
         benefit:"A traceable paper trail for every removal ton you report." },
       { title:"Permanence-Weighted Portfolios", detail:"Durability by design",
-        body:"Portfolio managers balancing durability against cost find many low-cost credits carry uncertain permanence that erodes portfolio quality. Our biochar locks carbon into a stable form rated for 1000+ years of storage.",
+        body:"Portfolio managers weigh durability against cost, so our biochar locks carbon into a stable form rated 1000+ years.",
         benefit:"High-durability removal to anchor a mixed credit portfolio." },
     ],
     specs:[
@@ -823,8 +796,8 @@ const PRODUCTS = {
       { q:"Forward purchase options?", a:"Yes, sized conservatively to our deployment schedule, we don't sell more credits than deployable tons." },
     ],
     form:"carbon",
-    internal:["/product/agricultural-biochar","/about"],
-  },
+    internal:["/product/agricultural-biochar","/about"]
+  }
 };
 
 /* ============ INDUSTRIES ============ */
@@ -839,29 +812,28 @@ const INDUSTRIES = {
     h1:"Solidify Drilling &amp; Frac Fluids With Half the Bags",
     sub:"A plant based bagasse absorbent for oilfield fluid solidification and spill cleanup, up to 5:1 absorption vs ~2.5:1 for wood, with SDS and bulk supply.",
     primary:CTA.sample, secondary:CTA.quote, image:"assets/industry/oil-gas.jpg?v=v2",
-    problem:"Oilfield disposal is billed by weight, so the sorbent you spread comes back as tonnage you pay to haul. At ~2.5:1, wood pellets take roughly twice the sorbent mass to solidify the same fluid, so you buy and bag more, and send heavier saturated loads to the disposal scale. And HSE teams face growing pressure to show a cleaner materials story.",
-    fit:"Bagasse pellets and crumble solidify aqueous drilling and frac fluids and absorb oil and non-viscous chemical spills at up to 5× their weight (vs ~2.5:1 wood), so it can take up to about half the sorbent mass to lock up the same fluid, cutting bags per job and saturated weight to disposal, while giving HSE a renewable, carbon neutral material.",
+
     appsHeading:"How Bagasse Absorbent Applications Help Your Oilfield Operations",
     useCases:["Drill Spoil &amp; Reserve Pit Closure","Frac Tank Bottoms &amp; Produced Water","Rig-Side Discharge Handling","Frac-Out Remediation","Wellhead &amp; Access Road Spill Response","Disposal Weight &amp; HSE Materials Story"],
     fieldApps:[
       { title:"Drill Spoil &amp; Reserve Pit Closure", detail:"Vertical, horizontal &amp; HDD",
-        body:"Free liquids standing in reserve and drill spoil pits keep the pit open and stop the solids from being hauled. Bagasse pellets solidify those liquids so the pit can be firmed up and closed out.",
-        benefit:"Fewer bags to stabilize the pit and lighter loads across the disposal scale." },
+        body:"Free liquid keeps reserve and drill spoil pits open until bagasse pellets solidify it for closeout.",
+        benefit:"Fewer bags to stabilize the pit and lighter disposal loads." },
       { title:"Frac Tank Bottoms &amp; Produced Water", detail:"Tank bottoms &amp; produced water",
-        body:"Residual liquid in frac tank bottoms and produced water streams cannot move to disposal while it is still free liquid. Bagasse pellets bind it into a handleable solid ahead of transport.",
-        benefit:"Turns free liquid into a handleable solid using less sorbent mass." },
+        body:"Free liquid in frac tank bottoms and produced water blocks disposal until bagasse pellets bind it solid.",
+        benefit:"Turns free liquid into a handleable solid using less sorbent." },
       { title:"Rig-Side Discharge Handling", detail:"Sumps, shaker &amp; cuttings dryer",
-        body:"Discharge from sumps, shale shaker screens, and cuttings dryer returns leaves working areas wet and adds saturated weight to haul. Bagasse pellets absorb it as it comes off the rig.",
-        benefit:"Keeps working areas dry and cuts saturated weight to the disposal scale." },
+        body:"Discharge from sumps, shakers, and cuttings dryers leaves areas wet until bagasse pellets absorb it at the rig.",
+        benefit:"Keeps work areas dry and cuts saturated weight to disposal." },
       { title:"Frac-Out Remediation", detail:"Access roads &amp; storm sewers",
-        body:"Inadvertent returns and frac outs spread fluid across access roads and around storm sewers where crews need fast, broad coverage. The coarser crumble grade recovers those fluids over a wide area.",
-        benefit:"Fast, broad coverage with the coarser crumble grade." },
+        body:"Frac outs spread fluid across access roads and storm sewers, where the coarser crumble grade recovers it fast.",
+        benefit:"Fast, broad coverage from the coarser crumble grade." },
       { title:"Wellhead &amp; Access Road Spill Response", detail:"Oil &amp; non-viscous spills",
-        body:"Oil and non-viscous fluid spills around the wellhead and along access roads need contained cleanup without specialized gear. Sprinkle the absorbent, let it work, and sweep it up.",
-        benefit:"Contain, absorb, sweep up, and dispose per your requirements." },
+        body:"Oil and non-viscous spills around wellheads and access roads clean up without special gear by sprinkling and sweeping.",
+        benefit:"Contain, absorb, and sweep up with no special equipment." },
       { title:"Disposal Weight &amp; HSE Materials Story", detail:"Bag count &amp; documentation",
-        body:"Oilfield disposal is billed by weight, and HSE teams face pressure to show a cleaner materials story. At up to 5:1 versus ~2.5:1 for wood, bagasse can take up to about half the sorbent mass to lock up the same fluid, on a renewable, carbon neutral material.",
-        benefit:"Fewer bags per job, lighter saturated loads, and SDS on request." },
+        body:"With disposal billed by weight, bagasse absorbs up to 5:1 versus ~2.5:1 wood, cutting mass roughly in half.",
+        benefit:"Fewer bags per job and lighter loads, with SDS on request." },
     ],
     proof:["Up to 5:1 absorption (non-viscous)","SDS on request","Bulk, bulk bag & truckload","Carbon neutral material"],
     procurement:["SDS + spec sheet provided","Bulk / bulk bag / truckload formats","Freight zoned pricing from White Castle, LA","Trial pallet available for head to head field test"],
@@ -870,7 +842,7 @@ const INDUSTRIES = {
       { q:"How fast can we get a trial pallet?", a:"Request a sample kit with your site location; we'll stage a trial pallet for your next job." },
     ],
     form:"sample",
-    products:["absorbent-pellets","absorbent-crumble"],
+    products:["absorbent-pellets","absorbent-crumble"]
   },
   "industrial-remediation":{
     name:"Industrial Remediation", icp:"Environmental remediation firms · industrial ops",
@@ -882,29 +854,28 @@ const INDUSTRIES = {
     h1:"A Renewable Industrial Absorbent That Cuts Bag Count",
     sub:"For remediation firms and industrial operations that need field performance, dependable supply, and documentation on one material.",
     primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/industrial-remediation.jpg?v=v2",
-    problem:"Remediation crews carry and dispose of enormous absorbent volume, and disposal is priced by the ton. At ~2.5:1, a lower capacity sorbent takes roughly twice the sorbent mass to capture the same liquid, heavier saturated loads to the landfill, plus the extra bags and labor to move it. Clients increasingly want a sustainability story behind the cleanup too.",
-    fit:"Bagasse pellets and crumble absorb up to 5× their weight in non-viscous liquids (vs ~2.5:1 wood), up to about half the sorbent mass per job, so fewer bags to move and less saturated weight billed at the disposal scale, with SDS and spec documentation and reliable bulk supply.",
+
     appsHeading:"How Bagasse Absorbent Applications Help Your Industrial Remediation Operations",
     useCases:["Tank &amp; Vessel Cleanout Residuals","Secondary Containment &amp; Dike Recovery","Process Water &amp; Aqueous Waste","Sump, Pit &amp; Trench Dewatering","Machinery &amp; Hydraulic Spill Cleanup","Client Documentation &amp; Disposal Profiling"],
     fieldApps:[
       { title:"Tank &amp; Vessel Cleanout Residuals", detail:"Bottoms &amp; rinsate",
-        body:"Tank, vessel, and process equipment cleanouts leave sludgy bottoms and rinsate that cannot ship with free liquids and are billed by weight at disposal. Bagasse pellets and crumble solidify those residuals so they profile and haul as a stable solid.",
-        benefit:"Locks up free liquids using up to about half the sorbent mass of ~2.5:1 wood." },
+        body:"Cleanout bottoms and rinsate cannot ship with free liquids, so bagasse pellets solidify them into a haulable solid.",
+        benefit:"Locks up free liquids using about half the sorbent mass." },
       { title:"Secondary Containment &amp; Dike Recovery", detail:"Bunds, berms &amp; sumps",
-        body:"Liquid pools in bunds, dikes, and containment sumps after a release or rainfall, and containment has to be cleared before the next event can be caught. Bagasse pellets and crumble bind that standing liquid so the containment can be emptied and reset.",
-        benefit:"Clears containment quickly and keeps it ready for the next event." },
+        body:"Standing liquid fills bunds and sumps after a release, so bagasse pellets bind it for a fast reset.",
+        benefit:"Empties containment quickly and keeps it ready for the next event." },
       { title:"Process Water &amp; Aqueous Waste", detail:"Batch &amp; washdown streams",
-        body:"Non-viscous process water, batch residuals, and washdown streams have to meet free liquids limits before transport, and a low capacity sorbent adds bags and weight to every load. Bagasse pellets and crumble bind these aqueous streams at up to 5:1.",
-        benefit:"Meets free liquids limits with fewer bags and lighter loads to the scale." },
+        body:"Process and washdown streams must meet free liquids limits, so bagasse pellets bind them at up to 5:1.",
+        benefit:"Meets free liquids limits with fewer bags and lighter loads." },
       { title:"Sump, Pit &amp; Trench Dewatering", detail:"Standing liquid in low points",
-        body:"Standing liquid in sumps, pits, and trenches keeps work areas wet and stalls the next stage of the job. Bagasse pellets and crumble solidify the liquid in place so the low point firms up and clears.",
-        benefit:"Keeps crews working on dry ground and cuts saturated weight to haul." },
+        body:"Standing liquid in sumps and trenches stalls the job, so bagasse pellets solidify it in place.",
+        benefit:"Keeps crews on dry ground and cuts saturated weight to haul." },
       { title:"Machinery &amp; Hydraulic Spill Cleanup", detail:"Plant floor &amp; equipment spills",
-        body:"Oil, hydraulic fluid, and lubricant spills spread across plant floors and under equipment, creating slip hazards and cleanup labor. Bagasse pellets and crumble contain the spill on contact for a simple sprinkle, absorb, and sweep recovery.",
+        body:"Oil and hydraulic spills cause slip hazards on plant floors, so bagasse pellets contain them on contact.",
         benefit:"Contains and clears spills fast, then disposes per your requirements." },
       { title:"Client Documentation &amp; Disposal Profiling", detail:"SDS, spec &amp; solid profiling",
-        body:"Remediation firms have to hand clients an SDS and spec on the material used and profile saturated waste for disposal, often chasing paperwork across several suppliers. One bagasse absorbent covers the job with SDS and spec provided and a renewable, low dust material to stand behind.",
-        benefit:"One documented material for the field work and the client-facing sustainability story." },
+        body:"Firms chase SDS and spec paperwork across suppliers, so one bagasse absorbent covers the job with documentation provided.",
+        benefit:"One documented material for field work and the sustainability story." },
     ],
     proof:["Up to 5:1 absorption","SDS + spec on request","Bulk & truckload supply","Renewable, low dust"],
     procurement:["Documentation package (SDS, spec)","Bulk / bulk bag / truckload","Freight aware pricing","Trial before switching"],
@@ -912,7 +883,7 @@ const INDUSTRIES = {
       { q:"Do you supply documentation for our clients?", a:"Yes, SDS and spec sheets are available on request and included when you submit a sample or quote request." },
     ],
     form:"quote",
-    products:["absorbent-pellets","absorbent-crumble"],
+    products:["absorbent-pellets","absorbent-crumble"]
   },
   "environmental-remediation":{
     name:"Environmental Remediation", icp:"Remediation contractors · environmental firms",
@@ -924,29 +895,28 @@ const INDUSTRIES = {
     h1:"Environmental Remediation With a Renewable, High Performance Absorbent",
     sub:"A plant based bagasse absorbent engineered for soil, groundwater, and environmental site remediation, up to 5:1 capacity, fewer bags, lower disposal costs.",
     primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/environmental-remediation.jpg?v=v2",
-    problem:"Environmental remediation requires handling large volumes of contaminated soil and aqueous waste at a cost per ton disposal scale. At ~2.5:1, a lower capacity sorbent takes roughly twice the sorbent mass to capture the same volume, heavier saturated loads to disposal, plus the extra material handling and ESG exposure. Site managers increasingly need a sustainability story to go with compliance.",
-    fit:"Bagasse pellets and crumble absorb up to 5× their weight in non-viscous liquids and aqueous waste (vs ~2.5:1 wood), up to about half the sorbent mass per job, so fewer bags to handle and less saturated weight billed at the disposal scale, with SDS and spec documentation, renewable credentials, and dependable bulk supply.",
+
     appsHeading:"How Bagasse Absorbent Applications Help Your Environmental Remediation Sites",
     useCases:["Dredged Sediment Dewatering","Slurry Wall &amp; Trench Spoil Management","Hydrocarbon Impacted Soil &amp; Free Product","Landfill Leachate Handling","Excavation &amp; Groundwater Dewatering","Brownfield, Pipeline Spill &amp; HDD Frac Out Response"],
     fieldApps:[
       { title:"Dredged Sediment Dewatering", detail:"Firming wet sediment",
-        body:"Dredged sediment arrives too wet to load or place, and hauling free water means heavier loads billed by the ton at disposal. Bagasse pellets and crumble bind the free water so the sediment firms up enough to load, transport, and place as a solid.",
-        benefit:"At up to 5:1 capacity, less sorbent mass firms the sediment and lightens each load." },
+        body:"Wet dredged sediment is too heavy to haul until bagasse binds the free water into a loadable solid.",
+        benefit:"Up to 5:1 capacity firms sediment and lightens each load." },
       { title:"Slurry Wall &amp; Trench Spoil Management", detail:"Handling wet spoil",
-        body:"Saturated slurry and trench spoil has to be pumped or double-handled before it can leave the site, which slows the excavation and adds labor. The absorbent solidifies the spoil so it can be handled and hauled as a stackable solid instead.",
-        benefit:"Wet spoil becomes a haulable solid, reducing rehandling and pumping steps." },
+        body:"Saturated trench spoil that needs pumping or double-handling solidifies into a stackable, haulable solid.",
+        benefit:"Wet spoil becomes haulable, cutting rehandling and pumping steps." },
       { title:"Hydrocarbon Impacted Soil &amp; Free Product", detail:"Excavation &amp; cleanup",
-        body:"During excavation of impacted soil, free product and non-viscous hydrocarbons pool in the cut and spread before crews can recover them. Sprinkled in, the pellets and crumble soak up free liquid on contact so it can be recovered rather than chased.",
-        benefit:"Captures free liquid on contact for cleaner, faster recovery." },
+        body:"Free product pooling in the excavation spreads before recovery until pellets soak it up on contact.",
+        benefit:"Captures free liquid on contact for faster recovery." },
       { title:"Landfill Leachate Handling", detail:"Aqueous waste solidification",
-        body:"Leachate and aqueous waste streams carry free liquids that disposal facilities will not accept and that add billed weight at the scale. The absorbent binds these streams so they can be profiled and disposed of as a solid within free liquids limits.",
-        benefit:"Meets free liquids limits with up to about half the sorbent mass versus wood." },
+        body:"Leachate carrying free liquids that disposal sites reject binds into a solid that meets free liquids limits.",
+        benefit:"Meets free liquids limits using about half the sorbent of wood." },
       { title:"Excavation &amp; Groundwater Dewatering", detail:"Standing water in the cut",
-        body:"Groundwater collecting in an open excavation keeps crews working in a wet cut and holds up backfill and closeout. The absorbent solidifies the standing liquid in the low points so the excavation can be firmed up and cleared.",
-        benefit:"Keeps the work area dry and cuts saturated weight hauled to disposal." },
+        body:"Groundwater pooling in an open cut stalls backfill and closeout until the absorbent solidifies the standing liquid.",
+        benefit:"Keeps the cut dry and cuts saturated weight to disposal." },
       { title:"Brownfield, Pipeline Spill &amp; HDD Frac Out Response", detail:"Rapid field response",
-        body:"Brownfield cleanups, pipeline releases, and HDD frac outs put fluid across a wide footprint that has to be covered quickly before it migrates. The coarser crumble grade spreads fast for broad coverage, with pellets for targeted recovery.",
-        benefit:"Coarse crumble covers a wide footprint quickly to contain the release." },
+        body:"Fluid from brownfield releases and frac outs migrates fast until coarse crumble spreads to cover the wide footprint.",
+        benefit:"Coarse crumble covers a wide footprint quickly to contain releases." },
     ],
     proof:["Up to 5:1 absorption","SDS + spec on request","Bulk & truckload supply","100% renewable material"],
     procurement:["Documentation package (SDS, spec)","Bulk / bulk bag / truckload","Freight aware pricing","Trial pilot available"],
@@ -955,7 +925,7 @@ const INDUSTRIES = {
       { q:"Can we run a site trial?", a:"Yes, we support pilot testing at the site with the full documentation package (SDS, spec, certifications) to confirm performance on your specific remediation challenge." },
     ],
     form:"quote",
-    products:["absorbent-pellets","absorbent-crumble"],
+    products:["absorbent-pellets","absorbent-crumble"]
   },
   "spill-response":{
     name:"Spill Response", icp:"Spill-response contractors · emergency crews",
@@ -967,29 +937,28 @@ const INDUSTRIES = {
     h1:"More Capture Per Bag. Fewer Trips to Disposal.",
     sub:"A bagasse absorbent built for spill response crews, soaks up more per bag so you carry less, sweep up clean, and haul lighter.",
     primary:CTA.sample, secondary:CTA.quote, image:"assets/industry/spill-response.jpg?v=v2",
-    problem:"On a spill, every bag is truck space, labor, and disposal weight you pay for. At ~2.5:1, a low capacity sorbent takes roughly twice the mass to soak up the same volume, more bags loaded, more saturated weight hauled, more trips to the disposal scale.",
-    fit:"Pellets for targeted spills, crumble for large area coverage, both absorb up to 5× their weight (vs ~2.5:1 wood), so crews can capture the same spill with up to about half the sorbent mass: fewer bags on the truck, less saturated weight to the disposal scale.",
+
     appsHeading:"How Bagasse Absorbent Applications Help Your Spill Response Operation",
     useCases:["Oil &amp; Fuel Spill Cleanup","Non-Viscous Chemical Spill Containment","Traffic Incident &amp; Roadway Response","Flood &amp; Water Intrusion Cleanup","Storm Drain &amp; Waterway Protection","Saturated Waste Loadout"],
     fieldApps:[
       { title:"Oil &amp; Fuel Spill Cleanup", detail:"Roadway, yard &amp; site spills",
-        body:"Oil, diesel, and fuel releases spread fast across pavement and yards, and a low capacity sorbent at ~2.5:1 means loading twice the bags to soak up the same volume. Bagasse pellets and crumble absorb up to 5x their weight, so crews capture the same spill with up to about half the sorbent mass.",
-        benefit:"Fewer bags on the truck and lighter loads to the disposal scale." },
+        body:"Fuel spills spread fast and a 2.5:1 sorbent doubles the bags, so bagasse pellets absorb up to 5x their weight.",
+        benefit:"Fewer bags and lighter loads to disposal." },
       { title:"Non-Viscous Chemical Spill Containment", detail:"Contain, absorb, recover",
-        body:"A non-viscous chemical release can reach a drain or spread across a site before crews knock it down. The pelletized form captures free liquid on contact, so the release can be contained and recovered for profiling and disposal.",
+        body:"A thin chemical release can reach a drain quickly, so pelletized bagasse captures the free liquid on contact for recovery.",
         benefit:"Fast capture at the source for easier recovery." },
       { title:"Traffic Incident &amp; Roadway Response", detail:"Vehicle fluids on pavement",
-        body:"Spilled vehicle fluids close lanes and leave a slick surface that delays reopening. The low dust crumble spreads quickly across pavement, restores traction, and sweeps up clean off the road.",
-        benefit:"Lanes reopen sooner with clean pickup off pavement." },
+        body:"Spilled vehicle fluids leave a slick that closes lanes, so low dust crumble spreads fast and sweeps up clean.",
+        benefit:"Lanes reopen sooner with clean pavement pickup." },
       { title:"Flood &amp; Water Intrusion Cleanup", detail:"Standing water &amp; wet debris",
-        body:"Flood and disaster events leave standing water and saturated debris that are heavy and slow to move by hand. The coarser crumble grade solidifies standing water at up to 5x its weight for broad, fast coverage.",
-        benefit:"Standing water becomes a solid crews can handle and haul." },
+        body:"Standing flood water is heavy and slow to move by hand, so coarse crumble solidifies it at up to 5x its weight.",
+        benefit:"Standing water becomes a solid crews can haul." },
       { title:"Storm Drain &amp; Waterway Protection", detail:"Perimeter &amp; inlet defense",
-        body:"Once a release reaches a storm inlet it becomes a reportable discharge into waterways. Absorbent pellets build barriers around drains and inlets that intercept fluids before they enter the storm system.",
-        benefit:"Keeps releases out of waterways while cleanup proceeds." },
+        body:"A release reaching a storm inlet becomes a reportable discharge, so absorbent pellets build barriers that intercept fluids first.",
+        benefit:"Keeps releases out of waterways during cleanup." },
       { title:"Saturated Waste Loadout", detail:"Weight-billed disposal",
-        body:"Saturated sorbent is billed by weight at the disposal scale, and a low capacity product doubles the tonnage hauled off every job. Because bagasse holds up to 5x its weight, crews load up to about half the saturated mass to disposal.",
-        benefit:"Fewer trips to the disposal scale per event." },
+        body:"Disposal is billed by weight and a low capacity sorbent doubles the tonnage, so bagasse holds up to 5x its weight.",
+        benefit:"About half the saturated mass to disposal." },
     ],
     proof:["Up to 5:1 absorption","Pellet & crumble forms","Low dust","SDS on request"],
     procurement:["Rapid ship bulk supply","SDS + spec","Trial pallet","Standing reorder terms"],
@@ -997,7 +966,7 @@ const INDUSTRIES = {
       { q:"Which form for a large spill?", a:"Use crumble for fast, broad coverage on large area events; pellets for targeted cleanup." },
     ],
     form:"sample",
-    products:["absorbent-pellets","absorbent-crumble"],
+    products:["absorbent-pellets","absorbent-crumble"]
   },
   "landfill-leachate":{
     name:"Landfill Leachate", icp:"Landfill operators · waste management · public works",
@@ -1009,28 +978,27 @@ const INDUSTRIES = {
     h1:"Solidify Leachate With a Renewable, High Capacity Sorbent",
     sub:"A plant based bagasse absorbent for landfill leachate and aqueous waste solidification, up to 5:1 capacity, low dust, and reliable bulk supply.",
     primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/landfill-leachate.jpg?v=v2",
-    problem:"Leachate and aqueous waste handling is a recurring, weight billed disposal cost and a compliance exposure. At ~2.5:1, a low capacity sorbent takes roughly twice the sorbent mass to solidify the same volume, heavier saturated tonnage back out the gate, and dusty product adds handling and air exposure on top.",
-    fit:"Bagasse pellets and crumble solidify aqueous waste at up to 5× their weight (vs ~2.5:1 wood), up to about half the sorbent mass per volume solidified, so less saturated tonnage leaves the gate each cycle, with a renewable material and documentation for compliance.",
+
     appsHeading:"How Bagasse Absorbent Applications Help Your Landfill &amp; Leachate Operation",
     useCases:["Leachate Pond &amp; Lagoon Solidification","Tanker &amp; Roll Off Free Liquids Compliance","Collection Sump &amp; Riser Handling","Storm &amp; Overflow Event Capture","Sludge &amp; Dewatered Cake Conditioning","Pilot &amp; RFP Documentation Support"],
     fieldApps:[
       { title:"Leachate Pond &amp; Lagoon Solidification", detail:"Standing aqueous waste",
-        body:"Accumulated leachate in ponds and lagoons has to be solidified before it can be profiled and hauled out as a solid. Bagasse pellets and crumble bind the standing liquid at up to 5:1 so the waste firms up for disposal.",
+        body:"Pond and lagoon leachate must firm up before hauling, so bagasse binds it at up to 5:1.",
         benefit:"Less saturated tonnage leaves the gate each cycle." },
       { title:"Tanker &amp; Roll Off Free Liquids Compliance", detail:"Paint filter test readiness",
-        body:"Loads with residual free liquids fail the paint filter test and cannot move. The absorbent binds residual liquid in tankers and roll offs so shipments meet free liquids limits before transport.",
-        benefit:"Meets free liquids limits with up to about half the sorbent mass of a ~2.5:1 wood product." },
+        body:"Loads with free liquids fail the paint filter test, so the absorbent binds residual liquid before transport.",
+        benefit:"Loads pass with about half the sorbent mass of ~2.5:1 wood." },
       { title:"Collection Sump &amp; Riser Handling", detail:"Rig side of the collection system",
-        body:"Standing liquid pulled from sumps, risers, and collection lines during maintenance is slow and messy to move wet. The absorbent solidifies it on the spot so crews can clear and dry the system.",
+        body:"Liquid pulled from sumps and risers is slow to move, so the absorbent solidifies it on the spot.",
         benefit:"Keeps the collection system clear and dry during service." },
       { title:"Storm &amp; Overflow Event Capture", detail:"High volume surge handling",
-        body:"Storm and overflow surges can push a collection system past capacity and create a compliance exposure. The coarser crumble grade absorbs surge volume quickly to keep systems within capacity.",
+        body:"Storm surges can push a collection system past capacity, so the coarse crumble grade absorbs surge volume quickly.",
         benefit:"Broad, fast coverage during high volume events." },
       { title:"Sludge &amp; Dewatered Cake Conditioning", detail:"Firming wet residuals",
-        body:"Wet sludge and dewatered cake that will not firm up are hard to load, transport, and place. The absorbent conditions the residuals so they hold together for handling.",
+        body:"Wet sludge and dewatered cake will not firm up, so the absorbent conditions them to hold together.",
         benefit:"Wet residuals become a stackable, haulable solid." },
       { title:"Pilot &amp; RFP Documentation Support", detail:"Budget cycle procurement",
-        body:"Switching sorbents means proving the change on a recurring, weight billed disposal cost and clearing procurement. We scope a pilot aligned to your budget cycle and provide an RFP ready kit with spec, SDS, and certifications.",
+        body:"Switching sorbents means proving it and clearing procurement, so we scope a pilot and RFP ready kit.",
         benefit:"Backs the switch with documentation for compliance and procurement review." },
     ],
     proof:["Up to 5:1 absorption","Renewable, low dust","SDS + spec","Bulk supply"],
@@ -1039,7 +1007,7 @@ const INDUSTRIES = {
       { q:"Can we run a pilot?", a:"Yes, we'll scope a pilot aligned to your budget cycle and provide an RFP ready documentation kit (spec, SDS, certifications)." },
     ],
     form:"quote",
-    products:["absorbent-pellets","absorbent-crumble"],
+    products:["absorbent-pellets","absorbent-crumble"]
   },
   "distributors":{
     name:"Distributors & Resellers", icp:"Ag input distributors · farm co-ops",
@@ -1051,29 +1019,28 @@ const INDUSTRIES = {
     h1:"A Differentiated Organic Line That Pulls Through",
     sub:"Add a carbon negative, OMRI listed bagasse biochar to your catalog, with a margin model, stocking pilot, and grower facing proof.",
     primary:CTA.biochar, secondary:CTA.quote, image:ASSETS.biocharLg,
-    problem:"Commodity inputs are a margin race: when every distributor stocks the same SKU, price is your only lever and each competing quote drags your margin toward zero. You need a differentiated SKU with real demand drivers, water efficiency, organic, and a carbon story, plus support so it actually sells through.",
-    fit:"OMRI listed bagasse biochar with a USDA-ARS field study behind it, a distributor margin model, and a co-branded grower trial program to de-risk stocking.",
+
     appsHeading:"How Bagasse Biochar Applications Help Your Ag Input Catalog",
     useCases:["Grower Water Efficiency Programs","Compost &amp; Soil Blend Accounts","Organic &amp; Regenerative Lines","Nursery, Landscape &amp; Retail SKUs","Co-Branded Grower Trials","Carbon Program &amp; Sustainability Accounts"],
     fieldApps:[
       { title:"Grower Water Efficiency Programs", detail:"Drought &amp; irrigation accounts",
-        body:"Your dryland and high water cost accounts keep asking for an input that cuts irrigation without a new capital purchase. Stock the raw bagasse biochar, which holds up to ~3 to 3.5x its weight in water, as the answer your reps can lead with.",
-        benefit:"Anchors a recurring SKU across your dryland and high water cost book." },
+        body:"Dryland accounts wanting lower irrigation get a biochar that holds ~3 to 3.5x its weight in water.",
+        benefit:"Anchors a recurring SKU across your dryland book." },
       { title:"Compost &amp; Soil Blend Accounts", detail:"Blenders &amp; municipal yards",
-        body:"Your blend and compost accounts run on pad turns, and a slow windrow ties up space that cannot take the next batch. Sell biochar in as a bulk consumed input that research shows can shorten compost cycles ~10 to 30%, which you validate in their process.",
+        body:"Blend accounts losing pad space to slow windrows get biochar shown to shorten cycles ~10 to 30%.",
         benefit:"Faster turns pull larger repeat volumes through your accounts." },
       { title:"Organic &amp; Regenerative Lines", detail:"OMRI listed shelf placement",
-        body:"Your organic aisle competes on price because every distributor stocks the same commodity amendments. Slot in the OMRI listed, carbon negative line with inherent NPK plus Ca/Mg to fill a certified input gap competitors cannot match on spec alone.",
+        body:"Organic aisles losing to price can add an OMRI listed, carbon negative line rivals cannot match on spec.",
         benefit:"Holds margin against interchangeable commodity amendments." },
       { title:"Nursery, Landscape &amp; Retail SKUs", detail:"Ready to use bagged soil",
-        body:"Your retail and nursery buyers want a finished product they can shelve, not a raw input that needs mixing. Carry the biochar-infused ready to use soil as a bagged SKU that moves without any blending step on their end.",
+        body:"Retail and nursery buyers want shelf ready goods, so offer biochar-infused soil as a bagged, no mix SKU.",
         benefit:"A no mix finished goods SKU that moves at retail margin." },
       { title:"Co-Branded Grower Trials", detail:"De-risked stocking &amp; proof",
-        body:"Committing shelf space to an unproven line is a real inventory risk when your reps have no local data to point to. Run co-branded field trials with target growers first, using their own yield and water numbers to build the case before you order volume.",
+        body:"Committing shelf space to an unproven line is risky, so run co-branded grower trials that build local proof.",
         benefit:"Local proof de-risks stocking and converts trial acres to orders." },
       { title:"Carbon Program &amp; Sustainability Accounts", detail:"Carbon negative sourcing",
-        body:"Buyers with sustainability commitments increasingly ask what carbon story your catalog carries, and commodity SKUs give you nothing to show. Stock the carbon negative line backed by a USDA-ARS field study so your reps have documented proof for these accounts.",
-        benefit:"Gives sustainability-driven accounts a documented reason to buy through you." },
+        body:"Sustainability accounts ask what carbon story you carry, so stock the carbon negative line backed by a USDA-ARS study.",
+        benefit:"Gives sustainability accounts a documented reason to buy through you." },
     ],
     proof:["OMRI · IBI certified","USDA-ARS field study","Margin model provided","Stocking pilot available"],
     procurement:["Distributor pricing & rebate tiers","Co-branded grower trial kit","Bulk & bulk bag supply","No first year exclusivity required"],
@@ -1081,7 +1048,7 @@ const INDUSTRIES = {
       { q:"How do you de-risk stocking?", a:"A stocking pilot plus a co-branded grower trial gives your reps a local proof point before you commit to volume." },
     ],
     form:"distributor",
-    products:["agricultural-biochar","biochar-infused-soil"],
+    products:["agricultural-biochar","biochar-infused-soil"]
   },
   "soil-blenders":{
     name:"Soil Blenders & Compost", icp:"Soil/media blenders · commercial composters",
@@ -1093,29 +1060,28 @@ const INDUSTRIES = {
     h1:"Faster Compost. Better Moisture in Your Blends.",
     sub:"For composters, the core problem is turnover time, every extra day a windrow sits is pad space that can't take a new batch. Research shows biochar can shorten compost cycles ~10 to 30% (validate in your own process), so you finish more batches per year on the same pad. For blenders, it firms up moisture performance in premium and sandy mixes.",
     primary:CTA.biochar, secondary:CTA.quote, image:"assets/industry/soil-blenders.jpg?v=v2",
-    problem:"Compost turnover time caps how many batches you can finish per year, a fixed pad only holds so many windrows, so slower maturity directly cuts annual throughput and revenue per square foot. Blenders face moisture complaints in sandy and premium mixes and pressure to offer an organic/carbon story.",
-    fit:"Peer reviewed research shows biochar can shorten compost cycles ~10 to 30% (validate in your process) and raise pile temperature; in blends, bagasse biochar holds up to ~3 to 3.5× its weight in water. We support a side by side windrow or blend trial so you measure the effect yourself.",
+
     appsHeading:"How Bagasse Biochar Applications Help Your Compost &amp; Blending Operation",
     useCases:["Compost Cycle Acceleration","Windrow Bulking &amp; Aeration","Premium Blend Water Holding","Organic / Carbon Negative SKU","Side by Side Trial Validation","Bulk Supply &amp; Freight Planning"],
     fieldApps:[
       { title:"Compost Cycle Acceleration", detail:"Windrow turnover",
-        body:"A fixed pad only holds so many windrows, so every extra day a pile sits to mature is throughput you cannot bill. Blending bagasse biochar into the windrow raises pile temperature and moves the pile toward maturity sooner.",
-        benefit:"Research shows ~10 to 30% shorter cycles (validate in your process), which frees pad space for more batches per year." },
+        body:"Because a fixed pad holds only so many windrows, blending in biochar raises pile temperature and speeds each pile to maturity.",
+        benefit:"Research shows ~10 to 30% shorter cycles, freeing pad space." },
       { title:"Windrow Bulking &amp; Aeration", detail:"Structure &amp; airflow",
-        body:"Dense, wet feedstock compacts and goes anaerobic, forcing extra turns and stalling the pile. Biochar adds porous structure that keeps the windrow open and steadies moisture through the cycle.",
-        benefit:"More consistent airflow and moisture across the pile means fewer corrective turns." },
+        body:"When dense, wet feedstock compacts and goes anaerobic, porous biochar keeps the windrow open and steadies moisture through the cycle.",
+        benefit:"Steadier airflow and moisture mean fewer corrective turns." },
       { title:"Premium Blend Water Holding", detail:"Sandy &amp; premium mixes",
-        body:"Sandy and premium mixes drain fast and draw moisture complaints from growers and retail buyers. Adding bagasse biochar firms up how the bag holds and releases water.",
-        benefit:"Holds up to ~3 to 3.5× its weight in water in blends, steadying moisture performance in the mix." },
+        body:"Because sandy and premium mixes drain fast, bagasse biochar firms up how the bag holds and releases water.",
+        benefit:"Holds up to ~3 to 3.5x its weight in water." },
       { title:"Organic / Carbon Negative SKU", detail:"Differentiated blend component",
-        body:"When every blender sells the same commodity components, price is the only lever and margin erodes. An OMRI listed, carbon negative biochar gives you a differentiated blend component growers request by name.",
-        benefit:"A demand driver SKU that holds margin instead of competing on price alone." },
+        body:"Because commodity components leave price as the only lever, an OMRI listed carbon negative biochar differentiates your blend.",
+        benefit:"A demand driver SKU that holds margin without competing on price." },
       { title:"Side by Side Trial Validation", detail:"Prove it on your pad",
-        body:"Adopting a new input on faith risks a full batch and your recipe consistency. Run a biochar amended windrow or blend against a control on the same recipe and turning schedule.",
-        benefit:"Measure days to maturity and moisture yourself before scaling to production volume." },
+        body:"Rather than adopt a new input on faith, run a biochar amended windrow against a control on the same recipe.",
+        benefit:"Measure days to maturity and moisture before scaling to production." },
       { title:"Bulk Supply &amp; Freight Planning", detail:"Bulk &amp; bulk bag formats",
-        body:"A blend or compost operation cannot commit to an input it cannot source or budget for load by load. Bagasse biochar ships in bulk and bulk bag formats with freight aware pricing and OMRI documentation on file.",
-        benefit:"Predictable supply and landed cost let you spec the input into recurring recipes." },
+        body:"Because you cannot spec an unreliable input, bagasse biochar ships bulk with freight aware pricing and OMRI docs.",
+        benefit:"Predictable supply and cost let you spec it into recurring recipes." },
     ],
     proof:["Compost cycle time research (validate in your process)","Up to ~3 to 3.5× water holding in blends","OMRI · IBI certified","Bulk supply"],
     procurement:["Windrow / blend trial protocol","Bulk & bulk bag supply","Freight aware pricing","Spec + OMRI docs"],
@@ -1124,7 +1090,7 @@ const INDUSTRIES = {
       { q:"What dose?", a:"Research commonly cites ~10% by volume as a starting point; we'll help you set a rate for your feedstock." },
     ],
     form:"biochar",
-    products:["agricultural-biochar","biochar-infused-soil"],
+    products:["agricultural-biochar","biochar-infused-soil"]
   },
   "animal-bedding":{
     name:"Animal Bedding", icp:"Poultry & livestock ops · barn/house managers · bedding distributors",
@@ -1136,29 +1102,28 @@ const INDUSTRIES = {
     h1:"Drier Litter, Fewer Bags Per House",
     sub:"A plant based bagasse bedding absorbent that holds up to ~5× its weight in moisture, so litter stays drier longer, you go through fewer bags, and dust stays low. Bedding &amp; absorbency only, we make no feed or animal health claims.",
     primary:CTA.sample, secondary:CTA.quote, image:ASSETS.pelletsPhoto,
-    problem:"Wet litter is the recurring cost center in a barn or house: it drives the moisture behind ammonia and odor, forces more frequent bedding changes, and adds bags, labor, and hauling to every cycle. Wood shavings and straw absorb less per pound and can be dusty, and pine shaving price and availability swing season to season, so you never quite control cost per house.",
-    fit:"Sugarcane bagasse pellets and crumble absorb up to ~5× their weight in moisture (vs ~2.5:1 for wood), so bedding holds moisture and stays drier longer, which means fewer bags per house, less frequent changes, and less material to haul. It's low dust, plant based, renewable, and biodegradable, so spent bedding composts down. Prove it in one house before you switch: compare litter moisture and bag usage side by side against your current bedding.",
+
     appsHeading:"How Bagasse Bedding Applications Help Your Poultry &amp; Livestock Operation",
     useCases:["Poultry House Litter","Equine &amp; Horse Stall Bedding","Cattle &amp; Livestock Bedding","Small Animal &amp; Pet Litter","Compostable Spent Bedding Disposal","Side By Side House Trial"],
     fieldApps:[
       { title:"Poultry House Litter", detail:"Broiler &amp; layer houses",
-        body:"Wet litter drives the moisture behind ammonia and odor and forces more frequent bedding changes across a house. Bagasse pellets absorb up to ~5× their weight in moisture, versus ~2.5:1 for wood, so litter stays drier longer between changes.",
-        benefit:"Drier litter for longer means fewer bags per house and fewer changes per cycle." },
+        body:"Wet litter forcing frequent bedding changes stays drier longer with bagasse pellets that hold up to ~5× their weight.",
+        benefit:"Fewer bags per house and fewer changes per cycle." },
       { title:"Equine &amp; Horse Stall Bedding", detail:"Box &amp; tie stalls",
-        body:"Damp stall bedding raises ammonia at the horse's level and drives up mucking labor and bag usage. Bagasse pellets fluff with about a half gallon of water per bag and hold up to ~5× their weight in moisture, so wet spots stay contained.",
-        benefit:"Contained wet spots cut daily mucking volume and bags used per stall." },
+        body:"Damp stall bedding driving up mucking labor stays contained with bagasse pellets that hold up to ~5× their weight.",
+        benefit:"Contained wet spots cut daily mucking and bags per stall." },
       { title:"Cattle &amp; Livestock Bedding", detail:"Barns &amp; pens",
-        body:"Pine shaving price and availability swing season to season, so cost per pen is hard to control. Bagasse is a plant based, renewable absorbent that holds more moisture per pound than wood, so you bed less material to keep pens dry.",
-        benefit:"Higher absorbency per pound means less material to buy and haul per pen." },
+        body:"Pine shaving cost swinging season to season eases with bagasse, which holds more moisture per pound than wood.",
+        benefit:"Less material to buy and haul per pen." },
       { title:"Small Animal &amp; Pet Litter", detail:"Cages &amp; habitats",
-        body:"Dusty bedding is a problem in enclosed habitats and small-animal facilities where air quality is close to the animal. Bagasse is low dust and can be scattered dry across the habitat floor, then topped off as moisture builds.",
-        benefit:"Low dust bedding keeps enclosed habitats cleaner between full changes." },
+        body:"Dusty bedding harming air quality in enclosed habitats gives way to low dust bagasse scattered dry across the floor.",
+        benefit:"Cleaner enclosed habitats between full changes." },
       { title:"Compostable Spent Bedding Disposal", detail:"Cleanout &amp; hauling",
-        body:"Spent bedding adds hauling and disposal cost to every cleanout cycle. Bagasse bedding is 100% plant based and biodegradable, so used bedding can be composted or land applied per your local requirements.",
-        benefit:"Compostable spent bedding can reduce what you pay to haul away." },
+        body:"Spent bedding adding hauling cost each cleanout becomes compostable because bagasse is 100% plant based and biodegradable.",
+        benefit:"Compostable spent bedding can reduce hauling cost." },
       { title:"Side By Side House Trial", detail:"Prove it before switching",
-        body:"Switching bedding across an operation is risky without proof it holds up in your own conditions. Bed one house or a set of stalls with bagasse against your current bedding, same conditions, and measure litter moisture and bags used over the cycle.",
-        benefit:"Measure moisture and bag usage yourself on a free sample before you scale." },
+        body:"Switching bedding operation wide is risky without proof, which a one house trial against your current bedding provides.",
+        benefit:"Measure moisture and bag usage yourself on a free sample." },
     ],
     proof:["Holds up to ~5× its weight in moisture","Low dust","Plant based &amp; compostable","Free sample + house trial"],
     procurement:["Free sample + in-house trial to prove moisture &amp; bag usage","Bedding spec sheet (bedding/absorbency only, no feed claims)","Bag &amp; bulk formats","Freight zoned pricing from White Castle, LA","LOI to reserve Q4 supply and lock pricing"],
@@ -1169,8 +1134,8 @@ const INDUSTRIES = {
       { q:"What happens to the spent bedding?", a:"It's 100% plant based and biodegradable, so used bedding can be composted or land applied per your local requirements." },
     ],
     form:"sample",
-    products:["absorbent-pellets","absorbent-crumble"],
-  },
+    products:["absorbent-pellets","absorbent-crumble"]
+  }
 };
 
 /* ============ FORMS ============ */
@@ -1197,7 +1162,7 @@ const FORMS = {
     confirm:"Thanks, your animal bedding sample request is in. A bedding supply specialist will reply within one business day to confirm the sample, the ship to, and the measurements for your side by side comparison, and to send the product specifications.",
     autoreply:"Subject: Your American BioCarbon bedding sample\n\nThanks for requesting a bagasse animal bedding sample. The product specifications are attached. A bedding supply specialist will follow up within one business day to confirm your ship to and the comparison you want to run against your current bedding., American BioCarbon, White Castle, LA",
     routing:"Bedding → bedding supply specialist queue. Create Account + Contact + Deal (type: Bedding Sample) + Sample Request; attach product specifications.",
-    scoring:"+ commercial operation, + named current material, + defined measurement, + in-region ship to; - personal email, - no measurable need.",
+    scoring:"+ commercial operation, + named current material, + defined measurement, + in-region ship to; - personal email, - no measurable need."
   },
   sample:{
     name:"Request a Sample Kit",
@@ -1220,7 +1185,7 @@ const FORMS = {
     confirm:"Thanks, your request for one complimentary sample bag is in (shipping and handling included). A remediation specialist will reply within one business day with the SDS and spec sheet attached. Need more than one bag? Just reply and we'll set up a purchase.",
     autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. Attached are the SDS and spec sheet for our bagasse absorbent. A specialist will follow up within one business day to confirm your use case, volume, and ship to., American BioCarbon, White Castle, LA",
     routing:"Industrial → remediation specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach SDS/spec.",
-    scoring:"+ truckload volume, + zone A/B, + active-now timeline, + named use case; - personal email, - 'just researching'.",
+    scoring:"+ truckload volume, + zone A/B, + active-now timeline, + named use case; - personal email, - 'just researching'."
   },
   quote:{
     name:"Get Bulk Absorbent Quote",
@@ -1242,7 +1207,7 @@ const FORMS = {
     confirm:"Thanks, your bulk quote request is in. We'll reply within one business day with freight aware pricing plus the SDS and spec sheet.",
     autoreply:"Subject: Your American BioCarbon bulk quote\n\nThanks for your quote request. We're preparing freight aware pricing for your volume and ship to. Meanwhile, the SDS and spec sheet are attached., American BioCarbon",
     routing:"Create Account + Contact + Deal (type: Bulk / Truckload); assign to sales; freight-zone the ship to.",
-    scoring:"+ volume tier, + recurring frequency, + zone A/B, + active-now.",
+    scoring:"+ volume tier, + recurring frequency, + zone A/B, + active-now."
   },
   biochar:{
     name:"Request Biochar Sample",
@@ -1262,7 +1227,7 @@ const FORMS = {
     confirm:"Thanks, your free biochar sample request is in (shipping and handling included). We'll follow up within one business day with the sample, spec sheet, and (for composters) a side by side windrow trial protocol.",
     autoreply:"Subject: Your American BioCarbon biochar sample\n\nThanks for your interest. The spec sheet is attached; we'll confirm your sample and ship to shortly. Composters: ask about our side by side windrow trial protocol., American BioCarbon",
     routing:"Create Account + Contact + Deal (type: Sample, segment: ag); route to distributor/ag lead.",
-    scoring:"+ distributor/blender/composter, + resale, + volume; - consumer/home use.",
+    scoring:"+ distributor/blender/composter, + resale, + volume; - consumer/home use."
   },
   distributor:{
     name:"Get Distributor Pricing",
@@ -1280,7 +1245,7 @@ const FORMS = {
     confirm:"Thanks, we'll send the distributor margin model and stocking pilot options within one business day.",
     autoreply:"Subject: American BioCarbon distributor program\n\nThanks for your interest in carrying our line. We're preparing the margin model and stocking pilot details for your geography., American BioCarbon",
     routing:"Create Account + Distributor Agreement (draft) + Deal; route to founder/distributor lead.",
-    scoring:"+ multi-branch, + organic demand region, + volume; - national-exclusivity-first.",
+    scoring:"+ multi-branch, + organic demand region, + volume; - national-exclusivity-first."
   },
   carbon:{
     name:"Request Carbon Removal Info",
@@ -1300,7 +1265,7 @@ const FORMS = {
     confirm:"Thanks, we'll follow up with current carbon removal data and forward purchase options tied to our deployment pipeline.",
     autoreply:"Subject: American BioCarbon carbon removal\n\nThanks for your interest in durable, deployment backed carbon removal. We'll share current methodology data and forward purchase options aligned to our deployment pipeline., American BioCarbon",
     routing:"Create Account + Deal (type: CDR); route to founder/carbon lead; link to deployment forecast.",
-    scoring:"+ annual volume, + this-year timeline, + Puro/standard match; - credits-without-deployment expectation.",
+    scoring:"+ annual volume, + this-year timeline, + Puro/standard match; - credits-without-deployment expectation."
   },
   docs:{
     name:"Request Technical Documentation",
@@ -1319,7 +1284,7 @@ const FORMS = {
     confirm:"Thanks, check your inbox. We've routed the requested documents to your email and a specialist will follow up if a spec or SDS needs tailoring to your application.",
     autoreply:"Subject: Your American BioCarbon technical documents\n\nThanks for your request. Attached are the spec sheets, SDS, and/or lab data for your application. Our full peer reviewed research package is included where requested. A specialist will follow up within one business day., American BioCarbon, White Castle, LA",
     routing:"Gated download. Create Contact + Activity (doc request) + Deal if volume signal; tag by role + industry + documents; deliver files by email.",
-    scoring:"+ procurement/EHS role, + oil&gas/remediation industry, + 'all documents', + named use case; - personal email, - student/research-only.",
+    scoring:"+ procurement/EHS role, + oil&gas/remediation industry, + 'all documents', + named use case; - personal email, - student/research-only."
   },
   contact:{
     name:"Talk to a Specialist",
@@ -1336,8 +1301,8 @@ const FORMS = {
     confirm:"Thanks, a specialist will reply within one business day.",
     autoreply:"Subject: We got your message, American BioCarbon\n\nThanks for reaching out. A specialist will reply within one business day with the right documentation and next step., American BioCarbon, White Castle, LA",
     routing:"Route by topic to the matching queue; create Contact + Activity + follow-up task.",
-    scoring:"By topic + volume signals in message.",
-  },
+    scoring:"By topic + volume signals in message."
+  }
 };
 
 /* ============ DEEP INDUSTRY PAGES ============ */
@@ -1349,7 +1314,7 @@ const ANIMAL_BEDDING = {
   seo:{
     title:"Bagasse Pellet Animal Bedding | American BioCarbon",
     desc:"Test high absorbency sugarcane bagasse pellets for poultry and livestock bedding. Up to roughly 5:1 water absorption based on available product data. Request a sample and compare it with your current bedding material.",
-    slug:"/industry/animal-bedding",
+    slug:"/industry/animal-bedding"
   },
   eyebrow:"BAGASSE ABSORBENT PELLETS / ANIMAL BEDDING",
   h1:"High absorbency bagasse pellets for animal bedding",
@@ -1363,17 +1328,7 @@ const ANIMAL_BEDDING = {
     { v:"~32 LB/FT³", l:"Approximate bulk density" },
   ],
   specStripNote:"Values are based on available product documentation. Confirm current specifications before procurement.",
-  problem:{
-    h:"Bedding buyers need performance they can verify",
-    rows:[
-      { p:"Moisture loading", r:"Bedding is bought to carry moisture. What matters is how much liquid a material holds per pound and how the litter behaves as it loads, not a headline absorption number in isolation." },
-      { p:"Pounds of bedding handled", r:"Every cycle moves weight in and out of the house or barn. A higher absorbency material can change how much you apply, though the actual figure depends on your housing system and moisture conditions." },
-      { p:"Storage and replenishment", r:"Bedding has to be stored dry and replenished on a schedule. Bulk density and format determine footprint, pallet counts, and how often you re-order." },
-      { p:"Consistency between deliveries", r:"Procurement needs the material in the next load to behave like the last one. Ask for the specifications that define the product and confirm them against what arrives." },
-      { p:"Documentation requirements", r:"Operations and EHS need the product specifications, and an SDS where one applies, on file before a material is approved for use." },
-      { p:"Disposal or downstream handling", r:"Spent bedding is 100% bagasse biomass. How you handle, compost, or land apply it depends on your local requirements, so plan the downstream step as part of the trial." },
-    ],
-  },
+
   comparison:{
     h:"Test it against your current wood bedding",
     cols:["Evaluation point","Bagasse pellets","Current wood product","What to measure during the trial"],
@@ -1387,7 +1342,7 @@ const ANIMAL_BEDDING = {
       ["Delivered cost","Confirm at your facility","Depends on current material","Delivered cost to your ship to"],
       ["Disposal or reuse","100% bagasse biomass","Depends on current material","Compost / land-application per local rules"],
     ],
-    note:"Performance depends on application rate, moisture conditions, animal housing system, handling practices, and the material used as the control.",
+    note:"Performance depends on application rate, moisture conditions, animal housing system, handling practices, and the material used as the control."
   },
   process:{
     h:"Run a controlled bedding comparison",
@@ -1395,7 +1350,7 @@ const ANIMAL_BEDDING = {
       { t:"Tell us what you use now", d:"Share the animal type, housing system, current bedding material, application method, and the result you want to evaluate." },
       { t:"Agree on a measurable test", d:"Select practical measurements such as starting material weight, moisture added, material used, handling observations, and cleanout conditions." },
       { t:"Compare the results", d:"Run the bagasse pellets beside your existing material and document the result before discussing larger supply formats." },
-    ],
+    ]
   },
   specs:{
     h:"Product information",
@@ -1412,24 +1367,13 @@ const ANIMAL_BEDDING = {
       ["Current availability","Samples available now"],
       ["Product specifications","Request document"],
       ["SDS status","Request document"],
-    ],
+    ]
   },
-  fit:{
-    h:"Determine whether the material fits your operation",
-    items:[
-      "Commercial poultry or livestock operation",
-      "Bedding distributor or farm supply buyer",
-      "Measurable moisture management need",
-      "Ability to run a side by side test",
-      "Appropriate dry storage",
-      "Defined handling and cleanout process",
-      "Named purchasing or operations contact",
-    ],
-  },
+
   finalCta:{
     h:"Compare bagasse pellets with the bedding you use today",
-    sub:"Request a qualified sample and define the measurement before the material ships.",
-  },
+    sub:"Request a qualified sample and define the measurement before the material ships."
+  }
 };
 
 const ENV_REMEDIATION = {
@@ -1439,37 +1383,26 @@ const ENV_REMEDIATION = {
   h1:"Remediation Made Efficient",
   sub:"For site managers who own the cost of containment and disposal",
   primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/environmental-remediation.jpg?v=v2",
-  painPoints:[
-    { title:"Site Containment Costs", desc:"Holding saturated material on site ties up pad space and cash flow. Lower absorption rates force you to deploy 2-3× more volume per job." },
-    { title:"Disposal Tonnage Billing", desc:"Waste disposal is charged by the ton. Lower capacity sorbents mean heavier saturated loads and higher bills per cubic yard of remediated soil." },
-    { title:"Regulatory & ESG Exposure", desc:"Persistent synthetic polymers in landfill streams invite scrutiny. Your clients and regulators want genuine waste reduction and natural degradation." },
-    { title:"Supply Chain Friction", desc:"Last minute shortages or quality variance from commodity suppliers derail project timelines and inflate emergency logistics costs." }
-  ],
-  whyABC:[
-    { title:"Up to 5:1 absorption = 2.5× less tonnage", desc:"Fewer bags per job. Less saturated weight to disposal. Direct cost savings on every project." },
-    { title:"Holds under landfill overburden", desc:"The honeycomb microstructure is stable even under pressure. No re-release. No compliance callbacks." },
-    { title:"100% natural biodegradation", desc:"Bagasse breaks down on schedule. No persistent polymers. No long term leachate risk." },
-    { title:"Predictable supply", desc:"We commit to delivery windows. No stockouts. No timeline slippage." }
-  ],
+
   applications:["Dredged sediment dewatering","Slurry wall & trench spoil management","Hydrocarbon impacted soil","Brownfield & frac out response","Groundwater remediation","Landfill leachate handling"],
   appsHeading:"How Bagasse Absorbent Applications Help Your Remediation Sites",
   fieldApps:[
-    { title:"Dredged sediment dewatering", detail:"Firming wet sediment for transport",
-      body:"Bind free water in dredged sediment so it firms up enough to load, transport, and place.",
-      benefit:"Less free liquid to manage and lighter loads to move.", product:"Absorbent Pellets · Crumble" },
-    { title:"Slurry wall &amp; trench spoil management", detail:"Handling wet spoil",
-      body:"Solidify slurry and trench spoil so saturated material can be handled and hauled instead of pumped.",
-      benefit:"Wet spoil becomes a stackable, haulable solid.", product:"Absorbent Pellets · Crumble" },
-    { title:"Hydrocarbon impacted soil &amp; free product", detail:"Excavation &amp; cleanup",
-      body:"Absorb free product and soak up non-viscous hydrocarbons during excavation and impacted soil cleanup.",
-      benefit:"Captures free liquid on contact for easier recovery.", product:"Absorbent Pellets · Crumble" },
-    { title:"Landfill leachate handling", detail:"Aqueous waste solidification",
-      body:"Solidify leachate and aqueous waste streams so they can be profiled and disposed as a solid.",
-      benefit:"Fewer bags per volume and lighter loads to disposal.", product:"Absorbent Pellets · Crumble" },
-    { title:"Brownfield, pipeline spill &amp; HDD frac out response", detail:"Rapid field response",
-      body:"Respond to brownfield cleanups, pipeline spills, and HDD frac outs with fast, broad coverage.",
-      benefit:"Coarser crumble spreads quickly across a wide footprint.", product:"Absorbent Crumble · Pellets" },
-  ],
+      { title:"Dredged sediment dewatering", detail:"Firming wet sediment for transport",
+        body:"Wet dredged sediment is too fluid to haul until pellets bind the free water and firm it up.",
+        benefit:"Less free liquid to manage and lighter loads." },
+      { title:"Slurry wall &amp; trench spoil management", detail:"Handling wet spoil",
+        body:"Saturated slurry and trench spoil can't be hauled until it solidifies into a stackable, movable solid.",
+        benefit:"Wet spoil becomes a stackable, haulable solid." },
+      { title:"Hydrocarbon impacted soil &amp; free product", detail:"Excavation &amp; cleanup",
+        body:"Free product spreads during excavation until the absorbent soaks up non-viscous hydrocarbons on contact.",
+        benefit:"Captures free liquid on contact for easier recovery." },
+      { title:"Landfill leachate handling", detail:"Aqueous waste solidification",
+        body:"Liquid leachate is hard to profile and dispose until it solidifies into a disposable solid.",
+        benefit:"Fewer bags per volume and lighter loads to disposal." },
+      { title:"Brownfield, pipeline spill &amp; HDD frac out response", detail:"Rapid field response",
+        body:"Field spills and HDD frac outs need coverage fast, met by coarse crumble spreading across a wide footprint.",
+        benefit:"Coarser crumble spreads quickly across a wide footprint." },
+    ],
   caseStudy:{
     scenario:"2 acre brownfield with soil contamination and dewatering need.",
     previous:"Standard absorbent: 18 truck deliveries, 120 tons saturated waste.",
@@ -1480,7 +1413,7 @@ const ENV_REMEDIATION = {
     { step:"02", label:"Pilot test", desc:"Stage a super sack on site. Your team validates absorption, retention, and cleanup benefit." },
     { step:"03", label:"Committed delivery", desc:"Once approved, we schedule delivery to YOUR timeline. No delays." },
     { step:"04", label:"Full support", desc:"Our team available through project close for logistics, troubleshooting, or scope adjustments." }
-  ],
+  ]
 };
 
 const RESELLERS_INDUSTRIES = {
@@ -1492,35 +1425,23 @@ const RESELLERS_INDUSTRIES = {
   primary:CTA.quote, secondary:CTA.biochar,
   appsHeading:"How Bagasse Absorbent Applications Help Your Distribution Catalog",
   fieldApps:[
-    { title:"Oilfield &amp; drilling accounts", detail:"Solidification &amp; spill supply",
-      body:"Stock pellets and crumble for oilfield services accounts solidifying drilling and frac fluids and cleaning rig site spills.",
-      benefit:"A high turn consumable across your energy book." },
-    { title:"Spill response &amp; emergency crews", detail:"Rapid ship absorbent",
-      body:"Supply spill response contractors who need a fast shipping, high capacity sorbent staged on the truck.",
-      benefit:"Up to 5:1 capacity means fewer bags per job and repeat orders." },
-    { title:"Environmental &amp; remediation firms", detail:"Documented sorbent line",
-      body:"Carry a plant based sorbent with SDS and spec sheet for remediation and industrial accounts.",
-      benefit:"A differentiated line with the documentation buyers require." },
-    { title:"Landfill &amp; waste operators", detail:"Leachate solidification",
-      body:"Sell into landfill and waste management accounts solidifying leachate and aqueous waste streams.",
-      benefit:"Recurring, weight driven consumable volume." },
-    { title:"Co-branded &amp; private label programs", detail:"Your brand, our supply",
-      body:"Offer the line under co-branded or private label programs with committed lead times.",
-      benefit:"Margin room and a carbon negative story competitors can't match." },
-  ],
-  painPoints:[
-    { title:"Commodity Margin Collapse", desc:"Every catalog carries the same wood pellets and clay. Price is the only lever. Your margin compresses to unsustainable levels." },
-    { title:"Inventory Risk", desc:"Slow moving SKUs of undifferentiated products tie up working capital. Customers shop on price, loyalty disappears at the next RFQ." },
-    { title:"Weak Competitive Position", desc:"Without a unique product or story, you're interchangeable. Customers pit you against online retailers on price alone." },
-    { title:"Support Burden", desc:"You're on the hook for technical questions on products you didn't develop, with no manufacturer backing." }
-  ],
-  whyABC:[
-    { title:"Premium tiers & margins", desc:"Our distributor program offers volume based tiering that rewards growth. Real margin room for your business." },
-    { title:"Differentiated product", desc:"Up to 5:1 absorption, plant based, carbon neutral story. Customers have a reason to buy, and stick." },
-    { title:"We handle tech support", desc:"Spec sheets, field trials, and technical questions, we're behind you so your team closes faster." },
-    { title:"Predictable supply", desc:"No allocation games. Committed lead times. Your inventory planning is reliable." },
-    { title:"Marketing co-op", desc:"Case studies, ROI models, sell side tools. Your reps close faster with real proof." }
-  ],
+      { title:"Oilfield &amp; drilling accounts", detail:"Solidification &amp; spill supply",
+        body:"Oilfield accounts constantly solidify drilling and frac fluids and clean rig spills using pellets and crumble.",
+        benefit:"A high-turn consumable across your energy accounts." },
+      { title:"Spill response &amp; emergency crews", detail:"Rapid ship absorbent",
+        body:"Spill response contractors staging sorbent on the truck get a fast-shipping, high-capacity option from you.",
+        benefit:"Up to 5:1 capacity means fewer bags and repeat orders." },
+      { title:"Environmental &amp; remediation firms", detail:"Documented sorbent line",
+        body:"Remediation and industrial buyers who require documentation get a plant-based sorbent with SDS and spec sheet.",
+        benefit:"A differentiated line with the documentation buyers require." },
+      { title:"Landfill &amp; waste operators", detail:"Leachate solidification",
+        body:"Landfill and waste accounts must solidify leachate and aqueous waste streams using a weight-driven consumable.",
+        benefit:"Recurring volume driven by weight per job." },
+      { title:"Co-branded &amp; private label programs", detail:"Your brand, our supply",
+        body:"Resellers wanting their own brand get co-branded or private label programs with committed lead times.",
+        benefit:"Margin room and a carbon negative story competitors can't match." },
+    ],
+
   program:[
     { title:"Tiered Margin Model", bullets:["Volume discounts that scale with growth","Quarterly rebates for hitting targets","No first year exclusivity"] },
     { title:"Order Fulfillment", bullets:["48-72 hour turnaround","Dedicated logistics coordination","Real-time tracking"] },
@@ -1533,7 +1454,7 @@ const RESELLERS_INDUSTRIES = {
     { n:"02", t:"Pilot", d:"Start with a pilot order. Your team tests, gathers customer feedback. We provide everything you need." },
     { n:"03", t:"Ramp", d:"As volume grows, we assign a dedicated account manager, launch co-branded marketing, optimize supply." },
     { n:"04", t:"Grow", d:"Ongoing quarterly planning, monthly updates, proactive support." }
-  ],
+  ]
 };
 
 const RESELLERS_AGRICULTURE = {
@@ -1545,35 +1466,23 @@ const RESELLERS_AGRICULTURE = {
   primary:CTA.biochar, secondary:CTA.quote,
   appsHeading:"How Bagasse Biochar Applications Help Your Ag Reseller Catalog",
   fieldApps:[
-    { title:"Grower water efficiency programs", detail:"Sandy &amp; drought prone ground",
-      body:"Position biochar with growers who need to hold water and nutrients in the root zone.",
-      benefit:"Up to ~3 to 3.5× water holding, a clear grower payoff." },
-    { title:"Compost &amp; soil blend inputs", detail:"Yards &amp; blenders in your book",
-      body:"Sell into compost yards and soil blenders for faster turnover and better moisture.",
-      benefit:"~10 to 30% shorter compost cycles (validate) drives repeat volume." },
-    { title:"Organic &amp; regenerative lines", detail:"OMRI listed shelf SKU",
-      body:"Stock a certified organic, carbon negative amendment for regenerative demand.",
-      benefit:"A differentiated SKU that pulls through instead of racing price." },
-    { title:"Nursery, landscape &amp; retail", detail:"Ready to use blends",
-      body:"Carry both raw biochar and ready to use infused soil for landscape and retail buyers.",
-      benefit:"Two SKUs covering dose it yourself and grab and go." },
-    { title:"Co-branded grower trials", detail:"Local proof for your reps",
-      body:"Run co-branded grower trials so your reps have a local proof point before scaling.",
-      benefit:"De-risks stocking before you commit to volume." },
-  ],
-  painPoints:[
-    { title:"Water & Nutrient Challenges", desc:"Growers in sandy and salt affected soils struggle. Standard amendments don't move the needle on water retention or yield." },
-    { title:"Commodity Input Pressure", desc:"Every input category compresses margins. Growers chase the cheapest option. Loyalty is transactional, not lasting." },
-    { title:"ESG Demand", desc:"Growers increasingly want to demonstrate soil health and carbon stewardship. Commodity products don't tell that story." },
-    { title:"Your Agronomic Gap", desc:"Recommending the right amendment requires knowledge. You need technical support, not more inventory risk." }
-  ],
-  whyABC:[
-    { title:"OMRI listed premium", desc:"Organic certification means certified growers and regenerative operations can use it immediately. Premium margin tier, instant." },
-    { title:"Proven field performance", desc:"Up to 3-3.5× water holding with inherent N-P-K. Growers see real results, not just promises. That drives repeat purchases." },
-    { title:"Unique value story", desc:"Carbon durability, honeycomb microstructure, inherent minerals. Growers have a reason to pay premium price and tell their peers." },
-    { title:"Agronomic co-selling", desc:"We provide trial protocols, field study data, and direct education. Your reps sell with confidence and proof." },
-    { title:"Scalable co-op", desc:"Joint marketing, demo kits, field trials that drive real volume, not just catalogs." }
-  ],
+      { title:"Grower water efficiency programs", detail:"Sandy &amp; drought prone ground",
+        body:"Growers on sandy, drought-prone ground lose water fast, so offer biochar to hold moisture in the root zone.",
+        benefit:"Up to ~3 to 3.5x more water held." },
+      { title:"Compost &amp; soil blend inputs", detail:"Yards &amp; blenders in your book",
+        body:"Compost yards and blenders need faster turnover, so add biochar to speed cycles and hold moisture.",
+        benefit:"~10 to 30% shorter compost cycles (validate), driving repeat volume." },
+      { title:"Organic &amp; regenerative lines", detail:"OMRI listed shelf SKU",
+        body:"Regenerative buyers want certified inputs, so stock this OMRI listed, carbon negative amendment.",
+        benefit:"A differentiated SKU that sells on value, not price." },
+      { title:"Nursery, landscape &amp; retail", detail:"Ready to use blends",
+        body:"Landscape and retail buyers want easy options, so carry both raw biochar and ready to use soil.",
+        benefit:"Two SKUs covering dose it yourself and grab and go." },
+      { title:"Co-branded grower trials", detail:"Local proof for your reps",
+        body:"Reps struggle to sell without local proof, so run co-branded grower trials before scaling.",
+        benefit:"De-risks stocking before you commit to volume." },
+    ],
+
   program:[
     { title:"Premium Margins", bullets:["Tiered pricing that rewards volume","Quarterly rebates for hitting targets","Co-op marketing budget"] },
     { title:"Grower Support", bullets:["Windrow & soil trial protocols","Field study data vs. competitors","Comparison ROI calculators"] },
@@ -1599,7 +1508,7 @@ const RESELLERS_AGRICULTURE = {
     { n:"02", t:"Pilot & education", d:"Stocking pilot + trial kits. Your reps and their growers see results." },
     { n:"03", t:"Ramp", d:"Dedicated account manager, co-branded marketing, optimized supply chain." },
     { n:"04", t:"Ongoing excellence", d:"Quarterly planning, monthly updates, proactive support." }
-  ],
+  ]
 };
 
 /* ============ CLAIM SAFETY TABLE ============ */
