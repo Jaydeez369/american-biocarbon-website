@@ -468,7 +468,7 @@ function buyCard(p){
     ? `<div class="buy-docs">${(p.docIds||[]).map(docLink).join("<span>·</span>")}</div>`
     : `<div class="buy-docs muted">Spec sheet coming</div>`;
   const primary = isLive
-    ? `<a class="btn btn-primary btn-sm" href="${p.id==="absorbent-pellets"?"#/shop/absorbent-pellets":"#/request-sample?product="+p.id}">Get a free sample</a>`
+    ? `<a class="btn btn-primary btn-sm" href="${(p.id==="absorbent-pellets"||p.id==="agricultural-biochar")?"#/shop/"+p.id:"#/request-sample?product="+p.id}">Get a free sample</a>`
     : `<a class="btn btn-primary btn-sm" href="#/request-sample?preorder=1&product=${p.id}">Get a free sample</a>`;
   const cta = isLive
     ? `<div class="btn-row">${primary}</div>
