@@ -54,7 +54,7 @@ const CTA = {
   sds:     { label:"Download SDS",                  href:"#/request-docs?doc=sds" },
   docs:    { label:"Request Technical Package",     href:"#/request-docs" },
   specialist:{ label:"Talk to a Remediation Specialist", href:"#/contact" },
-  biochar: { label:"Request a Free Biochar Sample", href:"#/request-sample?type=biochar" },
+  biochar: { label:"Request a free sample", href:"#/request-sample?type=biochar" },
   carbon:  { label:"Request Carbon Removal Info",   href:"#/contact?type=carbon" },
   beddingSample: { label:"Request Animal Bedding Sample",  href:"#/request-sample?type=bedding" },
   beddingSpecs:  { label:"Request Product Specifications", href:"#/request-docs?ind=animal-bedding" },
