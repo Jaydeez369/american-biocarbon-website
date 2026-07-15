@@ -85,7 +85,7 @@ function btn(cta, cls="btn-primary", specProduct=null){
 }
 function proofBand(){
   return `<div class="proofband"><div class="wrap"><div class="row">
-    ${PROOF.items.map(p=>`<div class="p"><div class="ic"><img src="${p.icon}" alt=""></div>
+    ${PROOF.items.map(p=>`<div class="p"><div class="ic">${ico(p.svg||iconFor({title:p.title}))}</div>
       <div><b>${raw(p.title)}</b><span>${raw(p.sub)}</span></div></div>`).join("")}
   </div></div></div>`;
 }
@@ -153,14 +153,58 @@ function faqBlock(items){
     ${items.map(f=>`<details><summary>${raw(f.q)}</summary><div class="a">${raw(f.a)}</div></details>`).join("")}
     </div></div></section>`;
 }
+/* ---- Line-stroke icon system (24px grid, currentColor, 1.75 stroke) ---- */
+const ICONS = {
+  seedling:'<path d="M12 20v-7M12 13c-.2-3-2.6-5-6-5 .2 3 2.6 5 6 5Zm0 0c.2-3.3 2.6-6 6-6-.2 3.3-2.6 6-6 6Z"/>',
+  recycle:'<path d="M4.5 12a7.5 7.5 0 0 1 12.5-5.6M19.5 12a7.5 7.5 0 0 1-12.5 5.6M17 3.5v3h-3M7 20.5v-3h3"/>',
+  leaf:'<path d="M11 20A7 7 0 0 1 4 13c0-4.5 3.5-8.5 9-9 0 6-1.5 10.5-8 12M4.5 20.5C6 16.5 8.5 14 12 12.5"/>',
+  droplet:'<path d="M12 3.5s6 5.8 6 9.8a6 6 0 0 1-12 0c0-4 6-9.8 6-9.8Z"/>',
+  waves:'<path d="M2 8c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 13c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 18c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>',
+  trash:'<path d="M4 7h16M9.5 7V5h5v2M6.5 7l1 13h9l1-13"/>',
+  layers:'<path d="M12 3 3 8l9 5 9-5-9-5ZM3 13l9 5 9-5"/>',
+  shield:'<path d="M12 3.5l7.5 2.8v5.7c0 4.7-3.7 7.5-7.5 8.5-3.8-1-7.5-3.8-7.5-8.5V6.3L12 3.5ZM9 12l2 2 4-4"/>',
+  truck:'<path d="M3 6.5h10.5v9H3zM13.5 9.5H17l3.5 3v3h-7M7 18.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm9.5 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/>',
+  chart:'<path d="M4 20V4M4 20h16M8 16l3-4 3 2 4-6"/>',
+  badge:'<path d="M12 2.5l2.2 1.6 2.7-.2.9 2.6 2.2 1.6-.9 2.6.9 2.6-2.2 1.6-.9 2.6-2.7-.2L12 21.5l-2.2-1.6-2.7.2-.9-2.6L4 15.5l.9-2.6L4 10.3l2.2-1.6.9-2.6 2.7.2L12 2.5ZM9 12l2 2 4-4"/>',
+  cog:'<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19 12c0-.5 0-.9-.1-1.3l1.9-1.4-1.9-3.3-2.2 1a7 7 0 0 0-2.2-1.3L14 3h-4l-.4 2.4a7 7 0 0 0-2.2 1.3l-2.2-1L3.3 9l1.9 1.4a7 7 0 0 0 0 2.6L3.3 14.4l1.9 3.3 2.2-1a7 7 0 0 0 2.2 1.3L10 20.4h4l.4-2.4a7 7 0 0 0 2.2-1.3l2.2 1 1.9-3.3-1.9-1.4c.1-.4.1-.8.1-1.3Z"/>',
+  spark:'<path d="M12 3l1.7 5.1L19 10l-5.3 1.9L12 17l-1.7-5.1L5 10l5.3-1.9L12 3Z"/>',
+  hex:'<path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5L12 2.5ZM9 12l2 2 4-4"/>'
+};
+function ico(name,cls){
+  const p = ICONS[name] || ICONS.hex;
+  return `<svg class="ic-svg${cls?' '+cls:''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+}
+// Infer a semantic icon from card copy (title + detail). Explicit item.icon wins.
+const ICON_RULES = [
+  [/soil|amend|root|nutrient|seed|grow/,'seedling'],
+  [/compost|blend|windrow|mix/,'recycle'],
+  [/carbon|removal|corc|sequest|offset|remov/,'leaf'],
+  [/bedding|animal|stall|barn|poultry|livestock/,'layers'],
+  [/flood|disaster|standing water|storm|wet debris/,'waves'],
+  [/landfill|leachate|waste|aqueous|sludge|dispos/,'trash'],
+  [/remediat|contaminat|cleanup|clean-up|reclamat|restor/,'shield'],
+  [/drill|frac|oilfield|pit|well|petro/,'droplet'],
+  [/spill|fuel|chemical|oil|hydrocarbon|sorb|absorb|leak/,'droplet'],
+  [/haul|transport|logistic|truck|freight|ship|deliver/,'truck'],
+  [/throughput|capacity|yield|volume|scale|output|cycle/,'chart'],
+  [/cert|complian|standard|verif|test|lab|spec/,'badge'],
+  [/process|patent|technolog|pyrolys|engineer|equipment/,'cog'],
+  [/moist|retention|hold|water|hydrat/,'droplet']
+];
+function iconFor(item){
+  if(item && item.icon) return item.icon;
+  const t = ((item && (item.title||'')) + ' ' + (item && (item.detail||'')) + ' ' + (typeof item==='string'?item:'')).toLowerCase();
+  for(const [re,name] of ICON_RULES){ if(re.test(t)) return name; }
+  return 'spark';
+}
 function ucGrid(list){
-  return `<div class="ucgrid">${list.map((u,i)=>`<div class="uc"><span class="uc-i">${String(i+1).padStart(2,"0")}</span><span class="uc-t">${raw(u)}</span><svg class="uc-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M17 7H9M17 7v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`).join("")}</div>`;
+  return `<div class="ucgrid">${list.map((u,i)=>`<div class="uc"><div class="uc-top"><span class="uc-ic-tile">${ico(iconFor(u))}</span><span class="uc-i">${String(i+1).padStart(2,"0")}</span></div><span class="uc-t">${raw(u)}</span><svg class="uc-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M17 7H9M17 7v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`).join("")}</div>`;
 }
 // Field-application cards: title, operational detail, explanation, benefit, and
 // the associated product line. Used for Oil & Gas and Environmental Remediation.
 function appCards(list){
   return `<div class="appgrid">${list.map((a,i)=>`<div class="appcard">
-    <span class="ac-n">${String(i+1).padStart(2,"0")}</span>
+    <div class="ac-top"><span class="ac-ic">${ico(iconFor(a))}</span><span class="ac-n">${String(i+1).padStart(2,"0")}</span></div>
     <h3 class="ac-t">${raw(a.title)}</h3>
     ${a.detail?`<span class="ac-d">${raw(a.detail)}</span>`:""}
     <p class="ac-b">${raw(a.body)}</p>

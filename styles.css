@@ -37,7 +37,9 @@ h1,h2,h3,h4{font-family:var(--f-head);line-height:1.12;letter-spacing:0;text-wra
 /* ---------- Header ---------- */
 header.site{position:sticky;top:0;z-index:50;background:rgba(26,55,108,.97);backdrop-filter:blur(8px);border-bottom:1px solid #24478a}
 .nav{display:flex;align-items:center;gap:20px;height:66px}
-.nav .logo{height:30px;width:auto}
+/* brand anchor must not shrink in the flex row, or the logo img collapses to 0px width */
+.nav>a:first-of-type{flex:0 0 auto;display:inline-flex;align-items:center}
+.nav .logo{height:30px;width:auto;flex:0 0 auto}
 .nav .logo-txt{color:#fff;font-weight:800;font-size:18px;letter-spacing:-.5px;white-space:nowrap}
 .nav .spring{flex:1}
 .app-tabs{display:flex;gap:2px;background:#12294f;border:1px solid #24478a;border-radius:8px;padding:3px;margin-left:14px}
@@ -446,6 +448,21 @@ tbody td:first-child{font-weight:650;color:var(--ink)}
   background:var(--paper-2);border-radius:20px;padding:6px 12px;align-self:flex-start}
 @media(max-width:900px){.appgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.appgrid{grid-template-columns:1fr}}
+
+/* ---------- Icon system (line-stroke) ---------- */
+.ic-svg{display:block;flex:0 0 auto}
+.ac-top,.uc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ac-ic{width:42px;height:42px;border-radius:11px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);transition:background .2s ease,border-color .2s ease,color .2s ease}
+.ac-ic .ic-svg{width:23px;height:23px}
+.uc-ic-tile{width:36px;height:36px;border-radius:10px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);transition:background .2s ease,border-color .2s ease,color .2s ease}
+.uc-ic-tile .ic-svg{width:20px;height:20px}
+.appcard:hover .ac-ic,.uc:hover .uc-ic-tile{background:var(--gold);border-color:var(--gold);color:#fff}
+@media (prefers-reduced-motion:reduce){.ac-ic,.uc-ic-tile{transition:none}}
+/* proof band now uses inline SVG icons instead of inverted logo images */
+.proofband .p .ic .ic-svg{width:22px;height:22px;color:#fff}
+/* richer chip/proof pills: leading accent dot (matches availability-badge language) */
+.chips span,.proofrow span{display:inline-flex;align-items:center}
+.chips span::before,.proofrow span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold);display:inline-block;margin-right:7px;flex:0 0 auto;opacity:.75}
 
 /* ---------- CTA band ---------- */
 .ctaband{background:linear-gradient(160deg,var(--green-d),#24478a);color:#fff;border-radius:var(--r-lg);padding:44px 40px;text-align:center}
