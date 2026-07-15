@@ -156,7 +156,6 @@ function appCards(list){
     ${a.detail?`<span class="ac-d">${raw(a.detail)}</span>`:""}
     <p class="ac-b">${raw(a.body)}</p>
     ${a.benefit?`<p class="ac-benefit"><span>Benefit</span>${raw(a.benefit)}</p>`:""}
-    ${a.product?`<div class="ac-prod">${raw(a.product)}</div>`:""}
   </div>`).join("")}</div>`;
 }
 function specTable(rows){
@@ -1011,7 +1010,6 @@ function renderEnvironmentalRemediation(){
     <p class="lead" style="margin-bottom:18px">Site managers face real constraints. Here's what we hear, and how we solve it.</p>
     <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:22px">
       ${p.painPoints.map(pt=>`<div style="padding:18px;background:white;border-radius:4px">
-        <div style="font-size:32px;margin-bottom:8px">${raw(pt.title.split(' ')[0])}</div>
         <b style="display:block;margin-bottom:8px;font-size:16px">${raw(pt.title)}</b>
         <p style="font-size:14px;line-height:1.5;color:#666">${raw(pt.desc)}</p>
       </div>`).join("")}
