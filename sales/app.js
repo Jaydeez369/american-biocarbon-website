@@ -11,7 +11,7 @@ function setCheck(k,on){ const c=getChecks(); c[k]= on?1:0; try{ localStorage.se
 function chk(key, labelHTML, def){ const v=getChecks()[key]; const on = (v===undefined? !!def : !!v) ? " done" : ""; return `<label class="chk${on}" data-k="${esc(key)}" onclick="toggleChk(this)"><span class="box">✓</span><span class="lbl">${labelHTML}</span></label>`; }
 function checkStats(keys, defs){ const c=getChecks(); let done=0; keys.forEach((k,i)=>{ const v=c[k]; if(v===undefined? (defs&&defs[i]):v) done++; }); return {done, total:keys.length}; }
 window.toggleChk = el => { const on = !el.classList.contains("done"); el.classList.toggle("done", on); setCheck(el.dataset.k, on); };
-window.resetChecks = pfx => { const c=getChecks(); Object.keys(c).forEach(k=>{ if(!pfx||k.startsWith(pfx)) delete c[k]; }); localStorage.setItem(CHECK_KEY, JSON.stringify(c)); go((location.hash||"#overview").slice(1)); };
+window.resetChecks = pfx => { const c=getChecks(); Object.keys(c).forEach(k=>{ if(!pfx||k.startsWith(pfx)) delete c[k]; }); localStorage.setItem(CHECK_KEY, JSON.stringify(c)); go((location.hash||"#daily").slice(1)); };
 
 /* ---- toast + copy ---- */
 function toast(msg="Copied to clipboard"){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1400);}
@@ -45,20 +45,16 @@ const LEAN_NAV=[
   {group:"Focus",items:[
     {id:"daily",ic:"◎",t:"Daily Plan"},
   ]},
-  {group:"Strategy",items:[
-    {id:"overview",ic:"◆",t:"Overview & Thesis"},
-    {id:"icp",ic:"◈",t:"ICP & Campaigns"},
+  {group:"Plan",items:[
+    {id:"strategy",ic:"◆",t:"Strategy & ICP"},
     {id:"product",ic:"❝",t:"Product & Messaging"},
   ]},
-  {group:"Execution",items:[
-    {id:"accounts",ic:"▥",t:"Target Accounts"},
-    {id:"outreach",ic:"✉",t:"Outreach & Scripts"},
-    {id:"assets",ic:"▣",t:"Assets & Samples"},
-    {id:"playbook",ic:"▷",t:"Playbook"},
+  {group:"Execute",items:[
+    {id:"outreach",ic:"✦",t:"Accounts & Outreach"},
+    {id:"playbook",ic:"▷",t:"Assets & Playbook"},
   ]},
-  {group:"Operate",items:[
-    {id:"onboarding",ic:"✍",t:"Customer Onboarding"},
-    {id:"roadmap",ic:"◐",t:"Scale · 60/90"},
+  {group:"Grow",items:[
+    {id:"onboarding",ic:"✍",t:"Onboarding & Scale"},
   ]},
 ];
 const BUILD_NAV=[
@@ -105,7 +101,7 @@ function rDaily(){
   const st=checkStats(calKeys, calKeys.map(()=>false));
   const pct=st.total?Math.round(st.done/st.total*100):0;
   return page("today",
-    head("Daily Plan — run the whole day from here","One place for everything: the clickable 30-day calendar (all tasks for Jesse, Victor &amp; Daniel), the foundation checklist, the launch gates, and the 31–90 horizon. This is the single canonical checklist — tick anything off and it persists across reloads.")+
+    head("Daily Plan","Run the whole day from one place: the clickable 30-day calendar for Jesse, Victor &amp; Daniel, the foundation checklist, the launch gates, and the 31–90 horizon. One canonical checklist — every item persists across reloads.")+
     `<div class="note ok" style="border-left:4px solid var(--green-bright);font-size:14px;margin-bottom:14px">
        <b style="color:var(--green-bright)">🔥 TOP PRIORITY — SELL THE BIOCHAR:</b> ${BIOCHAR_INVENTORY_LINE} Every day's tasks below are aimed at moving this inventory ASAP; absorbent pellets run second.
      </div>`+
@@ -459,7 +455,7 @@ function rAccounts(){
   const segs=[...new Set(SAMPLE_ACCOUNTS.map(a=>a[1]))];
   const rows=SAMPLE_ACCOUNTS.map((a,i)=>accRow(a,i)).join("");
   return page("accounts",
-    head("Target Accounts","A working account list view — filter by segment, sort by priority. This is a seeded demo; replace with your sourced Gulf South list (see TAM tab for the workflow).")+
+    head("Target Accounts","A working account list — filter by segment, sort by priority. Seeded sample data; replace with your sourced Gulf South list.")+
     `<div class="filters"><span class="pill active" onclick="accFilter(this,'all')">All segments</span>${segs.map(s=>`<span class="pill" onclick="accFilter(this,'${esc(s)}')">${esc(s)}</span>`).join("")}</div>`+
     `<div class="tbl-wrap"><table id="accTbl"><thead><tr>
       <th>Account</th><th>Segment</th><th>Location</th><th>Freight zone</th><th>Est. tons/yr</th><th>Priority</th><th>Status</th><th>Next action</th>
@@ -578,7 +574,7 @@ function rCollateral(){
       <div style="font-size:12px;margin-top:6px"><b style="color:var(--text)">Formula:</b> <span style="font-family:var(--mono);color:var(--text-dim)">${esc(c.formula)}</span></div>
       <div style="font-size:12px;margin-top:4px"><b style="color:var(--text)">Saves to CRM:</b> ${c.saves.map(s=>badge(s,"badge-muted")).join(" ")}</div>
     </div>`).join("")}</div>`+
-    `<div class="note">Two of these run live in the <b>Pricing & Economics</b> tab.</div>`+
+    `<div class="note">Two of these ship as live calculators in the <b>Pricing &amp; Economics</b> module (parked under Build Later).</div>`+
     sec("","Sample request workflow")+
     `<div class="grid g2">
       <div class="card"><h4>Sizes & gates</h4><b style="font-size:11.5px;color:var(--gold-soft)">Sizes</b><ul>${DATA.sample.sizes.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>
@@ -806,18 +802,19 @@ function compose(id, thunks){
 
 /* LEAN = daily-driver. BUILD = parked heavy modules (build-later.html). */
 const LEAN_SECTIONS=[
-  // Daily Plan is the single canonical hub: header → clickable calendar → foundation
-  // checklist → launch gates → 31–90 horizon. Roadmap/Checklist merged in here.
+  // Consolidated IA (v5): 10 → 6 sections.
+  //   daily      = the canonical hub (header → calendar → foundation → launch gates → horizon)
+  //   strategy   = thesis + ICP/segments/personas + campaigns
+  //   product    = product facts + messaging
+  //   outreach   = target accounts + full outreach engine (id kept for gtm CSS hooks)
+  //   playbook   = collateral/samples + discovery playbook
+  //   onboarding = customer onboarding + 60/90 scale
   ["daily",    [rDaily, G("r30Day"), rChecklist, G("rPrelaunch"), G("rLaunch"), rHorizon]],
-  ["overview", [G("rSummary")]],
-  ["icp",      [rSegments, rPersonas, G("rCampaigns")]],
+  ["strategy", [G("rSummary"), rSegments, rPersonas, G("rCampaigns")]],
   ["product",  [rBiochar, rMessaging]],
-  ["accounts", [rAccounts]],
-  ["outreach", [rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
-  ["assets",   [rCollateral, G("rSample")]],
-  ["playbook", [rPlaybook]],
-  ["onboarding",[rOnboarding]],
-  ["roadmap",  [G("rScale")]],
+  ["outreach", [rAccounts, rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
+  ["playbook", [rCollateral, G("rSample"), rPlaybook]],
+  ["onboarding",[rOnboarding, G("rScale")]],
 ];
 const BUILD_SECTIONS=[
   ["b-overview",  [rOverview, rAssumptions]],
