@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Brand Kit — American BioCarbon Sales OS</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../tokens.css?v=1" />
+<link rel="stylesheet" href="styles.css?v=cons5" />
+<style>
+  /* page-local layout only — all colors come from tokens */
+  .bk-wrap{max-width:1080px;margin:0 auto;padding:40px 34px 100px}
+  .bk-hero{border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:34px}
+  .bk-hero h1{font-family:var(--f-serif);font-size:40px;font-weight:400;letter-spacing:-.5px;color:#fff;line-height:1.05}
+  .bk-hero p{color:var(--text-dim);font-size:14.5px;margin-top:10px;max-width:640px;line-height:1.6}
+  .bk-hero .tag{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--brand-bright);background:rgba(var(--brand-rgb),.12);border:1px solid rgba(var(--brand-rgb),.28);
+    padding:4px 10px;border-radius:6px;margin-bottom:16px}
+  .bk-sec{margin:44px 0 0}
+  .bk-sec>h2{font-family:var(--f-serif);font-size:24px;font-weight:400;color:#fff;letter-spacing:-.3px;
+    margin-bottom:4px}
+  .bk-sec>.desc{color:var(--text-mute);font-size:12.5px;margin-bottom:18px;font-family:var(--mono);letter-spacing:.02em}
+  .sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .sw{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--slate-900)}
+  .sw .chip{height:76px;display:flex;align-items:flex-end;padding:9px 11px}
+  .sw .meta{padding:9px 11px 11px}
+  .sw .nm{font-size:12px;font-weight:700;color:var(--text)}
+  .sw .hex{font-family:var(--mono);font-size:10.5px;color:var(--text-mute);margin-top:2px;text-transform:uppercase}
+  .sw .role{font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.35}
+  .type-row{display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+  .type-row .lab{font-family:var(--mono);font-size:10.5px;color:var(--text-mute);width:120px;flex:0 0 120px;letter-spacing:.04em}
+  .specimen-serif{font-family:var(--f-serif);color:#fff}
+  .specimen-sans{font-family:var(--f-sans);color:var(--text)}
+  .specimen-mono{font-family:var(--mono);color:var(--text)}
+  .demo{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .scale-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  .scale-box{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--slate-850);
+    display:grid;place-items:center;color:var(--text-dim);font-family:var(--mono);font-size:10px}
+  .princ{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .princ .card h4{color:#fff}
+  .kbd{font-family:var(--mono);font-size:11px;background:var(--slate-800);border:1px solid var(--line);
+    border-radius:5px;padding:1px 6px;color:var(--brand-bright)}
+</style>
+</head>
+<body>
+<div class="bk-wrap">
+
+  <header class="bk-hero">
+    <span class="tag">Canonical Brand Kit · v1 · 2026-07</span>
+    <h1>American BioCarbon<br>Design System</h1>
+    <p>One source of truth for both surfaces. The public site runs the <b>light</b> theme;
+       this Sales OS runs the <b>dark console</b> theme. Both pull from <span class="kbd">tokens.css</span>.
+       Brand is <b>navy + crimson</b>. Green, amber, red and blue are <b>status colors only</b> — never brand.</p>
+  </header>
+
+  <!-- BRAND COLOR -->
+  <section class="bk-sec">
+    <h2>Brand — Navy</h2>
+    <div class="desc">Primary identity. Chrome, interaction, selection, primary actions.</div>
+    <div class="sw-grid">
+      <div class="sw"><div class="chip" style="background:var(--navy-300)"></div><div class="meta"><div class="nm">navy-300</div><div class="hex">#9db3d6</div><div class="role">tints, disabled</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--navy-400)"><span style="color:#0a0d12;font-family:var(--mono);font-size:10px;font-weight:600">bright</span></div><div class="meta"><div class="nm">navy-400</div><div class="hex">#6f93c9</div><div class="role">interaction on dark</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--navy-500)"><span style="color:#fff;font-family:var(--mono);font-size:10px">base</span></div><div class="meta"><div class="nm">navy-500</div><div class="hex">#4d6ba3</div><div class="role">brand base</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--navy-600)"></div><div class="meta"><div class="nm">navy-600</div><div class="hex">#24478a</div><div class="role">deep / gradients</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--navy-700)"></div><div class="meta"><div class="nm">navy-700</div><div class="hex">#1a376c</div><div class="role">footer, ink navy</div></div></div>
+    </div>
+  </section>
+
+  <!-- CRIMSON -->
+  <section class="bk-sec">
+    <h2>Brand — Crimson</h2>
+    <div class="desc">Accent. Reserved for the single most important / urgent CTA. Used sparingly.</div>
+    <div class="sw-grid">
+      <div class="sw"><div class="chip" style="background:var(--crimson-400)"></div><div class="meta"><div class="nm">crimson-400</div><div class="hex">#e6486a</div><div class="role">hover</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--crimson-500)"><span style="color:#fff;font-family:var(--mono);font-size:10px">accent</span></div><div class="meta"><div class="nm">crimson-500</div><div class="hex">#d7153f</div><div class="role">CTA / emphasis</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--crimson-600)"></div><div class="meta"><div class="nm">crimson-600</div><div class="hex">#b91237</div><div class="role">deep / gradients</div></div></div>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section class="bk-sec">
+    <h2>Status — semantic only</h2>
+    <div class="desc">Meaning, not brand. success=good · warning=attention · danger=problem · info=neutral note.</div>
+    <div class="sw-grid">
+      <div class="sw"><div class="chip" style="background:var(--success)"></div><div class="meta"><div class="nm">success</div><div class="hex">#5f8a5b</div><div class="role">done, live, positive</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--warning)"></div><div class="meta"><div class="nm">warning</div><div class="hex">#caa85a</div><div class="role">caution, pending</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--danger)"></div><div class="meta"><div class="nm">danger</div><div class="hex">#c85a54</div><div class="role">error, blocker</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--info)"></div><div class="meta"><div class="nm">info</div><div class="hex">#5a86c8</div><div class="role">neutral note, person</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--purple)"></div><div class="meta"><div class="nm">purple</div><div class="hex">#9a7fc8</div><div class="role">categorical only</div></div></div>
+    </div>
+  </section>
+
+  <!-- SURFACES -->
+  <section class="bk-sec">
+    <h2>Dark surfaces</h2>
+    <div class="desc">Console elevation ramp. Lower = deeper. Cards sit on 850/900, page on bg.</div>
+    <div class="sw-grid">
+      <div class="sw"><div class="chip" style="background:var(--bg)"></div><div class="meta"><div class="nm">bg</div><div class="hex">#0a0d12</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--slate-900)"></div><div class="meta"><div class="nm">slate-900</div><div class="hex">#111621</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--slate-850)"></div><div class="meta"><div class="nm">slate-850</div><div class="hex">#151b26</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--slate-800)"></div><div class="meta"><div class="nm">slate-800</div><div class="hex">#1b222e</div></div></div>
+      <div class="sw"><div class="chip" style="background:var(--slate-700)"></div><div class="meta"><div class="nm">slate-700</div><div class="hex">#28313f</div></div></div>
+      <div class="sw"><div class="chip" style="border-bottom:2px solid var(--line);background:var(--slate-850)"></div><div class="meta"><div class="nm">line</div><div class="hex">#232c39</div><div class="role">borders</div></div></div>
+    </div>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section class="bk-sec">
+    <h2>Typography</h2>
+    <div class="desc">DM Serif Display (headings) · DM Sans (body/UI) · IBM Plex Mono (data/labels).</div>
+    <div class="type-row"><div class="lab">Serif / Display</div><div class="specimen-serif" style="font-size:34px">Cleaner carbon, sold.</div></div>
+    <div class="type-row"><div class="lab">Sans / Heading</div><div class="specimen-sans" style="font-size:22px;font-weight:700">Pipeline &amp; account console</div></div>
+    <div class="type-row"><div class="lab">Sans / Body</div><div class="specimen-sans" style="font-size:15px;color:var(--text-dim)">Bagasse-derived biochar and absorbents — the workspace your reps run the day from.</div></div>
+    <div class="type-row"><div class="lab">Mono / Data</div><div class="specimen-mono" style="font-size:15px">$142,500 · 1,240 t · +18.4%</div></div>
+    <div style="margin-top:18px">
+      <div class="desc">Type scale (px)</div>
+      <div class="scale-row">
+        <div class="scale-box" style="width:34px;height:34px">11</div>
+        <div class="scale-box" style="width:40px;height:40px">12.5</div>
+        <div class="scale-box" style="width:46px;height:46px">14</div>
+        <div class="scale-box" style="width:52px;height:52px">16</div>
+        <div class="scale-box" style="width:62px;height:62px">20</div>
+        <div class="scale-box" style="width:74px;height:74px">24</div>
+        <div class="scale-box" style="width:92px;height:92px">32</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPONENTS -->
+  <section class="bk-sec">
+    <h2>Components</h2>
+    <div class="desc">Live from styles.css — what you build with.</div>
+
+    <h3 class="sub" style="color:#fff">Buttons</h3>
+    <div class="demo">
+      <button class="btn btn-primary">Primary · navy</button>
+      <button class="btn btn-accent">Urgent CTA · crimson</button>
+      <button class="btn btn-ghost">Ghost</button>
+    </div>
+
+    <h3 class="sub" style="color:#fff;margin-top:22px">Badges &amp; status</h3>
+    <div class="demo">
+      <span class="badge badge-green">● Live</span>
+      <span class="badge badge-gold">Pending</span>
+      <span class="badge badge-red">Blocked</span>
+      <span class="badge badge-blue">Info</span>
+      <span class="badge badge-navy">Brand</span>
+      <span class="badge badge-muted">Neutral</span>
+      <span class="proof proof-1">P1</span>
+      <span class="proof proof-2">P2</span>
+      <span class="proof proof-3">P3</span>
+      <span class="proof proof-5">P5</span>
+    </div>
+
+    <h3 class="sub" style="color:#fff;margin-top:22px">KPI tiles</h3>
+    <div class="grid g4" style="margin-top:6px">
+      <div class="card kpi"><div class="l">Pipeline</div><div class="v">$1.4M</div><div class="d">+18% MoM</div></div>
+      <div class="card kpi"><div class="l">Samples out</div><div class="v">37</div><div class="d">9 this week</div></div>
+      <div class="card kpi"><div class="l">LOIs</div><div class="v">6</div><div class="d">2 pending</div></div>
+      <div class="card kpi"><div class="l">Close rate</div><div class="v">24%</div><div class="d">trailing 30d</div></div>
+    </div>
+
+    <h3 class="sub" style="color:#fff;margin-top:22px">Cards, notes &amp; table</h3>
+    <div class="grid g2" style="margin-top:6px">
+      <div class="card">
+        <h4 style="color:#fff">Account card</h4>
+        <p>Consistent surface, hairline edge, brand-navy bullets.</p>
+        <ul><li>Navy interaction accents</li><li>Crimson reserved for urgent CTA</li><li>Green means done, not brand</li></ul>
+      </div>
+      <div>
+        <div class="note info"><b>Info.</b> Neutral guidance uses brand navy.</div>
+        <div class="note ok"><b>Success.</b> Positive / completed state uses green.</div>
+        <div class="note warn"><b>Warning.</b> Attention needed uses red.</div>
+      </div>
+    </div>
+    <div class="tbl-wrap" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Account</th><th>Stage</th><th class="t-num">Value</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Riverside Ag Co-op</strong></td><td>Sample sent</td><td class="t-num">$48,000</td><td><span class="badge badge-green">● Live</span></td></tr>
+          <tr><td><strong>Gulf Absorbents</strong></td><td>LOI review</td><td class="t-num">$126,500</td><td><span class="badge badge-gold">Pending</span></td></tr>
+          <tr><td><strong>Delta Soil Labs</strong></td><td>Stalled</td><td class="t-num">$19,200</td><td><span class="badge badge-red">Blocked</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- PRINCIPLES -->
+  <section class="bk-sec">
+    <h2>Rules of the system</h2>
+    <div class="desc">Read before adding new UI.</div>
+    <div class="princ">
+      <div class="card"><h4>1 · Brand ≠ status</h4><p>Navy &amp; crimson are identity. Green/amber/red/blue carry meaning. Never use green as a brand accent or navy as "success."</p></div>
+      <div class="card"><h4>2 · Go through tokens</h4><p>No raw hex in components. Use a semantic alias (<span class="kbd">--brand</span>, <span class="kbd">--success</span>…). Primitives live in <span class="kbd">tokens.css</span> only.</p></div>
+      <div class="card"><h4>3 · Crimson is rare</h4><p>One crimson CTA per view, max. If everything is urgent, nothing is.</p></div>
+      <div class="card"><h4>4 · One icon language</h4><p>SVG only, single stroke width, 24px grid, <span class="kbd">currentColor</span>. No emoji as structural icons.</p></div>
+      <div class="card"><h4>5 · 4pt rhythm</h4><p>Spacing in 4/8px steps. Radius from the token ramp. Tabular figures for all data columns.</p></div>
+      <div class="card"><h4>6 · Contrast holds</h4><p>Body text ≥ 4.5:1, large/secondary ≥ 3:1 — in both themes, checked independently.</p></div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

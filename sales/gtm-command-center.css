@@ -6,7 +6,7 @@
      b-dashboard = KPIs + dashboard (parked) */
 
 /* Campaign cards get a subtle left accent so they read as one system */
-.gtm-cmp{border-left:3px solid var(--green-bright)}
+.gtm-cmp{border-left:3px solid var(--brand-bright)}
 .gtm-cmp h4{flex-wrap:wrap;gap:6px;line-height:1.5}
 
 /* Pre-launch + sequence + script blocks fade in cleanly */

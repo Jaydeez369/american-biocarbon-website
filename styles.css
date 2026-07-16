@@ -1,24 +1,23 @@
 /* ============ American BioCarbon - industrial B2B site ============ */
+/* Brand primitives + type/space/radius come from tokens.css (loaded first
+   via <link> in index.html). This :root only maps those canonical primitives
+   onto the LIGHT-theme semantic names this stylesheet already uses. */
 :root{
-  --ink:#1a1a1a; --graphite:#1a376c; --graphite-2:#24478a; --slate:#3e4a5f;
-  --paper:#f7f8fa; --paper-2:#eef1f5; --white:#ffffff; --line:#e2e6ee; --line-2:#c4cfe6;
-  /* NOTE: brand palette is navy + crimson. The token NAMES below are historical
-     misnomers kept for compatibility with existing usage - the VALUES are correct:
-       --green*  are actually NAVY blues   (see --navy* aliases)
-       --gold*   are actually CRIMSON reds (see --crimson* aliases, except --gold-d which is navy)
-     Prefer the semantic aliases for new code. */
-  --green:#4d6ba3; --green-d:#24478a; --green-l:#9db3d6;
-  --gold:#d7153f; --gold-d:#4d6ba3; --gold-l:#b91237;
-  /* Semantic aliases (preferred) */
-  --navy:#4d6ba3; --navy-d:#24478a; --navy-l:#9db3d6;
-  --crimson:#d7153f; --crimson-d:#b91237;
-  /* --mute darkened from #8a8e96 (3.29:1) to meet WCAG AA 4.5:1 on white/paper */
-  --red:#c02542; --dim:#555a64; --mute:#63676e;
-  --f:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --f-head:"DM Serif Display","Georgia",serif;
-  --mono:"IBM Plex Mono",ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
-  --wrap:1160px; --r:6px; --r-lg:10px;
-  --sh:0 1px 2px rgba(26,55,108,.07),0 10px 30px rgba(26,55,108,.07);
+  --graphite:var(--navy-700); --graphite-2:var(--navy-600);
+  /* Brand - navy + crimson (semantic aliases, preferred for new code) */
+  --navy:var(--navy-500); --navy-d:var(--navy-600); --navy-l:var(--navy-300);
+  --crimson:var(--crimson-500); --crimson-d:var(--crimson-600);
+  /* Legacy token names kept as aliases so existing selectors keep working.
+     They now point at the correct brand primitives - no more misnomers:
+       --green* → navy,  --gold* → crimson. New code should use --navy/--crimson. */
+  --green:var(--navy-500); --green-d:var(--navy-600); --green-l:var(--navy-300);
+  --gold:var(--crimson-500); --gold-d:var(--navy-500); --gold-l:var(--crimson-600);
+  /* neutrals / text (from tokens: --ink --slate --mute --paper --paper-2 --white --line --line-2) */
+  --red:var(--danger-strong); --dim:#555a64;
+  /* type aliases → canonical */
+  --f:var(--f-sans); --f-head:var(--f-serif); --mono:var(--f-mono);
+  --r:var(--r-xs); --r-lg:var(--r);
+  --sh:var(--sh-light);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -37,7 +36,9 @@ h1,h2,h3,h4{font-family:var(--f-head);line-height:1.12;letter-spacing:0;text-wra
 /* ---------- Header ---------- */
 header.site{position:sticky;top:0;z-index:50;background:rgba(26,55,108,.97);backdrop-filter:blur(8px);border-bottom:1px solid #24478a}
 .nav{display:flex;align-items:center;gap:20px;height:66px}
-.nav .logo{height:30px;width:auto}
+/* brand anchor must not shrink in the flex row, or the logo img collapses to 0px width */
+.nav>a:first-of-type{flex:0 0 auto;display:inline-flex;align-items:center}
+.nav .logo{height:30px;width:auto;flex:0 0 auto}
 .nav .logo-txt{color:#fff;font-weight:800;font-size:18px;letter-spacing:-.5px;white-space:nowrap}
 .nav .spring{flex:1}
 .app-tabs{display:flex;gap:2px;background:#12294f;border:1px solid #24478a;border-radius:8px;padding:3px;margin-left:14px}
@@ -446,6 +447,21 @@ tbody td:first-child{font-weight:650;color:var(--ink)}
   background:var(--paper-2);border-radius:20px;padding:6px 12px;align-self:flex-start}
 @media(max-width:900px){.appgrid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.appgrid{grid-template-columns:1fr}}
+
+/* ---------- Icon system (line-stroke) ---------- */
+.ic-svg{display:block;flex:0 0 auto}
+.ac-top,.uc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ac-ic{width:42px;height:42px;border-radius:11px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);transition:background .2s ease,border-color .2s ease,color .2s ease}
+.ac-ic .ic-svg{width:23px;height:23px}
+.uc-ic-tile{width:36px;height:36px;border-radius:10px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);transition:background .2s ease,border-color .2s ease,color .2s ease}
+.uc-ic-tile .ic-svg{width:20px;height:20px}
+.appcard:hover .ac-ic,.uc:hover .uc-ic-tile{background:var(--gold);border-color:var(--gold);color:#fff}
+@media (prefers-reduced-motion:reduce){.ac-ic,.uc-ic-tile{transition:none}}
+/* proof band now uses inline SVG icons instead of inverted logo images */
+.proofband .p .ic .ic-svg{width:22px;height:22px;color:#fff}
+/* richer chip/proof pills: leading accent dot (matches availability-badge language) */
+.chips span,.proofrow span{display:inline-flex;align-items:center}
+.chips span::before,.proofrow span::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold);display:inline-block;margin-right:7px;flex:0 0 auto;opacity:.75}
 
 /* ---------- CTA band ---------- */
 .ctaband{background:linear-gradient(160deg,var(--green-d),#24478a);color:#fff;border-radius:var(--r-lg);padding:44px 40px;text-align:center}
