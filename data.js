@@ -398,7 +398,6 @@ const HOME = {
       ["Disposal weight","Lightest","Heavier","Heaviest"],
       ["Renewable / plant based","Yes","Yes","No"],
       ["Dust","Low","Moderate","High"],
-      ["Carbon story","Carbon negative","Neutral","None"],
     ]
   },
   ag:{
