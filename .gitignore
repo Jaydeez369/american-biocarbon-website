@@ -1,0 +1,13 @@
+# OS / editor cruft
+.DS_Store
+*.swp
+
+# Local Claude Code workspace
+.claude/
+
+# Node (not used by the static build, but guard against stray installs)
+node_modules/
+
+# Editor backups
+*.backup
+*~
