@@ -9,6 +9,10 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 
 # Internal sales tool. Belt-and-braces with robots.txt; neither is access control.
+# Both patterns are needed: /sales/* does NOT match the bare /sales/ index.
+/sales/
+  X-Robots-Tag: noindex, nofollow
+
 /sales/*
   X-Robots-Tag: noindex, nofollow
 

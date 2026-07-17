@@ -1,6 +1,8 @@
-# Internal docs live in the repo but the publish root is the repo root, so they would
-# otherwise be fetchable in production. Serve a hard 404 instead of the file.
-/docs/*    /404    404
+# NOTE: a _redirects rule can NEVER hide a file that exists. Cloudflare Pages serves
+# static assets BEFORE consulting this file, so a "/docs/* -> 404" rule silently does
+# nothing and the file is served anyway (verified in production, 2026-07-17).
+# The publish root IS the repo root: anything committed here is public. Internal docs
+# therefore live outside the repo (../website-internal-docs/), not behind a rule.
 # Sales OS is its own app under /sales/ - serve it directly, never via the SPA fallback
 /sales/*    /sales/:splat    200
 # E7: canonicalize duplicate topic URLs to their richer dedicated landing pages

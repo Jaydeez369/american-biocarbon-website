@@ -113,6 +113,26 @@ for (const src of ["data.js", "app.js"]) {
   }
 }
 
+/* The publish root IS the repo root, so every committed file is public. A _redirects rule
+   cannot hide it (Pages serves static assets first - an internal audit doc was live in
+   production on 2026-07-17 behind a rule that looked like it worked). Internal markdown
+   belongs outside the repo; README.md is the only one intended to be public. */
+const ALLOWED_MD = new Set(["README.md"]);
+function walkMd(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    if (["node_modules", ".git", ".claude"].includes(name)) continue;
+    const p = join(dir, name);
+    if (statSync(p).isDirectory()) walkMd(p, out);
+    else if (name.toLowerCase().endsWith(".md")) out.push(p.replace(ROOT + "/", ""));
+  }
+  return out;
+}
+for (const md of walkMd(ROOT)) {
+  if (ALLOWED_MD.has(md)) continue;
+  console.error(`✗ Internal doc in publish root: ${md} would be publicly fetchable. Move it out of the repo.`);
+  missing++;
+}
+
 if (missing) {
   console.error(`\n✗ Cache stamp: ${missing} broken asset reference(s). Fix before deploying.`);
   process.exit(1);
