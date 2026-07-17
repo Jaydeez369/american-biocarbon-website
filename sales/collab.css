@@ -14,8 +14,8 @@
 .brand-role{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;
   text-transform:uppercase;color:var(--text-mute);margin-bottom:3px}
 .brand-top h3{font-family:var(--serif);font-weight:400;font-size:24px;letter-spacing:-.3px;color:var(--navy-800);line-height:1.2}
-.brand-tag{flex:0 0 auto;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;
-  text-transform:uppercase;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.brand-tag{flex:0 1 auto;max-width:46%;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;padding:4px 10px;border-radius:12px;line-height:1.35;text-align:center}
 .tag-sales{background:rgba(var(--navy-600-rgb),.10);color:var(--navy-700);border:1px solid rgba(var(--navy-600-rgb),.22)}
 .tag-mktg{background:rgba(var(--accent-rgb),.10);color:var(--accent-deep);border:1px solid rgba(var(--accent-rgb),.24)}
 .brand-card ul{list-style:none}

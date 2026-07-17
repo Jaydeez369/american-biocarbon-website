@@ -824,19 +824,19 @@ function compose(id, thunks){
    and the handoffs written down so ownership is explicit rather than assumed. */
 const COLLAB = {
   /* The two-brand split is the frame for everything below: sales sells what
-     American BioCarbon has today; marketing builds ProGreaux for what's next. */
+     American BioCarbon has today; marketing builds Progreaux for what's next. */
   brands:[
-    ["sales","American BioCarbon","What sales sells today","Live now",[
-      "The brand sales is actively selling under — right now, and through the transition.",
-      "Sales works <b>what's left of American BioCarbon</b>: existing inventory, existing product facts, existing proof.",
-      "The ABC site and collateral are the <b>foundation and backdrop for outreach</b> — enough to make outbound credible, not a brand program.",
-      "Maintenance-level effort. Nobody is investing in growing this brand; it carries the revenue while ProGreaux gets built.",
+    ["sales","American BioCarbon","What we sell today","Product sales site launches next week",[
+      "The brand we sell under today, and through the transition to Progreaux.",
+      "Everything is ready to sell now: current inventory, product facts, and the proof behind them.",
+      "The <b>product sales site launches next week</b>, enough to make outbound credible and take orders.",
+      "Steady by design. It carries the revenue while Progreaux comes together, and the two move as one plan.",
     ]],
-    ["mktg","ProGreaux","What marketing is building","Marketing owns 100%",[
-      "The rebrand is <b>entirely marketing's</b> — narrative, identity, site, launch, timing, sequencing.",
-      "Sales has no build role here and no approval gate. Marketing decides what it is and when it lands.",
-      "Sales' only ask: <b>tell us the date and the story before a customer does</b>, so live conversations don't contradict the launch.",
-      "Target window: on or around <b>Aug 17</b>. If that moves, sales needs to hear it — that's the whole dependency.",
+    ["mktg","Progreaux","What we're building next","Launching in August",[
+      "Progreaux is the <b>rebrand of American BioCarbon</b>: same team, same product, same mill, new name.",
+      "Marketing leads the brand build; sales feeds in what's landing with buyers. We shape it together.",
+      "For our <b>current and former vendors</b>, this is a transition, not a new company. The relationship and the supply carry straight over.",
+      "Target window: on or around <b>Aug 17</b>. We firm the date together as launch gets close.",
     ]],
   ],
   sales:{ who:"Jesse · Victor · Daniel", own:[
@@ -846,7 +846,7 @@ const COLLAB = {
       "<b>Sample-to-LOI motion</b> — sample requests through signed LOI.",
       "<b>Pricing & terms conversations</b> — quotes, freight, negotiation.",
       "<b>Account relationships</b> — the named buyer, from first touch to reorder.",
-      "<b>Selling American BioCarbon</b> — the current brand, current inventory, as-is.",
+      "<b>Selling American BioCarbon</b> today: the current brand and inventory.",
       "<b>Sales data & CRM hygiene</b> — pipeline records, outcomes, and reasons live with sales.",
     ]],
     ["Decides",[
@@ -858,7 +858,7 @@ const COLLAB = {
   ]},
   mktg:{ who:"Marketing team", own:[
     ["Owns outright",[
-      "<b>ProGreaux — the entire rebrand</b>. Narrative, identity, launch, timing. Marketing's call, end to end.",
+      "<b>Progreaux rebrand</b>. Narrative, identity, launch, timing. Marketing leads the build, with sales in the loop.",
       "<b>Brand & voice</b> — how we look and sound everywhere, both brands.",
       "<b>Website & digital presence</b> — site, SEO, landing pages, analytics.",
       "<b>Demand generation</b> — paid, organic, social, email nurture.",
@@ -866,7 +866,7 @@ const COLLAB = {
       "<b>Inbound lead generation</b> — creating the demand that becomes sales' inbound.",
     ]],
     ["Decides",[
-      "Everything ProGreaux: what it is, what it says, when it launches.",
+      "The Progreaux brand: what it is, what it says, when it launches.",
       "Brand system: palette, typography, logo usage, template standards.",
       "Channel mix and campaign calendar.",
       "Final creative execution on anything public-facing.",
@@ -916,7 +916,7 @@ const COLLAB = {
   ],
   agreements:[
     ["Sales sells American BioCarbon as-is; the ABC backdrop is maintained, not grown.",true],
-    ["ProGreaux is marketing's build, end to end — no sales approval gate.",false],
+    ["The move to Progreaux is one shared transition: marketing leads the brand, sales feeds the field in.",false],
     ["Sales gets the rebrand date and story before any customer does.",false],
     ["One intake queue for asset requests — with the deal reason attached.",false],
     ["One canonical product-facts sheet; both teams cite it, neither improvises.",false],
@@ -945,7 +945,7 @@ function rCollab(){
          <span class="brand-tag tag-${side}">${esc(tag)}</span></div>
          <ul>${pts.map(p=>`<li>${p}</li>`).join("")}</ul>
        </div>`).join("")}</div>`+
-    `<div class="note"><b>Said plainly:</b> sales works <b>what's left of American BioCarbon</b> — the inventory that exists and the proof that exists. The ABC site and collateral are a <b>foundation and backdrop for outreach</b>, nothing more; they need to be accurate and credible, not impressive. <b>ProGreaux is 100% marketing's</b>, start to finish. The only wire between the two is timing: sales needs the launch date and the story before a customer brings it up on a call.</div>`+
+    `<div class="note"><b>Said plainly:</b> we sell American BioCarbon today and move to Progreaux together. Same team, same product, same mill. For our current and former vendors it's a name change and a step up, not a new company, and the relationship and supply carry straight over. The one thing to keep in sync is timing: everyone hears the launch date and the story before a customer does.</div>`+
     sec("2","Who owns what")+
     `<div class="lanes">
        <div class="lane lane-sales">

@@ -17,7 +17,7 @@ summary:{
     "Credibility exists — these products have sold before; we lead with proof of prior sales and a free test, not a science pitch.",
     "Volume + targeting win — like ReRoofGen, we run many parallel, hyper-ICP-targeted email campaigns and A/B test everything; the sample offer is constant, the packaging is tuned per ICP."
   ],
-  wedgeNote:"Two things to hold in mind. (1) The GTM SYSTEM is v1 — treat product validation as real, the machine as still being built. (2) REBRAND: American BioCarbon becomes ProGreaux effective ~Aug 17, 2026 (day ~35, inside the days 31–60 window). We're standing up the site NOW under the current identity to get to market fast, so keep cold outreach brand-LIGHT (lead with the product and the free-sample offer, not heavy brand equity) — the name transitions mid-quarter. Fold the rebrand into collateral and the site during days 31–60; don't let it block launch today.",
+  wedgeNote:"Two things to hold in mind. (1) The GTM SYSTEM is v1 — treat product validation as real, the machine as still being built. (2) REBRAND: American BioCarbon becomes Progreaux effective ~Aug 17, 2026 (day ~35, inside the days 31–60 window). We're standing up the site NOW under the current identity to get to market fast, so keep cold outreach brand-LIGHT (lead with the product and the free-sample offer, not heavy brand equity) — the name transitions mid-quarter. Fold the rebrand into collateral and the site during days 31–60; don't let it block launch today.",
   allocation:[
     {icp:"Biochar — Ag Distributors / Co-ops (free Biochar sample → bulk order)",pct:"~40%",why:"PRIMARY wedge. Highest-leverage channel — one distributor = many acres — and now bulk-capable: we have 80 MT to ship, so a winning sample converts straight to a paid order.",cls:"badge-green"},
     {icp:"Biochar — Compost/Soil Blenders · Composters · Nursery · Growers",pct:"~25%",why:"Trial-driven biochar samples (blend/windrow tests) that convert to bulk pulls against the 80 MT; broadest biochar demand base.",cls:"badge-gold"},
@@ -35,7 +35,7 @@ summary:{
   ],
   goals:{
     d30:"Infrastructure live (Instantly + warmed domains + Apollo) + 1,000+ ICP contacts sourced across BOTH products + many hyper-targeted campaigns running + ~5k touches sent + 15–25 free samples shipped. The month-1 scoreboard is SAMPLES IN HANDS — not LOIs.",
-    d60:"Sample volume scaling, 1–2 documented performance wins from trials, distributor/co-op relationships opened, ProGreaux rebrand live on site + collateral (~Aug 17), campaigns A/B-tuned to reply data, founder content + Facebook-group presence live. First reorders / LOI conversations happen 1:1 off winning trials.",
+    d60:"Sample volume scaling, 1–2 documented performance wins from trials, distributor/co-op relationships opened, Progreaux rebrand live on site + collateral (~Aug 17), campaigns A/B-tuned to reply data, founder content + Facebook-group presence live. First reorders / LOI conversations happen 1:1 off winning trials.",
     d90:"Repeatable free-sample pipeline that predictably produces trials, winning trials converting to reorders and (quietly) LOIs for Q4 supply, committed forward volume aggregating into the funding deck, first offtake + carbon conversations opening, trade-show/referral channels seeded, weekly reporting cadence operating."
   },
   kpis:[
@@ -287,17 +287,17 @@ calendar:[
   {d:27,wk:4,theme:"Case-study capture",jesse:["SALES: attach trial results to CRM + capture what I need for onboarding on the next wave","SALES: +20 emails to lookalikes of best biochar repliers","SALES: schedule reorder conversations on delivered accounts — set my reorder reminders","110 emails (biochar-weighted)","45 calls","Attach biochar trial results to CRM"],victor:["ADMIN/ACCT (Victor+Daniel): finalize onboarding on each closed account (COA/SDS on file, terms set) + set reorder + annual resale-cert refresh reminders","Capture biochar case-study-safe win (with customer permission)"]},
   {d:28,wk:4,theme:"Deliverability + certs · CDR seed",jesse:["90 emails (rotate inboxes)","40 calls","Suppress bounces / opt-outs; tag ESG/CDR targets (days 61–90)"],victor:["Publish updated biochar certs / spec if new lab data lands","Draft MRV data-capture plan tied to biochar deployment"]},
   {d:29,wk:4,theme:"Push to sign / order + report",jesse:["SALES: close-plan on hottest order + LOI; confirm each is onboarding-clean (W-9 out, tax status set, PO in) with Victor/Daniel","SALES: +20 emails / +10 calls final push","SALES: compile MY 30-day sales funnel (accounts, emails, calls, samples, handoffs, POs, MT sold vs 80)","110 emails","50 calls","Close-plan on hottest biochar order + LOI; compile 30-day funnel (samples, orders, MT sold vs 80)"],victor:["ADMIN/ACCT (Victor+Daniel): confirm every closed order is onboarding-clean (W-9 out, resale cert/tax resolved, account in books, invoice issued); compile fulfillment + AR metrics","Push hottest biochar order / LOI to signature with Jesse; compile product / fulfillment metrics"]},
-  {d:30,wk:4,light:true,theme:"Weekend — Month-1 retro + plan 31–60",jesse:["Month-1 retro; lock winning biochar segments / tracks","Plan days 31–60 (biochar scale, replenish beyond the 80 MT); 3 bets + lead-gen plan"],victor:["Plan days 31–60: ProGreaux rebrand (~Aug 17) prep, more certs, offtake groundwork"]},
+  {d:30,wk:4,light:true,theme:"Weekend — Month-1 retro + plan 31–60",jesse:["Month-1 retro; lock winning biochar segments / tracks","Plan days 31–60 (biochar scale, replenish beyond the 80 MT); 3 bets + lead-gen plan"],victor:["Plan days 31–60: Progreaux rebrand (~Aug 17) prep, more certs, offtake groundwork"]},
 ],
 
 /* ---------------------------------------------------------- 5. 60/90 SCALE */
 scale:{
-  d60:{title:"Days 31–60 — Double down & sign LOIs",goal:"Turn sample performance into signed LOIs; open the distributor channel; ship the ProGreaux rebrand.",
+  d60:{title:"Days 31–60 — Double down & sign LOIs",goal:"Turn sample performance into signed LOIs; open the distributor channel; ship the Progreaux rebrand.",
     weeks:[
       {wk:"Wk 5",g:"Double down on winning ICP subsegments",act:"110–130 emails/day, 45–55 calls/day, sample-focused",adj:"Cut losing angles/segments; clone best repliers",need:"Consultant + VA for list-building",auto:"Auto-log activity to CRM",mile:"5–8 samples in hands / active trials"},
       {wk:"Wk 6",g:"Convert samples → signed LOIs",act:"Trial-result check-ins, present LOI, lock supply/pricing/territory for Q4",adj:"Tighten sample→LOI follow-up SLA to 48h",need:"LOI template + Q4 price band",auto:"LOI e-sign flow",mile:"3+ LOIs signed"},
-      {wk:"Wk 7",g:"ProGreaux rebrand + case studies + distributors",act:"Cut over site + collateral to ProGreaux (~Aug 17); document 2 wins; 15 distributor touches",adj:"Add distributor LOI sequence (CMP-AGD); update signatures/domains to ProGreaux",need:"Rebrand asset pack; distributor program one-pager",auto:"Case-study template",mile:"Rebrand live; 2 case-study-safe assets; 3 distributor LOI convos"},
-      {wk:"Wk 8",g:"Launch content + SEO pages; referral loop",act:"Publish 4 SEO pages (ProGreaux); ask signed-LOI customers for intros",adj:"Founder LinkedIn cadence 3x/wk",need:"Copywriter/VA for pages",auto:"Referral ask in follow-up templates",mile:"First distributor LOI signed; committed forward volume tallied for the raise"}
+      {wk:"Wk 7",g:"Progreaux rebrand + case studies + distributors",act:"Cut over site + collateral to Progreaux (~Aug 17); document 2 wins; 15 distributor touches",adj:"Add distributor LOI sequence (CMP-AGD); update signatures/domains to Progreaux",need:"Rebrand asset pack; distributor program one-pager",auto:"Case-study template",mile:"Rebrand live; 2 case-study-safe assets; 3 distributor LOI convos"},
+      {wk:"Wk 8",g:"Launch content + SEO pages; referral loop",act:"Publish 4 SEO pages (Progreaux); ask signed-LOI customers for intros",adj:"Founder LinkedIn cadence 3x/wk",need:"Copywriter/VA for pages",auto:"Referral ask in follow-up templates",mile:"First distributor LOI signed; committed forward volume tallied for the raise"}
     ]},
   d90:{title:"Days 61–90 — Scale, systematize & convert LOIs toward offtake",goal:"Make the sample→LOI pipeline predictable, aggregate committed volume for funding, open first offtake and carbon conversations as capacity firms up.",
     weeks:[
@@ -536,8 +536,8 @@ scriptLibrary:{
 
 /* ---------------------------------------------------------- 8. LINKEDIN PLAN */
 linkedin:{
-  profile:["Headline states value, not title: 'Plant-based industrial absorbents & biochar | Helping remediation & ag teams cut cost and carbon'","Banner: product + facility photo","About: prior sales credibility + bagasse story + who you help + CTA","Featured: spec sheet, comparison sheet, sample-request link","Experience: American BioCarbon / ProGreaux with 2-line what-we-do","Turn on Creator mode; add 'absorbents, remediation, biochar, CDR' topics"],
-  companyPage:["Create LinkedIn Company Page (American BioCarbon → rename to ProGreaux at the ~Aug 17 rebrand; reserve the ProGreaux handle now)","Logo + banner + 1-line tagline","About: products, wedge, facility/feedstock story","Add products + website + location","Post 2–3x/week; employees reshare","Add 'Products' section linking to the free-sample + reserve-supply (LOI) pages"],
+  profile:["Headline states value, not title: 'Plant-based industrial absorbents & biochar | Helping remediation & ag teams cut cost and carbon'","Banner: product + facility photo","About: prior sales credibility + bagasse story + who you help + CTA","Featured: spec sheet, comparison sheet, sample-request link","Experience: American BioCarbon / Progreaux with 2-line what-we-do","Turn on Creator mode; add 'absorbents, remediation, biochar, CDR' topics"],
+  companyPage:["Create LinkedIn Company Page (American BioCarbon → rename to Progreaux at the ~Aug 17 rebrand; reserve the Progreaux handle now)","Logo + banner + 1-line tagline","About: products, wedge, facility/feedstock story","Add products + website + location","Post 2–3x/week; employees reshare","Add 'Products' section linking to the free-sample + reserve-supply (LOI) pages"],
   targets:["HSE Manager","Procurement / Sourcing Manager","Operations Manager","Environmental / Remediation Ops","Landfill Manager","Sustainability / ESG lead (CDR)"],
   dailyConnect:"15–25 targeted connects/day (stay under ~100/week to avoid limits). Personalize every note. Prioritize accounts already in a sequence.",
   contentThemes:[
@@ -624,7 +624,7 @@ longTerm:{
      targets:["Ag input distributors & co-ops","Landscape/soil supply chains","Industrial safety-supply resellers (absorbents)"],
      metric:"Distributor sample placements → programs signed"},
     {name:"Strategic Partnerships & Earned Media",horizon:"Days 90+",cost:"$$",
-     why:"Credibility and reach we can't buy — mill/feedstock partners, environmental firms, carbon marketplaces, and press that positions ProGreaux as the Louisiana bagasse leader.",
+     why:"Credibility and reach we can't buy — mill/feedstock partners, environmental firms, carbon marketplaces, and press that positions Progreaux as the Louisiana bagasse leader.",
      plays:["Co-marketing with Cora Texas / mill + any enviro-services partners","List on CDR marketplaces & broker networks (days 90+, MRV-honest)","Pitch regional business/ag/climate press on the waste-to-value story","Apply for relevant sustainability / ag-innovation awards","Explore paid retargeting only AFTER an ICP is proven by outbound"],
      targets:["Feedstock & mill partners","Environmental-services firms","CDR marketplaces & brokers","Regional & trade press"],
      metric:"Partnerships live · earned placements · marketplace listings"}
