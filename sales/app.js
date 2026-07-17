@@ -1015,6 +1015,14 @@ function render(){
 }
 buildNav();
 render();
+/* The Website/Sales OS toggle points at /  and /sales/, which only resolve when Sales OS
+   is served as /sales/ on the main site. On the standalone Sales OS deployment (served at
+   the root) those links break, and there is no stable public-site URL to point at yet, so
+   hide the toggle there. Detection: the standalone root path never contains /sales/. */
+if (!location.pathname.includes("/sales/")) {
+  const sw = document.querySelector(".app-switch");
+  if (sw) sw.style.display = "none";
+}
 $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
 const defaultId = NAV[0].items[0].id;
 const isNavId = id => NAV.flatMap(g=>g.items).some(i=>i.id===id);
