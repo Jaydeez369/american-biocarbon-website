@@ -1,0 +1,6 @@
+# Claude Code local state, incl. worktrees holding stale duplicates of the site.
+# Never ship: the publish root is the repo root.
+.claude/
+
+.DS_Store
+node_modules/

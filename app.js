@@ -1,6 +1,8 @@
 /* ============ American BioCarbon, router & renderers ============ */
 const $ = s => document.querySelector(s);
-const esc = s => String(s??"").replace(/&(?!amp;|lt;|gt;|#)/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+// Escapes quotes too: esc() output lands inside double-quoted attributes, where &<> alone
+// would not stop an attribute break-out.
+const esc = s => String(s??"").replace(/&(?!amp;|lt;|gt;|quot;|#39;|#)/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 // allow pre-escaped entities in copy (we author with &amp; etc.)
 const raw = s => String(s??"");
 
@@ -39,7 +41,7 @@ const SPEC_SHEETS = {
 
 function downloadSpecSheet(specId){
   const spec = SPEC_SHEETS[specId];
-  if(!spec) return;
+  if(!spec){ console.warn(`[abc] no spec sheet for "${specId}" - the button did nothing. Add it to SPEC_SHEETS or drop the CTA.`); return; }
   track("spec_sheet_download", { spec: specId });
   const link = document.createElement("a");
   link.href = spec.file;
@@ -49,8 +51,11 @@ function downloadSpecSheet(specId){
 
 /* ---- hero product carousel ---- */
 let _heroTimer = null;
+/* The router replaces #app wholesale, so the carousel's DOM is detached on any nav away
+   from home. The timer must be stopped explicitly or it ticks forever against dead nodes. */
+function stopHeroCarousel(){ if(_heroTimer){ clearInterval(_heroTimer); _heroTimer = null; } }
 function initHeroCarousel(){
-  if(_heroTimer){ clearInterval(_heroTimer); _heroTimer = null; }
+  stopHeroCarousel();
   const car = document.getElementById("heroCarousel"); if(!car) return;
   const slides = [...car.querySelectorAll(".hslide")];
   const dots = [...car.querySelectorAll(".hdot")];
@@ -62,7 +67,8 @@ function initHeroCarousel(){
     slides.forEach((s,k)=>{ const on = k===i; s.classList.toggle("active", on); s.setAttribute("aria-hidden", on?"false":"true");
       // inert keeps keyboard focus/AT out of offscreen slides (their CTAs are not tabbable)
       if(on) s.removeAttribute("inert"); else s.setAttribute("inert",""); });
-    dots.forEach((d,k)=>{ d.classList.toggle("active", k===i); d.setAttribute("aria-selected", k===i?"true":"false"); }); };
+    // .active drives the progress fill in CSS; no aria-selected, these are not tabs
+    dots.forEach((d,k)=>{ d.classList.toggle("active", k===i); }); };
   const setToggle = paused => { if(!toggle) return; toggle.setAttribute("aria-pressed", paused?"true":"false");
     toggle.setAttribute("aria-label", paused?"Play slideshow":"Pause slideshow");
     toggle.querySelector(".hero-toggle-ic").textContent = paused ? "►" : "❚❚"; };
@@ -249,13 +255,46 @@ function renderChrome(){
   </div>
   <div class="legal"><span>© ${new Date().getFullYear()} ${raw(BRAND.name)}. All rights reserved.</span></div>`;
   const burger = $("#burger");
-  burger.onclick = () => {
-    const open = $("#menu").classList.toggle("open");
+  const setBurger = open => {
     burger.setAttribute("aria-expanded", String(open));
     burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
   };
-  // make dropdown parent labels keyboard-focusable
-  document.querySelectorAll('.menu>.item>span').forEach(s=>{ s.setAttribute("tabindex","0"); s.setAttribute("role","button"); s.setAttribute("aria-haspopup","true"); });
+  burger.onclick = () => {
+    const menu = $("#menu");
+    const open = menu.classList.toggle("open");
+    setBurger(open);
+    /* The panel sits BEFORE the burger in the DOM but paints below it, so forward-Tab
+       would skip straight past it. Move focus in so tab order follows what's on screen. */
+    if(open){ const first = menu.querySelector('a,[tabindex="0"]'); if(first) first.focus(); }
+  };
+  document.addEventListener("keydown", e => {
+    if(e.key !== "Escape") return;
+    const menu = $("#menu");
+    if(!menu.classList.contains("open")) return;
+    menu.classList.remove("open");
+    setBurger(false);
+    burger.focus();
+  });
+  // Dropdown parents: keyboard-focusable, and honest about their own state. The reveal
+  // itself stays CSS-driven (.menu>.item:focus-within .dropdown).
+  document.querySelectorAll('.menu>.item>span').forEach(s=>{
+    s.setAttribute("tabindex","0");
+    s.setAttribute("role","button");
+    s.setAttribute("aria-haspopup","true");
+    s.setAttribute("aria-expanded","false");
+    const item = s.parentElement;
+    const sync = on => s.setAttribute("aria-expanded", String(on));
+    item.addEventListener("focusin", ()=>sync(true));
+    item.addEventListener("focusout", ()=>{ if(!item.contains(document.activeElement)) sync(false); });
+    item.addEventListener("mouseenter", ()=>sync(true));
+    item.addEventListener("mouseleave", ()=>sync(false));
+    s.addEventListener("keydown", e=>{
+      if(e.key!=="Enter" && e.key!==" ") return;
+      e.preventDefault();
+      const first = item.querySelector(".dropdown a");
+      if(first) first.focus();
+    });
+  });
   // skip-link → focus main without polluting the hash router
   const skip = document.querySelector(".skip-link");
   if(skip) skip.addEventListener("click", e=>{ e.preventDefault(); const m=$("#app"); m.focus(); m.scrollIntoView(); });
@@ -303,7 +342,7 @@ function renderHome(){
           </div>
         </div>
       </div>`; }).join("")}
-    <div class="hnav"><div class="hnav-inner wrap"><div class="hnav-tabs" role="tablist" aria-label="Choose product slide">${HS.map((s,i)=>`<button class="hdot${i===0?" active":""}" role="tab" aria-selected="${i===0?"true":"false"}" data-i="${i}"><span class="hdot-track"><span class="hdot-fill"></span></span><span class="hdot-row"><span class="hdot-num">${String(i+1).padStart(2,"0")}</span><span class="hdot-label">${raw(s.label)}</span></span></button>`).join("")}</div><button class="hero-toggle" id="heroToggle" type="button" aria-label="Pause slideshow" aria-pressed="false"><span class="hero-toggle-ic" aria-hidden="true">❚❚</span></button></div></div>
+    <div class="hnav"><div class="hnav-inner wrap"><div class="hnav-tabs" role="group" aria-label="Choose product slide">${HS.map((s,i)=>`<button class="hdot${i===0?" active":""}" type="button" aria-label="Show slide ${i+1}: ${raw(s.label)}" data-i="${i}"><span class="hdot-track"><span class="hdot-fill"></span></span><span class="hdot-row"><span class="hdot-num">${String(i+1).padStart(2,"0")}</span><span class="hdot-label">${raw(s.label)}</span></span></button>`).join("")}</div><button class="hero-toggle" id="heroToggle" type="button" aria-label="Pause slideshow" aria-pressed="false"><span class="hero-toggle-ic" aria-hidden="true">❚❚</span></button></div></div>
   </section>
   ${proofBand()}
 
@@ -453,15 +492,32 @@ function renderForm(kind, qs){
     <div class="formcard" id="mainform"></div>
   </div></div></section>`;
 }
-function buildForm(kind, mountSel){
+/* Resolve ?product=/?preorder= into a form context.
+   SECURITY: nothing from the query string is ever interpolated into HTML. The product id
+   is used only as a lookup key against PRODUCTS (own properties only, so /?product=constructor
+   cannot match), and what gets rendered is the canonical name from data.js. If the param does
+   not resolve to a real product it is dropped. */
+function formContext(qs){
+  const p = new URLSearchParams(qs || "");
+  const id = p.get("product");
+  const known = id && Object.prototype.hasOwnProperty.call(PRODUCTS, id);
+  return {
+    productId: known ? id : null,
+    productName: known ? PRODUCTS[id].name : null,
+    preorder: p.get("preorder") === "1",
+  };
+}
+function buildForm(kind, mountSel, qs){
   const f = FORMS[kind]; const mount = $(mountSel); if(!f||!mount) return;
+  const ctx = formContext(qs);
   mount.innerHTML = `<form id="lf">
     <div class="formgrid">
-      ${f.fields.map(fieldHTML).join("")}
+      ${f.fields.map(fl=>fieldHTML(fl, ctx)).join("")}
     </div>
+    ${ctx.productId?`<input type="hidden" name="product_id" value="${esc(ctx.productId)}">`:""}
+    ${ctx.preorder?`<input type="hidden" name="preorder" value="1">`:""}
     <button type="submit" class="btn btn-primary" style="margin-top:20px;width:100%">${raw(f.h.replace(/^Request an |^Get a |^Get |^Request |^Talk to a /,'').startsWith('Industrial')?'Send Request':'Submit')}</button>
     <p class="form-note">By submitting, you agree to be contacted about your request. We reply within one business day.</p>
-    <div class="dev-note">↳ Preview: submits are captured locally (no backend). Wire to internal app, routing: ${raw(f.routing)}</div>
   </form>`;
   // reveal an "other" text box when a select's Other/Something-else option is chosen
   $("#lf").querySelectorAll("select").forEach(sel=>{
@@ -479,21 +535,26 @@ function buildForm(kind, mountSel){
     form.dataset.submitted="1";
     const btn = form.querySelector('button[type="submit"]');
     if(btn){ btn.disabled=true; btn.textContent="Sending…"; }
-    track("lead_submit", { form: kind, routing: (f.routing||"").split(".")[0] }); // event only, no field values
+    // event only, no field values; product id is catalog context, not PII
+    track("lead_submit", { form: kind, routing: (f.routing||"").split(".")[0], ...(ctx.productId?{product:ctx.productId}:{}) });
     mount.innerHTML = `<div class="form-success" role="status" tabindex="-1">✓ ${raw(f.confirm)}</div>
       <div class="dev-note" style="margin-top:16px"><b>Auto-reply preview:</b><br>${raw(f.autoreply).replace(/\n/g,"<br>")}</div>`;
     const ok = mount.querySelector(".form-success"); if(ok) ok.focus();
     window.scrollTo({top:mount.getBoundingClientRect().top+window.scrollY-120,behavior:"smooth"});
   });
 }
-function fieldHTML(fl){
+function fieldHTML(fl, ctx){
   const req = fl.req?` <span class="req">*</span>`:"";
   const full = (fl.type==="textarea"||fl.n==="useCase"||fl.n==="volume")?" full":"";
   const id = `f_${fl.n}`;
   let input;
   if(fl.type==="select"){
     const hasOther = fl.options.some(o=>/^other$/i.test(o)||/something else/i.test(o));
-    input=`<select id="${id}" name="${fl.n}" ${fl.req?"required":""}><option value="">Select…</option>${fl.options.map(o=>`<option>${raw(o)}</option>`).join("")}</select>`;
+    // Preselect the product the visitor clicked through from. Compared against the canonical
+    // name resolved in formContext(), never against the raw query value.
+    const pre = (fl.n==="product" && ctx && ctx.productName) ? ctx.productName : null;
+    const sel = o => (pre && o===pre) ? " selected" : "";
+    input=`<select id="${id}" name="${fl.n}" ${fl.req?"required":""}><option value=""${pre?"":" selected"}>Select…</option>${fl.options.map(o=>`<option${sel(o)}>${raw(o)}</option>`).join("")}</select>`;
     if(hasOther){ input+=`<input type="text" class="other-input" name="${fl.n}_other" hidden aria-label="${raw(fl.label)}, please specify" placeholder="${raw(fl.otherPh||"Please specify")}">`; }
   }
   else if(fl.type==="textarea"){ input=`<textarea id="${id}" name="${fl.n}" ${fl.req?"required":""} placeholder="${raw(fl.ph||"")}"></textarea>`; }
@@ -973,9 +1034,14 @@ function setJsonLd(nodes){
   s.textContent = JSON.stringify(nodes.length===1 ? nodes[0] : { "@context":"https://schema.org", "@graph":nodes });
 }
 function clearJsonLd(){ const s=document.getElementById("ld-route"); if(s) s.remove(); }
-/* C1: serve local raster images as WebP via <picture>, original path as graceful fallback.
-   Transforms the HTML string BEFORE insertion so the <source> is parsed before the <img>
-   loads (no double fetch). A missing .webp simply falls through to the original <img>. */
+/* C1: serve local raster images as WebP via <picture>, original path as the fallback for
+   browsers without WebP support. Transforms the HTML string BEFORE insertion so the
+   <source> is parsed before the <img> loads (no double fetch).
+   NOTE: this is NOT a fallback for a *missing* .webp - once a browser matches the
+   <source>, a 404 there renders a broken image rather than falling through to the <img>.
+   Every assets/ raster must have a .webp sibling; scripts/build.mjs enforces that.
+   NOTE: the wrapper makes the <img> a child of <picture>, not of whatever laid it out.
+   Any flex/grid sizing must target the <picture> (see .proc-left picture in styles.css). */
 function webpify(html){
   return html.replace(
     /<img\b([^>]*?)\ssrc="(assets\/[^"?]+)\.(png|jpe?g)(\?[^"]*)?"([^>]*?)>/gi,
@@ -1259,6 +1325,7 @@ function renderResellersAgriculture(){
 }
 
 /* ================= ROUTER ================= */
+let _navigated = false; // false during the first render; true for every nav after it
 function router(){
   const path = (location.pathname || "/").replace(/^\/+/,"").replace(/\/+$/,"");
   const query = location.search.replace(/^\?/,"");
@@ -1308,12 +1375,22 @@ function router(){
   else if(parts[0]==="distributors-resellers-agriculture"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Distributors & Resellers - Agriculture",path:"/distributors-resellers-agriculture"}])]); }
   else { /* notFound() already set noindex + cleared JSON-LD */ }
 
+  stopHeroCarousel();
   $("#app").innerHTML = webpify(html);
-  if(formToBuild) buildForm(formToBuild, formMount);
+  if(formToBuild) buildForm(formToBuild, formMount, query);
   if(parts[0]==="technical") bindResourceFilters();
   if(parts.length===0) initHeroCarousel();
   $("#menu").classList.remove("open");
   window.scrollTo(0,0);
+  /* Replacing #app destroys the element the user just activated, dropping focus to <body>
+     and announcing nothing. Move focus to main and announce the new title - but only on a
+     real navigation, since stealing focus on first load would skip past the header. */
+  if(_navigated){
+    const app = $("#app");
+    app.focus({ preventScroll:true });
+    const live = document.getElementById("routeAnnounce");
+    if(live) live.textContent = document.title;
+  }
   track("page_view", { path: "/"+parts.join("/"), title: document.title });
 }
 function parseType(q){ if(!q) return null; const p=new URLSearchParams(q); return p.get("type"); }
@@ -1331,7 +1408,8 @@ document.addEventListener("click", e=>{
   if(/\.[a-z0-9]+($|\?)/i.test(href)) return;             // asset/file links (e.g. .pdf)
   e.preventDefault();
   if((location.pathname + location.search) !== href) history.pushState(null, "", href);
+  _navigated = true;
   router();
 });
-window.addEventListener("popstate", router);
+window.addEventListener("popstate", ()=>{ _navigated = true; router(); });
 router();

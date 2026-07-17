@@ -45,7 +45,7 @@ const BRAND = {
 
 /* Primary + secondary CTAs used across the site */
 const CTA = {
-  sample:  { label:"Request quote",         href:"/request-sample" },
+  sample:  { label:"Request a sample",      href:"/request-sample" },
   freeSamplePellets: { label:"Get a free sample", href:"/shop/absorbent-pellets" },
   freeSampleBiochar: { label:"Get a free sample", href:"/shop/agricultural-biochar" },
   quote:   { label:"Talk to us about volume",       href:"/request-quote" },
@@ -130,8 +130,8 @@ const TECH = {
   ],
   // Document catalog, the gated deliverables (spec sheets first for primary products)
   docs:[
-    { id:"abs-spec", name:"Absorbent Pellets & Crumble, Spec Sheet", cat:"Absorbents", desc:"Absorbency ratio, bulk density, granulation, form factors.", primary:true, file:"assets/spec sheets/Absorbent-Pellets-Specification-Sheet.pdf", fmt:"PDF" },
-    { id:"bio-spec", name:"100% Biochar, Spec Sheet", cat:"Agriculture", desc:"Organic carbon, water holding, NPK, particle size.", primary:true, file:"assets/spec sheets/Biochar-Premium-Specification-Sheet.pdf", fmt:"PDF" },
+    { id:"abs-spec", name:"Absorbent Pellets & Crumble, Spec Sheet", cat:"Absorbents", desc:"Absorbency ratio, bulk density, granulation, form factors.", primary:true, file:"assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf", fmt:"PDF" },
+    { id:"bio-spec", name:"100% Biochar, Spec Sheet", cat:"Agriculture", desc:"Organic carbon, water holding, NPK, particle size.", primary:true, file:"assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf", fmt:"PDF" },
     { id:"abs-sds", name:"Absorbent Pellets & Crumble, SDS", cat:"Absorbents", desc:"Safety data sheet for handling, storage, and disposal." },
     { id:"abs-disposal", name:"Saturated-Material Disposal Guidance", cat:"Absorbents", desc:"Handling and disposal profile for spent absorbent." },
     { id:"bio-lab", name:"Independent Lab Analysis, Heavy Metals & Nutrients", cat:"Agriculture", desc:"Full IBI panel: metals vs thresholds, NPK, H/C ratio, surface area." },
@@ -257,7 +257,9 @@ const HOME = {
       { label:"Biochar-Infused Soil", img:ASSETS.heroSoil, pos:"50% 50%", zoom:1.05, origin:"50% 50%",
         h:"Ready to use soil,<br>biochar built in.",
         sub:"A ready to use growing soil pre-blended with our carbon negative bagasse biochar for water retention, nutrient holding, and aeration with no mixing. Coming Q4.",
-        primary:{label:"Stay informed",href:CTA.biochar.href}, secondary:CTA.specDownload, specProduct:"biochar-infused-soil" },
+        /* No spec sheet exists for this product yet (it is Q4), so a Download Spec Sheet
+           secondary would silently do nothing. Point at a real destination instead. */
+        primary:{label:"Stay informed",href:CTA.biochar.href}, secondary:CTA.quote },
     ]
   },
   offer:{

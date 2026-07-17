@@ -199,6 +199,8 @@ section.block{padding:72px 0;border-bottom:1px solid var(--line)}
 
 /* ---------- Accessibility ---------- */
 .skip-link{position:absolute;left:-9999px;top:0;z-index:100;background:var(--gold);color:#fff;padding:10px 16px;border-radius:0 0 8px 0;font-weight:700;font-size:14px}
+/* available to assistive tech, never painted (used by the route live region) */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .skip-link:focus{left:0}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:4px}
 .hero :focus-visible,.phead :focus-visible,.proofband :focus-visible,.carbon-pillar :focus-visible,footer.site :focus-visible,.ctaband :focus-visible{outline-color:#fff}
@@ -399,8 +401,16 @@ section.block{padding:72px 0;border-bottom:1px solid var(--line)}
 .split.proc-split{align-items:stretch}
 .proc-left{display:flex;flex-direction:column;gap:24px;height:100%}
 .proc-left .proc-copy{flex:0 0 auto}
-.proc-left .procimg{flex:1 1 auto;width:100%;min-height:200px;object-fit:cover;border-radius:var(--r-lg);border:1px solid var(--line);display:block}
-@media(max-width:940px){.proc-left .procimg{min-height:220px;aspect-ratio:16/10;flex:0 0 auto}}
+/* webpify() wraps every local <img> in a <picture> at render time, so the image is
+   NOT the flex child here - the <picture> is. Size the wrapper and let the img fill it,
+   or `flex:1 1 auto` lands on an element that no longer has a flex parent and the image
+   collapses to its min-height. */
+.proc-left picture{flex:1 1 auto;min-height:200px;display:flex}
+.proc-left .procimg{flex:none;width:100%;height:100%;min-height:200px;object-fit:cover;border-radius:var(--r-lg);border:1px solid var(--line);display:block}
+@media(max-width:940px){
+  .proc-left picture{flex:0 0 auto;min-height:220px}
+  .proc-left .procimg{min-height:220px;aspect-ratio:16/10;flex:none;height:auto}
+}
 .split ul.checks{list-style:none;margin:18px 0}
 ul.checks li{position:relative;padding:6px 0 6px 26px;color:var(--graphite);font-size:15px}
 ul.checks li::before{content:"";position:absolute;left:0;top:12px;width:12px;height:8px;border-left:2.5px solid var(--green);border-bottom:2.5px solid var(--green);transform:rotate(-45deg)}
@@ -478,7 +488,10 @@ tbody td:first-child{font-weight:650;color:var(--ink)}
 .phead .crumb a{color:#b9c8e4}
 .phead h1{font-size:38px;color:#fff}
 .phead .sub{color:#c4cfe6;font-size:17px;margin:16px 0 24px}
-.phead .cta-note{margin-top:16px;font-family:var(--f);font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--gold)}
+/* must stay legible on navy: crimson-500 fails AA here (2.24:1), same as the footer
+   address did; the light crimson tint passes at 6.9:1 and still reads as crimson.
+   Never use --crimson-500/--gold as a text color on a navy surface. */
+.phead .cta-note{margin-top:16px;font-family:var(--f);font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--crimson-300)}
 .phead .proofline{margin-top:14px;font-family:var(--f);font-size:13.5px;font-weight:500;line-height:1.5;letter-spacing:.01em;color:rgba(238,243,251,.6)}
 .phead .media{border-radius:var(--r-lg);overflow:hidden;border:1px solid #24478a;aspect-ratio:1/1;height:auto;min-height:0;align-self:center;background:#1e3a6e}
 .phead .media img{width:100%;height:100%;object-fit:cover;object-position:50% 55%}
@@ -592,6 +605,9 @@ tbody td:first-child{font-weight:650;color:var(--ink)}
 .field input,.field select,.field textarea{font-family:inherit;font-size:15px;padding:11px 13px;border:1.5px solid var(--line-2);border-radius:7px;background:var(--paper);color:var(--ink);width:100%;min-width:0;box-sizing:border-box}
 .field textarea{min-height:90px;resize:vertical}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--green);background:#fff}
+/* restore the keyboard ring the :focus rule above outranks - mouse focus keeps the clean
+   borderless look, keyboard focus keeps a visible indicator */
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .form-note{font-size:12.5px;color:var(--mute);margin-top:6px}
 .form-success{background:rgba(77,107,163,.10);border:1px solid var(--green);border-radius:var(--r);padding:18px 20px;color:var(--green-d);font-weight:600}
 .dev-note{font-family:var(--mono);font-size:11.5px;color:var(--mute);margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-2)}

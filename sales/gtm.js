@@ -64,7 +64,7 @@
       filters+blocks
     );
   }
-  window.gtmPreFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-prelaunch .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  window.gtmPreFilter=(el,i)=>{el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
     document.querySelectorAll(".gtm-pre-block").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
 
   /* ---- 3. ICP Campaigns ---- */
@@ -132,16 +132,23 @@
       `<div id="gtmCalPanel"></div>`
     );
   }
-  window.gtmCalPick=function(d){
+  /* Ticking a task re-renders #content (so the mission bar updates), which wipes the open
+     day panel. rerender() reads this to put it back; opts.restore skips the scroll so
+     restoring is invisible. */
+  window.gtmOpenCalDay = null;
+  window.gtmCalPick=function(d, opts={}){
     const c=(GTM.calendar||[]).find(x=>x.d===d); if(!c) return;
-    document.querySelectorAll("#sec-gtm-30day .cal-day, .cal-day").forEach(el=>el.classList.toggle("sel", +el.dataset.d===d));
+    window.gtmOpenCalDay = d;
+    // the #sec-gtm-30day half was dead (compose() owns section ids now); .cal-day is the live selector
+    document.querySelectorAll(".cal-day").forEach(el=>el.classList.toggle("sel", +el.dataset.d===d));
     const lane=(who,arr,cls)=>`<div class="cal-lane ${cls}"><h4>${who}</h4>${arr.map((t,i)=>chk(`cal:${d}:${cls}:${i}`,esc(t))).join("")}</div>`;
     const html=`<div class="cal-panel">
       <div class="cal-panel-h"><h3>${calFull(calDate(c.d))} — ${esc(c.theme)}</h3><div class="sub">Day ${c.d} · Week ${c.wk}${c.light?" · lighter / review day":""}</div></div>
       <div class="cal-lanes">${lane("Jesse — demand & the machine",c.jesse,"j")}${lane("Victor + Daniel — product, proof, website & fulfillment",c.victor,"v")}</div>
       <div class="cal-meta">Tick each task as done — it stays checked across reloads. Victor + Daniel split this track: certs/spec sheets, company discovery, product photos, testing, website approval, then Shopify install & go-live, and sample fulfillment.</div>
     </div>`;
-    const panel=document.getElementById("gtmCalPanel"); if(panel){ panel.innerHTML=html; panel.scrollIntoView({behavior:"smooth",block:"nearest"}); }
+    const panel=document.getElementById("gtmCalPanel");
+    if(panel){ panel.innerHTML=html; if(!opts.restore) panel.scrollIntoView({behavior:"smooth",block:"nearest"}); }
   };
 
   /* ---- 5. 60/90 Scale ---- */
@@ -173,7 +180,7 @@
       filters+blocks
     );
   }
-  window.gtmSeqFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-sequences .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  window.gtmSeqFilter=(el,i)=>{el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
     document.querySelectorAll(".gtm-seq").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
 
   /* ---- 7. Calling Plan ---- */
@@ -218,7 +225,7 @@
       filters+segs.map(block).join("")
     );
   }
-  window.gtmScrFilter=(el,i)=>{document.querySelectorAll("#sec-gtm-scripts .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  window.gtmScrFilter=(el,i)=>{el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
     document.querySelectorAll(".gtm-scr").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
 
   /* ---- 9b. Long-Term / Compounding Channels ---- */

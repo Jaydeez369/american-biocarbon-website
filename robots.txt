@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
 
+# Internal sales tool. Not customer-facing and not for indexing.
+# This is a crawl hint, NOT access control - /sales/ still needs auth in front of it.
+Disallow: /sales/
+
 # Gated conversion/form routes carry a noindex meta; no crawl value.
 Disallow: /request-quote
 Disallow: /request-sample

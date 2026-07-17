@@ -24,8 +24,8 @@
   <link rel="preconnect" href="https://cdn.shopify.com" crossorigin />
   <link rel="preload" as="image" href="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164" fetchpriority="high" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="tokens.css?v=2" />
-  <link rel="stylesheet" href="styles.css?v=clean25" />
+  <link rel="stylesheet" href="tokens.css?v=9479fa9f" />
+  <link rel="stylesheet" href="styles.css?v=0c0c1b88" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -46,20 +46,37 @@
   </script>
 </head>
 <body>
+  <script>
+    /* Legacy hash-route compatibility. This site was a hash router until 2026-07-15, so
+       "#/shop/agricultural-biochar" was the public URL form - it is still live in
+       bookmarks, shared links, collateral and search results. The router now reads
+       location.pathname, so without this those links silently render the homepage
+       instead of the page they name. A hash never reaches the server, so this cannot be
+       a _redirects rule; it has to happen here, and it must run before the deferred
+       app.js router reads the path. Translate once, then let the router see a clean path. */
+    (function () {
+      var h = window.location.hash;
+      if (!h || h.charAt(1) !== "/") return;      // ignore "#main" and bare "#/"
+      var target = h.slice(1);
+      if (target === "/") return;
+      // the old shim kept the query outside the hash; only re-add it if the hash lacks one
+      if (target.indexOf("?") === -1) target += window.location.search || "";
+      window.history.replaceState(null, "", target);
+    })();
+  </script>
   <a href="#main" class="skip-link">Skip to content</a>
   <header class="site">
     <div class="wrap nav">
       <a href="/" aria-label="American BioCarbon home"><img class="logo" id="navLogo" alt="American BioCarbon" /></a>
-      <div class="app-tabs" role="tablist" aria-label="Switch app">
-        <a class="app-tab active" href="/" aria-current="page">Website</a>
-        <a class="app-tab" href="/sales/">Sales OS</a>
-      </div>
       <div class="spring"></div>
       <nav class="menu" id="menu" aria-label="Primary"><!-- injected --></nav>
       <a class="cta-mini" href="/request-quote">Request Quote</a>
       <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu">☰</button>
     </div>
   </header>
+
+  <!-- Route changes are announced here: an SPA title change alone is not announced. -->
+  <div id="routeAnnounce" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
   <main id="app" tabindex="-1"><!-- injected --></main>
 
@@ -70,7 +87,7 @@
 
   <footer class="site"><div class="wrap" id="footer"><!-- injected --></div></footer>
 
-  <script src="data.js?v=clean25" defer></script>
-  <script src="app.js?v=clean25" defer></script>
+  <script src="data.js?v=867090aa" defer></script>
+  <script src="app.js?v=0b0f32ba" defer></script>
 </body>
 </html>

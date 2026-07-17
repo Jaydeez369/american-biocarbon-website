@@ -25,7 +25,10 @@ const BANNED = {
 const RE = new RegExp(`[${Object.keys(BANNED).join("")}]`, "g");
 
 const SCAN_EXT = new Set([".html", ".js", ".css", ".json", ".md"]);
-const SKIP_DIRS = new Set(["node_modules", ".git", "scripts", "sales"]);
+// The gate gets one job: customer-facing copy. Everything skipped here is non-shipping.
+// .claude holds worktrees with stale duplicates of the site; docs/ is internal-only and
+// 404s in production (see _redirects). Linting either just produces false failures.
+const SKIP_DIRS = new Set(["node_modules", ".git", ".claude", "docs", "scripts", "sales"]);
 // styles.css.green-backup etc. are non-shipping; only lint tracked shipping files.
 const SKIP_FILES = new Set(["styles.css.green-backup"]);
 
