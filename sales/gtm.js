@@ -359,10 +359,10 @@
   function rLaunch(){
     const l=GTM.launch;
     return page("gtm-launch",
-      head("③ Launch gate — first-48h execution","The gate before outbound, the exact first-48-hours moves, and week-one outputs with iteration rules.")+
-      sec("","Before outreach (gate)")+`<div class="card">${ul(l.before)}</div>`+
-      sec("","First 48 hours — exact tasks")+
-      table(["Task","What to do"],l.first48.map(t=>[`<strong>${esc(t.t)}</strong>`,esc(t.d)]))+
+      head("③ Launch gate: first 48 hours","Clear the gate, then run the first 48 hours. Week-one outputs and iteration rules below.")+
+      sec("","Before outreach (gate)")+`<div class="card">${l.before.map((x,i)=>chk("gate:before:"+i,esc(x))).join("")}</div>`+
+      sec("","First 48 hours")+
+      `<div class="card">${l.first48.map((t,i)=>chk("gate:f48:"+i,`<b>${esc(t.t)}</b> · ${esc(t.d)}`)).join("")}</div>`+
       sec("","First week")+
       `<div class="grid g3">
         <div class="card"><h4>Expected outputs</h4>${ul(l.firstWeek.outputs)}</div>

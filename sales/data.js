@@ -817,8 +817,8 @@ const DATA = {
 
   /* ============ 12b. DAILY ACTION PLAN (top-of-app focus) ============ */
   daily:{
-    mission:"Move our 80 MT of finished biochar. Biochar is Priority #1 and bulk-capable now: get free samples into ag/soil/grower buyers' hands, then convert winning trials straight to paid orders against inventory on hand. Absorbent Pellets run in parallel as the secondary track — samples-first, LOIs follow a win. Cold outreach still leads with a free sample, never a bulk pitch.",
-    target:"By end of Week 2: biochar sample→order motion live with 15–25 samples shipped (biochar-weighted), first biochar reorders/POs against the 80 MT, both tracks live.",
+    mission:"Move the 80 MT of biochar. Get free samples into ag, soil, and grower buyers' hands, then convert winning trials to paid orders against inventory on hand. Absorbent pellets are the secondary track: samples first, LOIs after a win. Cold outreach always leads with a free sample, never a bulk pitch.",
+    target:"By end of Week 2: 15-25 biochar samples shipped, first reorders and POs against the 80 MT, both tracks live.",
     sectors:[
       {k:"bizdev",   t:"Business Development", c:"#5b9bd5", d:"Lists, accounts, calls, LOI conversations"},
       {k:"outreach", t:"Outreach Engine",      c:"#d9a441", d:"Domains, sequences, cold email + call"},
@@ -1023,10 +1023,6 @@ const DATA = {
     collateral:["Absorbent 1-pager (industrial — single-product)","Biochar 1-pager (ag — single-product)","Sample-kit insert + test protocol","Spec sheets + SDS (from Victor)","Comparison: pellets vs wood/clay · biochar vs wood biochar","Product photos (real close-ups + facility)"],
     lists:["150–200 accounts across BOTH product ICPs (Gulf South + freight-viable)","Contacts + verified emails (Apollo)","ICP-tagged + freight-zoned; shared with Victor"],
     firstActions:["Free-sample outreach ONLY (no bulk talk in cold touch — sample is the door-opener)","BIOCHAR track (PRIORITY): distributor/blender/composter/grower emails + calls","Absorbent track (secondary): EHS/spill/oilfield emails + calls","Ship free samples within 48h of qualification (biochar first)","Convert winning biochar trials → POs against the 80 MT on hand","Book discovery/technical calls (Victor takes technical)"],
-    dashFields:["samples requested / shipped","sample → LOI rate","LOIs signed + committed volume","positive reply rate by ICP","deliverability (bounce <2%)"],
-    priceInputs:["(Q4 reference only — NOT quoted now) COGS/SKU","freight zones A–D","Q4 price band per product","distributor territory/volume terms","CDR $/tCO2e (days 61–90)"],
-    claims:["Keep the two product pitches SEPARATE — never mix in one asset","Confirm OMRI/IBI/Puro language (Victor)","USDA Organic = pending only, never 'certified'","Feed/health claims = gated (AAFCO/FDA-CVM) — bedding/absorbency framing only","Lock proof hierarchy (T1–T5) on all assets"],
-    hires:["Jesse (consultant) — demand & the machine","Victor (company) — product, proof, certs, website, fulfillment, signs LOIs","VA for list-building / enrichment as volume grows"],
   },
 
   /* ============ 14. BIOCHAR — SPECS, DATA & AVATARS ============

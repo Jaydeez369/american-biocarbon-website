@@ -35,7 +35,7 @@ function toast(msg="Copied to clipboard"){const t=$("#toast");t.textContent=msg;
 function copyText(txt){navigator.clipboard?.writeText(txt).then(()=>toast()).catch(()=>toast("Copy failed"));}
 /* Live sellable inventory — biochar is Priority #1 (finished tonnage ready to ship now). */
 const BIOCHAR_INVENTORY_TONS = 80;
-const BIOCHAR_INVENTORY_LINE = `${BIOCHAR_INVENTORY_TONS} metric tons of finished 100% biochar are available to sell right now — real, shippable inventory. Biochar is bulk-capable today; samples still open the door, but this tonnage moves now.`;
+const BIOCHAR_INVENTORY_LINE = `${BIOCHAR_INVENTORY_TONS} metric tons of finished 100% biochar, ready to sell right now. Biochar is bulk-capable today: samples open the door, this tonnage moves now.`;
 window.copyEl = id => { const e=document.getElementById(id); if(e) copyText(e.dataset.raw||e.textContent); };
 
 /* ---- helpers ---- */
@@ -124,15 +124,15 @@ function rDaily(){
   const st=checkStats(calKeys, calKeys.map(()=>false));
   const pct=st.total?Math.round(st.done/st.total*100):0;
   return page("today",
-    head("Daily Plan","Run the whole day from one place: the clickable 30-day calendar for Jesse, Victor &amp; Daniel, the foundation checklist, the launch gates, and the 31–90 horizon. One canonical checklist — every item persists across reloads.")+
+    head("Daily Plan","One page to run the day. Every checkbox persists across reloads.")+
     `<div class="note ok" style="border-left:4px solid var(--green-bright);font-size:14px;margin-bottom:14px">
-       <b style="color:var(--green-bright)">🔥 TOP PRIORITY — SELL THE BIOCHAR:</b> ${BIOCHAR_INVENTORY_LINE} Every day's tasks below are aimed at moving this inventory ASAP; absorbent pellets run second.
+       <b style="color:var(--green-bright)">🔥 TOP PRIORITY: SELL THE BIOCHAR.</b> ${BIOCHAR_INVENTORY_LINE} Every task below moves this inventory. Absorbent pellets run second.
      </div>`+
     `<div class="daily-mission card pad-lg">
        <div class="dm-row"><span class="dm-tag">THE MISSION</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}% of calendar tasks</span></div>
        <p class="dm-mission">${esc(D.mission)}</p>
        <div class="note" style="margin-top:10px"><b>2-week target:</b> ${esc(D.target)}</div>
-       <div class="note ok" style="margin-top:8px"><b>How to use this page:</b> work top-to-bottom — <b>① Calendar</b> (click a day for that day's tasks) → <b>② Foundation checklist</b> (what must be true to sell) → <b>③ Launch gates</b> (before outbound) → <b>④ Days 31–90 horizon</b>. Every checkbox persists.</div>
+       <div class="note ok" style="margin-top:8px"><b>Work top to bottom:</b> <b>① Calendar</b> (click a day for its tasks) → <b>② Foundation checklist</b> (what must be true to sell) → <b>③ Launch gates</b> (before outbound) → <b>④ Days 31-90 horizon</b>.</div>
      </div>`
   );
 }
@@ -143,7 +143,7 @@ function rDaily(){
 function rHorizon(){
   const later=DATA.roadmap.slice(2);
   return page("horizon",
-    head("④ Days 31–90 — Horizon","Once the 80 MT biochar motion is running, this is the longer arc: scale what converts, formalize the distributor channel, advance Q4 offtake, and open carbon. Every task persists.")+
+    head("④ Days 31-90 · Horizon","Once the 80 MT biochar motion is running, this is the longer arc: scale what converts, formalize the distributor channel, advance Q4 offtake, and open carbon. Every task persists.")+
     later.map((ph,idx)=>{
       const pi=idx+2; // original DATA.roadmap index → stable check keys
       const keys=ph.tasks.map((t,ti)=>`roadmap:${pi}:${ti}`);
@@ -791,7 +791,7 @@ function rChecklist(){
       arr.map((x,i)=>{ const done=/\|done$/.test(x); const txt=x.replace(/\|done$/,""); return chk(keys[i],esc(txt),done); }).join("")+`</div>`;
   };
   return page("checklist",
-    head("② Foundation checklist — what must be true to sell","The concrete setup behind the calendar: get the 80 MT sellable, then website & product, app build, collateral, lists, first outbound, and the claims to verify. Every item persists across reloads.")+
+    head("② Foundation checklist — what must be true to sell","The concrete setup behind the calendar: get the 80 MT sellable, then website & product, app build, collateral, lists, and first outbound. Every item persists across reloads.")+
     `<div class="grid g2">
       ${block("bio","⓪ Biochar inventory → revenue (80 MT)",c.biochar)}
       ${block("web","① Website & product launch",c.website)}
@@ -799,10 +799,6 @@ function rChecklist(){
       ${block("coll","③ Collateral (single-product each)",c.collateral)}
       ${block("lists","④ Lists to build first",c.lists)}
       ${block("first","⑤ First outbound actions (sample-first)",c.firstActions)}
-      ${block("dash","⑥ First dashboard fields",c.dashFields)}
-      ${block("price","⑦ Pricing inputs (biochar bulk now · pellets Q4 ref)",c.priceInputs)}
-      ${block("claims","⑧ Claims to verify (legal)",c.claims)}
-      ${block("hires","⑨ Team",c.hires)}
     </div>`+
     `<div class="chk-head"><span class="note ok" style="margin:0;flex:1"><b>Sequence:</b> get 80 MT ship-ready + priced → publish site + sample SKUs → build app fields → source biochar-weighted accounts → produce single-product kits → launch biochar-first outbound → ship free samples → convert wins to POs against the 80 MT → present Q4 LOIs on top.</span><span class="chk-reset" onclick="resetChecks('launch:')">Reset</span></div>`
   );
@@ -911,28 +907,6 @@ const COLLAB = {
     ["05","Report back","Outcome + reason logged, so campaigns get sharper instead of guessing.","sales","Sales → Marketing"],
   ],
   /* [workflow, owner, consulted, how it runs, worked example] */
-  raci:[
-    ["Campaign launch","Marketing","Sales (target input)","Marketing owns creative; sales confirms the list is real before spend.",
-     "Marketing builds a Gulf South soil-amendment campaign. Before spend, sales confirms those accounts are actually buying at that volume — the list gets trimmed from 400 to 180, and the budget goes further."],
-    ["Inbound lead routing","Marketing","Sales","Routed with context; acknowledged same business day.",
-     "A form fill comes in tagged \"biochar / paid search / 40-ton inquiry.\" It lands with Victor by noon, and he confirms receipt before end of day — nobody wonders whether it got picked up."],
-    ["Collateral request","Marketing","Sales (brief)","One intake queue with the deal reason attached; no side-door asks.",
-     "Jesse needs a one-pager for a live 80-ton deal. It goes in the queue with the deal name and the close date attached — so marketing can rank it against the other four requests instead of guessing which is urgent."],
-    ["Sales messaging & claims","Shared","Both","Field data in, brand voice out — neither side ships it alone.",
-     "Sales hears \"how do I know it won't wash out?\" on five straight calls. Marketing turns it into approved language; sales runs it live for two weeks and reports which version actually lands."],
-    ["Product facts","Sales (accuracy)","Marketing","One canonical sheet. If it isn't on the sheet, we don't publish it.",
-     "Marketing drafts \"carbon-negative certified\" for the site. Sales checks the cert list, finds it isn't there yet, and it comes out before it's published — not after a customer asks for the paperwork."],
-    ["Website copy","Marketing","Sales (review)","Sales flags anything that would break a live conversation.",
-     "The site says \"bulk quantities available.\" Sales flags it — biochar is bulk-capable, pellets aren't yet. Copy gets split by product so nobody promises what we can't ship."],
-    ["Sample fulfillment","Sales","Marketing (follow-up)","Sales ships; marketing runs the nurture sequence after delivery.",
-     "Sales ships a ½lb biochar sample on a 4–7 day promise. Day 8, marketing's sequence auto-fires the follow-up — so the sample doesn't die in a drawer while sales is on other calls."],
-    ["ProGreaux rebrand","Marketing","Sales (heads-up)","Marketing's call, end to end. Sales just needs the date and the story before customers get it.",
-     "Marketing locks the Aug 17 launch. Sales gets the date and the narrative a week ahead, so active deals hear it from their rep first instead of finding a new logo on the site mid-negotiation."],
-    ["Events & PR","Shared","Both","Marketing runs the presence; sales works the room. Planned together.",
-     "A Gulf South ag trade show: marketing owns the booth, the materials, and the press angle; sales owns the meeting list and books conversations before the doors open."],
-    ["Pipeline reporting","Shared","Both","Sales owns the data, marketing owns the source tagging, one number gets quoted by both.",
-     "Month close: sales reports 12 opportunities and why 3 stalled; marketing maps them to the campaigns that sourced them. One reconciled number goes in both decks."],
-  ],
   cadence:[
     ["Weekly sync","30 min","Both","Lead flow, asset queue, what's blocked this week."],
     ["Outbound readout","Bi-weekly","Sales → Marketing","What sales is generating, objections heard, language that landed, competitor mentions."],
@@ -953,14 +927,6 @@ const COLLAB = {
     ["Sales messaging gets built together — field data in, brand voice out.",false],
     ["One pipeline number, one dashboard, both teams quote it identically.",false],
   ],
-  agenda:[
-    "Do we agree on the split — sales runs ABC as-is, marketing builds ProGreaux end to end?",
-    "What's the real ProGreaux launch date, and how far ahead does sales hear it?",
-    "How much ABC upkeep does sales actually need to keep outreach credible — and who does it?",
-    "What's the right intake path when sales needs an asset — and what turnaround is realistic?",
-    "What does marketing want out of the outbound readout that we aren't sending yet?",
-    "What's the one pipeline number we both report against, and who publishes it?",
-  ],
 };
 function rCollab(){
   const C=COLLAB;
@@ -969,8 +935,8 @@ function rCollab(){
   const keys=C.agreements.map((_,i)=>`collab:agree:${i}`);
   const st=checkStats(keys,C.agreements.map(a=>a[1]));
   return page("marketing",
-    head("Sales × Marketing","One page for how the two teams mesh: what each side owns outright, what we own together, and how work crosses the line between us. Built as a working agreement to review together — not a scorecard.")+
-    `<div class="note info"><b>Frame for the meeting:</b> both teams are pulling toward the same number. The goal today is to make the seams explicit — domains, handoffs, and turnaround — so nothing falls between us and nothing gets done twice.</div>`+
+    head("Sales × Marketing","How the two teams mesh: what each side owns, what we own together, and how work crosses the line between us. A working agreement to review together, not a scorecard.")+
+    `<div class="note info"><b>Frame for the meeting:</b> both teams pull toward the same number. Make the seams explicit (domains, handoffs, turnaround) so nothing falls between us and nothing gets done twice.</div>`+
     sec("1","The rollout: two brands, two jobs")+
     `<p class="lead">Everything below only makes sense against this split. Sales is running one brand to keep revenue moving; marketing is building the next one. Neither team is doing the other's job.</p>`+
     `<div class="brands">${C.brands.map(([side,name,role,tag,pts])=>
@@ -1000,36 +966,23 @@ function rCollab(){
          ${laneList(C.mktg.own)}
        </div>
      </div>`+
-    `<div class="note">Read the middle column first. The outer lanes are where each team moves without asking permission; the middle is where we move together — and where every misfire between two good teams actually starts.</div>`+
+    `<div class="note">Read the middle column first. The outer lanes are where each team moves without asking; the middle is where we move together, and where most misfires between two good teams start.</div>`+
     sec("3","The inbound handoff, end to end")+
     `<div class="flow">${C.flow.map(([n,t,d,o,lbl])=>
       `<div class="flow-step"><div class="n">${n}</div><div class="t">${esc(t)}</div><div class="d">${esc(d)}</div>
        <span class="owner owner-${o}">${esc(lbl)}</span></div>`).join("")}</div>`+
-    `<div class="note ok"><b>The one rule that makes this work:</b> step 05 is not optional. Marketing can only sharpen what it can see — if outcomes never come back, campaigns are guessing and sales inherits weaker leads next quarter.</div>`+
-    sec("4","Ownership by workflow")+
-    `<p class="lead">Each row has a worked example, so "how it runs" means the same thing to both teams instead of staying abstract.</p>`+
-    table(["Workflow","Owns","Consulted","How it runs"],C.raci.map(r=>[
-      `<strong>${esc(r[0])}</strong>`,
-      badge(r[1], r[1]==="Sales"?"badge-navy":r[1]==="Marketing"?"badge-red":"badge-muted"),
-      esc(r[2]),
-      `${esc(r[3])}<div class="ex"><span class="ex-l">Example</span>${esc(r[4])}</div>`]))+
-    sec("5","Pipeline reporting")+
-    `<p class="lead">The number both teams get judged on, so it's worth being exact about who owns which half of it.</p>`+
+    `<div class="note ok"><b>Step 05 is not optional.</b> Marketing can only sharpen what it sees. If outcomes never come back, sales inherits weaker leads next quarter.</div>`+
+    sec("4","Pipeline reporting")+
     `<div class="grid g2">${C.reporting.map(([t,side,d])=>
       `<div class="card rep-card rep-${side}"><h4>${esc(t)} <span class="owner owner-${side}">${side==="sales"?"Sales":side==="mktg"?"Marketing":"Both"}</span></h4>
        <p>${esc(d)}</p></div>`).join("")}</div>`+
-    `<div class="note ok"><b>Why this one matters most:</b> if sales and marketing quote two different pipeline numbers, every other agreement on this page gets re-litigated every month. One number ends that.</div>`+
-    sec("6","Cadence")+
+    `<div class="note ok"><b>One number, one definition.</b> Two different pipeline figures and every agreement on this page gets re-litigated monthly.</div>`+
+    sec("5","Cadence")+
     table(["Ritual","Length","Direction","Purpose"],C.cadence.map(r=>[
       `<strong>${esc(r[0])}</strong>`,esc(r[1]),esc(r[2]),esc(r[3])]))+
-    sec("7","Working agreements")+
-    `<p class="lead">The short list of things we'd like both teams to be able to say out loud without hesitating. Check them off as we land them — progress persists across reloads.
-     <b style="color:var(--navy-800)">${st.done}/${st.total} agreed</b></p>`+
-    C.agreements.map((a,i)=>chk(`collab:agree:${i}`,a[0],a[1])).join("")+
-    sec("8","To-dos to leave the room with")+
-    `<div class="grid g2">${C.agenda.map((q,i)=>
-      `<div class="card"><h4><span class="kicker">Q${i+1}</span></h4><p style="font-size:13.5px;color:var(--text)">${esc(q)}</p></div>`).join("")}</div>`+
-    `<div class="note info" style="margin-top:16px"><b>Close on:</b> one owner and one date per open item. Anything we can't assign today gets parked on this page and picked up at the weekly sync — nothing leaves in someone's head.</div>`
+    sec("6","Working agreements")+
+    `<p class="lead">Things both teams should be able to say out loud without hesitating. Check them off as we land them. <b style="color:var(--navy-800)">${st.done}/${st.total} agreed</b></p>`+
+    C.agreements.map((a,i)=>chk(`collab:agree:${i}`,a[0],a[1])).join("")
   );
 }
 
