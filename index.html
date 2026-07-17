@@ -46,6 +46,24 @@
   </script>
 </head>
 <body>
+  <script>
+    /* Legacy hash-route compatibility. This site was a hash router until 2026-07-15, so
+       "#/shop/agricultural-biochar" was the public URL form - it is still live in
+       bookmarks, shared links, collateral and search results. The router now reads
+       location.pathname, so without this those links silently render the homepage
+       instead of the page they name. A hash never reaches the server, so this cannot be
+       a _redirects rule; it has to happen here, and it must run before the deferred
+       app.js router reads the path. Translate once, then let the router see a clean path. */
+    (function () {
+      var h = window.location.hash;
+      if (!h || h.charAt(1) !== "/") return;      // ignore "#main" and bare "#/"
+      var target = h.slice(1);
+      if (target === "/") return;
+      // the old shim kept the query outside the hash; only re-add it if the hash lacks one
+      if (target.indexOf("?") === -1) target += window.location.search || "";
+      window.history.replaceState(null, "", target);
+    })();
+  </script>
   <a href="#main" class="skip-link">Skip to content</a>
   <header class="site">
     <div class="wrap nav">
