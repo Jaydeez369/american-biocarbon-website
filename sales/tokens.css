@@ -1,0 +1,82 @@
+/* ============================================================
+   AMERICAN BIOCARBON - CANONICAL BRAND TOKENS  (v1, 2026-07)
+   Single source of truth. Imported by BOTH the public site
+   (website/styles.css, light theme) and the Sales OS console
+   (website/sales/styles.css, dark theme).
+
+   ARCHITECTURE - two layers:
+     1. PRIMITIVES  (this file): raw brand scales + type/space/
+        radius. Theme-agnostic. Never reference these directly
+        in component CSS - go through a semantic alias.
+     2. SEMANTIC ALIASES (each stylesheet's :root): map these
+        primitives onto local role names (--brand, --surface,
+        --text …) per theme. Light and dark map differently.
+
+   RULE: brand identity = NAVY + CRIMSON. Green / amber / red /
+   blue are STATUS colors only (success / warning / danger /
+   info) - never brand. This is why the console is navy, not
+   green: green now means "good," not "us."
+   ============================================================ */
+
+:root{
+  /* ---------- BRAND · Navy (primary) ---------- */
+  --navy-50:#eef2f9;  --navy-100:#d9e2f1; --navy-200:#b3c4e0;
+  --navy-300:#9db3d6; --navy-400:#6f93c9; --navy-500:#4d6ba3;
+  --navy-600:#24478a; --navy-700:#1a376c; --navy-800:#122a52;
+  --navy-900:#0d1f3d;
+
+  /* ---------- BRAND · Crimson (accent / CTA) ---------- */
+  --crimson-50:#fdeaef; --crimson-300:#f08aa0; --crimson-400:#e6486a;
+  --crimson-500:#d7153f; --crimson-600:#b91237; --crimson-700:#8f0d2a;
+
+  /* ---------- NEUTRALS (light-theme surfaces/text) ---------- */
+  --ink:#1a1a1a; --slate:#3e4a5f; --mute:#63676e;
+  --white:#ffffff; --paper:#f7f8fa; --paper-2:#eef1f5;
+  --line:#e2e6ee; --line-2:#c4cfe6;
+
+  /* ---------- DARK SURFACES (console theme) ---------- */
+  --d-bg:#0a0d12;   --d-950:#0b0e14; --d-900:#111621; --d-850:#151b26;
+  --d-800:#1b222e;  --d-700:#28313f; --d-600:#3a4655;
+  --d-line:#232c39; --d-line-soft:#1a212c;
+  --d-text:#e6ecf5; --d-text-dim:#9aa7bd; --d-text-mute:#67728a;
+
+  /* ---------- STATUS (semantic, shared, NOT brand) ---------- */
+  --success:#5f8a5b; --success-bright:#84b47b; --success-deep:#3f5f3c;
+  --warning:#caa85a; --warning-soft:#e6cd8a;
+  --danger:#c85a54;  --danger-soft:#e69089;  --danger-strong:#c02542;
+  --info:#5a86c8;    --info-soft:#9dbbe6;
+  --purple:#9a7fc8;  /* categorical only (e.g. person tag) */
+
+  /* ---------- rgb channels (for rgba() with alpha) ---------- */
+  --navy-500-rgb:77,107,163; --navy-400-rgb:111,147,201; --navy-600-rgb:36,71,138;
+  --crimson-500-rgb:215,21,63;
+  --success-rgb:132,180,123; --warning-rgb:202,168,90;
+  --danger-rgb:200,90,84;    --info-rgb:90,134,200; --purple-rgb:154,127,200;
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --f-sans:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --f-serif:"DM Serif Display","Georgia",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+  /* type scale */
+  --fs-xs:11px; --fs-sm:12.5px; --fs-base:14px; --fs-md:16px;
+  --fs-lg:20px; --fs-xl:24px; --fs-2xl:32px; --fs-3xl:44px;
+
+  /* ---------- SPACING (4pt rhythm) ---------- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
+
+  /* ---------- RADIUS ---------- */
+  --r-xs:6px; --r-sm:8px; --r:10px; --r-lg:12px; --r-xl:16px; --r-pill:999px;
+
+  /* ---------- ELEVATION ---------- */
+  /* light - navy-tinted, soft */
+  --sh-light-sm:0 1px 2px rgba(var(--navy-600-rgb),.07);
+  --sh-light:0 1px 2px rgba(var(--navy-600-rgb),.07),0 10px 30px rgba(var(--navy-600-rgb),.07);
+  /* dark - black, deep */
+  --sh-dark-1:0 1px 2px rgba(0,0,0,.35);
+  --sh-dark-2:0 2px 5px rgba(0,0,0,.30),0 12px 28px -8px rgba(0,0,0,.45);
+  --sh-dark-3:0 8px 40px -8px rgba(0,0,0,.55);
+
+  /* ---------- LAYOUT ---------- */
+  --wrap:1160px;
+}

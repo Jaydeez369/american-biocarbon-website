@@ -38,6 +38,26 @@ function hashOf(file) {
 let stale = 0;
 let missing = 0;
 
+/* Sales OS deploys two ways: as /sales/ on the main site, AND as its own standalone
+   Cloudflare Pages project (root dir = sales/). A standalone deploy cannot reach
+   ../tokens.css, so Sales OS links a LOCAL sales/tokens.css that is a build-managed
+   mirror of the canonical tokens.css. Edit tokens.css; the build syncs the mirror.
+   --check fails on drift so a stale mirror can't ship. */
+{
+  const canon = readFileSync(join(ROOT, "tokens.css"));
+  const mirrorPath = join(ROOT, "sales", "tokens.css");
+  const mirror = existsSync(mirrorPath) ? readFileSync(mirrorPath) : null;
+  if (!mirror || !canon.equals(mirror)) {
+    if (CHECK) {
+      console.error("✗ Token mirror: sales/tokens.css is out of date with tokens.css. Run the build to sync.");
+      stale++;
+    } else {
+      writeFileSync(mirrorPath, canon);
+      console.log("• Synced sales/tokens.css from canonical tokens.css");
+    }
+  }
+}
+
 for (const page of PAGES) {
   const pagePath = join(ROOT, page);
   if (!existsSync(pagePath)) {
