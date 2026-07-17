@@ -10,8 +10,25 @@ function setCheck(k,on){ const c=getChecks(); c[k]= on?1:0; try{ localStorage.se
 /* chk(key, labelHTML, def) — labelHTML is trusted HTML; def = default-checked when never touched */
 function chk(key, labelHTML, def){ const v=getChecks()[key]; const on = (v===undefined? !!def : !!v) ? " done" : ""; return `<label class="chk${on}" data-k="${esc(key)}" onclick="toggleChk(this)"><span class="box">✓</span><span class="lbl">${labelHTML}</span></label>`; }
 function checkStats(keys, defs){ const c=getChecks(); let done=0; keys.forEach((k,i)=>{ const v=c[k]; if(v===undefined? (defs&&defs[i]):v) done++; }); return {done, total:keys.length}; }
-window.toggleChk = el => { const on = !el.classList.contains("done"); el.classList.toggle("done", on); setCheck(el.dataset.k, on); };
-window.resetChecks = pfx => { const c=getChecks(); Object.keys(c).forEach(k=>{ if(!pfx||k.startsWith(pfx)) delete c[k]; }); localStorage.setItem(CHECK_KEY, JSON.stringify(c)); go((location.hash||"#daily").slice(1)); };
+/* Counters (per-block progress, the Daily Plan mission bar) are produced by the renderers
+   from getChecks(), so they only change when the DOM is rebuilt. Toggling a class and
+   writing storage is not enough - without a re-render the mission bar reads 0% forever.
+   rerender() rebuilds from live state while preserving what the user was looking at. */
+function rerender(){
+  const y = window.scrollY;
+  const id = (location.hash || "#" + NAV[0].items[0].id).slice(1);
+  render();
+  go(id, { keepScroll:true });   // restore the active section without jumping to top
+  recalc();                       // #content was rebuilt, so the calculators need repopulating
+  // an open calendar day lives inside #content, so put it back or ticking a task inside it
+  // would close the panel out from under the user
+  if(window.gtmOpenCalDay != null && typeof window.gtmCalPick === "function"){
+    window.gtmCalPick(window.gtmOpenCalDay, { restore:true });
+  }
+  window.scrollTo(0, y);
+}
+window.toggleChk = el => { const on = !el.classList.contains("done"); el.classList.toggle("done", on); setCheck(el.dataset.k, on); rerender(); };
+window.resetChecks = pfx => { const c=getChecks(); Object.keys(c).forEach(k=>{ if(!pfx||k.startsWith(pfx)) delete c[k]; }); localStorage.setItem(CHECK_KEY, JSON.stringify(c)); rerender(); };
 
 /* ---- toast + copy ---- */
 function toast(msg="Copied to clipboard"){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1400);}
@@ -56,6 +73,9 @@ const LEAN_NAV=[
   {group:"Grow",items:[
     {id:"onboarding",ic:"✍",t:"Onboarding & Scale"},
   ]},
+  {group:"Collaborate",items:[
+    {id:"marketing",ic:"⇄",t:"Sales × Marketing"},
+  ]},
 ];
 const BUILD_NAV=[
   {group:"Build Later · parked",items:[
@@ -74,13 +94,16 @@ function buildNav(){
 }
 const titleOf = id => NAV.flatMap(g=>g.items).find(i=>i.id===id)?.t||"";
 
-function go(id){
+function go(id, opts={}){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   const sec=document.getElementById("sec-"+id); if(sec)sec.classList.add("active");
   document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.id===id));
   $("#topbarTitle").textContent=titleOf(id);
   $("#sidebar").classList.remove("open");
-  window.scrollTo(0,0); location.hash=id;
+  // keepScroll is for re-renders in place (ticking a checkbox), where jumping to the top
+  // would throw away the user's position mid-list.
+  if(!opts.keepScroll) window.scrollTo(0,0);
+  location.hash=id;
 }
 
 /* ================= RENDERERS ================= */
@@ -226,7 +249,7 @@ function segCard(s){
   </div>`;
 }
 window.segFilter=(el,g)=>{
-  document.querySelectorAll("#sec-segments .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
   document.querySelectorAll("#segCards .seg-card").forEach(c=>c.style.display=(g==="all"||c.dataset.group===g)?"":"none");
 };
 
@@ -473,7 +496,7 @@ function accRow(a,i){
     <td>${badge("P"+pri,priCls)}</td><td>${badge(status,"badge-blue")}</td><td>${esc(next)}</td></tr>`;
 }
 window.accFilter=(el,s)=>{
-  document.querySelectorAll("#sec-accounts .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
   document.querySelectorAll("#accTbl tbody tr").forEach(r=>r.style.display=(s==="all"||r.dataset.seg===s)?"":"none");
 };
 
@@ -492,7 +515,7 @@ function rOutreach(){
   );
 }
 window.outFilter=(el,i)=>{
-  document.querySelectorAll("#sec-outreach .pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
+  el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
   document.querySelectorAll(".out-block").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");
 };
 
@@ -800,6 +823,216 @@ function compose(id, thunks){
   return page(id, thunks.map(stripBody).join(mergeDiv));
 }
 
+/* --- Sales × Marketing collaboration (working agreement) ---
+   Built for the standing marketing sync: two owned lanes, one shared middle,
+   and the handoffs written down so ownership is explicit rather than assumed. */
+const COLLAB = {
+  /* The two-brand split is the frame for everything below: sales sells what
+     American BioCarbon has today; marketing builds ProGreaux for what's next. */
+  brands:[
+    ["sales","American BioCarbon","What sales sells today","Live now",[
+      "The brand sales is actively selling under — right now, and through the transition.",
+      "Sales works <b>what's left of American BioCarbon</b>: existing inventory, existing product facts, existing proof.",
+      "The ABC site and collateral are the <b>foundation and backdrop for outreach</b> — enough to make outbound credible, not a brand program.",
+      "Maintenance-level effort. Nobody is investing in growing this brand; it carries the revenue while ProGreaux gets built.",
+    ]],
+    ["mktg","ProGreaux","What marketing is building","Marketing owns 100%",[
+      "The rebrand is <b>entirely marketing's</b> — narrative, identity, site, launch, timing, sequencing.",
+      "Sales has no build role here and no approval gate. Marketing decides what it is and when it lands.",
+      "Sales' only ask: <b>tell us the date and the story before a customer does</b>, so live conversations don't contradict the launch.",
+      "Target window: on or around <b>Aug 17</b>. If that moves, sales needs to hear it — that's the whole dependency.",
+    ]],
+  ],
+  sales:{ who:"Jesse · Victor · Daniel", own:[
+    ["Owns outright",[
+      "<b>Outbound & pipeline</b> — target account list, sequences, calls, LinkedIn touches.",
+      "<b>Discovery & qualification</b> — fit, volume, timeline, decision path.",
+      "<b>Sample-to-LOI motion</b> — sample requests through signed LOI.",
+      "<b>Pricing & terms conversations</b> — quotes, freight, negotiation.",
+      "<b>Account relationships</b> — the named buyer, from first touch to reorder.",
+      "<b>Selling American BioCarbon</b> — the current brand, current inventory, as-is.",
+      "<b>Sales data & CRM hygiene</b> — pipeline records, outcomes, and reasons live with sales.",
+    ]],
+    ["Decides",[
+      "Which accounts and segments we chase this month.",
+      "Whether a lead is worked, nurtured, or disqualified.",
+      "What gets said on a live call.",
+      "What the ABC backdrop needs to be credible for outreach.",
+    ]],
+  ]},
+  mktg:{ who:"Marketing team", own:[
+    ["Owns outright",[
+      "<b>ProGreaux — the entire rebrand</b>. Narrative, identity, launch, timing. Marketing's call, end to end.",
+      "<b>Brand & voice</b> — how we look and sound everywhere, both brands.",
+      "<b>Website & digital presence</b> — site, SEO, landing pages, analytics.",
+      "<b>Demand generation</b> — paid, organic, social, email nurture.",
+      "<b>Content production</b> — one-pagers, deck design, case studies, photo/video.",
+      "<b>Inbound lead generation</b> — creating the demand that becomes sales' inbound.",
+    ]],
+    ["Decides",[
+      "Everything ProGreaux: what it is, what it says, when it launches.",
+      "Brand system: palette, typography, logo usage, template standards.",
+      "Channel mix and campaign calendar.",
+      "Final creative execution on anything public-facing.",
+    ]],
+  ]},
+  seams:[
+    ["to-sales","→","<b>Inbound leads</b> — handed off to sales with source, campaign, and context attached."],
+    ["to-mktg","←","<b>Outbound leads</b> — what sales is generating and hearing in-market, fed back so campaigns aim better."],
+    ["to-sales","→","<b>Collateral</b> — decks, one-pagers, sample sheets, on brand."],
+    ["to-mktg","←","<b>Asset requests</b> — one queue, with the deal reason attached."],
+    ["to-sales","→","<b>Site & landing pages</b> that outbound can point to."],
+    ["to-mktg","←","<b>Outcome data</b> — what closed, what stalled, and why. Sales owns the data and reports it out."],
+  ],
+  shared:[
+    ["Jointly owned — neither side moves alone",[
+      "<b>ICP & positioning</b> — same definition of who we sell to and why we win.",
+      "<b>Sales messaging & claims</b> — what sales says on calls and in sequences. Marketing shapes the voice, sales pressure-tests it live. Built together, not handed down.",
+      "<b>Product facts</b> — one source of truth for specs, certs, capacity, and lead times.",
+      "<b>Events & PR</b> — trade shows, press, industry presence. Marketing runs the presence, sales works the room; both plan it.",
+      "<b>Pipeline reporting</b> — see below. One number, one definition, both teams quote it identically.",
+    ]],
+  ],
+  /* Pipeline reporting gets its own block — it's the number both teams get
+     measured on, so the split between who owns the data and who reads it
+     needs to be unambiguous. */
+  reporting:[
+    ["Sales owns the data","sales","Every record, outcome, and reason code. If it's in the pipeline, sales put it there and sales stands behind it."],
+    ["Marketing owns the source","mktg","Which campaign, channel, or event produced the lead — tagged before it ever reaches a seller."],
+    ["One number, both mouths","both","Sourced pipeline, conversion by source, and closed volume. Same figure, same definition, whether it's quoted in a sales review or a marketing readout."],
+    ["Reported monthly, together","both","Sales brings outcomes; marketing brings sources. The two get reconciled in the room — not in two separate decks that disagree."],
+    ["What it's actually for","both","Marketing can only sharpen what it can see. Outcome data going back is what turns spend into better leads next month."],
+  ],
+  flow:[
+    ["01","Lead arrives","Form, event, campaign, or referral — captured with source and campaign attached.","mktg","Marketing"],
+    ["02","Handoff to sales","Routed to a named seller with full context. Acknowledged same business day.","mktg","Marketing → Sales"],
+    ["03","Qualify","Sales scores it against the shared ICP: work it, nurture it, or disqualify it.","sales","Sales"],
+    ["04","Work the account","Discovery, sample, quote, LOI. Sales owns every touch from here.","sales","Sales"],
+    ["05","Report back","Outcome + reason logged, so campaigns get sharper instead of guessing.","sales","Sales → Marketing"],
+  ],
+  /* [workflow, owner, consulted, how it runs, worked example] */
+  raci:[
+    ["Campaign launch","Marketing","Sales (target input)","Marketing owns creative; sales confirms the list is real before spend.",
+     "Marketing builds a Gulf South soil-amendment campaign. Before spend, sales confirms those accounts are actually buying at that volume — the list gets trimmed from 400 to 180, and the budget goes further."],
+    ["Inbound lead routing","Marketing","Sales","Routed with context; acknowledged same business day.",
+     "A form fill comes in tagged \"biochar / paid search / 40-ton inquiry.\" It lands with Victor by noon, and he confirms receipt before end of day — nobody wonders whether it got picked up."],
+    ["Collateral request","Marketing","Sales (brief)","One intake queue with the deal reason attached; no side-door asks.",
+     "Jesse needs a one-pager for a live 80-ton deal. It goes in the queue with the deal name and the close date attached — so marketing can rank it against the other four requests instead of guessing which is urgent."],
+    ["Sales messaging & claims","Shared","Both","Field data in, brand voice out — neither side ships it alone.",
+     "Sales hears \"how do I know it won't wash out?\" on five straight calls. Marketing turns it into approved language; sales runs it live for two weeks and reports which version actually lands."],
+    ["Product facts","Sales (accuracy)","Marketing","One canonical sheet. If it isn't on the sheet, we don't publish it.",
+     "Marketing drafts \"carbon-negative certified\" for the site. Sales checks the cert list, finds it isn't there yet, and it comes out before it's published — not after a customer asks for the paperwork."],
+    ["Website copy","Marketing","Sales (review)","Sales flags anything that would break a live conversation.",
+     "The site says \"bulk quantities available.\" Sales flags it — biochar is bulk-capable, pellets aren't yet. Copy gets split by product so nobody promises what we can't ship."],
+    ["Sample fulfillment","Sales","Marketing (follow-up)","Sales ships; marketing runs the nurture sequence after delivery.",
+     "Sales ships a ½lb biochar sample on a 4–7 day promise. Day 8, marketing's sequence auto-fires the follow-up — so the sample doesn't die in a drawer while sales is on other calls."],
+    ["ProGreaux rebrand","Marketing","Sales (heads-up)","Marketing's call, end to end. Sales just needs the date and the story before customers get it.",
+     "Marketing locks the Aug 17 launch. Sales gets the date and the narrative a week ahead, so active deals hear it from their rep first instead of finding a new logo on the site mid-negotiation."],
+    ["Events & PR","Shared","Both","Marketing runs the presence; sales works the room. Planned together.",
+     "A Gulf South ag trade show: marketing owns the booth, the materials, and the press angle; sales owns the meeting list and books conversations before the doors open."],
+    ["Pipeline reporting","Shared","Both","Sales owns the data, marketing owns the source tagging, one number gets quoted by both.",
+     "Month close: sales reports 12 opportunities and why 3 stalled; marketing maps them to the campaigns that sourced them. One reconciled number goes in both decks."],
+  ],
+  cadence:[
+    ["Weekly sync","30 min","Both","Lead flow, asset queue, what's blocked this week."],
+    ["Outbound readout","Bi-weekly","Sales → Marketing","What sales is generating, objections heard, language that landed, competitor mentions."],
+    ["Campaign preview","Before launch","Marketing → Sales","Sales sees the message before a prospect does."],
+    ["Rebrand checkpoint","Until launch","Marketing → Sales","Marketing's build, marketing's timeline — sales just needs the date and the story kept current."],
+    ["Monthly review","60 min","Both","Sourced pipeline, conversion by source, next month's priorities."],
+  ],
+  agreements:[
+    ["Sales sells American BioCarbon as-is; the ABC backdrop is maintained, not grown.",true],
+    ["ProGreaux is marketing's build, end to end — no sales approval gate.",false],
+    ["Sales gets the rebrand date and story before any customer does.",false],
+    ["One intake queue for asset requests — with the deal reason attached.",false],
+    ["One canonical product-facts sheet; both teams cite it, neither improvises.",false],
+    ["Every inbound handoff acknowledged same business day, by a named person.",false],
+    ["Every worked lead gets an outcome + reason back to marketing.",false],
+    ["No public claim ships without a sales accuracy check.",false],
+    ["No campaign launches without sales seeing the message first.",false],
+    ["Sales messaging gets built together — field data in, brand voice out.",false],
+    ["One pipeline number, one dashboard, both teams quote it identically.",false],
+  ],
+  agenda:[
+    "Do we agree on the split — sales runs ABC as-is, marketing builds ProGreaux end to end?",
+    "What's the real ProGreaux launch date, and how far ahead does sales hear it?",
+    "How much ABC upkeep does sales actually need to keep outreach credible — and who does it?",
+    "What's the right intake path when sales needs an asset — and what turnaround is realistic?",
+    "What does marketing want out of the outbound readout that we aren't sending yet?",
+    "What's the one pipeline number we both report against, and who publishes it?",
+  ],
+};
+function rCollab(){
+  const C=COLLAB;
+  const laneList=(blocks)=>blocks.map(([h,items])=>
+    `<div class="lane-sub">${esc(h)}</div><ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`).join("");
+  const keys=C.agreements.map((_,i)=>`collab:agree:${i}`);
+  const st=checkStats(keys,C.agreements.map(a=>a[1]));
+  return page("marketing",
+    head("Sales × Marketing","One page for how the two teams mesh: what each side owns outright, what we own together, and how work crosses the line between us. Built as a working agreement to review together — not a scorecard.")+
+    `<div class="note info"><b>Frame for the meeting:</b> both teams are pulling toward the same number. The goal today is to make the seams explicit — domains, handoffs, and turnaround — so nothing falls between us and nothing gets done twice.</div>`+
+    sec("1","The rollout: two brands, two jobs")+
+    `<p class="lead">Everything below only makes sense against this split. Sales is running one brand to keep revenue moving; marketing is building the next one. Neither team is doing the other's job.</p>`+
+    `<div class="brands">${C.brands.map(([side,name,role,tag,pts])=>
+      `<div class="brand-card brand-${side}">
+         <div class="brand-top"><div><div class="brand-role">${esc(role)}</div><h3>${esc(name)}</h3></div>
+         <span class="brand-tag tag-${side}">${esc(tag)}</span></div>
+         <ul>${pts.map(p=>`<li>${p}</li>`).join("")}</ul>
+       </div>`).join("")}</div>`+
+    `<div class="note"><b>Said plainly:</b> sales works <b>what's left of American BioCarbon</b> — the inventory that exists and the proof that exists. The ABC site and collateral are a <b>foundation and backdrop for outreach</b>, nothing more; they need to be accurate and credible, not impressive. <b>ProGreaux is 100% marketing's</b>, start to finish. The only wire between the two is timing: sales needs the launch date and the story before a customer brings it up on a call.</div>`+
+    sec("2","Who owns what")+
+    `<div class="lanes">
+       <div class="lane lane-sales">
+         <div class="lane-hd"><div class="lane-mark">S</div><h3>Sales</h3></div>
+         <div class="lane-who">${esc(C.sales.who)}</div>
+         ${laneList(C.sales.own)}
+       </div>
+       <div class="lane lane-shared">
+         <div class="lane-hd"><div class="lane-mark">∩</div><h3>Together</h3></div>
+         <div class="lane-who">The intersection</div>
+         ${laneList(C.shared)}
+         <div class="lane-sub">What crosses the line</div>
+         ${C.seams.map(([cls,dir,txt])=>`<div class="seam ${cls}"><span class="dir">${dir}</span><span>${txt}</span></div>`).join("")}
+       </div>
+       <div class="lane lane-mktg">
+         <div class="lane-hd"><div class="lane-mark">M</div><h3>Marketing</h3></div>
+         <div class="lane-who">${esc(C.mktg.who)}</div>
+         ${laneList(C.mktg.own)}
+       </div>
+     </div>`+
+    `<div class="note">Read the middle column first. The outer lanes are where each team moves without asking permission; the middle is where we move together — and where every misfire between two good teams actually starts.</div>`+
+    sec("3","The inbound handoff, end to end")+
+    `<div class="flow">${C.flow.map(([n,t,d,o,lbl])=>
+      `<div class="flow-step"><div class="n">${n}</div><div class="t">${esc(t)}</div><div class="d">${esc(d)}</div>
+       <span class="owner owner-${o}">${esc(lbl)}</span></div>`).join("")}</div>`+
+    `<div class="note ok"><b>The one rule that makes this work:</b> step 05 is not optional. Marketing can only sharpen what it can see — if outcomes never come back, campaigns are guessing and sales inherits weaker leads next quarter.</div>`+
+    sec("4","Ownership by workflow")+
+    `<p class="lead">Each row has a worked example, so "how it runs" means the same thing to both teams instead of staying abstract.</p>`+
+    table(["Workflow","Owns","Consulted","How it runs"],C.raci.map(r=>[
+      `<strong>${esc(r[0])}</strong>`,
+      badge(r[1], r[1]==="Sales"?"badge-navy":r[1]==="Marketing"?"badge-red":"badge-muted"),
+      esc(r[2]),
+      `${esc(r[3])}<div class="ex"><span class="ex-l">Example</span>${esc(r[4])}</div>`]))+
+    sec("5","Pipeline reporting")+
+    `<p class="lead">The number both teams get judged on, so it's worth being exact about who owns which half of it.</p>`+
+    `<div class="grid g2">${C.reporting.map(([t,side,d])=>
+      `<div class="card rep-card rep-${side}"><h4>${esc(t)} <span class="owner owner-${side}">${side==="sales"?"Sales":side==="mktg"?"Marketing":"Both"}</span></h4>
+       <p>${esc(d)}</p></div>`).join("")}</div>`+
+    `<div class="note ok"><b>Why this one matters most:</b> if sales and marketing quote two different pipeline numbers, every other agreement on this page gets re-litigated every month. One number ends that.</div>`+
+    sec("6","Cadence")+
+    table(["Ritual","Length","Direction","Purpose"],C.cadence.map(r=>[
+      `<strong>${esc(r[0])}</strong>`,esc(r[1]),esc(r[2]),esc(r[3])]))+
+    sec("7","Working agreements")+
+    `<p class="lead">The short list of things we'd like both teams to be able to say out loud without hesitating. Check them off as we land them — progress persists across reloads.
+     <b style="color:var(--navy-800)">${st.done}/${st.total} agreed</b></p>`+
+    C.agreements.map((a,i)=>chk(`collab:agree:${i}`,a[0],a[1])).join("")+
+    sec("8","To-dos to leave the room with")+
+    `<div class="grid g2">${C.agenda.map((q,i)=>
+      `<div class="card"><h4><span class="kicker">Q${i+1}</span></h4><p style="font-size:13.5px;color:var(--text)">${esc(q)}</p></div>`).join("")}</div>`+
+    `<div class="note info" style="margin-top:16px"><b>Close on:</b> one owner and one date per open item. Anything we can't assign today gets parked on this page and picked up at the weekly sync — nothing leaves in someone's head.</div>`
+  );
+}
+
 /* LEAN = daily-driver. BUILD = parked heavy modules (build-later.html). */
 const LEAN_SECTIONS=[
   // Consolidated IA (v5): 10 → 6 sections.
@@ -815,6 +1048,7 @@ const LEAN_SECTIONS=[
   ["outreach", [rAccounts, rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
   ["playbook", [rCollateral, G("rSample"), rPlaybook]],
   ["onboarding",[rOnboarding, G("rScale")]],
+  ["marketing", [rCollab]],
 ];
 const BUILD_SECTIONS=[
   ["b-overview",  [rOverview, rAssumptions]],
@@ -830,6 +1064,14 @@ buildNav();
 render();
 $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
 const defaultId = NAV[0].items[0].id;
+const isNavId = id => NAV.flatMap(g=>g.items).some(i=>i.id===id);
 const start=(location.hash||"").slice(1);
-go(NAV.flatMap(g=>g.items).some(i=>i.id===start)?start:defaultId);
+go(isNavId(start)?start:defaultId);
 recalc();
+/* go() writes location.hash on every nav, so without this Back/Forward changes the URL and
+   nothing else. Re-setting the hash to its current value does not re-fire hashchange, so
+   calling go() from here cannot loop. */
+window.addEventListener("hashchange", () => {
+  const id = (location.hash||"").slice(1);
+  if(isNavId(id)) go(id);
+});

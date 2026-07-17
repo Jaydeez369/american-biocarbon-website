@@ -1,3 +1,6 @@
+# Internal docs live in the repo but the publish root is the repo root, so they would
+# otherwise be fetchable in production. Serve a hard 404 instead of the file.
+/docs/*    /404    404
 # Sales OS is its own app under /sales/ - serve it directly, never via the SPA fallback
 /sales/*    /sales/:splat    200
 # E7: canonicalize duplicate topic URLs to their richer dedicated landing pages
