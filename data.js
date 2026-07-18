@@ -45,20 +45,20 @@ const BRAND = {
 
 /* Primary + secondary CTAs used across the site */
 const CTA = {
-  sample:  { label:"Request a sample",      href:"/request-sample" },
-  freeSamplePellets: { label:"Get a free sample", href:"/shop/absorbent-pellets" },
-  freeSampleBiochar: { label:"Get a free sample", href:"/shop/agricultural-biochar" },
-  quote:   { label:"Talk to us about volume",       href:"/request-quote" },
+  sample:  { label:"Request a Sample Kit",      href:"/request-sample" },
+  freeSamplePellets: { label:"Request a Sample Kit", href:"/shop/absorbent-pellets" },
+  freeSampleBiochar: { label:"Request a Sample Kit", href:"/shop/agricultural-biochar" },
+  quote:   { label:"Request a Quote",       href:"/request-quote" },
   compare: { label:"Compare vs Wood Pellets",       href:"/compare" },
-  spec:    { label:"Get spec sheet",           href:"/request-docs?doc=spec" },
-  specDownload: { label:"Download Spec Sheet",      href:"/request-quote" },
-  sds:     { label:"Download SDS",                  href:"/request-docs?doc=sds" },
+  spec:    { label:"Request Spec Sheet",           href:"/request-docs?doc=spec" },
+  specDownload: { label:"Download Spec Sheet",      href:"/request-docs?doc=spec" },
+  sds:     { label:"Request SDS",                  href:"/request-docs?doc=sds" },
   docs:    { label:"Request Technical Package",     href:"/request-docs" },
   specialist:{ label:"Talk to a Remediation Specialist", href:"/contact" },
-  biochar: { label:"Request a free sample", href:"/request-sample?type=biochar" },
+  biochar: { label:"Request a Sample Kit", href:"/request-sample?type=biochar" },
   carbon:  { label:"Request Carbon Removal Info",   href:"/contact?type=carbon" },
-  beddingSample: { label:"Request Animal Bedding Sample",  href:"/request-sample?type=bedding" },
-  beddingSpecs:  { label:"Request Product Specifications", href:"/request-docs?ind=animal-bedding" },
+  beddingSample: { label:"Request a Sample Kit",  href:"/request-sample?type=bedding" },
+  beddingSpecs:  { label:"Request Spec Sheet", href:"/request-docs?ind=animal-bedding" },
   beddingSpecialist:{ label:"Talk to a Bedding Supply Specialist", href:"/contact?type=bedding" }
 };
 
@@ -178,6 +178,12 @@ const TECH = {
       { item:"USDA-ARS field study", scope:"Sugarcane bagasse biochar trials", status:"field" },
       { item:"USDA Organic", scope:"Certification in progress", status:"pending" },
     ],
+    // Biochar-infused soil is a blend, NOT the certified 100% biochar product. It does
+    // not carry the OMRI/IBI listing on its own; only reference the biochar it is built on.
+    soil:[
+      { item:"Built on our carbon negative bagasse biochar", scope:"Same biochar as our 100% Biochar product", status:"verified" },
+      { item:"Independent lab analysis", scope:"Biochar component composition & heavy-metal screening", status:"lab" },
+    ],
     carbon:[
       { item:"Puro.earth Certified", scope:"CORC carbon-removal methodology", status:"verified" },
       { item:"Lab-verified permanence", scope:"H/C molar ratio < 0.7", status:"lab" },
@@ -188,7 +194,9 @@ const TECH = {
     "absorbent-pellets":["abs-spec","abs-sds","abs-disposal"],
     "absorbent-crumble":["abs-spec","abs-sds","abs-disposal"],
     "agricultural-biochar":["bio-spec","bio-lab","omri-cert"],
-    "biochar-infused-soil":["bio-spec","omri-cert"],
+    // Infused soil is a blend, not the certified 100% biochar. Do not transfer the
+    // OMRI/IBI certificate or the biochar spec sheet to it; request-gate its docs.
+    "biochar-infused-soil":[],
     "carbon-removal":["carbon-mrv","bio-lab"]
   },
   // Resource-library filters. Each option lists the doc ids it matches, so a
@@ -224,18 +232,18 @@ const TECH = {
 /* ============ HOME (11 sections) ============ */
 const HOME = {
   seo:{ title:"Plant Based Industrial Absorbent & Bagasse Biochar | American BioCarbon",
-    desc:"A plant based industrial absorbent that holds up to 5× its weight in liquid, fewer bags, lighter disposal. Request a free sample; reserve volume supply for our Q4 capacity ramp. Bagasse biochar & carbon removal.",
+    desc:"A plant based industrial absorbent that holds up to 5× its weight in liquid, fewer bags, less to haul away. Request a free sample; reserve volume supply for our Q4 capacity ramp. Bagasse biochar & carbon removal.",
     slug:"/", keyword:"plant based industrial absorbent", schema:"Organization + WebSite" },
   heroOptions:[
-    "Fewer bags per spill. Less weight to disposal.",
+    "Fewer bags per spill. Less material to haul away.",
     "A plant based absorbent that holds up to 5× its weight, vs ~2.5× for wood.",
-    "Industrial absorbent, engineered from sugarcane. Absorbs more, disposes lighter.",
+    "Industrial absorbent, engineered from sugarcane. Absorbs more, hauls away less.",
     "Solidify fluids and clean spills with a fraction of the bags.",
     "Renewable absorbents and biochar, built for industrial scale.",
   ],
   hero:{
-    chosen:"Fewer bags per spill. Less weight to disposal.",
-    sub:"Our sugarcane bagasse absorbents, available as pellets, crumble, and fiber, hold up to 5× their weight in liquid, so crews open fewer bags and send fewer truckloads to disposal. Engineered for oilfield fluids, spill response, and industrial remediation.",
+    chosen:"Fewer bags per spill. Less material to haul away.",
+    sub:"Our sugarcane bagasse absorbents hold up to roughly 5x their weight in liquid, so crews open fewer bags and fewer loads need to be hauled away for disposal. Engineered for oilfield fluids, spill response, and industrial remediation.",
     primary:CTA.freeSamplePellets, secondary:CTA.quote,
     proofLine:["Up to 5× weight absorption","SDS & spec sheet available"],
     image:ASSETS.pelletsPhoto,
@@ -245,10 +253,10 @@ const HOME = {
       { label:"100% Biochar", img:ASSETS.hands, pos:"50% 50%", zoom:1.06, origin:"50% 55%",
         h:"Carbon that stays<br>in the ground.",
         sub:"OMRI listed bagasse biochar builds soil, holds water and nutrients, and locks durable carbon away for centuries.",
-        primary:{label:"Get a free sample",href:"/product/agricultural-biochar"}, secondary:CTA.quote },
+        primary:{label:"Request a Sample Kit",href:"/product/agricultural-biochar"}, secondary:CTA.quote },
       { label:"Absorbent Pellets", img:ASSETS.heroPellets, pos:"50% 62%", zoom:1.24, origin:"50% 82%",
-        h:"Fewer bags per spill.<br>Less weight to disposal.",
-        sub:"Sugarcane bagasse absorbent pellets hold up to 5× their weight in liquid, so crews open fewer bags and haul fewer truckloads to disposal.",
+        h:"Fewer bags per spill.<br>Less material to haul away.",
+        sub:"Sugarcane bagasse absorbent pellets hold up to roughly 5x their weight in liquid, so crews open fewer bags and fewer loads need to be hauled away for disposal.",
         primary:CTA.freeSamplePellets, secondary:CTA.quote },
       { label:"Absorbent Crumble", img:ASSETS.pelletsPhoto, pos:"50% 58%", zoom:1.1, origin:"50% 72%",
         h:"Cover more ground,<br>in less time.",
@@ -269,7 +277,7 @@ const HOME = {
     steps:[
       { n:"01", t:"Request a sample", d:"Give us the fluid, site, and volume. Samples ship in 4 to 7 business days with SDS + spec." },
       { n:"02", t:"Test it head to head", d:"Run it beside your current absorbent on a real job." },
-      { n:"03", t:"Scale on the numbers", d:"Fewer bags and lighter disposal earn the bulk contract." },
+      { n:"03", t:"Scale on the numbers", d:"Fewer bags and less to haul away earn the bulk contract." },
     ],
     primary:CTA.sample, secondary:CTA.quote
   },
@@ -291,7 +299,7 @@ const HOME = {
       // NOTE: variant IDs below are the CURRENT live Shopify SKUs (Pellets 20 lb, Biochar 8 qt) used so checkout works
       // end-to-end today. Swap to the 1 lb / 8 oz SAMPLE variant IDs the moment Victor/Jesse create those SKUs.
       { id:"absorbent-pellets", name:"Absorbent Pellets", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Spill Control", accent:"aqua",
-        claim:"An up to 5:1 absorption ratio means crews open fewer bags per spill and send lighter loads to disposal.",
+        claim:"An up to 5:1 absorption ratio means crews open fewer bags per spill and haul away less material.",
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
         chips:["1 lb sample bag","100% bagasse","Low dust"], unit:"1 lb Sample Bag", sampleWeight:"1 LB", photo:ASSETS.pelletsPhoto, free:true, truckloadQ4:true,
         bag:{ banner:"ABSORBENT PELLETS", iconSet:"absorbent",
@@ -303,7 +311,7 @@ const HOME = {
         gallery:[ ASSETS.pelletsBag, CDN+"AmericanBiocarbon2021-292.jpg?v=1699280021" ],
         sections:[
           { h:"Spill cleanup and remediation", body:"Soak up soil runoff, solvents, drilling and frac fluids, and other non-viscous liquids. Sprinkle the pellets over the spill, wait for full absorption, then sweep up and dispose of the saturated material per your local requirements." },
-          { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and send lighter loads to disposal." },
+          { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },
           { h:"Animal bedding", body:"Use as bedding by adding about a half gallon of water to the bag for wet bedding, or scatter the pellets across the habitat floor for dry bedding." },
           { h:"Pet litter", body:"A renewable, low dust alternative to traditional litter for cats, rabbits, ferrets, birds, and more." },
         ],
@@ -351,13 +359,13 @@ const HOME = {
           icons:["Natural Biomass","Agricultural Waste","Superior Water Retention","Enhanced Root Development"],
           uses:"Potting & Container Gardening | Raised Beds & Garden Bed Fill | Lawn Patch & Overseeding Prep | Starting Seedlings & Transplants | Improving Water Retention in Sandy or Fast Draining Soil",
           desc:"A ready to use growing soil pre-blended with our carbon negative bagasse biochar, so you get the water retention, nutrient holding, and soil-aeration benefits of biochar without any mixing or guesswork. Just fill your bed, pot, or planting hole and go. Built on the same sustainably sourced, Louisiana sugarcane biochar as our standalone soil amendment, this blend gives your plants a strong, carbon rich foundation from the very first watering.",
-          ingredients:"MICROBE TREATED SUGARCANE BAGASSE, BIOCHAR AND COFFEE CHAFF", omri:true } },
+          ingredients:"MICROBE TREATED SUGARCANE BAGASSE, BIOCHAR AND COFFEE CHAFF", omri:false } },
     ],
     filters:["All","Absorbents","Biochar","Soil"],
     bbqFootnote:{ label:"Louisiana Sweet BBQ Smoker Pellets (consumer/retail)", href:"https://americanbiocarbon.com/products/louisiana-sweet-bbq-smoker-pellets" }
   },
   categories:[
-    { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, lighter disposal, low dust. Sample bags ship now.", cta:CTA.sample, href:"/product/absorbent-pellets", img:ASSETS.pelletsBag, avail:"live" },
+    { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, less to haul away, low dust. Sample bags ship now.", cta:CTA.sample, href:"/product/absorbent-pellets", img:ASSETS.pelletsBag, avail:"live" },
     { name:"100% Biochar", icp:"Distributors · blenders · growers", blurb:"OMRI listed bagasse biochar holds up to ~3 to 3.5× its weight in water, better moisture retention, faster compost. Sample bags ship now.", cta:CTA.biochar, href:"/product/agricultural-biochar", img:ASSETS.biocharBag, avail:"live" },
     { name:"Absorbent Crumble", icp:"Large area & high volume spills", blurb:"A coarser grade that spreads fast across a wide footprint, same high capacity.", cta:CTA.quote, href:"/product/absorbent-crumble", img:ASSETS.crumbleBag, avail:"q4" },
     { name:"Biochar-Infused Soil", icp:"Landscape · nursery · retail", blurb:"Ready to use blend with biochar's water- and nutrient holding benefits. No mixing.", cta:CTA.biochar, href:"/product/biochar-infused-soil", img:ASSETS.soilBag, avail:"q4" },
@@ -430,7 +438,7 @@ const HOME = {
     h:"What are you here to solve?",
     sub:"Pick the path that fits your role, we'll take you straight to the right products, specs, and request form.",
     lanes:[
-      { tag:"Oil, Gas & Industrial", desc:"Solidify drilling & frac fluids, remediate sites, fewer bags, lighter disposal.", href:"/industry/oil-gas", cta:"Industrial absorbents" },
+      { tag:"Oil, Gas & Industrial", desc:"Solidify drilling & frac fluids, remediate sites, fewer bags, less to haul away.", href:"/industry/oil-gas", cta:"Industrial absorbents" },
       { tag:"Spill Response & Disaster", desc:"More capture per bag for emergency crews and large area cleanup.", href:"/industry/spill-response", cta:"Spill-response line" },
       { tag:"Landfill & Waste", desc:"Solidify leachate and aqueous waste with RFP-ready documentation.", href:"/industry/landfill-leachate", cta:"Leachate solutions" },
       { tag:"Ag Distributors & Growers", desc:"Add a carbon negative, OMRI listed biochar line with a margin model.", href:"/distributors-resellers-industries", cta:"Distributor program" },
@@ -490,7 +498,7 @@ const PRODUCTS = {
     name:"Absorbent Pellets", icp:"Oil & gas · spill response · environmental remediation · landfill",
     intent:"Evaluate & procure an industrial sorbent",
     seo:{ title:"Industrial Absorbent Pellets, Up to 5:1 Bagasse Sorbent | American BioCarbon",
-      desc:"Plant based bagasse absorbent pellets that hold up to 5× their weight in liquid, vs ~2.5× for wood. Fewer bags, lighter disposal. Bulk supply, SDS & spec on request.",
+      desc:"Plant based bagasse absorbent pellets that hold up to 5× their weight in liquid, vs ~2.5× for wood. Fewer bags, less to haul away. Bulk supply, SDS & spec on request.",
       slug:"/absorbent-pellets", keyword:"industrial absorbent pellets",
       secondary:["oil spill absorbent pellets","plant based absorbent","wood pellet alternative absorbent","biodegradable absorbent pellets"],
       schema:"Product + FAQPage + BreadcrumbList" },
@@ -534,7 +542,7 @@ const PRODUCTS = {
       rows:[["Absorption","Up to ~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
     faq:[
       { q:"What liquids do the pellets absorb?", a:"Oil, fuels, and non-viscous chemicals and aqueous streams. For a specific fluid, request the spec sheet and SDS so we can confirm suitability." },
-      { q:"How is it disposed of?", a:"Saturated material is swept up and disposed of per your local requirements and the absorbed material's profile. Because it holds up to ~5× its weight vs ~2.5× for wood, you fill roughly half the bags and send less saturated weight to disposal, fewer pounds at by the pound rates and fewer truckloads." },
+      { q:"How is it disposed of?", a:"Saturated material is swept up and disposed of per your local requirements and the absorbed material's profile. Because it holds up to ~5× its weight vs ~2.5× for wood, you fill roughly half the bags and haul away less saturated material, fewer pounds at by the pound rates and fewer truckloads." },
       { q:"Can I get a sample, and when is volume supply available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Volume supply (bulk, one metric ton bags, truckload) comes online with our Q4 capacity ramp; if the sample performs, you can reserve supply and lock pricing now." },
       { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request." },
     ],
@@ -720,7 +728,7 @@ const PRODUCTS = {
     h1:"Ready to Use Biochar Soil, No Mixing",
     sub:"A growing soil pre-blended with carbon negative bagasse biochar, so you get the water holding, nutrient retention, and aeration benefits from the first watering.",
     primary:CTA.biochar, secondary:CTA.spec, image:ASSETS.biocharLg, mock:ASSETS.biocharMock,
-    proofRow:["Pre-blended, no mixing","OMRI listed biochar base","Water & nutrient retention","Bagged & bulk"],
+    proofRow:["Pre-blended, no mixing","Carbon negative biochar base","Water & nutrient retention","Bagged & bulk"],
 
     appsHeading:"How Biochar-Infused Soil Applications Help Your Landscape, Nursery &amp; Growing Operation",
     useCases:["Raised Beds &amp; Garden Fill","Container &amp; Nursery Media","Tree &amp; Shrub Planting","Seedlings &amp; Transplants","Sandy or Fast Draining Soils","Retail &amp; Bagged Supply"],
@@ -741,7 +749,7 @@ const PRODUCTS = {
         body:"On sandy beds, water and nutrients drain past the root zone and raise watering frequency. This blend holds both (NPK ~1.4-0.7-1.4 plus Ca/Mg) where roots reach.",
         benefit:"Keeps water and nutrients within root reach." },
       { title:"Retail &amp; Bagged Supply", detail:"Shelf-ready blend",
-        body:"Retail buyers need a soil customers can use without instructions or a separate biochar step. This OMRI listed blend ships bagged and bulk, ready to use.",
+        body:"Retail buyers need a soil customers can use without instructions or a separate biochar step. This ready to use blend ships bagged and bulk.",
         benefit:"Shelf-ready amendment in bagged and bulk form." },
     ],
     specs:[
@@ -818,7 +826,7 @@ const INDUSTRIES = {
   "oil-gas":{
     name:"Oil & Gas Remediation", icp:"Oilfield services · procurement · HSE",
     seo:{ title:"Drilling & Frac Fluid Absorbent, Plant Based, Up to 5:1 | American BioCarbon",
-      desc:"Solidify drilling and frac fluids and clean spills with a plant based absorbent that holds up to 5× its weight, fewer bags, lighter disposal. Bulk supply, SDS on request.",
+      desc:"Solidify drilling and frac fluids and clean spills with a plant based absorbent that holds up to 5× its weight, fewer bags, less to haul away. Bulk supply, SDS on request.",
       slug:"/industries/oil-gas", keyword:"drilling fluid absorbent",
       secondary:["fracking fluid remediation absorbent","oil spill absorbent pellets","industrial absorbent pellets"],
       schema:"Service + FAQPage" },
@@ -831,13 +839,13 @@ const INDUSTRIES = {
     fieldApps:[
       { title:"Drill Spoil &amp; Reserve Pit Closure", detail:"Vertical, horizontal &amp; HDD",
         body:"Free liquid keeps reserve and drill spoil pits open until bagasse pellets solidify it for closeout.",
-        benefit:"Fewer bags to stabilize the pit and lighter disposal loads." },
+        benefit:"Fewer bags to stabilize the pit and less material to haul away." },
       { title:"Frac Tank Bottoms &amp; Produced Water", detail:"Tank bottoms &amp; produced water",
         body:"Free liquid in frac tank bottoms and produced water blocks disposal until bagasse pellets bind it solid.",
         benefit:"Turns free liquid into a handleable solid using less sorbent." },
       { title:"Rig-Side Discharge Handling", detail:"Sumps, shaker &amp; cuttings dryer",
         body:"Discharge from sumps, shakers, and cuttings dryers leaves areas wet until bagasse pellets absorb it at the rig.",
-        benefit:"Keeps work areas dry and cuts saturated weight to disposal." },
+        benefit:"Keeps work areas dry and cuts the saturated material hauled away." },
       { title:"Frac-Out Remediation", detail:"Access roads &amp; storm sewers",
         body:"Frac outs spread fluid across access roads and storm sewers, where the coarser crumble grade recovers it fast.",
         benefit:"Fast, broad coverage from the coarser crumble grade." },
@@ -860,7 +868,7 @@ const INDUSTRIES = {
   "industrial-remediation":{
     name:"Industrial Remediation", icp:"Environmental remediation firms · industrial ops",
     seo:{ title:"Plant Based Industrial Absorbent for Remediation | American BioCarbon",
-      desc:"A renewable industrial absorbent for spill and fluid remediation, holds up to 5× its weight, fewer bags, lighter disposal. Bulk supply, SDS & spec on request.",
+      desc:"A renewable industrial absorbent for spill and fluid remediation, holds up to 5× its weight, fewer bags, less to haul away. Bulk supply, SDS & spec on request.",
       slug:"/industries/industrial-remediation", keyword:"industrial absorbent",
       secondary:["environmental remediation absorbent","plant based absorbent","spill response absorbent"],
       schema:"Service + FAQPage" },
@@ -926,7 +934,7 @@ const INDUSTRIES = {
         benefit:"Meets free liquids limits using about half the sorbent of wood." },
       { title:"Excavation &amp; Groundwater Dewatering", detail:"Standing water in the cut",
         body:"Groundwater pooling in an open cut stalls backfill and closeout until the absorbent solidifies the standing liquid.",
-        benefit:"Keeps the cut dry and cuts saturated weight to disposal." },
+        benefit:"Keeps the cut dry and cuts the saturated material hauled away." },
       { title:"Brownfield, Pipeline Spill &amp; HDD Frac Out Response", detail:"Rapid field response",
         body:"Fluid from brownfield releases and frac outs migrates fast until coarse crumble spreads to cover the wide footprint.",
         benefit:"Coarse crumble covers a wide footprint quickly to contain releases." },
@@ -943,7 +951,7 @@ const INDUSTRIES = {
   "spill-response":{
     name:"Spill Response", icp:"Spill-response contractors · emergency crews",
     seo:{ title:"Spill Response Absorbent, Fewer Bags, Faster Cleanup | American BioCarbon",
-      desc:"A plant based spill-response absorbent that holds up to 5× its weight, fewer bags on the truck, faster cleanup, lighter disposal. Bulk supply, SDS on request.",
+      desc:"A plant based spill-response absorbent that holds up to 5× its weight, fewer bags on the truck, faster cleanup, less to haul away. Bulk supply, SDS on request.",
       slug:"/industries/spill-response", keyword:"spill response absorbent",
       secondary:["oil spill absorbent pellets","disaster cleanup absorbent","plant based absorbent"],
       schema:"Service + FAQPage" },
@@ -1154,8 +1162,8 @@ const INDUSTRIES = {
 /* ============ FORMS ============ */
 const FORMS = {
   bedding:{
-    name:"Request Animal Bedding Sample",
-    h:"Request an Animal Bedding Sample",
+    name:"Request a Sample Kit",
+    h:"Request a Sample Kit",
     sub:"Qualified samples are intended for commercial farms, integrators, bedding distributors, and animal care operations. Tell us what you bed with now and what you want to measure, and we'll ship a sample with the product specifications so you can run a side by side comparison. A bedding supply specialist replies within one business day.",
     fields:[
       { n:"firstName", label:"First name", type:"text", req:true },
@@ -1188,10 +1196,11 @@ const FORMS = {
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"location", label:"Location (city / state)", type:"text", req:false },
       { n:"buyerType", label:"Buyer type", type:"select", req:false, options:["Oilfield services","Spill response","Environmental remediation","Industrial operations","Landfill / waste","Municipal / disaster","Other"], otherPh:"e.g. Marine terminal, Mining, Pipeline" },
-      { n:"useCase", label:"Use case", type:"text", req:true, ph:"e.g. drilling-fluid solidification, spill cleanup, leachate" },
+      { n:"fluid", label:"Fluid or material to absorb", type:"text", req:true, ph:"e.g. drilling mud, crude, produced water, solvent, leachate" },
+      { n:"useCase", label:"Use case", type:"text", req:true, ph:"e.g. reserve-pit solidification, spill cleanup, leachate control" },
       { n:"current", label:"Current absorbent material", type:"text", req:false, ph:"e.g. wood pellets, clay" },
       { n:"volume", label:"Estimated tonnage per month", type:"number", req:false, ph:"e.g. 20 (tons)" },
-      { n:"format", label:"Format needed", type:"select", req:false, options:["Pellets","Crumble","Bulk","1 MT bulk bag","Not sure"] },
+      { n:"format", label:"Product format needed", type:"select", req:false, options:["Pellets","Crumble","Bulk","1 MT bulk bag","Not sure"] },
       { n:"timeline", label:"Timeline", type:"select", req:false, options:["Active need now","This quarter","Evaluating","Just researching"] },
       { n:"request", label:"Request type", type:"select", req:true, options:["One complimentary sample bag","Additional sample bags (purchase)","Sample + bulk quote","Spec sheet / SDS","Talk to a specialist"] },
     ],
@@ -1201,8 +1210,8 @@ const FORMS = {
     scoring:"+ truckload volume, + zone A/B, + active-now timeline, + named use case; - personal email, - 'just researching'."
   },
   quote:{
-    name:"Get Bulk Absorbent Quote",
-    h:"Get a Bulk Absorbent Quote",
+    name:"Request a Quote",
+    h:"Request a Quote",
     sub:"Give us your volume and location for freight aware pricing. SDS and spec included with your quote.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
@@ -1223,8 +1232,8 @@ const FORMS = {
     scoring:"+ volume tier, + recurring frequency, + zone A/B, + active-now."
   },
   biochar:{
-    name:"Request Biochar Sample",
-    h:"Request a Biochar Sample",
+    name:"Request a Sample Kit",
+    h:"Request a Sample Kit",
     sub:"Your biochar sample is free, shipping and handling included. For growers, blenders, composters, and distributors. Tell us your use and we'll send it with the spec sheet and its up to ~3 to 3.5× water holding figure (per our technical report).",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
@@ -1243,9 +1252,9 @@ const FORMS = {
     scoring:"+ distributor/blender/composter, + resale, + volume; - consumer/home use."
   },
   distributor:{
-    name:"Get Distributor Pricing",
-    h:"Get Distributor Pricing",
-    sub:"Add a carbon negative biochar line without over-committing inventory, we send the margin model and a low-volume stocking pilot.",
+    name:"Request a Quote",
+    h:"Request a Quote",
+    sub:"Distributor and reseller pricing: add a carbon negative biochar line without over-committing inventory. We send the margin model and a low-volume stocking pilot.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },

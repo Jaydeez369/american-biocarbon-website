@@ -244,7 +244,7 @@ function renderChrome(){
     <div>
       <img class="logo" src="${ASSETS.logoRev}" alt="American BioCarbon">
       <p class="addr">${raw(BRAND.legal)}<br>${raw(BRAND.address)}<br>${raw(BRAND.location)}</p>
-      <div class="foot-cta"><a class="btn btn-primary btn-sm" href="/request-quote">Request quote</a><a class="cta-link-light" href="/request-quote">Talk to us about volume</a></div>
+      <div class="foot-cta"><a class="btn btn-primary btn-sm" href="/request-quote">Request a Quote</a><a class="btn btn-ghost-light btn-sm" href="/request-sample">Request a Sample Kit</a></div>
     </div>
     <div><h4>Products</h4>
       <a href="/product/absorbent-pellets">Absorbent Pellets</a><a href="/product/absorbent-crumble">Absorbent Crumble</a>
@@ -258,7 +258,7 @@ function renderChrome(){
     <div><h4>Resources</h4>
       <a href="/technical">Certifications &amp; Technical Data</a><a href="/compare">Compare vs Wood Pellets</a>
       <a href="/about">About</a><a href="/contact">Contact</a>
-      <a href="/request-sample">Get a free sample</a><a href="/request-quote">Request Quote</a></div>
+      <a href="/request-sample">Request a Sample Kit</a><a href="/request-quote">Request a Quote</a></div>
   </div>
   <div class="legal"><span>© ${new Date().getFullYear()} ${raw(BRAND.name)}. All rights reserved.</span></div>`;
   const burger = $("#burger");
@@ -316,9 +316,9 @@ function renderHome(){
     const isLive = p.avail==="live";
     // Homepage showcase sections 3, 4 & 5 (index 2, 3 & 4) use "Stay informed" instead of a free-sample CTA.
     const notifyPrimary = i===2 || i===3 || i===4;
-    const primary = isLive ? {label:"Get a free sample",href:p.id==="agricultural-biochar"?"/product/agricultural-biochar":p.id==="absorbent-pellets"?"/shop/"+p.id:"/request-sample?product="+p.id}
+    const primary = isLive ? {label:"Request a Sample Kit",href:p.id==="agricultural-biochar"?"/product/agricultural-biochar":p.id==="absorbent-pellets"?"/shop/"+p.id:"/request-sample?product="+p.id}
       : notifyPrimary ? {label:"Stay informed",href:"/request-sample?preorder=1&product="+p.id}
-      : {label:"Get a free sample",href:"/request-sample?preorder=1&product="+p.id};
+      : {label:"Request a Sample Kit",href:"/request-sample?preorder=1&product="+p.id};
     const secondary = null;
     return `
   <section class="block" style="background:${i%2?'var(--paper-2)':'var(--white)'}"><div class="wrap"><div class="split${i%2?' rev':''} bleed">
@@ -413,8 +413,14 @@ function renderProduct(id){
       <div class="proc-left">
         <div class="proc-copy">
           <div class="kicker">Proof</div><h2 style="font-size:26px;margin:8px 0 12px">Certified and lab verified</h2>
-          <ul class="checks">${PROOF.certs.filter(c=>c.status!=="pending").slice(0,4).map(c=>`<li><b>${raw(c.name)}</b>, ${raw(c.note)}</li>`).join("")}</ul>
-          <p class="form-note">USDA Organic certification in progress.</p>
+          ${(()=>{
+            // Product-accurate certifications. OMRI/IBI belong to the certified 100%
+            // biochar only, never to absorbents or the infused-soil blend.
+            const CERT_SET = { "absorbent-pellets":"absorbents","absorbent-crumble":"absorbents","absorbent-fiber":"absorbents","agricultural-biochar":"biochar","biochar-infused-soil":"soil","carbon-removal":"carbon" };
+            const set = (TECH.certSets[CERT_SET[id]] || TECH.certSets.absorbents).filter(c=>c.status!=="pending");
+            const usda = (CERT_SET[id]==="biochar") ? `<p class="form-note">USDA Organic certification in progress.</p>` : "";
+            return `<ul class="checks">${set.slice(0,4).map(c=>`<li><b>${raw(c.item)}</b>, ${raw(c.scope)}</li>`).join("")}</ul>${usda}`;
+          })()}
         </div>
         <img class="procimg" src="assets/industry/${id}.jpg?v=v2" alt="${raw(p.name)}" loading="lazy">
       </div>
@@ -577,11 +583,11 @@ function buyCard(p){
     ? `<div class="buy-docs">${(p.docIds||[]).map(docLink).join("<span>·</span>")}</div>`
     : `<div class="buy-docs muted">Spec sheet coming</div>`;
   const primary = isLive
-    ? `<a class="btn btn-primary btn-sm" href="${(p.id==="absorbent-pellets"||p.id==="agricultural-biochar")?"/shop/"+p.id:"/request-sample?product="+p.id}">Get a free sample</a>`
-    : `<a class="btn btn-primary btn-sm" href="/request-sample?preorder=1&product=${p.id}">Get a free sample</a>`;
+    ? `<a class="btn btn-primary btn-sm" href="${(p.id==="absorbent-pellets"||p.id==="agricultural-biochar")?"/shop/"+p.id:"/request-sample?product="+p.id}">Request a Sample Kit</a>`
+    : `<a class="btn btn-primary btn-sm" href="/request-sample?preorder=1&product=${p.id}">Request a Sample Kit</a>`;
   const cta = isLive
     ? `<div class="btn-row">${primary}</div>
-       <a class="notify" href="/request-quote?product=${p.id}">Talk to us about volume →</a>`
+       <a class="notify" href="/request-quote?product=${p.id}">Request a Quote →</a>`
     : `<div class="btn-row">${primary}</div>`;
   return `<div class="card pcard buycard${isLive?"":" is-q4"}" data-cat="${raw(p.cat||"")}">
     <div class="thumb"><img src="${p.img}" alt="${raw(p.name)}" loading="lazy">
@@ -672,6 +678,13 @@ const SHOPIFY_CHECKOUT = {
   "absorbent-pellets":   SHOP_DOMAIN + "/cart/54185346302244:1",
   "agricultural-biochar": SHOP_DOMAIN + "/cart/54185346335012:1",
 };
+// Products with an approved, product-specific spec-sheet PDF available for DIRECT
+// download (maps site id -> SPEC_SHEETS key). Anything not listed here has no approved
+// file yet and must use a "Request Spec Sheet" action instead of an incorrect download.
+const SPEC_SPECID = {
+  "absorbent-pellets": "absorbent-pellets",
+  "agricultural-biochar": "biochar",
+};
 function renderShopProduct(id){
   const p = (HOME.buy.products||[]).find(x=>x.id===id);
   if(!p) return notFound();
@@ -696,12 +709,14 @@ function renderShopProduct(id){
         ${p.uses?`<ul class="uses" style="margin:12px 0 14px">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
         <div class="chips" style="margin:0 0 18px">${(p.chips||[]).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
         ${SHOPIFY_CHECKOUT[p.id]
-          ? `<a class="btn btn-primary" href="${SHOPIFY_CHECKOUT[p.id]}" style="width:100%;justify-content:center">Order free sample</a>`
-          : `<a class="btn btn-primary" href="/request-sample?product=${p.id}" style="width:100%;justify-content:center">Get a free sample</a>`}
+          ? `<a class="btn btn-primary" href="${SHOPIFY_CHECKOUT[p.id]}" style="width:100%;justify-content:center">Request a Sample Kit</a>`
+          : `<a class="btn btn-primary" href="/request-sample?product=${p.id}" style="width:100%;justify-content:center">Request a Sample Kit</a>`}
         <div class="pdp-links" style="margin-top:12px">
-          <a href="/request-quote?product=${p.id}">Talk to us about volume</a>
+          <a href="/request-quote?product=${p.id}">Request a Quote</a>
           <span>·</span>
-          <a href="/request-docs?doc=spec&product=${p.id}">Download spec sheet</a>
+          ${SPEC_SPECID[p.id]
+            ? `<a href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
+            : `<a href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
         </div>
         <p class="pdp-secure">Free ${raw(p.sampleWeight||"")} sample. Ships in 4 to 7 business days from White Castle, LA.</p>
         ${p.truckloadQ4?`<p class="pdp-secure" style="color:var(--dim)">Bulk bag and truckload supply available Q4.</p>`:""}
@@ -715,11 +730,13 @@ function renderShopProduct(id){
       <p class="lead" style="max-width:70ch">${raw(p.desc||p.claim)}</p>
       ${(p.sections||[]).map(s=>`<div class="pdp-sec"><h3>${raw(s.h)}</h3><p>${raw(s.body)}</p></div>`).join("")}
       <div class="btn-row" style="margin-top:26px">
-        <a class="btn btn-dark" href="/request-docs?doc=spec&product=${p.id}">Download Spec Sheet</a>
-        <a class="btn btn-ghost" href="/request-docs?doc=sds&product=${p.id}">Download SDS</a>
+        ${SPEC_SPECID[p.id]
+          ? `<a class="btn btn-dark" href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
+          : `<a class="btn btn-dark" href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
+        <a class="btn btn-ghost" href="/request-docs?doc=sds&product=${p.id}">Request SDS</a>
         ${SHOPIFY_CHECKOUT[p.id]
-          ? `<a class="btn btn-ghost" href="${SHOPIFY_CHECKOUT[p.id]}">Order free sample</a>`
-          : `<a class="btn btn-ghost" href="/request-sample?product=${p.id}">Get a free sample</a>`}
+          ? `<a class="btn btn-ghost" href="${SHOPIFY_CHECKOUT[p.id]}">Request a Sample Kit</a>`
+          : `<a class="btn btn-ghost" href="/request-sample?product=${p.id}">Request a Sample Kit</a>`}
       </div>
       <p class="pdp-meta" style="margin-top:16px">Ships from White Castle, Louisiana. ${p.truckloadQ4?"Truckload supply available Q4.":""}</p>
     </div>
@@ -1063,13 +1080,18 @@ function breadcrumbLd(items){ // items: [{name, path}]
       ...(it.path ? { item: SITE.origin+it.path } : {}) })) };
 }
 function productLd(p){
-  const certs = ["OMRI Listed","IBI Certified","Puro.earth Certified"];
+  // Certifications in structured data must match the product. OMRI/IBI are the
+  // certified 100% biochar's only; Puro.earth is carbon removal's. Absorbents and
+  // the infused-soil blend carry neither, so they emit no certification claim.
+  const key = prodId(p);
+  const CERT_NAMES = { "agricultural-biochar":["OMRI Listed","IBI Certified"], "carbon-removal":["Puro.earth Certified"] };
+  const certs = CERT_NAMES[key] || [];
   return { "@context":"https://schema.org", "@type":"Product",
     name: p.name, description: (p.seo&&p.seo.desc)||p.sub||p.claim||"",
     category: "Industrial Absorbent", brand: { "@type":"Brand", name: SITE.name },
     image: SITE.origin+SITE.ogImage,
     manufacturer: { "@type":"Organization", name: SITE.name },
-    hasCertification: certs.map(c=>({ "@type":"Certification", name:c })) };
+    ...(certs.length ? { hasCertification: certs.map(c=>({ "@type":"Certification", name:c })) } : {}) };
 }
 function notFound(){ setMeta({title:"Page not found | American BioCarbon", desc:"The page you requested could not be found."}, {noindex:true}); clearJsonLd(); return `<section class="block"><div class="wrap"><h1>Page not found</h1><p class="lead">Try the <a href="/">homepage</a>.</p></div></section>`; }
 /* Semantic breadcrumb: crumbs([{label,href}], ...) - last item is the current page (aria-current). */
@@ -1240,7 +1262,7 @@ function renderResellersIndustries(){
 
   <section class="block" style="padding-top:96px;padding-bottom:96px"><div class="wrap" style="min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:28px">
     <p style="margin:0;font-size:40px;line-height:1.15;font-weight:700;max-width:16ch">Enterprise grade supply, one simple step away.</p>
-    <a class="btn btn-primary" href="/request-quote">Request Quote</a>
+    <a class="btn btn-primary" href="/request-quote">Request a Quote</a>
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap"><div class="split proc-split">
@@ -1314,7 +1336,7 @@ function renderResellersAgriculture(){
     <p class="lead" style="margin-bottom:22px">Our platform makes it effortless. Place orders, track shipments, manage inventory all in one place.</p>
     <div class="btn-row" style="justify-content:center;gap:12px;margin-top:20px">
       ${btn(p.primary)}
-      <a class="btn btn-ghost-light" href="/request-quote">Get a Custom Quote</a>
+      <a class="btn btn-ghost-light" href="/request-quote">Request a Quote</a>
       <a class="btn btn-ghost-light" href="/request-quote">Check Order Status</a>
     </div>
   </div></section>

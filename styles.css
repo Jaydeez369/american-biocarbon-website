@@ -81,6 +81,24 @@ section.block{padding:72px 0;border-bottom:1px solid var(--line)}
 .block h2{font-size:34px;margin:10px 0 14px}
 .lead{color:var(--dim);font-size:17px;max-width:680px}
 .eyebrow-line{width:44px;height:3px;background:var(--gold);border-radius:2px;margin-bottom:18px}
+/* ---- Canonical centered section header ----
+   Standalone section intros place their eyebrow/kicker + title + lead as DIRECT
+   children of a `.block .wrap`. Center that unit as one cohesive block for an
+   enterprise-grade rhythm. Split-column headings (inside .split/.grid/.pdp columns,
+   paired with an image or a second column) are NOT direct .wrap children, so they
+   keep their left alignment and are unaffected. */
+section.block > .wrap > .kicker,
+section.block > .wrap > .eyebrow-line,
+section.block > .wrap > h2,
+section.block > .wrap > h3,
+section.block > .wrap > .lead{text-align:center}
+section.block > .wrap > .eyebrow-line,
+section.block > .wrap > .lead{margin-left:auto;margin-right:auto}
+/* Shop PDP "Product details" intro sits one level deep in .pdp-details; center its
+   header to match the canonical rhythm. Its running description/body stays left. */
+.pdp-details > .eyebrow-line,
+.pdp-details > h2{text-align:center}
+.pdp-details > .eyebrow-line{margin-left:auto;margin-right:auto}
 
 /* ---------- Hero - full-bleed cinematic carousel ---------- */
 .hero{position:relative;height:88vh;min-height:600px;max-height:900px;width:100%;overflow:hidden;background:#0a1226;color:#fff}
@@ -651,6 +669,10 @@ footer.site .logo{height:28px;margin-bottom:14px}
 /* address must stay legible on navy: crimson #d7153f failed AA (2.25:1); light tint passes */
 footer.site .addr{font-size:13.5px;line-height:1.7;color:#cdd8ee}
 footer.site .foot-cta{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+/* The generic `footer.site a` rule (block/muted/no-x-padding) out-specifies the button
+   classes, so restore real button geometry + color for CTAs placed in the footer. */
+footer.site .foot-cta a.btn{display:inline-flex;width:auto;padding:9px 15px;font-size:13.5px;color:#fff}
+footer.site .foot-cta a.btn:hover{color:#fff}
 footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a;font-size:12.5px;color:#8c9ab5;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 
 /* ---------- Responsive ---------- */
