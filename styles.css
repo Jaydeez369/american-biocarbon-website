@@ -441,32 +441,52 @@ tbody td:first-child{font-weight:650;color:var(--ink)}
 
 /* ---------- Field-application cards ---------- */
 .appgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.appcard{position:relative;background:var(--white);border:1px solid var(--line);border-radius:12px;
-  padding:22px 20px 20px;display:flex;flex-direction:column;overflow:hidden;
-  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
-.appcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);transform:scaleY(0);transform-origin:top;transition:transform .24s ease}
-.appcard:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(26,55,108,.12);border-color:var(--line-2)}
-.appcard:hover::before{transform:scaleY(1)}
-.ac-n{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--gold)}
-.ac-t{font-family:var(--f-head);font-weight:400;font-size:20px;line-height:1.14;color:var(--ink);margin:10px 0 4px}
-.ac-d{font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;color:var(--mute);text-transform:uppercase}
-.ac-b{font-size:14px;line-height:1.55;color:var(--dim);margin:12px 0 0}
-.ac-benefit{font-size:13.5px;line-height:1.5;color:var(--ink);margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+/* Icon-forward card: centered layout, gradient circular icon, red button CTA */
+.appcard{position:relative;isolation:isolate;background:var(--white);border:1px solid var(--line);border-radius:18px;
+  padding:28px 24px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;overflow:hidden;
+  text-decoration:none;color:inherit;
+  transition:transform .28s cubic-bezier(.2,.7,.2,1),box-shadow .28s ease,border-color .28s ease}
+.appcard:hover{transform:translateY(-6px);box-shadow:0 20px 46px rgba(26,55,108,.16);border-color:var(--line-2)}
+.appcard.is-link{cursor:pointer}
+.appcard.is-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(var(--crimson-500-rgb),.35),0 20px 46px rgba(26,55,108,.16)}
+/* soft radial glow behind the icon on hover */
+.ac-glow{position:absolute;inset:0;z-index:-1;opacity:0;pointer-events:none;
+  background:radial-gradient(90% 60% at 50% 0%,rgba(var(--crimson-500-rgb),.10),transparent 60%);
+  transition:opacity .34s ease}
+.appcard:hover .ac-glow,.appcard:focus-visible .ac-glow{opacity:1}
+/* gradient circular icon */
+.ac-ic{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(150deg,var(--crimson-500),var(--crimson-700));color:#fff;
+  box-shadow:0 8px 20px rgba(var(--crimson-500-rgb),.30);transition:transform .28s cubic-bezier(.2,.7,.2,1)}
+.ac-ic .ic-svg{width:27px;height:27px}
+.appcard:hover .ac-ic{transform:scale(1.06)}
+.ac-t{font-family:var(--f-head);font-weight:400;font-size:20px;line-height:1.16;color:var(--ink);margin:16px 0 0}
+.ac-b{font-size:14px;line-height:1.55;color:var(--dim);margin:10px 0 0}
+.ac-benefit{width:100%;font-size:13.5px;line-height:1.5;color:var(--ink);margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line)}
 .ac-benefit span{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+/* red button CTA (white letters) pinned to the bottom of every card */
+.ac-cta{margin-top:auto;align-self:center;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:20px;padding:11px 20px;border-radius:9px;background:var(--gold);color:#fff;
+  font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  box-shadow:0 1px 2px rgba(122,10,32,.25),0 6px 16px rgba(215,21,63,.22);
+  transition:background .24s ease,box-shadow .24s ease}
+.ac-cta svg{width:16px;height:16px;transition:transform .26s cubic-bezier(.2,.7,.2,1)}
+.appcard:hover .ac-cta{background:var(--gold-l)}
+.appcard:hover .ac-cta svg,.appcard:focus-visible .ac-cta svg{transform:translateX(4px)}
 .ac-prod{margin-top:14px;font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;color:var(--slate);
   background:var(--paper-2);border-radius:20px;padding:6px 12px;align-self:flex-start}
 @media(max-width:900px){.appgrid{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.appgrid{grid-template-columns:1fr}}
+@media(max-width:560px){.appgrid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.appcard,.ac-glow,.ac-ic,.ac-cta,.ac-cta svg{transition:none}.appcard:hover{transform:none}.appcard:hover .ac-ic{transform:none}}
 
 /* ---------- Icon system (line-stroke) ---------- */
 .ic-svg{display:block;flex:0 0 auto}
-.ac-top,.uc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.ac-ic{width:42px;height:42px;border-radius:11px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);transition:background .2s ease,border-color .2s ease,color .2s ease}
-.ac-ic .ic-svg{width:23px;height:23px}
+.uc-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+/* .ac-ic styling lives in the .appgrid block above (gradient circular icon) */
 .uc-ic-tile{width:36px;height:36px;border-radius:10px;background:var(--paper-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);transition:background .2s ease,border-color .2s ease,color .2s ease}
 .uc-ic-tile .ic-svg{width:20px;height:20px}
-.appcard:hover .ac-ic,.uc:hover .uc-ic-tile{background:var(--gold);border-color:var(--gold);color:#fff}
-@media (prefers-reduced-motion:reduce){.ac-ic,.uc-ic-tile{transition:none}}
+.uc:hover .uc-ic-tile{background:var(--gold);border-color:var(--gold);color:#fff}
+@media (prefers-reduced-motion:reduce){.uc-ic-tile{transition:none}}
 /* proof band now uses inline SVG icons instead of inverted logo images */
 .proofband .p .ic .ic-svg{width:22px;height:22px;color:#fff}
 /* richer chip/proof pills: leading accent dot (matches availability-badge language) */

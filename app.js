@@ -174,7 +174,9 @@ const ICONS = {
   badge:'<path d="M12 2.5l2.2 1.6 2.7-.2.9 2.6 2.2 1.6-.9 2.6.9 2.6-2.2 1.6-.9 2.6-2.7-.2L12 21.5l-2.2-1.6-2.7.2-.9-2.6L4 15.5l.9-2.6L4 10.3l2.2-1.6.9-2.6 2.7.2L12 2.5ZM9 12l2 2 4-4"/>',
   cog:'<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19 12c0-.5 0-.9-.1-1.3l1.9-1.4-1.9-3.3-2.2 1a7 7 0 0 0-2.2-1.3L14 3h-4l-.4 2.4a7 7 0 0 0-2.2 1.3l-2.2-1L3.3 9l1.9 1.4a7 7 0 0 0 0 2.6L3.3 14.4l1.9 3.3 2.2-1a7 7 0 0 0 2.2 1.3L10 20.4h4l.4-2.4a7 7 0 0 0 2.2-1.3l2.2 1 1.9-3.3-1.9-1.4c.1-.4.1-.8.1-1.3Z"/>',
   spark:'<path d="M12 3l1.7 5.1L19 10l-5.3 1.9L12 17l-1.7-5.1L5 10l5.3-1.9L12 3Z"/>',
-  hex:'<path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5L12 2.5ZM9 12l2 2 4-4"/>'
+  hex:'<path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5L12 2.5ZM9 12l2 2 4-4"/>',
+  rig:'<path d="M7 5h10v14H7zM7 5c0 1.3 2.2 2 5 2s5-.7 5-2M7 10.5c0 1.3 2.2 2 5 2s5-.7 5-2M7 15c0 1.3 2.2 2 5 2s5-.7 5-2"/>',
+  cow:'<path d="M6 4.5c-1.6.4-2.3 2-1.6 3.6M18 4.5c1.6.4 2.3 2 1.6 3.6M5 8.5a7 7 0 0 0 14 0M8 7.5C8 5 9.8 3.5 12 3.5S16 5 16 7.5M9.7 12h.01M14.3 12h.01M9 15a3 3 0 0 0 6 0H9ZM11 16.7h.01M13 16.7h.01"/>'
 };
 function ico(name,cls){
   const p = ICONS[name] || ICONS.hex;
@@ -209,13 +211,18 @@ function ucGrid(list){
 // Field-application cards: title, operational detail, explanation, benefit, and
 // the associated product line. Used for Oil & Gas and Environmental Remediation.
 function appCards(list){
-  return `<div class="appgrid">${list.map((a,i)=>`<div class="appcard">
-    <div class="ac-top"><span class="ac-ic">${ico(iconFor(a))}</span><span class="ac-n">${String(i+1).padStart(2,"0")}</span></div>
+  return `<div class="appgrid">${list.map((a)=>{
+    const inner = `
+    <span class="ac-glow" aria-hidden="true"></span>
+    <span class="ac-ic">${ico(iconFor(a))}</span>
     <h3 class="ac-t">${raw(a.title)}</h3>
-    ${a.detail?`<span class="ac-d">${raw(a.detail)}</span>`:""}
     <p class="ac-b">${raw(a.body)}</p>
     ${a.benefit?`<p class="ac-benefit"><span>Benefit</span>${raw(a.benefit)}</p>`:""}
-  </div>`).join("")}</div>`;
+    ${a.cta?`<span class="ac-cta">${raw(a.cta)}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`:""}`;
+    return a.href
+      ? `<a class="appcard is-link" href="${a.href}" aria-label="${raw(a.title)}: ${raw(a.cta||"Learn more")}">${inner}</a>`
+      : `<div class="appcard">${inner}</div>`;
+  }).join("")}</div>`;
 }
 function specTable(rows){
   return `<div class="tbl"><table><tbody>${rows.map(r=>`<tr><td>${raw(r[0])}</td><td>${raw(r[1])}</td></tr>`).join("")}</tbody></table></div>`;

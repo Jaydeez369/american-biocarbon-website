@@ -30,7 +30,8 @@ const SCAN_EXT = new Set([".html", ".js", ".css", ".json", ".md"]);
 // 404s in production (see _redirects). Linting either just produces false failures.
 const SKIP_DIRS = new Set(["node_modules", ".git", ".claude", "docs", "scripts", "sales"]);
 // styles.css.green-backup etc. are non-shipping; only lint tracked shipping files.
-const SKIP_FILES = new Set(["styles.css.green-backup"]);
+// design-lab.html is an internal, noindex UI comparison page (not shipped to customers).
+const SKIP_FILES = new Set(["styles.css.green-backup", "design-lab.html"]);
 
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
