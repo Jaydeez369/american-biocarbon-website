@@ -14,9 +14,14 @@
  * boots and hydrates normally because <base href="/"> keeps asset paths absolute and the
  * router reads location.pathname.
  *
- * Runs at build time against the publish checkout, AFTER stamp-assets, so the template it
- * copies already carries content-hashed ?v= asset tokens. The seo objects are read straight
- * out of data.js (in a sandbox), so titles/descriptions cannot drift from the running app.
+ * Runs at build time AFTER stamp-assets, so the template it copies already carries
+ * content-hashed ?v= asset tokens. The seo objects are read straight out of data.js (in a
+ * sandbox), so titles/descriptions cannot drift from the running app.
+ *
+ * The snapshots ARE COMMITTED (Cloudflare Pages serves the repo as-is; the build command is
+ * not wired to run this). Run `npm run build` before committing any change to index.html or
+ * the seo objects in data.js. `--check` (in `npm run check`) fails if a committed snapshot
+ * is out of date, so a stale snapshot cannot ship.
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -125,12 +130,25 @@ function render(route) {
   return h;
 }
 
-let written = 0;
+const CHECK = process.argv.includes("--check");
+let written = 0, stale = 0;
 for (const route of routes) {
   if (route.path === "/") continue; // the committed index.html already IS the home snapshot
   const outDir = join(ROOT, route.path.replace(/^\//, ""));
+  const outFile = join(outDir, "index.html");
+  const next = render(route);
+  if (CHECK) {
+    const cur = existsSync(outFile) ? readFileSync(outFile, "utf8") : null;
+    if (cur !== next) { stale++; console.error(`✗ Prerender: ${route.path}/index.html is out of date.`); }
+    continue;
+  }
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(join(outDir, "index.html"), render(route));
+  writeFileSync(outFile, next);
   written++;
 }
-console.log(`✓ Prerender: ${written} route snapshot(s) written (+ committed index.html for home).`);
+if (CHECK) {
+  if (stale) { console.error(`\n✗ Prerender: ${stale} stale snapshot(s). Run "node scripts/build.mjs" to regenerate.`); process.exit(1); }
+  console.log("✓ Prerender: all route snapshots up to date.");
+} else {
+  console.log(`✓ Prerender: ${written} route snapshot(s) written (+ committed index.html for home).`);
+}

@@ -4,6 +4,6 @@
   "description": "Static marketing site + internal Sales OS. No bundler: the build verifies and stamps, it does not compile.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node scripts/check-dashes.mjs && node scripts/stamp-assets.mjs --check"
+    "check": "node scripts/check-dashes.mjs && node scripts/stamp-assets.mjs --check && node scripts/prerender.mjs --check"
   }
 }
