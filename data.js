@@ -252,7 +252,7 @@ const HOME = {
     slides:[
       { label:"100% Biochar", img:ASSETS.hands, pos:"50% 50%", zoom:1.06, origin:"50% 55%",
         h:"Carbon that stays<br>in the ground.",
-        sub:"OMRI listed bagasse biochar builds soil, holds water and nutrients, and locks durable carbon away for centuries.",
+        sub:"OMRI listed bagasse biochar builds soil, holds water and nutrients, and locks durable carbon away for the long term.",
         primary:{label:"Request a Sample Kit",href:"/product/agricultural-biochar"}, secondary:CTA.quote },
       { label:"Absorbent Pellets", img:ASSETS.heroPellets, pos:"50% 62%", zoom:1.24, origin:"50% 82%",
         h:"Fewer bags per spill.<br>Less material to haul away.",
@@ -305,7 +305,7 @@ const HOME = {
         bag:{ banner:"ABSORBENT PELLETS", iconSet:"absorbent",
           icons:["Natural Biomass","Agricultural Waste","Naturally Absorbent Fibers","Superior Liquid Retention"],
           uses:"Spill Cleanup (Oil, Solvents & Non-Viscous Chemicals) | Animal Bedding | Landfill Leachate Control | Oil & Gas Fluid Remediation (Drilling & Fracking) | Flood & Natural Disaster Cleanup",
-          desc:"A carbon neutral, plant based absorbent made from sugarcane bagasse. These pellets soak up five times their own weight in liquid, outperforming standard wood pellets, and are just as easy to use: sprinkle over the mess, let them fully absorb, then sweep up and dispose. Renewable, sustainably sourced, and built for tough industrial and household jobs alike.",
+          desc:"A renewable, plant based absorbent made from sugarcane bagasse. These pellets hold up to roughly five times their own weight in non-viscous liquid, outperforming standard wood pellets (about 2.5×), and are just as easy to use: sprinkle over the mess, let them fully absorb, then sweep up and dispose. Renewable, sustainably sourced, and built for tough industrial and household jobs alike.",
           ingredients:"ANAEROBIC FERMENTED MICROTREATED BAGASSE", omri:false },
         desc:"Super-absorbent multi-purpose bagasse pellets made from the fiber left over when sugar is processed. An up to 5:1 absorption ratio suits spill cleanup, waste solidification, and remediation, as well as animal bedding and litter. Odorless, renewable, low dust, and easy to use.",
         gallery:[ ASSETS.pelletsBag, CDN+"AmericanBiocarbon2021-292.jpg?v=1699280021" ],
@@ -323,7 +323,7 @@ const HOME = {
         bag:{ banner:"100% BIOCHAR", iconSet:"soil",
           icons:["Natural Biomass","Agricultural Waste","Superior Water Retention","Enhanced Root Development"],
           uses:"Garden & Lawn Soil Amendment | Vegetable & Flower Bed Enrichment | Tree & Orchard Planting | Farm & Crop Field Application | Improving Water Holding Capacity | Boosting Nutrient Retention & Microbial Activity | Long Term Carbon Sequestration in Soil",
-          desc:"A pure, carbon negative soil amendment made from Louisiana sugarcane bagasse. Our biochar's porous, honeycomb structure locks carbon into a stable form that can persist in soil for decades to millennia, while improving water retention, nutrient availability, and aeration. It's OMRI Listed for organic use, so it fits right into organic gardens, farms, and landscaping programs. Simply mix into soil, water thoroughly to activate, and let it get to work building healthier ground from the roots up.",
+          desc:"A pure, carbon negative soil amendment made from Louisiana sugarcane bagasse. Our biochar's porous, honeycomb structure locks carbon into a stable, durable form that persists in soil, while improving water retention, nutrient availability, and aeration. It's OMRI Listed for organic use, so it fits right into organic gardens, farms, and landscaping programs. Simply mix into soil, water thoroughly to activate, and let it get to work building healthier ground from the roots up.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE", omri:true },
         desc:"OMRI listed 100% bagasse biochar soil enhancer for healthy growth and carbon capture, made from pure Louisiana sugarcane fiber. It improves water and nutrient retention and holds up to 3 to 3.5 times its weight in water. Works as a soil amendment for gardens, beds, lawns, and trees.",
         gallery:[ ASSETS.biocharBag, CDN+"AmericanBiocarbonBiochar1.jpg?v=1699279980" ],
@@ -340,7 +340,7 @@ const HOME = {
         bag:{ banner:"ABSORBENT CRUMBLE", iconSet:"absorbent",
           icons:["Natural Biomass","Agricultural Waste","Naturally Absorbent Fibers","Superior Liquid Retention"],
           uses:"Spill Cleanup (Oil, Solvents & Non-Viscous Chemicals) | Animal Bedding | Landfill Leachate Control | Oil & Gas Fluid Remediation (Drilling & Fracking) | Large Area or High Volume Spill Coverage",
-          desc:"A carbon neutral, plant based absorbent made from sugarcane bagasse, offered in a coarser crumble form for faster, broader coverage. Like our standard pellets, the crumble soaks up several times its own weight in liquid, outperforming standard wood based absorbents. Simply spread over the mess, let it fully absorb, then sweep up and dispose. Renewable, sustainably sourced, and built for demanding industrial and household cleanup jobs.",
+          desc:"A renewable, plant based absorbent made from sugarcane bagasse, offered in a coarser crumble form for faster, broader coverage. Like our standard pellets, the crumble soaks up several times its own weight in liquid, outperforming standard wood based absorbents. Simply spread over the mess, let it fully absorb, then sweep up and dispose. Renewable, sustainably sourced, and built for demanding industrial and household cleanup jobs.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE", omri:false } },
       { id:"absorbent-fiber", name:"Multipurpose Fiber", avail:"q4", cat:"Absorbents", category:"Peat Moss Replacement · Locally Sourced", accent:"aqua",
         claim:"One loose bagasse fiber built for three jobs: soaking up spills, bedding animals, and enriching soil as a renewable peat replacement. Coming Q4.",
@@ -349,7 +349,7 @@ const HOME = {
         bag:{ banner:"MULTIPURPOSE FIBER · LOCALLY SOURCED", iconSet:"absorbent",
           icons:["Locally Sourced","Agricultural Waste","Peat Replacement","Superior Absorption"],
           uses:"Animal Bedding & Litter | Spill Cleanup (Oil, Solvents & Non-Viscous Chemicals) | Landfill Leachate Control | Oil & Gas Fluid Remediation | Environmental Remediation | Soil Amendment & Peat Replacement",
-          desc:"Microbe treated sugarcane bagasse fiber, grown and processed in Louisiana. It soaks up several times its own weight in liquid, spreads quickly across wide areas, and works just as well as soft animal bedding or a renewable soil amendment. Spread it on a spill, let it absorb, then sweep it up and dispose. Carbon neutral, biodegradable, and locally grown.",
+          desc:"Microbe treated sugarcane bagasse fiber, grown and processed in Louisiana. It soaks up several times its own weight in liquid, spreads quickly across wide areas, and works just as well as soft animal bedding or a renewable soil amendment. Spread it on a spill, let it absorb, then sweep it up and dispose. Renewable, biodegradable, and locally grown.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE FIBER", omri:false } },
       { id:"biochar-infused-soil", name:"Biochar-Infused Soil", avail:"q4", cat:"Soil", category:"Growing Media · Ready to Use Blend", accent:"soil",
         claim:"A ready to use growing soil pre-blended with our carbon negative bagasse biochar. No mixing.",
@@ -610,7 +610,7 @@ const PRODUCTS = {
       secondary:["bagasse absorbent fiber","renewable animal bedding","loose absorbent fiber","locally sourced peat replacement"],
       schema:"Product + FAQPage" },
     h1:"Multipurpose Bagasse Fiber",
-    sub:"One loose bagasse fiber, grown and processed in Louisiana, that handles spill cleanup, animal bedding, and soil amendment. A renewable, carbon neutral replacement for mined peat and wood. Coming Q4.",
+    sub:"One loose bagasse fiber, grown and processed in Louisiana, that handles spill cleanup, animal bedding, and soil amendment. A renewable replacement for mined peat and wood. Coming Q4.",
     primary:CTA.quote, secondary:CTA.sample, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
     proofRow:["Renewable peat replacement","Loose, fast spreading fiber","100% organic biomass","Locally grown in Louisiana"],
 
@@ -681,7 +681,7 @@ const PRODUCTS = {
         benefit:"Deeper rooting in tight or worked-out soils." },
       { title:"Microbial &amp; Fungal Habitat", detail:"Living-soil biology",
         body:"Overworked soils lose the living biology that feeds plants, so biochar's stable pores give fungi and microbes protected shelter to recolonize.",
-        benefit:"Studies report markedly higher mycorrhizal colonization." },
+        benefit:"Porous biochar can provide habitat that supports soil microbial activity." },
       { title:"pH Buffering", detail:"Steady the root zone",
         body:"Acidic or swinging soil pH locks up nutrients and stresses roots, so biochar buffers pH toward a steadier, crop-friendly range.",
         benefit:"A stable pH that keeps nutrients available." },
@@ -801,17 +801,17 @@ const PRODUCTS = {
         body:"Finance teams face scrutiny on climate disclosures, so every CORC ties to a full measurement and verification record.",
         benefit:"A traceable paper trail for every removal ton you report." },
       { title:"Permanence-Weighted Portfolios", detail:"Durability by design",
-        body:"Portfolio managers weigh durability against cost, so our biochar locks carbon into a stable form rated 1000+ years.",
+        body:"Portfolio managers weigh durability against cost, so our biochar locks carbon into a stable, durable form (H/C < 0.7), with permanence rated per the Puro.earth methodology.",
         benefit:"High-durability removal to anchor a mixed credit portfolio." },
     ],
     specs:[
-      ["Durability","H/C < 0.7 (millennial scale storage)"],
+      ["Durability","H/C < 0.7 (durable, long-term storage)"],
       ["Verification","Puro.earth CORC + independent MRV"],
       ["Supply","Documented physical biochar deployment"],
     ],
     comparison:{ h:"Real tons vs paper offsets",
       cols:["","Our CORCs","Typical offsets"],
-      rows:[["Basis","Physical biochar deployment","Paper/avoidance claims"],["Durability","Stable biochar form","Variable"],["Permanence","1000+ years","Uncertain"]] },
+      rows:[["Basis","Physical biochar deployment","Paper/avoidance claims"],["Durability","Stable biochar form","Variable"],["Permanence","Durable, rated per Puro.earth MRV","Uncertain"]] },
     faq:[
       { q:"What's the CO₂ per ton?", a:"We share verified methodology specific figures during diligence. Request information and we'll provide current data aligned to our deployment pipeline." },
       { q:"Forward purchase options?", a:"Yes, sized conservatively to our deployment schedule, we don't sell more credits than deployable tons." },
@@ -1431,7 +1431,7 @@ const ENV_REMEDIATION = {
     result:"American BioCarbon up to 5:1: 7 trucks, 48 tons saturated waste. Saved: 11 loads of logistics, 72 tons of disposal billing, zero compliance callbacks."
   },
   procurement:[
-    { step:"01", label:"Site scoping", desc:"Share your contamination profile. We confirm fit and send spec with field proven data." },
+    { step:"01", label:"Site scoping", desc:"Share your contamination profile. We confirm fit and send the spec sheet with available lab data." },
     { step:"02", label:"Pilot test", desc:"Stage a super sack on site. Your team validates absorption, retention, and cleanup benefit." },
     { step:"03", label:"Committed delivery", desc:"Once approved, we schedule delivery to YOUR timeline. No delays." },
     { step:"04", label:"Full support", desc:"Our team available through project close for logistics, troubleshooting, or scope adjustments." }
@@ -1466,7 +1466,7 @@ const RESELLERS_INDUSTRIES = {
 
   program:[
     { title:"Tiered Margin Model", bullets:["Volume discounts that scale with growth","Quarterly rebates for hitting targets","No first year exclusivity"] },
-    { title:"Order Fulfillment", bullets:["48-72 hour turnaround","Dedicated logistics coordination","Real-time tracking"] },
+    { title:"Order Fulfillment", bullets:["Coordinated logistics scheduling","Dedicated logistics coordination","Order status tracking"] },
     { title:"Sales Tools", bullets:["Co-branded case studies","Product docs for your reps","Joint webinars & content"] },
     { title:"Technical Support", bullets:["Direct access to our team","Field trial support","Application guidance"] },
     { title:"Communication", bullets:["Monthly forecasts","Real time order status","Quarterly business reviews"] }
@@ -1507,9 +1507,9 @@ const RESELLERS_AGRICULTURE = {
 
   program:[
     { title:"Premium Margins", bullets:["Tiered pricing that rewards volume","Quarterly rebates for hitting targets","Co-op marketing budget"] },
-    { title:"Grower Support", bullets:["Windrow & soil trial protocols","Field study data vs. competitors","Comparison ROI calculators"] },
+    { title:"Grower Support", bullets:["Windrow & soil trial protocols","USDA-ARS bagasse biochar field study data","Comparison ROI calculators"] },
     { title:"Sales Enablement", bullets:["Co-branded case studies","Tech spec sheets","Certification docs"] },
-    { title:"Reliable Supply", bullets:["Committed lead times","Flexible packaging","Seasonal forecasting"] },
+    { title:"Reliable Supply", bullets:["Planned lead times as capacity scales","Flexible packaging","Seasonal forecasting"] },
     { title:"Direct Account Mgmt", bullets:["Dedicated account manager","Monthly reviews","Quarterly planning","Direct agronomic access"] }
   ],
   timeline:[

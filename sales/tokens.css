@@ -4,6 +4,11 @@
    (website/styles.css, light theme) and the Sales OS console
    (website/sales/styles.css, dark theme).
 
+   EDIT THIS FILE ONLY. website/sales/tokens.css is a build-managed
+   MIRROR of this file (scripts/stamp-assets.mjs copies it on every
+   build so the standalone Sales OS deploy has a local copy; the
+   build's --check gate fails on drift). Never hand-edit the mirror.
+
    ARCHITECTURE - two layers:
      1. PRIMITIVES  (this file): raw brand scales + type/space/
         radius. Theme-agnostic. Never reference these directly

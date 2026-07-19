@@ -4,3 +4,16 @@
 
 .DS_Store
 node_modules/
+
+# Build-generated per-route metadata snapshots (scripts/prerender.mjs). Regenerated on
+# every deploy from data.js; never hand-edited, never committed.
+/product/
+/shop/
+/industry/
+/buy/
+/compare/
+/technical/
+/about/
+/environmental-remediation-solutions/
+/distributors-resellers-industries/
+/distributors-resellers-agriculture/

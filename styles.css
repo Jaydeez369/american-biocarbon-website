@@ -673,7 +673,7 @@ footer.site .foot-cta{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
    classes, so restore real button geometry + color for CTAs placed in the footer. */
 footer.site .foot-cta a.btn{display:inline-flex;width:auto;padding:9px 15px;font-size:13.5px;color:#fff}
 footer.site .foot-cta a.btn:hover{color:#fff}
-footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a;font-size:12.5px;color:#8c9ab5;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a;font-size:12.5px;color:#cdd8ee;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 
 /* ---------- Responsive ---------- */
 .mobile-cta{display:none}

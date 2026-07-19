@@ -278,7 +278,9 @@ td strong,th strong{color:var(--navy-800);font-weight:700}
 }
 @media print{
   .sidebar,.topbar,.menu-btn,.copy,.filters{display:none!important}
-  .section{display:block!important}
+  /* Print only the section you're on, not all seven at once. */
+  .section{display:none!important}
+  .section.active{display:block!important}
   body{background:#fff;color:#111}
   .card,.script,.tbl-wrap{break-inside:avoid;box-shadow:none}
 }

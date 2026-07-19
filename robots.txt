@@ -11,6 +11,5 @@ Disallow: /request-sample
 Disallow: /request-docs
 Disallow: /contact
 Disallow: /download-spec
-Disallow: /buy
 
 Sitemap: https://americanbiocarbon.com/sitemap.xml

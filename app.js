@@ -336,7 +336,8 @@ function renderHome(){
   const HS = H.hero.slides;
   return `
   <section class="hero" id="heroCarousel" aria-roledescription="carousel" aria-label="Product highlights">
-    ${HS.map((s,i)=>{ const Ht = i===0?"h1":"h2"; return `
+    <h1 class="sr-only">American BioCarbon - sugarcane-bagasse industrial absorbents and biochar</h1>
+    ${HS.map((s,i)=>{ const Ht = "h2"; return `
       <div class="hslide${i===0?" active":""}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${HS.length}: ${raw(s.label)}" aria-hidden="${i===0?"false":"true"}" ${i===0?"":"inert"}>
         <img class="hslide-img" src="${s.img}" alt="${raw(s.label)}" style="object-position:${s.pos||'50% 55%'};--z:${s.zoom||1.05};--o:${s.origin||'50% 55%'}" ${i?'loading="lazy"':'fetchpriority="high"'}>
         <div class="hslide-scrim"></div>
@@ -550,8 +551,7 @@ function buildForm(kind, mountSel, qs){
     if(btn){ btn.disabled=true; btn.textContent="Sending…"; }
     // event only, no field values; product id is catalog context, not PII
     track("lead_submit", { form: kind, routing: (f.routing||"").split(".")[0], ...(ctx.productId?{product:ctx.productId}:{}) });
-    mount.innerHTML = `<div class="form-success" role="status" tabindex="-1">✓ ${raw(f.confirm)}</div>
-      <div class="dev-note" style="margin-top:16px"><b>Auto-reply preview:</b><br>${raw(f.autoreply).replace(/\n/g,"<br>")}</div>`;
+    mount.innerHTML = `<div class="form-success" role="status" tabindex="-1">✓ ${raw(f.confirm)}</div>`;
     const ok = mount.querySelector(".form-success"); if(ok) ok.focus();
     window.scrollTo({top:mount.getBoundingClientRect().top+window.scrollY-120,behavior:"smooth"});
   });
@@ -651,7 +651,7 @@ function kraftBag(p){
   const acc = ACCENTS[p.accent] || ACCENTS.aqua;
   const cert = b.omri
     ? `<div class="kb-omri"><span>CERTIFIED</span><b>OMRI</b><i>LISTED</i></div>`
-    : `<div class="kb-omri kb-omri-gen"><span>CERTIFIED</span></div>`;
+    : `<div class="kb-omri kb-omri-gen"><span>LAB TESTED</span></div>`;
   return `<div class="kbag" style="--acc:${acc.b}">
     <div class="kb-body">
       <img class="kb-logo" src="${ASSETS.logoColor}" alt="American BioCarbon" />
@@ -752,6 +752,7 @@ document.addEventListener("click", e=>{
 });
 function renderBuy(){
   const B = HOME.buy;
+  setMeta({title:"Products, Bagasse Absorbents, Biochar & Soil | American BioCarbon",desc:"Browse American BioCarbon's sugarcane-bagasse product line: industrial absorbent pellets and crumble, OMRI-listed 100% biochar, biochar-infused soil, and carbon removal. Request a free sample.",slug:"/buy"});
   const live = B.products.filter(p=>p.avail==="live");
   const q4 = B.products.filter(p=>p.avail==="q4");
   const filters = B.filters.map((f,i)=>`<button class="filter-btn${i===0?" active":""}" data-filter="${raw(f)}">${raw(f)}</button>`).join("");
@@ -960,7 +961,7 @@ function renderTechnical(){
     <div class="doclist">
       ${TECH.studies.map(s=>`<div class="docrow study">
         <div><div class="study-top">${tBadge(s.type)} <span class="study-note">${raw(s.note)}</span></div>
-          <b>${s.url ? `<a href="${s.url}" target="_blank">${raw(s.title)}</a>` : raw(s.title)}</b><span>${raw(s.authors)} · ${raw(s.venue)}</span><em>${raw(s.finding)}</em></div>
+          <b>${s.url ? `<a href="${s.url}" target="_blank" rel="noopener noreferrer">${raw(s.title)}</a>` : raw(s.title)}</b><span>${raw(s.authors)} · ${raw(s.venue)}</span><em>${raw(s.finding)}</em></div>
       </div>`).join("")}
     </div>
     <div class="callout" style="margin-top:22px"><b>Research standards:</b> Studies marked <em>general biochar research</em> demonstrate the mechanism; product performance should be validated through buyer trials. Yield, ROI, and other business outcomes are not claimed without field data specific to your application.</div>
@@ -1011,7 +1012,10 @@ function linkLabel(href){
   if(href.startsWith("/product/")){ const p=PRODUCTS[href.split("/").pop()]; return p?p.name:"Product"; }
   if(href.startsWith("/industry/")){ const n=INDUSTRIES[href.split("/").pop()]; return n?n.name:"Industry"; }
   if(href.includes("technical")) return "Technical Data";
-  return "Learn";
+  if(href.includes("distributors-resellers")) return "Distributors & Resellers";
+  if(href.includes("environmental-remediation")) return "Environmental Remediation";
+  if(href.includes("compare")) return "Compare";
+  return "Learn more";
 }
 const SITE = { origin:"https://americanbiocarbon.com", name:"American BioCarbon", locale:"en_US", ogImage:"/assets/og-image.png" };
 function _meta(sel, attr, key, val){
@@ -1386,7 +1390,7 @@ function router(){
   else { html=notFound(); }
 
   // ---- centralized per-route SEO: JSON-LD, robots noindex, E7 canonical ----
-  const NOINDEX = new Set(["request-sample","request-quote","contact","request-docs","download-spec","buy"]);
+  const NOINDEX = new Set(["request-sample","request-quote","contact","request-docs","download-spec"]);
   const home = { name:"Home", path:"/" };
   if(parts.length===0){ setNoindex(false); clearJsonLd(); }
   else if(NOINDEX.has(parts[0])){ setNoindex(true); clearJsonLd(); }
@@ -1396,6 +1400,7 @@ function router(){
     if(parts[1]==="environmental-remediation") setCanonical("/environmental-remediation-solutions");
     else if(parts[1]==="distributors") setCanonical("/distributors-resellers-industries");
     n ? setJsonLd([breadcrumbLd([home,{name:"Industries"},{name:n.name,path:"/industry/"+parts[1]}])]) : clearJsonLd(); }
+  else if(parts[0]==="buy"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Products",path:"/buy"}])]); }
   else if(parts[0]==="compare"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Compare",path:"/compare"}])]); }
   else if(parts[0]==="technical"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Technical Data & Research",path:"/technical"}])]); }
   else if(parts[0]==="about"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"About",path:"/about"}])]); }
