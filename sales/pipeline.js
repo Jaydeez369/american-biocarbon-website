@@ -191,6 +191,8 @@
     const ds = liveDeals();
     const total = sum(ds,value), wtd = sum(ds,weighted);
     const confirmed = sum(ds.filter(d=>d.stage==="won_fulfillment"),value);
+    const mtTotal = sum(ds.filter(d=>d.uom==="MT"),d=>d.qty);
+    const corcsTotal = sum(ds.filter(d=>d.product==="CORCS"),d=>d.qty);
     const products = [...new Set(ds.map(d=>d.product))]
       .sort((a,b)=>sum(ds.filter(d=>d.product===b),value)-sum(ds.filter(d=>d.product===a),value));
     const totalsRow = `<tr class="ptotal"><td colspan="3"><strong>TOTALS (${ds.length})</strong></td><td class="t-num" colspan="6">${qtyStr(ds)}</td>
@@ -207,10 +209,11 @@
     const quarters=[...new Set(ds.map(quarterOf))].sort(qSort);
     const head=`<thead><tr><th>Customer</th><th>Product</th><th>Sector</th><th>Qty</th><th>Price/Unit</th><th>Order Type</th><th>Close Date</th><th>Stage</th><th>Confidence</th><th>Deal Value</th><th>Weighted Value</th><th>Quarter</th><th>Notes</th><th></th></tr></thead>`;
     return `
-      <div class="grid g5">
+      <div class="grid g6">
         ${kpi("Total Pipeline",money(total))}
         ${kpi("Weighted Pipeline",money(wtd),null,"pk-blue")}
-        ${kpi("Total Quantity",qtyStr(ds))}
+        ${kpi("Total MT Sold",num(mtTotal)+' <span class="pk-u">MT</span>')}
+        ${kpi("Total CORCS Sold",num(corcsTotal)+' <span class="pk-u">UNIT</span>')}
         ${kpi("Active Deals",ds.length)}
         ${kpi("Confirmed Revenue",money(confirmed),null,"pk-green")}
       </div>
