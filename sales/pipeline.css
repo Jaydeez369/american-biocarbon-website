@@ -112,10 +112,21 @@ select.pinput{cursor:pointer;padding-right:26px}
 .pc-act:hover{background:var(--paper-2);color:var(--navy-800)}
 .pc-del:hover{color:var(--red-soft)}
 
-/* add/edit contact modal */
+/* row action cells (edit/delete/convert) — keep them compact + right-aligned */
+.pact-cell{white-space:nowrap;text-align:right}
+.pc-conv{color:var(--green-deep)}
+.pc-conv:hover{background:rgba(var(--green-rgb),.14)}
+
+/* add/edit modal */
 .pmodal-wrap{position:fixed;inset:0;background:rgba(13,20,35,.45);z-index:80;display:grid;place-items:center;padding:20px}
 .pmodal{background:#fff;border-radius:12px;box-shadow:var(--sh-3);width:100%;max-width:440px;
   max-height:92vh;overflow-y:auto;padding:20px 22px;animation:fade .2s ease}
+.pmodal.wide{max-width:560px}
+.pcf-g3{grid-template-columns:1fr 1fr 1fr}
+.pcf-hint{font-size:12px;color:var(--text-dim);background:var(--paper-2);border:1px solid var(--line);
+  border-radius:8px;padding:8px 11px;margin-top:2px}
+.pcf-hint b{color:var(--navy-800)}
+@media(max-width:520px){.pcf-g3{grid-template-columns:1fr 1fr}}
 .pmodal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .pmodal-h h3{margin:0;font-size:16px;font-weight:800;color:var(--navy-800)}
 .pmodal-x{cursor:pointer;color:var(--text-mute);font-size:14px;padding:4px 7px;border-radius:6px}
