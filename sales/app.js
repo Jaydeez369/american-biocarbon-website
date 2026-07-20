@@ -62,6 +62,9 @@ const LEAN_NAV=[
   {group:"Focus",items:[
     {id:"daily",ic:"◎",t:"Daily Plan"},
   ]},
+  {group:"Pipeline",items:[
+    {id:"crm",ic:"◉",t:"Sales Pipeline"},
+  ]},
   {group:"Plan",items:[
     {id:"strategy",ic:"◆",t:"Strategy & ICP"},
     {id:"product",ic:"❝",t:"Product & Messaging"},
@@ -813,6 +816,8 @@ function stripBody(fn){
   return h.replace(/^\s*<section[^>]*>/,"").replace(/<\/section>\s*$/,"");
 }
 const G = k => (window.GTMB && GTMB[k]) ? GTMB[k] : (()=> "");
+/* Live SIBRA pipeline module (pipeline.js, loads before app.js) */
+const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
 /* newId → ordered list of renderer thunks it composes */
 function compose(id, thunks){
@@ -996,6 +1001,7 @@ const LEAN_SECTIONS=[
   //   playbook   = collateral/samples + discovery playbook
   //   onboarding = customer onboarding + 60/90 scale
   ["daily",    [rDaily, G("r30Day"), rChecklist, G("rPrelaunch"), G("rLaunch"), rHorizon]],
+  ["crm",      [PL("rCRM")]],
   ["strategy", [G("rSummary"), rSegments, rPersonas, G("rCampaigns")]],
   ["product",  [rBiochar, rMessaging]],
   ["outreach", [rAccounts, rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],

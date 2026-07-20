@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="styles.css?v=751d58ba" />
   <link rel="stylesheet" href="gtm-command-center.css?v=8796ece6" />
   <link rel="stylesheet" href="collab.css?v=1ac50dce" />
+  <link rel="stylesheet" href="pipeline.css?v=8377d1da" />
 </head>
 <body>
   <div class="app">
@@ -48,10 +49,12 @@
 
   <div class="toast" id="toast">Copied to clipboard</div>
 
-  <!-- LEAN daily-driver view. load order: data → gtm-data → gtm (exposes window.GTMB) → app -->
+  <!-- LEAN daily-driver view. load order: data → gtm-data → gtm (exposes window.GTMB) → pipeline (exposes window.PIPELIVE) → app -->
   <script src="data.js?v=d80d0625"></script>
   <script src="gtm-data.js?v=98c26daa"></script>
   <script src="gtm.js?v=ca834281"></script>
-  <script src="app.js?v=e562a582"></script>
+  <script src="pipeline-data.js?v=3fe1751b"></script>
+  <script src="pipeline.js?v=a1410f99"></script>
+  <script src="app.js?v=88644ea1"></script>
 </body>
 </html>
