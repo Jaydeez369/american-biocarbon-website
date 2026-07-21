@@ -4,23 +4,23 @@
       "id": "absorbent-pellets-spec",
       "product_id": "absorbent-pellets",
       "product_name": "Absorbent Pellets",
-      "file_name": "Absorbent-Pellets-Specification-Sheet.txt",
-      "file_path": "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.txt",
-      "title": "Absorbent Pellets - Technical Specification Sheet",
-      "description": "Complete technical specifications for American BioCarbon Absorbent Pellets including absorption ratios, bulk density, applications, and comparisons.",
+      "file_name": "Absorbent-Pellets-Specification-Sheet.pdf",
+      "file_path": "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf",
+      "title": "American BioCarbon Absorbent Pellets - Technical Specification Sheet",
+      "description": "Complete technical specifications for American BioCarbon Absorbent Pellets including absorption ratios, bulk density, applications, cost/freight comparisons, and sustainability profile.",
       "availability": "published",
-      "last_updated": "2026-07-15"
+      "last_updated": "2026-07-21"
     },
     {
       "id": "biochar-premium-spec",
       "product_id": "agricultural-biochar",
       "product_name": "100% Premium Biochar",
-      "file_name": "Biochar-Premium-Specification-Sheet.txt",
-      "file_path": "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.txt",
-      "title": "100% Premium Biochar - Technical Specification Sheet",
-      "description": "Complete technical specifications for American BioCarbon Premium Biochar including carbon content, nutrients, microstructure analysis, and soil applications.",
+      "file_name": "Biochar-Premium-Specification-Sheet.pdf",
+      "file_path": "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf",
+      "title": "American BioCarbon Bagasse-Based Biochar - Technical, Nutritional & Environmental Report",
+      "description": "Complete technical specifications for American BioCarbon Bagasse-Based Biochar including carbon content, inherent nutrients (N-P-K), SEM microstructure analysis, heavy-metal analysis, and 12 independent IBI laboratory certifications.",
       "availability": "published",
-      "last_updated": "2026-07-15"
+      "last_updated": "2026-07-21"
     }
   ],
   "by_product": {

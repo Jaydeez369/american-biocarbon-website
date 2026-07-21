@@ -35,7 +35,7 @@ const SPEC_SHEETS = {
   },
   "biochar": {
     file: "assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf",
-    name: "ProGreaux-Bagasse-Biochar-Technical-Report.pdf"
+    name: "American-BioCarbon-Bagasse-Biochar-Technical-Report.pdf"
   }
 };
 
