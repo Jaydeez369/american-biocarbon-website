@@ -12,10 +12,11 @@
    Loads BEFORE app.js; exposes window.PIPELIVE.rCRM for LEAN_SECTIONS. */
 (function(){
   const P = window.PIPE;
-  const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  const money = n => "$" + Math.round(n).toLocaleString();
-  const kfmt = n => "$" + Math.round(n/1000) + "K";
-  const num = n => Math.round(n).toLocaleString();
+  const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const fin = n => Number.isFinite(+n)?+n:0;
+  const money = n => "$" + Math.round(fin(n)).toLocaleString();
+  const kfmt = n => "$" + Math.round(fin(n)/1000) + "K";
+  const num = n => Math.round(fin(n)).toLocaleString();
   const lsGet=(k,d)=>{ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } };
   const lsSet=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
   const rr=()=>{ if(typeof rerender==="function") rerender(); };
@@ -26,23 +27,70 @@
   const L_KEY="vej_pipe_leads_v1";       // custom leads
   const O_KEY="vej_pipe_offtake_v1";     // custom offtake rows
   const A_KEY="vej_pipe_accounts_v1";    // custom accounts
+  const N_KEY="vej_pipe_acct_notes_v1";  // per-account notes/activity (profile timeline)
   const QX_KEY="vej_pipe_extra_quarters";
 
-  const customDeals=()=>lsGet(D_KEY,[]).map((d,ci)=>({...d,qty:+d.qty,price:+d.price,ci,custom:true}));
+  const customDeals=()=>lsGet(D_KEY,[]).map((d,ci)=>({...d,qty:+d.qty||0,price:+d.price||0,ci,custom:true}));
   const liveDeals=()=>P.deals.map(d=>({...d,base:true})).concat(customDeals());
   const allContacts=()=>P.contacts.map(c=>({...c,base:true})).concat(lsGet(C_KEY,[]).map((c,ci)=>({...c,ci})));
   const allLeads=()=>P.leads.map(l=>({...l,base:true})).concat(lsGet(L_KEY,[]).map((l,ci)=>({...l,ci})));
-  const offRowsAll=()=>P.offtake.rows.map(r=>({...r,base:true})).concat(lsGet(O_KEY,[]).map((r,ci)=>({confirmed:{},...r,ci})));
+  const offRowsAll=()=>P.offtake.rows.map(r=>({...r,base:true})).concat(lsGet(O_KEY,[]).map((r,ci)=>({confirmed:{},vols:{},...r,ci})));
   /* accounts = snapshot ∪ custom ∪ anything referenced by a deal/contact/offtake row */
   const liveAccounts=()=>{
     const map=new Map();
-    P.accounts.forEach(a=>map.set(a.name,{...a,base:true}));
-    lsGet(A_KEY,[]).forEach(a=>{ if(!map.has(a.name)) map.set(a.name,{...a}); });
-    liveDeals().forEach(d=>{ if(d.customer&&!map.has(d.customer)) map.set(d.customer,{name:d.customer,type:"customer",industry:"",derived:true}); });
-    allContacts().forEach(c=>{ if(c.account&&!map.has(c.account)) map.set(c.account,{name:c.account,type:"prospect",industry:"",derived:true}); });
-    offRowsAll().forEach(r=>{ if(r.customer&&!map.has(r.customer)) map.set(r.customer,{name:r.customer,type:"prospect",industry:"",derived:true}); });
+    const put=(k,v)=>{ const n=norm(k); if(!map.has(n)) map.set(n,v); };
+    P.accounts.forEach(a=>put(a.name,{...a,base:true}));
+    lsGet(A_KEY,[]).forEach(a=>put(a.name,{...a}));
+    liveDeals().forEach(d=>{ if(d.customer) put(d.customer,{name:d.customer,type:"customer",industry:"",derived:true}); });
+    allContacts().forEach(c=>{ if(c.account) put(c.account,{name:c.account,type:"prospect",industry:"",derived:true}); });
+    offRowsAll().forEach(r=>{ if(r.customer) put(r.customer,{name:r.customer,type:"prospect",industry:"",derived:true}); });
     return [...map.values()];
   };
+  /* upsert a typed account name into the custom-account store (bug: __new orphaned it) */
+  const upsertAccount=(name,type)=>{
+    name=String(name||"").trim(); if(!name) return;
+    if(P.accounts.some(a=>norm(a.name)===norm(name))) return;
+    const arr=lsGet(A_KEY,[]);
+    if(arr.some(a=>norm(a.name)===norm(name))) return;
+    arr.push({name,type:type||"customer",industry:""}); lsSet(A_KEY,arr);
+  };
+  /* per-account typed activity store — keyed by account name; newest-first.
+     Shape: {ch,who,title,body,status,ts}. Legacy note rows {body,ts} are migrated
+     on read so old data keeps rendering. Stored alongside nothing else in N_KEY. */
+  const migrateAct = r => (r && r.ch)
+    ? r
+    : { ch:"note", who:"", title:"Internal Note", body:(r&&r.body)||"", status:"logged", ts:(r&&r.ts)||new Date().toISOString() };
+  /* resolve to the canonical liveAccounts name so notes under a norm-equal
+     alias ("Designs" vs "Design") aren't orphaned from the profile */
+  const canonAcct = name => (liveAccounts().find(a=>norm(a.name)===norm(name))||{}).name || name;
+  const acctActivities = name => {
+    const all=lsGet(N_KEY,{});
+    const keys=Object.keys(all).filter(k=>norm(k)===norm(name));
+    if(!keys.length) return [];
+    const canon=canonAcct(name);
+    /* consolidate every norm-matching bucket into the canonical key so the
+       delete index (all[canon][i]) stays valid */
+    if(keys.length>1 || keys[0]!==canon){
+      const merged=[];
+      keys.forEach(k=>merged.push(...(all[k]||[])));
+      merged.sort((a,b)=>new Date((b&&b.ts)||0)-new Date((a&&a.ts)||0));
+      keys.forEach(k=>{ if(k!==canon) delete all[k]; });
+      all[canon]=merged; lsSet(N_KEY,all);
+      return merged.map(migrateAct);
+    }
+    return (all[canon]||[]).map(migrateAct);
+  };
+  const addAcctActivity = (name,act) => {
+    const all=lsGet(N_KEY,{});
+    (all[name]=all[name]||[]).unshift({ ch:"note", status:"logged", ts:new Date().toISOString(), ...act });
+    lsSet(N_KEY,all);
+  };
+  /* back-compat: a plain note is just a note-channel activity */
+  const addAcctNote = (name,body) => addAcctActivity(name,{ ch:"note", title:"Internal Note", body, status:"logged" });
+  const delAcctActivity = (name,i) => { const all=lsGet(N_KEY,{}); if(all[name]){ all[name].splice(i,1); lsSet(N_KEY,all); } };
+  /* legacy alias kept so any old caller still resolves */
+  const acctNotes = name => acctActivities(name);
+
   const accountNames=()=>liveAccounts().map(a=>a.name).sort();
   const productNames=()=>[...new Set(P.production.products.map(r=>r.p).concat(liveDeals().map(d=>d.product)))].filter(Boolean).sort();
   const sectorNames=()=>[...new Set(liveDeals().map(d=>d.sector).filter(Boolean))].sort();
@@ -52,8 +100,9 @@
   const value = d => d.qty * d.price;
   const weighted = d => value(d) * stageOf(d.stage).prob / 100;
   const closeDate = d => new Date(d.close + "T00:00:00Z");
+  const safeISO = d => { const t=closeDate(d); return isNaN(t)?new Date().toISOString():t.toISOString(); };
   const fmtDate = d => closeDate(d).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"});
-  const quarterOf = d => { const t=closeDate(d); return "Q"+(Math.floor(t.getMonth()/3)+1)+" "+t.getFullYear(); };
+  const quarterOf = d => { const t=closeDate(d); return "Q"+(Math.floor(t.getUTCMonth()/3)+1)+" "+t.getUTCFullYear(); };
   const qSort=(a,b)=>{ const [qa,ya]=a.split(" "),[qb,yb]=b.split(" "); return ya-yb||qa[1]-qb[1]; };
   const norm = s => String(s||"").trim().toLowerCase().replace(/s$/,"");
   const qtyStr = ds => {
@@ -68,6 +117,13 @@
 
   const CAT = ["#24478a","#5f8a5b","#caa85a","#9a7fc8","#c85a54","#5a86c8","#d7153f","#3a4655"];
   const colorFor = (list,name) => CAT[list.indexOf(name) % CAT.length];
+
+  /* clickable customer/account name → opens the client-profile epicenter */
+  const acctLink = name => name
+    ? `<span class="acct-link" onclick="pipeOpenAccount('${esc(String(name)).replace(/'/g,"\\'")}')" title="Open ${esc(name)} profile">${esc(name)}</span>`
+    : "—";
+  const fmtTs = iso => { const d=new Date(iso); if(isNaN(d)) return ""; return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}); };
+  const initials = n => String(n||"?").split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 
   /* ---- CSV export (shared) ---- */
   function downloadCSV(filename, header, rows){
@@ -154,9 +210,10 @@
     document.getElementById("pdName").focus();
   };
   window.pipeDealSave=(ci,leadCi)=>{
-    let customer=V("pdCustomer"); if(customer==="__new") customer=V("pdNewAcct");
+    let customer=V("pdCustomer"); const isNewAcct=customer==="__new"; if(isNewAcct) customer=V("pdNewAcct");
     const deal=V("pdName")||`${customer}: Deal`, qty=+V("pdQty"), price=+V("pdPrice");
     if(!customer||!(qty>0)||!(price>0)){ alert("Account, a positive quantity, and a price are required."); return; }
+    if(isNewAcct) upsertAccount(customer,"customer");
     const rec={ deal, customer, product:V("pdProduct"), sector:V("pdSector"), qty, uom:V("pdUom"), price,
       order:V("pdOrder"), close:V("pdClose")||todayISO(), stage:V("pdStage"), conf:V("pdConf"),
       status:V("pdStatus"), owner:V("pdOwner"), notes:V("pdNotes") };
@@ -180,7 +237,7 @@
   const VIEW_KEY="vej_pipe_view";
   const dealAttrs = d => `data-product="${esc(d.product)}" data-quarter="${quarterOf(d)}" data-stage="${d.stage}" data-sector="${esc(d.sector)}" data-conf="${d.conf}"`;
   const trackerRow = d => `<tr ${dealAttrs(d)}>
-    <td><strong>${esc(d.customer)}</strong></td><td>${esc(d.product)}</td><td>${esc(d.sector)}</td>
+    <td><strong>${acctLink(d.customer)}</strong></td><td>${esc(d.product)}</td><td>${esc(d.sector)}</td>
     <td class="t-num">${num(d.qty)} <span class="uom">${esc(d.uom)}</span></td>
     <td class="t-num">${(+d.price).toFixed(2)}</td><td>${esc(d.order)}</td>
     <td class="t-num">${fmtDate(d)}</td><td>${stBadge(d)}</td><td>${cfBadge(d)}</td>
@@ -190,7 +247,7 @@
   function tPipeline(){
     const ds = liveDeals();
     const total = sum(ds,value), wtd = sum(ds,weighted);
-    const confirmed = sum(ds.filter(d=>d.stage==="won_fulfillment"),value);
+    const confirmed = sum(ds.filter(d=>d.status==="won"),value);
     const mtTotal = sum(ds.filter(d=>d.uom==="MT"),d=>d.qty);
     const corcsTotal = sum(ds.filter(d=>d.product==="CORCS"),d=>d.qty);
     const products = [...new Set(ds.map(d=>d.product))]
@@ -212,8 +269,8 @@
       <div class="grid g6">
         ${kpi("Total Pipeline",money(total))}
         ${kpi("Weighted Pipeline",money(wtd),null,"pk-blue")}
-        ${kpi("Total MT Sold",num(mtTotal)+' <span class="pk-u">MT</span>')}
-        ${kpi("Total CORCS Sold",num(corcsTotal)+' <span class="pk-u">UNIT</span>')}
+        ${kpi("Total MT (Pipeline)",num(mtTotal)+' <span class="pk-u">MT</span>')}
+        ${kpi("Total CORCS (Pipeline)",num(corcsTotal)+' <span class="pk-u">UNIT</span>')}
         ${kpi("Active Deals",ds.length)}
         ${kpi("Confirmed Revenue",money(confirmed),null,"pk-green")}
       </div>
@@ -269,6 +326,7 @@
 
   /* ================= TAB 2 · PRODUCTION PLAN ================= */
   const prodQuarters=()=>[...new Set(P.production.quarters.concat(lsGet(QX_KEY,[])))].sort(qSort);
+  const offtakeQuarters=()=>[...new Set(P.offtake.quarters.concat(lsGet(QX_KEY,[])))].sort(qSort);
   function tProduction(){
     const quarters=prodQuarters(), products=P.production.products;
     const totals = quarters.map(q=>sum(products,r=>r.mt[q]||0));
@@ -299,12 +357,12 @@
     const filter=lsGet(EXECF_KEY,"");
     const allDs=liveDeals();
     const ds=filter?allDs.filter(d=>d.product===filter):allDs;
-    const total=sum(ds,value), wtd=sum(ds,weighted), qty=sum(ds,d=>d.qty);
-    const confirmed=sum(ds.filter(d=>d.stage==="won_fulfillment"),value);
+    const total=sum(ds,value), wtd=sum(ds,weighted), qty=sum(ds.filter(d=>d.uom==="MT"),d=>d.qty);
+    const confirmed=sum(ds.filter(d=>d.status==="won"),value);
     const sc=P.sampleConversions;
     const qs=prodQuarters();
-    const confMT=qs.map(q=>sum(ds.filter(d=>d.status==="won"&&quarterOf(d)===q),d=>d.qty));
-    const wtdMT=qs.map(q=>sum(ds.filter(d=>quarterOf(d)===q),d=>d.qty*stageOf(d.stage).prob/100));
+    const confMT=qs.map(q=>sum(ds.filter(d=>d.uom==="MT"&&d.status==="won"&&quarterOf(d)===q),d=>d.qty));
+    const wtdMT=qs.map(q=>sum(ds.filter(d=>d.uom==="MT"&&quarterOf(d)===q),d=>d.qty*stageOf(d.stage).prob/100));
     const offRows=filter?offRowsAll().filter(r=>r.product===filter):offRowsAll();
     const prodRows=filter?P.production.products.filter(r=>r.p===filter):P.production.products;
     const offMT=qs.map(q=>sum(offRows,r=>+(r.vols[q]||0)));
@@ -381,7 +439,7 @@
     return base+extra;
   }
   function tOfftake(){
-    const quarters=P.offtake.quarters;
+    const quarters=offtakeQuarters();
     const rows=offRowsAll();
     const annual = r => sum(quarters,q=>+(r.vols[q]||0))*r.price;
     const totQ = quarters.map(q=>sum(rows,r=>+(r.vols[q]||0)));
@@ -389,7 +447,7 @@
     const cfQ  = quarters.map(q=>sum(rows,r=>confirmedFor(r,q)));
     const confB = c => `<span class="pbadge ${c==="Low"?"cf-low":c==="High"?"cf-secured":"cf-medium"}">${esc(c)}</span>`;
     const grouped=lsGet(OGRP_KEY,false);
-    const oRow=r=>`<tr><td><strong>${esc(r.customer)}</strong></td><td>${esc(r.product)}</td><td class="pnote" title="${esc(r.sector)}">${esc(r.sector)}</td><td>${confB(r.conf)}</td>
+    const oRow=r=>`<tr><td><strong>${acctLink(r.customer)}</strong></td><td>${esc(r.product)}</td><td class="pnote" title="${esc(r.sector)}">${esc(r.sector)}</td><td>${confB(r.conf)}</td>
       ${quarters.map(q=>{ const v=r.vols[q]; const c=confirmedFor(r,q);
         return `<td class="t-num">${v==null?'<span class="pdim">—</span>':num(v)}${c?`<div class="pconf-sub">✓ ${num(c)} confirmed</div>`:""}</td>`; }).join("")}
       <td class="t-num">$${r.price}</td><td><span class="pbadge pfreq">${esc(r.freq)}</span></td>
@@ -418,16 +476,16 @@
       <tr class="prev"><td colspan="4">Revenue (MT × Price/MT)</td>${revQ.map(t=>`<td class="t-num">${t?money(t):"—"}</td>`).join("")}<td colspan="4"></td></tr>
       <tr class="pconf-row"><td colspan="4">✓ Confirmed Sales (Won Deals)</td>${cfQ.map(t=>`<td class="t-num">${t?num(t)+" MT":"—"}</td>`).join("")}<td colspan="4"></td></tr>
       </tbody>`)}
-      <div class="note">Row notes worth keeping in view: ${P.offtake.rows.filter(r=>r.notes).map(r=>`<b>${esc(r.customer)} (${esc(r.product)})</b> — ${esc(r.notes).replace(/\n/g,"<br>")}`).join(" · ")}</div>`;
+      <div class="note">Row notes worth keeping in view: ${offRowsAll().filter(r=>r.notes).map(r=>`<b>${esc(r.customer)} (${esc(r.product)})</b> — ${esc(r.notes).replace(/\n/g,"<br>")}`).join(" · ")}</div>`;
   }
   window.pipeOfftakeGroup=on=>{ lsSet(OGRP_KEY,!!on); rr(); };
-  window.pipeOfftakeExport=()=>{ const qs=P.offtake.quarters; downloadCSV("offtake-pipeline.csv",
+  window.pipeOfftakeExport=()=>{ const qs=offtakeQuarters(); downloadCSV("offtake-pipeline.csv",
     ["Customer","Product","Sector","Confidence","Price/MT","Frequency",...qs,...qs.map(q=>q+" confirmed"),"Annual Rev."],
     offRowsAll().map(r=>[r.customer,r.product,r.sector,r.conf,r.price,r.freq,...qs.map(q=>r.vols[q]??""),...qs.map(q=>confirmedFor(r,q)||""),sum(qs,q=>+(r.vols[q]||0))*r.price])); };
   window.pipeOfftakeModal=ci=>{
     const cur=(ci!=null&&ci>=0)?lsGet(O_KEY,[])[ci]:{vols:{}};
     if(!cur) return;
-    const quarters=P.offtake.quarters;
+    const quarters=offtakeQuarters();
     const body=`
       ${F("poCustomer","Customer",cur.customer,1)}
       ${SEL("poProduct","Product",productNames(),cur.product)}
@@ -445,7 +503,7 @@
     const customer=V("poCustomer"), price=parseFloat(V("poPrice"));
     if(!customer||!(price>0)){ alert("Customer and a price per MT are required."); return; }
     const vols={};
-    P.offtake.quarters.forEach((q,i)=>{ const v=V("poQ"+i); if(v!=="") vols[q]=+v; });
+    offtakeQuarters().forEach((q,i)=>{ const v=V("poQ"+i); if(v!=="") vols[q]=+v; });
     const rec={customer, product:V("poProduct"), sector:V("poSector"), conf:V("poConf"), freq:V("poFreq"), price, vols, confirmed:{}, notes:V("poNotes")};
     const arr=lsGet(O_KEY,[]);
     if(ci>=0) arr[ci]=rec; else arr.push(rec);
@@ -469,7 +527,7 @@
         <button class="btn btn-primary" onclick="pipeDealModal()">＋ Add Deal</button></div>
       ${tblWrap(`<thead><tr><th>Deal Name</th><th>Account</th><th>Product</th><th>Stage</th><th class="t-num">Value</th><th>Close Date</th><th>Status</th><th>Assigned To</th><th></th></tr></thead>
       <tbody id="pipeDealsTbl">${ds.map(d=>`<tr data-stage="${d.stage}" data-status="${d.status}" title="${esc(d.notes||"")}">
-        <td><strong>${esc(d.deal)}</strong></td><td>${esc(d.customer)}</td><td>${esc(d.product)}</td><td>${stBadge(d,false)}</td>
+        <td><strong>${esc(d.deal)}</strong></td><td>${acctLink(d.customer)}</td><td>${esc(d.product)}</td><td>${stBadge(d,false)}</td>
         <td class="t-num">${money(value(d))}</td><td class="t-num">${fmtDate(d)}</td>
         <td><span class="pbadge ${d.status==="won"?"st-won":d.status==="lost"?"cf-low":"pfreq"}">${esc(d.status)}</span></td>
         <td>${esc(d.owner)}</td>
@@ -503,7 +561,7 @@
       </div>
       ${tblWrap(`<thead><tr><th>Name</th><th>Job Title</th><th>Account</th><th>Email / Phone</th><th>Drop-off Address</th><th>Actions</th></tr></thead>
       <tbody id="pipeCTbl">${cs.map(c=>`<tr data-account="${esc(c.account||"")}">
-        <td title="${esc(c.notes||"")}"><strong>${esc(c.name)}</strong></td><td>${esc(c.title||"—")}</td><td>${esc(c.account||"—")}</td>
+        <td title="${esc(c.notes||"")}"><strong>${esc(c.name)}</strong></td><td>${esc(c.title||"—")}</td><td>${c.account?acctLink(c.account):"—"}</td>
         <td>${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a><br>`:""}${chip(c.phone)}${c.mobile?` ${chip(c.mobile)} <span class="pdim" style="font-size:10.5px">(mobile)</span>`:""}</td>
         <td class="pnote">${esc(c.dropOff||"—")}</td>
         <td class="pact-cell">${c.base?`<span class="pdim" title="From the SIBRA snapshot — edit in pipeline-data.js">—</span>`
@@ -546,8 +604,9 @@
   };
   window.pipeContactSave=idx=>{
     const first=V("pcFirst"), last=V("pcLast");
-    let account=V("pcAccount"); if(account==="__new") account=V("pcNewAccount");
+    let account=V("pcAccount"); const isNewAcct=account==="__new"; if(isNewAcct) account=V("pcNewAccount");
     if(!first||!last||!account){ alert("First name, last name, and account are required."); return; }
+    if(isNewAcct) upsertAccount(account,"prospect");
     const rec={ name:first+" "+last, first, last, account, title:V("pcTitle"), email:V("pcEmail"),
       phone:V("pcPhone"), mobile:V("pcMobile"), dropOff:V("pcDrop"), notes:V("pcNotes") };
     const arr=getCustom();
@@ -661,16 +720,310 @@
       </div>`;
   }
 
+  /* ================= CLIENT PROFILE (the "epicenter") =================
+     One unified account record — contacts + deals + offtake + activity in a
+     single HubSpot-style screen. Opens on any customer-name click; reads the
+     same live accessors so it's always in sync with every tab. */
+  let PROFILE=null;              // account name currently open, or null (=tabs view)
+  let PROFILE_TAB="activity";    // kept for state-machinery back-compat (unused by Bento)
+  let PROFILE_FILTER="all";      // timeline channel filter: all | email | call | sms | note | task,meeting
+  window.pipeOpenAccount = name => { PROFILE=canonAcct(name); PROFILE_TAB="activity"; PROFILE_FILTER="all"; remount(); };
+  window.pipeCloseAccount = () => { PROFILE=null; remount(); };
+  window.pipeProfileTab = t => { PROFILE_TAB=t; remount(); };
+  window.pipeAcctFilter = f => { PROFILE_FILTER=f; remount(); };
+  window.pipeAcctNoteSave = name => {
+    const ta=document.getElementById("acctComposerInput"); if(!ta||!ta.value.trim()) return;
+    addAcctNote(name, ta.value.trim()); remount();
+  };
+  window.pipeAcctActDelete = (name,i) => { delAcctActivity(name,i); remount(); };
+
+  /* ---- the 6 comm modals — reuse the app's openModal() shell ---- */
+  const CH_META = {
+    email:  { label:"Email",   status:"sent" },
+    call:   { label:"Call",    status:"logged" },
+    sms:    { label:"SMS",     status:"sent" },
+    note:   { label:"Note",    status:"logged" },
+    task:   { label:"Task",    status:"scheduled" },
+    meeting:{ label:"Meeting", status:"scheduled" },
+  };
+  window.pipeAcctComm = (ch,name) => {
+    const m=CH_META[ch]||CH_META.note;
+    let body="";
+    if(ch==="email")      body=F("acEmailSubj","Subject",null,1,"Subject line")+`<div class="pcf"><label>Body *</label><textarea class="pinput" id="acEmailBody" rows="4" placeholder="Write your message…"></textarea></div>`;
+    else if(ch==="sms")   body=`<div class="pcf"><label>Message *</label><textarea class="pinput" id="acSmsBody" rows="3" placeholder="Type SMS message…"></textarea></div>`;
+    else if(ch==="call")  body=F("acCallOut","Outcome",null,1,"e.g. Confirmed order, discussed timing")+F("acCallDur","Duration (min)",null,0,"e.g. 12","number");
+    else if(ch==="note")  body=`<div class="pcf"><label>Note *</label><textarea class="pinput" id="acNoteBody" rows="3" placeholder="Write an internal note…"></textarea></div>`;
+    else if(ch==="task")  body=F("acTaskTitle","Title",null,1,"Task title")+F("acTaskDue","Due Date",todayISO(),1,"","date");
+    else if(ch==="meeting")body=F("acMeetTitle","Title",null,1,"Meeting title")+F("acMeetWhen","Date & Time",null,1,"","datetime-local");
+    openModal("New "+m.label, body, "Log "+m.label, `pipeAcctCommSave('${ch}')`, false);
+  };
+  window.pipeAcctCommSave = ch => {
+    if(!PROFILE) return;
+    const m=CH_META[ch]||CH_META.note;
+    const who=(P.team[0]&&P.team[0].name)||"";
+    let title="", body="";
+    if(ch==="email"){ const s=V("acEmailSubj"), b=V("acEmailBody"); if(!s||!b){ alert("Subject and body are required."); return; } title=s; body=b; }
+    else if(ch==="sms"){ const b=V("acSmsBody"); if(!b){ alert("A message is required."); return; } title="SMS"; body=b; }
+    else if(ch==="call"){ const o=V("acCallOut"); if(!o){ alert("A call outcome is required."); return; } const d=V("acCallDur"); title="Outbound Call"+(d?` · ${d} min`:""); body="Outcome: "+o; }
+    else if(ch==="note"){ const b=V("acNoteBody"); if(!b){ alert("A note is required."); return; } title="Internal Note"; body=b; }
+    else if(ch==="task"){ const t=V("acTaskTitle"), d=V("acTaskDue"); if(!t||!d){ alert("Title and due date are required."); return; } title=t; body="Due: "+d; }
+    else if(ch==="meeting"){ const t=V("acMeetTitle"), w=V("acMeetWhen"); if(!t||!w){ alert("Title and date/time are required."); return; } title=t; body="Scheduled: "+w.replace("T"," "); }
+    addAcctActivity(PROFILE, { ch, who, title, body, status:m.status });
+    pipeModalClose(); remount();
+  };
+
+  /* re-render just the section in place, preserving its .active state */
+  function remount(){ const el=document.getElementById("sec-crm"); if(el){ el.innerHTML=sectionInner(); window.scrollTo(0,0); } }
+
+  /* ---- inline icon sprite (single icon system, mirrors v3.html) ---- */
+  const AV3_SPRITE = `<svg class="av3-defs" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-email" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+    <symbol id="i-call" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></symbol>
+    <symbol id="i-sms" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8Z"/><path d="M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-task" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></symbol>
+    <symbol id="i-meeting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/></symbol>
+  </svg>`;
+  const ICON_ID = { email:"email", call:"call", sms:"sms", note:"note", task:"task", meeting:"meeting", system:"system" };
+  const iconSvg = ch => `<svg aria-hidden="true"><use href="#i-${ICON_ID[ch]||"system"}"/></svg>`;
+  const dayKey = iso => { const d=new Date(iso); return isNaN(d)?"":d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); };
+  const timeStr = iso => { const d=new Date(iso); return isNaN(d)?"":d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}); };
+  const STATUS_CLS = { sent:"sent", received:"received", logged:"logged", scheduled:"scheduled" };
+
+  function renderProfile(name){
+    const acct = liveAccounts().find(a=>norm(a.name)===norm(name)) || {name,type:"",industry:""};
+    const deals = liveDeals().filter(d=>norm(d.customer)===norm(name));
+    const contacts = allContacts().filter(c=>norm(c.account)===norm(name));
+    const offs = offRowsAll().filter(r=>norm(r.customer)===norm(name));
+    const safe = esc(name).replace(/'/g,"\\'");
+
+    /* ---- derived metrics ---- */
+    const openDeals = deals.filter(d=>d.status==="open");
+    const wonDeals  = deals.filter(d=>d.status==="won");
+    const lostDeals = deals.filter(d=>d.status==="lost");
+    const closed    = wonDeals.length + lostDeals.length;
+    const ltv       = sum(deals,value);
+    const openPipe  = sum(openDeals,value);
+    const weightedOpen = sum(openDeals,weighted);
+    const wonRev    = sum(wonDeals,value);
+    const winRate   = closed ? Math.round(wonDeals.length/closed*100)+"%" : "—";
+    /* most-common deal owner */
+    const ownerCount={}; deals.forEach(d=>{ if(d.owner) ownerCount[d.owner]=(ownerCount[d.owner]||0)+1; });
+    const owner = Object.keys(ownerCount).sort((a,b)=>ownerCount[b]-ownerCount[a])[0] || "—";
+    const products = [...new Set(deals.map(d=>d.product).filter(Boolean))];
+    const primary = contacts[0];
+    const drop = (contacts.find(c=>c.dropOff)||{}).dropOff || "";
+
+    /* ---- tags: products + offtake ---- */
+    const tags = products.map(p=>`<span class="tag">${esc(p)}</span>`)
+      .concat(offs.length?[`<span class="tag crimson">Offtake pipeline</span>`]:[]).join("");
+
+    /* =================== HEADER BENTO =================== */
+    const header = `<div class="header-bento">
+      <div class="tile identity-tile">
+        <div class="avatar" aria-hidden="true">${esc(initials(name))}</div>
+        <div class="identity-main">
+          <h1>${esc(name)}</h1>
+          <div class="identity-meta">
+            <span>${esc((acct.type||"Account").replace(/^\w/,c=>c.toUpperCase()))}</span>
+            ${acct.industry?`<span class="dot" aria-hidden="true"></span><span>${esc(acct.industry)}</span>`:""}
+            <span class="dot" aria-hidden="true"></span><span>Owner: ${esc(owner)}</span>
+          </div>
+          ${tags?`<div class="tags">${tags}</div>`:""}
+        </div>
+      </div>
+      <div class="tile metric-tile accent">
+        <div class="lbl">Lifetime Value</div><div class="val">${money(ltv)}</div>
+        <div class="sub">${deals.length} deal${deals.length===1?"":"s"} total</div>
+      </div>
+      <div class="tile metric-tile">
+        <div class="lbl">Win Rate</div><div class="val">${winRate}</div>
+        <div class="sub mute2">${wonDeals.length} of ${closed} closed won</div>
+      </div>
+      <div class="tile metric-tile">
+        <div class="lbl">Active Deals</div><div class="val">${openDeals.length}</div>
+        <div class="sub mute2">${money(openPipe)} open pipeline</div>
+      </div>
+    </div>`;
+
+    /* =================== LEFT COLUMN =================== */
+    const companyTile = `<div class="tile">
+      <div class="tile-head"><h2>Company</h2></div>
+      <div class="tile-body">
+        <div class="kv-row"><span class="k">Type</span><span class="v"><span class="status-pill prospect">${esc((acct.type||"—").replace(/^\w/,c=>c.toUpperCase()))}</span></span></div>
+        <div class="kv-row"><span class="k">Industry</span><span class="v">${esc(acct.industry||"—")}</span></div>
+        <div class="kv-row"><span class="k">Account Owner</span><span class="v">${esc(owner)}</span></div>
+        ${acct.website?`<div class="kv-row"><span class="k">Website</span><span class="v">${esc(acct.website)}</span></div>`:""}
+        ${acct.region?`<div class="kv-row"><span class="k">Region</span><span class="v">${esc(acct.region)}</span></div>`:""}
+        ${drop?`<div class="kv-row"><span class="k">Drop-off</span><span class="v">${esc(drop)}</span></div>`:""}
+      </div>
+    </div>`;
+
+    const contactCard = c => `<div class="contact-card">
+      <div class="c-avatar${c===primary?"":" sec"}" aria-hidden="true">${esc(initials(c.name))}</div>
+      <div class="c-info">
+        <div class="c-name">${esc(c.name)}</div>
+        <div class="c-title">${esc(c.title||"Contact")}${c===primary?" · Primary":""}</div>
+        ${c.email?`<span class="c-detail">${esc(c.email)}</span>`:""}
+        ${c.phone?`<span class="c-detail mono">${esc(c.phone)}</span>`:""}
+      </div>
+      <div class="c-actions">
+        <button type="button" class="icon-btn" aria-label="Email ${esc(c.name)}" onclick="pipeAcctComm('email','${safe}')">${iconSvg("email")}</button>
+        <button type="button" class="icon-btn" aria-label="Call ${esc(c.name)}" onclick="pipeAcctComm('call','${safe}')">${iconSvg("call")}</button>
+        <button type="button" class="icon-btn" aria-label="SMS ${esc(c.name)}" onclick="pipeAcctComm('sms','${safe}')">${iconSvg("sms")}</button>
+      </div>
+    </div>`;
+    const contactsTile = `<div class="tile">
+      <div class="tile-head"><h2>Contacts</h2> <span class="count">${contacts.length}</span></div>
+      <div class="tile-body">${contacts.length?contacts.map(contactCard).join(""):`<div class="av3-empty">No contacts on file. <a class="acct-link" onclick="pipeContactModal()">Add one →</a></div>`}</div>
+    </div>`;
+
+    const attrTile = `<div class="tile">
+      <div class="tile-head"><h2>Attributes</h2></div>
+      <div class="tile-body">
+        <div class="attr-list">
+          ${products.map(p=>`<span class="tag">${esc(p)}</span>`).join("")}
+          ${offs.length?`<span class="tag">Offtake: ${esc([...new Set(offs.map(r=>r.product))].join(", "))}</span>`:""}
+          ${products.length||offs.length?"":`<span class="av3-empty">No attributes yet.</span>`}
+        </div>
+      </div>
+    </div>`;
+
+    const left = `<section class="stack" aria-label="Company &amp; Contacts">${companyTile}${contactsTile}${attrTile}</section>`;
+
+    /* =================== MIDDLE COLUMN =================== */
+    const actionBar = `<div class="actionbar">
+      ${["email","call","sms","note","task","meeting"].map(ch=>`<button type="button" class="action-tile" data-ch="${ch}" onclick="pipeAcctComm('${ch}','${safe}')">
+        <div class="aico">${iconSvg(ch)}</div><div class="alabel">${esc(CH_META[ch].label)}</div></button>`).join("")}
+    </div>`;
+
+    /* timeline: stored activities (deletable) + derived events */
+    const stored = acctActivities(name).map((a,i)=>({...a,_idx:i}));
+    const derived = [];
+    wonDeals.forEach(d=>derived.push({ ch:"system", who:"System", title:"Deal Won",
+      body:`${d.deal} (${money(value(d))}) marked ${stageOf(d.stage).label}`, status:"logged", ts:safeISO(d) }));
+    deals.filter(d=>d.notes).forEach(d=>derived.push({ ch:"note", who:d.owner||"", title:"Deal Note — "+d.deal,
+      body:d.notes, status:"logged", ts:safeISO(d) }));
+    const all = stored.concat(derived).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+    const filterSet = PROFILE_FILTER==="all" ? null : PROFILE_FILTER.split(",");
+    const shown = filterSet ? all.filter(a=>filterSet.includes(a.ch)) : all;
+
+    let tl="", lastDay=null;
+    if(!shown.length){ tl = `<div class="timeline-empty">No activity in this channel.</div>`; }
+    else shown.forEach(a=>{
+      const dk=dayKey(a.ts);
+      if(dk!==lastDay){ tl+=`<div class="date-sep"><span>${esc(dk)}</span></div>`; lastDay=dk; }
+      const st=a.status?`&middot; <span class="badge ${STATUS_CLS[a.status]||""}">${esc(a.status)}</span>`:"";
+      const del=a._idx!=null?`<button type="button" class="av3-del" title="Delete" aria-label="Delete activity" onclick="pipeAcctActDelete('${safe}',${a._idx})">🗑</button>`:"";
+      tl+=`<div class="item" data-ch="${esc(a.ch)}">
+        <div class="ico">${iconSvg(a.ch)}</div>
+        <div class="bubble">
+          <div class="b-head"><span class="b-title">${esc(a.title||"")}</span><span class="b-time">${esc(timeStr(a.ts))}${del}</span></div>
+          <div class="b-meta">${esc(a.who||"")} ${st}</div>
+          <div class="b-body">${esc(a.body||"").replace(/\n/g,"<br>")}</div>
+        </div>
+      </div>`;
+    });
+
+    const chips = [["all","All"],["email","Emails"],["call","Calls"],["sms","SMS"],["note","Notes"],["task,meeting","Tasks/Meetings"]]
+      .map(([f,l])=>`<button type="button" class="chip" data-filter="${f}" aria-pressed="${PROFILE_FILTER===f}" onclick="pipeAcctFilter('${f}')">${esc(l)}</button>`).join("");
+
+    const threadTop = `<div class="thread-top">
+      <div class="who">
+        <div class="c-avatar" aria-hidden="true">${esc(primary?initials(primary.name):initials(name))}</div>
+        <div><h2>${esc(primary?primary.name:name)}</h2><small>${esc(primary?(primary.title||"Primary contact"):"Account")} · ${esc(name)}</small></div>
+      </div>
+      <span class="tag">${all.length} activit${all.length===1?"y":"ies"}</span>
+    </div>`;
+    const composer = `<div class="composer"><div class="composer-bar">
+      <input type="text" id="acctComposerInput" placeholder="Log a quick note or update…" onkeydown="if(event.key==='Enter')pipeAcctNoteSave('${safe}')">
+      <button type="button" class="btn primary" onclick="pipeAcctNoteSave('${safe}')">Log</button>
+    </div></div>`;
+
+    const middle = `<section class="main-grid-middle" aria-label="Activity">
+      ${actionBar}
+      <div class="thread-tile">
+        ${threadTop}
+        ${composer}
+        <div class="filters" role="group" aria-label="Filter activity">${chips}</div>
+        <div class="timeline" aria-live="polite">${tl}</div>
+      </div>
+    </section>`;
+
+    /* =================== RIGHT COLUMN — analytics =================== */
+    const kpis = `
+      <div class="tile kpi-tile"><div class="lbl">Open Pipeline</div><div class="val">${money(openPipe)}</div></div>
+      <div class="tile kpi-tile"><div class="lbl">Weighted</div><div class="val crimson">${money(weightedOpen)}</div></div>
+      <div class="tile kpi-tile"><div class="lbl">Won Revenue</div><div class="val success">${money(wonRev)}</div></div>
+      <div class="tile kpi-tile"><div class="lbl">Win Rate</div><div class="val success">${winRate}</div></div>`;
+
+    /* stage funnel */
+    const stageAgg = P.stages.map(s=>{ const g=deals.filter(d=>d.stage===s.k); return {label:s.label, cls:s.k==="won_fulfillment"?"won":"", val:sum(g,value), count:g.length}; });
+    const funMax = Math.max(...stageAgg.map(s=>s.val),1);
+    const funnel = `<div class="tile chart-tile span2"><h3>Stage Funnel</h3>
+      <div class="funnel"><div class="funnel-scale" aria-hidden="true"></div>
+      ${stageAgg.map(s=>{ const empty=s.val===0; const w=empty?6:Math.max(Math.round(s.val/funMax*100),3);
+        return `<div class="funnel-row"><div class="funnel-label">${esc(s.label)}</div>
+          <div class="funnel-bar ${empty?"empty":s.cls}" style="width:${w}%">${empty?"—":money(s.val)}</div>
+          <div class="funnel-count">${s.count||""}</div></div>`; }).join("")}
+      </div></div>`;
+
+    /* revenue by month */
+    const monthMap=new Map();
+    deals.forEach(d=>{ const t=closeDate(d); const k=t.getUTCFullYear()+"-"+String(t.getUTCMonth()+1).padStart(2,"0");
+      const m=monthMap.get(k)||{k, label:t.toLocaleDateString("en-US",{month:"short",timeZone:"UTC"}), val:0, won:0};
+      m.val+=value(d); if(d.status==="won") m.won+=value(d); monthMap.set(k,m); });
+    const months=[...monthMap.values()].sort((a,b)=>a.k<b.k?-1:1);
+    const barMax=Math.max(...months.map(m=>m.val),1);
+    const bars = `<div class="tile chart-tile span2"><h3>Revenue by Month</h3>
+      <div class="barchart">${months.length?months.map(m=>{ const h=Math.max(Math.round(m.val/barMax*100),4);
+        return `<div class="bar-col"><div class="bar-val">${kfmt(m.val)}</div><div class="bar-fill ${m.won>=m.val/2&&m.won>0?"won":""}" style="height:${h}%"></div><div class="bar-lbl">${esc(m.label)}</div></div>`;
+      }).join(""):`<div class="av3-empty">No dated deals.</div>`}</div></div>`;
+
+    /* product split donut */
+    const prodVals=products.map(p=>({p, v:sum(deals.filter(d=>d.product===p),value), n:deals.filter(d=>d.product===p).length})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+    const prodTot=sum(prodVals,x=>x.v)||1;
+    let accP=0; const segs=prodVals.map(x=>{ const p=x.v/prodTot*100; const seg=`${colorFor(products,x.p)} ${accP}% ${accP+p}%`; accP+=p; return seg; });
+    const topShare=prodVals[0]?Math.round(prodVals[0].v/prodTot*100):0;
+    const donut = `<div class="tile chart-tile span2"><h3>Product Split</h3>
+      ${prodVals.length?`<div class="donut-wrap">
+        <div class="donut" style="background:conic-gradient(${segs.join(",")})"><div class="donut-center"><span class="n">${topShare}%</span><span class="t">${esc(prodVals[0].p)}</span></div></div>
+        <div class="legend">${prodVals.map(x=>`<div class="legend-item"><span class="legend-dot" style="background:${colorFor(products,x.p)}" aria-hidden="true"></span><span class="lname">${esc(x.p)} · ${x.n} deal${x.n===1?"":"s"}</span><span class="lval">${money(x.v)}</span></div>`).join("")}</div>
+      </div>`:`<div class="av3-empty">No product revenue.</div>`}</div>`;
+
+    /* deal list */
+    const dealList = `<div class="tile chart-tile span2"><h3>Deal List</h3>
+      <div class="deal-list">${deals.length?[...deals].sort((a,b)=>closeDate(b)-closeDate(a)).map(d=>`<div class="deal-row">
+        <div class="deal-main"><div class="deal-name">${esc(d.deal)}</div><div class="deal-sub">${esc(d.product)} · ${num(d.qty)} ${esc(d.uom)} · ${esc(d.owner||"")}</div>${stBadge(d,false)}</div>
+        <div class="deal-right"><div class="deal-val">${money(value(d))}</div></div></div>`).join(""):`<div class="av3-empty">No deals yet. <a class="acct-link" onclick="pipeDealModal(null,{customer:'${safe}'})">Add the first deal →</a></div>`}</div></div>`;
+
+    const right = `<section class="analytics-grid" aria-label="Analytics">${kpis}${funnel}${bars}${donut}${dealList}</section>`;
+
+    /* =================== ASSEMBLE =================== */
+    return `<div class="av3">${AV3_SPRITE}
+      <div class="topbar">
+        <nav class="crumbs" aria-label="Breadcrumb"><span class="acct-link" onclick="pipeCloseAccount()">Sales Pipeline</span> / <b>${esc(name)}</b></nav>
+        <div class="topbar-actions">
+          <button type="button" class="btn" onclick="pipeContactModal()">+ Contact</button>
+          <button type="button" class="btn primary" onclick="pipeDealModal(null,{customer:'${safe}'})">+ New Deal</button>
+        </div>
+      </div>
+      ${header}
+      <div class="main-grid">${left}${middle}${right}</div>
+    </div>`;
+  }
+
   /* ================= SECTION ================= */
-  function rCRM(){
+  function sectionInner(){
+    if(PROFILE) return renderProfile(PROFILE);
     const at=activeTab();
     const panes=[["pipeline",tPipeline],["production",tProduction],["exec",tExec],["offtake",tOfftake],["deals",tDeals],["contacts",tContacts],["leads",tLeads],["reports",tReports]];
-    return `<section class="section" id="sec-crm">
-      <h1 class="pipe-h">Sales Pipeline</h1>
+    return `<h1 class="pipe-h">Sales Pipeline</h1>
       <div class="pipe-tabs">${TABS.map(([id,t])=>`<span class="pill${id===at?" active":""}" data-tab="${id}" onclick="pipeTab('${id}')">${t}</span>`).join("")}</div>
-      ${panes.map(([id,fn])=>`<div class="pipe-pane${id===at?" active":""}" data-tab="${id}">${fn()}</div>`).join("")}
-    </section>`;
+      ${panes.map(([id,fn])=>`<div class="pipe-pane${id===at?" active":""}" data-tab="${id}">${fn()}</div>`).join("")}`;
   }
+  function rCRM(){ return `<section class="section" id="sec-crm">${sectionInner()}</section>`; }
 
   window.PIPELIVE = { rCRM };
 })();

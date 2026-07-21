@@ -42,7 +42,7 @@ window.PIPE = {
     { deal:"Ronald Herbert – Biochar",               customer:"Ronald Herbert Farms",  product:"Biochar",           sector:"Agriculture",  qty:30, uom:"MT",   price:450, order:"One-Time",  close:"2026-06-29", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Karina Vasquez", notes:"already delivered waiting for NRCS" },
     { deal:"Rose Acres - June – Biochar",            customer:"Rose Acres",            product:"Biochar",           sector:"Agriculture",  qty:16, uom:"MT",   price:450, order:"Recurring", close:"2026-06-25", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Karina Vasquez", notes:"June Order" },
     { deal:"Rose Acres - May – Biochar",             customer:"Rose Acres",            product:"Biochar",           sector:"Agriculture",  qty:17, uom:"MT",   price:450, order:"Recurring", close:"2026-05-27", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Karina Vasquez", notes:"May Order" },
-    { deal:"Eco Vision Designs – Biochar",           customer:"Eco Vision Designs",    product:"Biochar",           sector:"Agriculture",  qty:6,  uom:"MT",   price:400, order:"One-Time",  close:"2026-07-01", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Karina Vasquez", notes:"small but scaling" },
+    { deal:"Eco Vision Design – Biochar",           customer:"Eco Vision Design",     product:"Biochar",           sector:"Agriculture",  qty:6,  uom:"MT",   price:400, order:"One-Time",  close:"2026-07-01", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Karina Vasquez", notes:"small but scaling" },
   ],
 
   accounts: [
@@ -66,7 +66,7 @@ window.PIPE = {
 
   leads: [
     { company:"Eco Vision Design", contact:"Tim Watkins", email:"timothy@ecovisiondesign.com", phone:"+1 (239) 789-5919",
-      source:"website", status:"qualified", converted:true, convertedTo:"Eco Vision Designs – Biochar", convertedDate:"2026-06-30" },
+      source:"website", status:"qualified", converted:true, convertedTo:"Eco Vision Design – Biochar", convertedDate:"2026-06-30" },
   ],
 
   team: [
