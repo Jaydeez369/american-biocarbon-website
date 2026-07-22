@@ -32,7 +32,8 @@
 
   const customDeals=()=>lsGet(D_KEY,[]).map((d,ci)=>({...d,qty:+d.qty||0,price:+d.price||0,ci,custom:true}));
   const liveDeals=()=>P.deals.map(d=>({...d,base:true})).concat(customDeals());
-  const allContacts=()=>P.contacts.map(c=>({...c,base:true})).concat(lsGet(C_KEY,[]).map((c,ci)=>({...c,ci})));
+  const hsContacts=()=>((window.HUBSPOT&&window.HUBSPOT.contacts)||[]).map(c=>({...c,hubspot:true}));
+  const allContacts=()=>P.contacts.map(c=>({...c,base:true})).concat(lsGet(C_KEY,[]).map((c,ci)=>({...c,ci}))).concat(hsContacts());
   const allLeads=()=>P.leads.map(l=>({...l,base:true})).concat(lsGet(L_KEY,[]).map((l,ci)=>({...l,ci})));
   const offRowsAll=()=>P.offtake.rows.map(r=>({...r,base:true})).concat(lsGet(O_KEY,[]).map((r,ci)=>({confirmed:{},vols:{},...r,ci})));
   /* accounts = snapshot ∪ custom ∪ anything referenced by a deal/contact/offtake row */
@@ -41,6 +42,9 @@
     const put=(k,v)=>{ const n=norm(k); if(!map.has(n)) map.set(n,v); };
     P.accounts.forEach(a=>put(a.name,{...a,base:true}));
     lsGet(A_KEY,[]).forEach(a=>put(a.name,{...a}));
+    /* HubSpot company layer (read-only snapshot, hubspot-data.js). Merged AFTER the
+       pipeline's own accounts so the 5 canonical matches win and don't double. */
+    if(window.HUBSPOT&&window.HUBSPOT.accounts) window.HUBSPOT.accounts.forEach(a=>put(a.name,{...a,hubspot:true}));
     liveDeals().forEach(d=>{ if(d.customer) put(d.customer,{name:d.customer,type:"customer",industry:"",derived:true}); });
     allContacts().forEach(c=>{ if(c.account) put(c.account,{name:c.account,type:"prospect",industry:"",derived:true}); });
     offRowsAll().forEach(r=>{ if(r.customer) put(r.customer,{name:r.customer,type:"prospect",industry:"",derived:true}); });
@@ -890,7 +894,15 @@
       </div>
     </div>`;
 
-    const left = `<section class="stack" aria-label="Company &amp; Contacts">${companyTile}${contactsTile}${attrTile}</section>`;
+    /* read-only HubSpot communications timeline (hubspot-comms.js), matched by norm name */
+    const hubComms = (()=>{ const H=window.HUBSPOT_COMMS; if(!H) return ""; if(H[name]) return H[name];
+      const k=Object.keys(H).find(k=>norm(k)===norm(name)); return k?H[k]:""; })();
+    const hubTile = hubComms ? `<div class="tile">
+      <div class="tile-head"><h2>HubSpot Communications</h2> <span class="count">synced 07/22</span></div>
+      <div class="tile-body"><div style="max-height:340px;overflow:auto;font-size:12px;line-height:1.55;white-space:normal">${esc(hubComms).replace(/===ACT===/g,'<hr style="border:none;border-top:1px solid var(--line,#334);margin:8px 0">').replace(/\n/g,"<br>")}</div></div>
+    </div>` : "";
+
+    const left = `<section class="stack" aria-label="Company &amp; Contacts">${companyTile}${contactsTile}${hubTile}${attrTile}</section>`;
 
     /* =================== MIDDLE COLUMN =================== */
     const actionBar = `<div class="actionbar">
