@@ -601,7 +601,6 @@ function buyCard(p){
     <div class="body">
       <span class="icp">${raw(p.category)}</span>
       <h3>${raw(p.name)}</h3>
-      ${isLive?(p.priceLabel?`<div class="cardprice">${raw(p.priceLabel)}${p.stock?` · ${p.stock} in stock`:""}</div>`:`<div class="cardprice free">Free sample</div>`):""}
       <p class="claim">${raw(p.claim)}</p>
       ${p.uses?`<ul class="uses">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
       <div class="chips">${(p.chips||[]).filter(c=>/sample bag|metric ton/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
@@ -778,7 +777,7 @@ function renderBuy(){
   const group = (label, list) => list.length ? `
     <div class="shop-group">
       <div class="shop-group-h">${raw(label)} <span class="count">(${list.length})</span></div>
-      <div class="cards c3 shop-grid">${list.map(buyCard).join("")}</div>
+      <div class="cards c4 shop-grid shop-grid-sm">${list.map(buyCard).join("")}</div>
     </div>` : "";
   return `
   <section class="shop-head"><div class="wrap">

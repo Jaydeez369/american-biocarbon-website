@@ -396,6 +396,21 @@ section.block > .wrap > .lead{margin-left:auto;margin-right:auto}
 
 /* product-card (compact) */
 .pcard .thumb{aspect-ratio:4/3}
+
+/* 4-up product grid on /buy: tighter padding & type so 4 cards fit a row cleanly */
+.shop-grid-sm{gap:14px}
+.shop-grid-sm .card .body{padding:13px 14px;gap:6px}
+.shop-grid-sm .card .body h3{font-size:15.5px}
+.shop-grid-sm .buycard .claim{font-size:12.5px}
+.shop-grid-sm .icp{font-size:10px}
+.shop-grid-sm .uses{gap:6px;margin:5px 0 2px}
+.shop-grid-sm .uses li{font-size:12px;padding-left:15px}
+.shop-grid-sm .chips span{font-size:9.5px;padding:2px 7px}
+.shop-grid-sm .availline{font-size:10.5px;padding-top:7px}
+.shop-grid-sm .buy-docs{font-size:10.5px}
+.shop-grid-sm .btn-sm{font-size:12.5px;padding:8px 14px}
+@media (max-width:1180px){ .shop-grid-sm.c4{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:640px){ .shop-grid-sm.c4{grid-template-columns:1fr} }
 .thumb-blank{width:100%;height:100%}
 .pdp-slide-blank{width:100%;height:100%;background:var(--paper-2);border-radius:var(--r-lg)}
 
