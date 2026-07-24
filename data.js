@@ -12,7 +12,7 @@ const ASSETS = {
   pelletsMock:CDN+"AbsorbentPelletsMock.jpg?v=1699280021",
   pelletsPhoto:CDN+"AmericanBiocarbon2021-292.jpg?v=1699280021",
   biocharMock:CDN+"100BiocharMock.jpg?v=1699279980",
-  biocharPhoto:"assets/products/100-biochar-photo.jpg?v=v2",
+  biocharPhoto:"assets/products/100-biochar-photo.jpg?v=v3",
   biocharLg:  CDN+"biochar-lg.jpg?v=1702141148",
   /* NEW canonical bag renders (local), one distinct bag per product */
   pelletsBag: "assets/products/absorbent-pellets-bag.png",
