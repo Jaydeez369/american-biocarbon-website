@@ -314,22 +314,23 @@ function renderHome(){
   // custom kraft sample bag (6 bags total, tailored per product).
   const zig = (HOME.buy.products||[]).map((p,i)=>{
     const isLive = p.avail==="live";
-    // Homepage showcase sections 3, 4 & 5 (index 2, 3 & 4) use "Stay informed" instead of a free-sample CTA.
-    const notifyPrimary = i===2 || i===3 || i===4;
-    const primary = isLive ? {label:"Request a Sample Kit",href:p.id==="agricultural-biochar"?"/product/agricultural-biochar":p.id==="absorbent-pellets"?"/shop/"+p.id:"/request-sample?product="+p.id}
-      : notifyPrimary ? {label:"Stay informed",href:"/request-sample?preorder=1&product="+p.id}
-      : {label:"Request a Sample Kit",href:"/request-sample?preorder=1&product="+p.id};
+    // Every currently live product (isLive) is a Buy Now / shop item; everything else
+    // (Coming Q4) uses "Stay informed" instead of a purchase CTA.
+    const primary = isLive
+      ? {label:"Buy Now",href:"/shop/"+p.id}
+      : {label:"Stay informed",href:"/request-sample?preorder=1&product="+p.id};
     const secondary = null;
+    const media = p.img ? `<img src="${p.img}" alt="${raw(p.name)}">` : `<div class="thumb-blank" aria-hidden="true"></div>`;
     return `
   <section class="block" style="background:${i%2?'var(--paper-2)':'var(--white)'}"><div class="wrap"><div class="split${i%2?' rev':''} bleed">
-    <div class="media"><img src="${p.img}" alt="${raw(p.name)}"></div>
+    <div class="media">${media}</div>
     <div>
       <div class="kicker">${raw(p.category)}${isLive?"":" · Coming Q4"}</div>
       <h2 style="font-size:30px;margin:8px 0 12px">${raw(p.name)}</h2>
       <p class="lead">${raw(p.claim)}</p>
       <ul class="checks">${(p.uses||[]).map(u=>`<li>${raw(u)}</li>`).join("")}</ul>
       <div class="btn-row">${btn(primary)}${secondary?btn(secondary,"btn-ghost"):""}</div>
-      ${isLive?`<p class="freenote">Free sample. Shipping and handling included.</p>`:""}
+      ${isLive?`<p class="freenote">${p.priceLabel?raw(p.priceLabel)+(p.stock?` · ${p.stock} in stock`:""):"Free sample. Shipping and handling included."}</p>`:""}
     </div>
   </div></div></section>`;
   }).join("");
@@ -578,28 +579,33 @@ function fieldHTML(fl, ctx){
 /* ================= COMPARE ================= */
 function buyCard(p){
   const isLive = p.avail==="live";
+  const isBuyNow = BUY_NOW_IDS.has(p.id);
   const docLink = id => `<a href="/request-docs?doc=${id}&product=${p.id}">${id==="sds"?"SDS":"Spec sheet"}</a>`;
   const docs = isLive
     ? `<div class="buy-docs">${(p.docIds||[]).map(docLink).join("<span>·</span>")}</div>`
     : `<div class="buy-docs muted">Spec sheet coming</div>`;
+  const primaryLabel = isBuyNow ? "Buy Now" : "Request a Sample Kit";
   const primary = isLive
-    ? `<a class="btn btn-primary btn-sm" href="${(p.id==="absorbent-pellets"||p.id==="agricultural-biochar")?"/shop/"+p.id:"/request-sample?product="+p.id}">Request a Sample Kit</a>`
+    ? `<a class="btn btn-primary btn-sm" href="${isBuyNow?"/shop/"+p.id:"/request-sample?product="+p.id}">${primaryLabel}</a>`
     : `<a class="btn btn-primary btn-sm" href="/request-sample?preorder=1&product=${p.id}">Request a Sample Kit</a>`;
   const cta = isLive
     ? `<div class="btn-row">${primary}</div>
        <a class="notify" href="/request-quote?product=${p.id}">Request a Quote →</a>`
     : `<div class="btn-row">${primary}</div>`;
+  const thumb = p.img
+    ? `<img src="${p.img}" alt="${raw(p.name)}" loading="lazy">`
+    : `<div class="thumb-blank" aria-hidden="true"></div>`;
   return `<div class="card pcard buycard${isLive?"":" is-q4"}" data-cat="${raw(p.cat||"")}">
-    <div class="thumb"><img src="${p.img}" alt="${raw(p.name)}" loading="lazy">
+    <div class="thumb">${thumb}
       <span class="avail ${isLive?"avail-live":"avail-q4"}">${isLive?"Live · ships 4 to 7 biz days":"Coming Q4"}</span></div>
     <div class="body">
       <span class="icp">${raw(p.category)}</span>
       <h3>${raw(p.name)}</h3>
-      ${isLive?`<div class="cardprice free">Free sample</div>`:""}
+      ${isLive?(p.priceLabel?`<div class="cardprice">${raw(p.priceLabel)}${p.stock?` · ${p.stock} in stock`:""}</div>`:`<div class="cardprice free">Free sample</div>`):""}
       <p class="claim">${raw(p.claim)}</p>
       ${p.uses?`<ul class="uses">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
-      <div class="chips">${(p.chips||[]).filter(c=>/sample bag/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
-      <div class="availline">${isLive?"Free sample ships in 4 to 7 business days. Bulk and truckload by quote.":"Coming Q4. Request a sample on a 30 day lead time."}</div>
+      <div class="chips">${(p.chips||[]).filter(c=>/sample bag|metric ton/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
+      <div class="availline">${isLive?(p.priceLabel?"Bulk bag ships in 4 to 7 business days.":"Free sample ships in 4 to 7 business days. Bulk and truckload by quote."):"Coming Q4. Request a sample on a 30 day lead time."}</div>
       ${docs}
       ${cta}
     </div>
@@ -677,13 +683,21 @@ const SHOP_DOMAIN = "https://americanbiocarbon.com";
 const SHOPIFY_CHECKOUT = {
   "absorbent-pellets":   SHOP_DOMAIN + "/cart/54185346302244:1",
   "agricultural-biochar": SHOP_DOMAIN + "/cart/54185346335012:1",
+  // 1 metric ton (2,204.6 lb) bulk bags, $200 / $400, 10 in stock each. Live Shopify products:
+  // "Absorbent Pellets - 2200 lbs Super Sack" / "100% Biochar - 2200lbs (4 Cubic Yard) supersack".
+  "absorbent-pellets-mt":   SHOP_DOMAIN + "/cart/54182475170084:1",
+  "agricultural-biochar-mt": SHOP_DOMAIN + "/cart/54184340914468:1",
 };
+// ids whose primary CTA reads "Buy Now" instead of "Request a Sample Kit"
+const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-mt","agricultural-biochar-mt"]);
 // Products with an approved, product-specific spec-sheet PDF available for DIRECT
 // download (maps site id -> SPEC_SHEETS key). Anything not listed here has no approved
 // file yet and must use a "Request Spec Sheet" action instead of an incorrect download.
 const SPEC_SPECID = {
   "absorbent-pellets": "absorbent-pellets",
   "agricultural-biochar": "biochar",
+  "absorbent-pellets-mt": "absorbent-pellets",
+  "agricultural-biochar-mt": "biochar",
 };
 function renderShopProduct(id){
   const p = (HOME.buy.products||[]).find(x=>x.id===id);
@@ -693,24 +707,31 @@ function renderShopProduct(id){
   const photos = (p.gallery && p.gallery.length) ? p.gallery : (p.img ? [p.img] : []);
   const slides = photos.map(src=>({src}));
   const slideHTML = (s,i,ctx)=> `<div class="pdp-slide${i===0?" active":""}" data-slide="${i}"><img src="${s.src}" alt="${raw(p.name)}"></div>`;
+  const isBuyNow = BUY_NOW_IDS.has(p.id);
+  const ctaLabel = isBuyNow ? "Buy Now" : "Request a Sample Kit";
+  // Bulk (metric-ton) SKUs are paid; the sample bags stay free. Both are Shopify checkouts.
+  const priceHTML = p.priceLabel
+    ? `<div class="pdp-price">${raw(p.priceLabel)}${p.stock?` <span>· ${p.stock} in stock</span>`:""}</div>`
+    : `<div class="pdp-price free">Free sample <span>· shipping &amp; handling included</span></div>`;
+  const checkoutHref = SHOPIFY_CHECKOUT[p.id]
+    ? SHOPIFY_CHECKOUT[p.id]
+    : (p.priceLabel ? `/request-quote?product=${p.id}&intent=purchase` : `/request-sample?product=${p.id}`);
   return `
   <section class="block" style="padding-top:34px"><div class="wrap">
     ${crumbs([{label:"Products",href:"/buy"},{label:p.name}], "margin-bottom:22px")}
     <div class="pdp">
       <div class="pdp-media">
-        <div class="pdp-main">${slides.map((s,i)=>slideHTML(s,i,"m")).join("")}</div>
-        <div class="pdp-thumbs">${slides.map((s,i)=>`<button class="pdp-thumb${i===0?" active":""}" data-slide="${i}" aria-label="View ${i+1}"><img src="${s.src}" alt=""></button>`).join("")}</div>
+        <div class="pdp-main">${slides.length ? slides.map((s,i)=>slideHTML(s,i,"m")).join("") : `<div class="pdp-slide active pdp-slide-blank" data-slide="0"></div>`}</div>
+        ${slides.length>1?`<div class="pdp-thumbs">${slides.map((s,i)=>`<button class="pdp-thumb${i===0?" active":""}" data-slide="${i}" aria-label="View ${i+1}"><img src="${s.src}" alt=""></button>`).join("")}</div>`:""}
       </div>
       <div class="pdp-info">
         <span class="avail avail-live" style="position:static;display:inline-block;margin-bottom:14px">Live · ships 4 to 7 biz days</span>
         <h1>${raw(p.name)}${p.unit?", "+raw(p.unit):""}</h1>
-        <div class="pdp-price free">Free sample <span>· shipping &amp; handling included</span></div>
+        ${priceHTML}
         <p class="pdp-lead">${raw(p.claim)}</p>
         ${p.uses?`<ul class="uses" style="margin:12px 0 14px">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
         <div class="chips" style="margin:0 0 18px">${(p.chips||[]).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
-        ${SHOPIFY_CHECKOUT[p.id]
-          ? `<a class="btn btn-primary" href="${SHOPIFY_CHECKOUT[p.id]}" style="width:100%;justify-content:center">Request a Sample Kit</a>`
-          : `<a class="btn btn-primary" href="/request-sample?product=${p.id}" style="width:100%;justify-content:center">Request a Sample Kit</a>`}
+        <a class="btn btn-primary" href="${checkoutHref}" style="width:100%;justify-content:center">${ctaLabel}</a>
         <div class="pdp-links" style="margin-top:12px">
           <a href="/request-quote?product=${p.id}">Request a Quote</a>
           <span>·</span>
@@ -718,7 +739,7 @@ function renderShopProduct(id){
             ? `<a href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
             : `<a href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
         </div>
-        <p class="pdp-secure">Free ${raw(p.sampleWeight||"")} sample. Ships in 4 to 7 business days from White Castle, LA.</p>
+        <p class="pdp-secure">${p.priceLabel ? raw(p.priceLabel)+" bulk bag." : `Free ${raw(p.sampleWeight||"")} sample.`} Ships in 4 to 7 business days from White Castle, LA.</p>
         ${p.truckloadQ4?`<p class="pdp-secure" style="color:var(--dim)">Bulk bag and truckload supply available Q4.</p>`:""}
       </div>
     </div>
@@ -734,9 +755,7 @@ function renderShopProduct(id){
           ? `<a class="btn btn-dark" href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
           : `<a class="btn btn-dark" href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
         <a class="btn btn-ghost" href="/request-docs?doc=sds&product=${p.id}">Request SDS</a>
-        ${SHOPIFY_CHECKOUT[p.id]
-          ? `<a class="btn btn-ghost" href="${SHOPIFY_CHECKOUT[p.id]}">Request a Sample Kit</a>`
-          : `<a class="btn btn-ghost" href="/request-sample?product=${p.id}">Request a Sample Kit</a>`}
+        <a class="btn btn-ghost" href="${checkoutHref}">${ctaLabel}</a>
       </div>
       <p class="pdp-meta" style="margin-top:16px">Ships from White Castle, Louisiana. ${p.truckloadQ4?"Truckload supply available Q4.":""}</p>
     </div>
