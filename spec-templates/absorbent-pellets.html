@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>American BioCarbon Absorbent Pellets — Technical Specification Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   AMERICAN BIOCARBON — Absorbent Pellets Spec Sheet
+   Editable HTML template · regenerates to PDF (Print → Save as PDF)
+   Brand: NAVY + CRIMSON (canonical tokens). ABC branding only.
+   Customize per-prospect via the bar at top (screen only).
+   ============================================================ */
+:root{
+  --navy-600:#24478a; --navy-700:#1a376c; --navy-800:#122a52; --navy-900:#0d1f3d;
+  --navy-50:#eef2f9; --navy-100:#d9e2f1;
+  --crimson-500:#d7153f; --crimson-600:#b91237; --crimson-50:#fdeaef;
+  --ink:#1a1a1a; --slate:#3e4a5f; --mute:#63676e;
+  --paper:#f7f8fa; --paper-2:#eef1f5; --line:#e2e6ee; --line-2:#c4cfe6; --white:#fff;
+  --f-sans:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--f-sans);color:var(--ink);background:var(--paper-2);line-height:1.5;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* ---------- Customize bar (screen only) ---------- */
+.cust{position:sticky;top:0;z-index:50;background:var(--navy-900);color:#fff;
+  padding:12px 20px;display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;
+  box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.cust h4{margin:0 12px 0 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  color:#9db3d6;align-self:center;font-weight:700}
+.cust label{display:flex;flex-direction:column;gap:4px;font-size:10.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:#9db3d6;font-weight:600}
+.cust input{font-family:var(--f-sans);font-size:13px;padding:5px 9px;border:1px solid #33507f;
+  border-radius:6px;background:#0d1f3d;color:#fff;min-width:150px}
+.cust input:focus{outline:2px solid var(--crimson-500);outline-offset:1px}
+.cust .hint{font-size:10.5px;color:#6f93c9;align-self:center;max-width:230px}
+.cust button{font-family:var(--f-sans);font-weight:700;font-size:12px;padding:7px 14px;border:0;
+  border-radius:6px;background:var(--crimson-500);color:#fff;cursor:pointer;letter-spacing:.03em}
+.cust button:hover{background:var(--crimson-600)}
+
+/* ---------- Page canvas (US Letter) ---------- */
+.page{background:var(--white);width:8.5in;min-height:11in;margin:22px auto;padding:0.72in 0.7in 0.55in;
+  box-shadow:0 8px 30px rgba(13,31,61,.14);position:relative;display:flex;flex-direction:column}
+.page-body{flex:1 0 auto}
+
+/* running header */
+.rh{display:flex;justify-content:space-between;align-items:center;border-bottom:2.5px solid var(--navy-700);
+  padding-bottom:10px}
+.rh img{height:26px;width:auto}
+.rh .kicker{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy-700);font-weight:700}
+
+/* title block (page 1) */
+.title{font-size:30px;line-height:1.12;font-weight:700;color:var(--navy-800);margin:26px 0 4px}
+.title .reg{font-size:.6em;vertical-align:super}
+.subtitle{font-size:15px;color:var(--slate);font-weight:500;margin:0}
+.rule{width:88px;height:4px;background:var(--crimson-500);border-radius:2px;margin:16px 0 22px}
+
+/* prepared-for chip */
+.prepared{display:inline-flex;gap:8px;align-items:baseline;background:var(--navy-50);
+  border:1px solid var(--line-2);border-left:4px solid var(--crimson-500);border-radius:6px;
+  padding:7px 14px;font-size:12.5px;color:var(--slate);margin:0 0 22px}
+.prepared b{color:var(--navy-800)}
+.prepared[data-empty="1"]{display:none}
+
+/* hero */
+.hero{background:var(--navy-700);color:#eaf1fb;border-radius:12px;padding:26px 28px;margin-bottom:26px}
+.hero h2{margin:0 0 6px;font-size:26px;font-weight:700;color:#fff}
+.hero .tag{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#9db3d6;font-weight:700;margin-bottom:12px}
+.hero p{margin:0;font-size:13.5px;line-height:1.6}
+.hero strong{color:#fff}
+
+/* section heading */
+h3.sec{font-size:16px;color:var(--navy-700);font-weight:700;margin:0 0 12px;padding-left:12px;
+  border-left:4px solid var(--crimson-500);line-height:1.2}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:4px}
+thead th{background:var(--navy-700);color:#fff;text-align:left;font-weight:600;padding:10px 14px;font-size:12.5px}
+tbody td{padding:9px 14px;border-bottom:1px solid var(--line)}
+tbody tr:nth-child(even){background:var(--paper)}
+td.prop{color:var(--navy-700);font-weight:600}
+.cmp thead th:nth-child(2){background:var(--crimson-500)}
+.cmp td:nth-child(2){font-weight:600;color:var(--navy-800)}
+.cmp tbody tr:nth-child(even) td:nth-child(2){background:var(--crimson-50)}
+
+/* two column bullets */
+.cols{columns:2;column-gap:34px;font-size:13px;margin:0 0 8px}
+ul.chk{list-style:none;padding:0;margin:0;font-size:13px}
+ul.chk li{position:relative;padding:4px 0 4px 18px;break-inside:avoid}
+ul.chk li::before{content:"";position:absolute;left:0;top:11px;width:7px;height:7px;border-radius:50%;
+  background:var(--crimson-500)}
+
+/* callout */
+.callout{background:var(--crimson-50);border-radius:10px;padding:16px 20px;text-align:center;
+  font-size:16px;font-weight:700;color:var(--crimson-600);margin:14px 0 22px}
+
+/* editable field */
+.f{border-bottom:1.5px dotted var(--navy-400,#6f93c9)}
+.f:empty::before,.f[data-empty="1"]::before{content:attr(data-ph);color:#9db3d6;font-style:italic}
+
+/* contact grid */
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:8px 40px;margin-top:6px}
+.contact .who{font-weight:700;color:var(--navy-800);font-size:14px;margin-bottom:2px}
+.contact .row{font-size:12.5px;color:var(--slate)}
+.contact .org{grid-column:1 / -1;margin-top:6px;font-size:12.5px;color:var(--slate)}
+.contact .org b{color:var(--navy-800)}
+
+.note{font-size:11px;color:var(--mute);font-style:italic;margin-top:4px}
+
+/* running footer */
+.rf{margin-top:22px;padding-top:10px;border-top:1px solid var(--line);display:flex;
+  justify-content:space-between;align-items:center;font-size:10.5px;color:var(--mute)}
+.rf .pg{width:22px;height:22px;border-radius:50%;background:var(--navy-700);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+.rf a,.rf .site{color:var(--navy-700);font-weight:600;text-decoration:none}
+.footnote{font-size:10.5px;color:var(--mute);font-style:italic;margin:6px 0 0}
+
+/* ---------- Print / PDF ---------- */
+@page{size:Letter;margin:0}
+@media print{
+  body{background:#fff}
+  .cust{display:none !important}
+  .page{width:auto;height:11in;min-height:0;margin:0;box-shadow:none;padding:0.55in 0.65in;
+    page-break-after:always;overflow:hidden;position:relative}
+  .page:last-child{page-break-after:auto}
+  .page-body{flex:none}
+  .rf{position:absolute;left:0.65in;right:0.65in;bottom:0.42in;margin-top:0}
+  .f{border-bottom:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== CUSTOMIZE BAR (screen only, hidden in PDF) ===== -->
+<div class="cust" id="custBar">
+  <h4>Customize</h4>
+  <label>Prepared for<input id="c-prepared" placeholder="Prospect / company" /></label>
+  <label>Date<input id="c-date" placeholder="e.g. July 2026" /></label>
+  <label>Sales rep — name<input id="c-repname" placeholder="Daniel Villamizar" /></label>
+  <label>Rep — phone<input id="c-repphone" placeholder="(xxx) xxx-xxxx" /></label>
+  <label>Rep — email<input id="c-repemail" placeholder="dvillamizar@americanbiocarbon.com" /></label>
+  <button onclick="window.print()">Save as PDF ⭳</button>
+  <span class="hint">Fill any field to personalize this sheet, then Save as PDF. Blank fields fall back to defaults.</span>
+</div>
+
+<!-- ==================== PAGE 1 ==================== -->
+<section class="page">
+ <div class="page-body">
+  <header class="rh">
+    <img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" />
+    <span class="kicker">Technical Specification Sheet</span>
+  </header>
+
+  <h1 class="title">American BioCarbon<span class="reg">®</span> Absorbent Pellets</h1>
+  <p class="subtitle">Technical Specification Sheet</p>
+  <div class="rule"></div>
+
+  <div class="prepared" id="preparedChip" data-empty="1">Prepared for <b id="preparedName"></b></div>
+
+  <div class="hero">
+    <div class="tag">100% Plant Based and Biodegradable</div>
+    <h2>5X Absorbent Pellets</h2>
+    <p>American BioCarbon's renewable absorbent pellets absorb up to <strong>5× their own weight in water</strong>,
+    double the capacity of wood-based pellets and roughly five times that of clay. Manufactured from
+    single-source recycled sugarcane bagasse, they ship and store stable, then disintegrate on contact
+    to expose the full internal pore structure.</p>
+  </div>
+
+  <h3 class="sec">Core Specifications</h3>
+  <table>
+    <thead><tr><th>Property</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td class="prop">Absorption capacity</td><td>Up to 5:1</td></tr>
+      <tr><td class="prop">Bulk density</td><td>30–40 lb/ft³</td></tr>
+      <tr><td class="prop">Moisture content</td><td>5–10%</td></tr>
+      <tr><td class="prop">Pellet diameter</td><td>6–8 mm</td></tr>
+      <tr><td class="prop">Pellet length</td><td>10–25 mm</td></tr>
+      <tr><td class="prop">Dust content</td><td>&lt;10%</td></tr>
+      <tr><td class="prop">Biodegradability</td><td>100%</td></tr>
+      <tr><td class="prop">Materials</td><td>100% sugarcane bagasse</td></tr>
+      <tr><td class="prop">Chemical additives</td><td>None (native lignin binder)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="sec" style="margin-top:22px">Plant-Based Advantage</h3>
+  <p style="font-size:13px;margin:0">Made from single-source recycled sugarcane bagasse. The cane stalk carries a native vascular
+  structure with open parenchyma cells. Natural lignin binds the pellet during pressing, with no synthetic
+  adhesives in the product or the finished waste.</p>
+ </div>
+  <footer class="rf">
+    <span>American BioCarbon, LLC · White Castle, Louisiana</span>
+    <span class="pg">1</span>
+    <span class="site">americanbiocarbon.com</span>
+  </footer>
+</section>
+
+<!-- ==================== PAGE 2 ==================== -->
+<section class="page">
+ <div class="page-body">
+  <header class="rh">
+    <img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" />
+    <span class="kicker">Technical Specification Sheet</span>
+  </header>
+  <div style="height:22px"></div>
+
+  <h3 class="sec">Flexible Use Applications</h3>
+  <ul class="chk cols" style="margin-bottom:22px">
+    <li>Oil and gas waste solidification</li>
+    <li>Environmental remediation</li>
+    <li>Animal bedding</li>
+    <li>Chemical and hydrocarbon spill response</li>
+    <li>Landfill leachate management</li>
+    <li>Dredged-sediment dewatering</li>
+    <li>Slurry-wall and trench-spoil management</li>
+  </ul>
+
+  <h3 class="sec">Powerful Sustainability</h3>
+  <ul class="chk" style="margin-bottom:24px">
+    <li>Produced from 100% repurposed single-source organic plant material</li>
+    <li>Diverts methane emissions from ag-waste byproduct of sugar cane (bagasse) for beneficial use</li>
+    <li>Manufactured using renewable biomass energy</li>
+    <li>100% chemical-free and biodegradable</li>
+    <li>No persistent polymers in landfill leachate</li>
+    <li>Supports recycled-content credits and low-embodied-carbon specifications</li>
+  </ul>
+
+  <h3 class="sec">How It Compares</h3>
+  <table class="cmp">
+    <thead><tr><th>Property</th><th>ABC Bagasse</th><th>Wood Pellet</th><th>Premium Clay</th></tr></thead>
+    <tbody>
+      <tr><td class="prop">Absorption ratio</td><td>Up to 5:1</td><td>2.0–2.5:1</td><td>~1:1</td></tr>
+      <tr><td class="prop">Moisture content</td><td>5–10%</td><td>8–12%</td><td>1–5%</td></tr>
+      <tr><td class="prop">Dust content</td><td>&lt;10%</td><td>10–20%</td><td>High</td></tr>
+      <tr><td class="prop">Biodegradable</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+      <tr><td class="prop">Indicative bulk price</td><td>$250–350/MT</td><td>$250–400/ton</td><td>$400–700/ton</td></tr>
+      <tr><td class="prop">Cost per gallon absorbed*</td><td>$0.18</td><td>$0.33–0.50</td><td>$1.30–2.50</td></tr>
+    </tbody>
+  </table>
+  <p class="footnote">*Water basis, at indicative bulk pricing.</p>
+ </div>
+  <footer class="rf">
+    <span>American BioCarbon, LLC · White Castle, Louisiana</span>
+    <span class="pg">2</span>
+    <span class="site">americanbiocarbon.com</span>
+  </footer>
+</section>
+
+<!-- ==================== PAGE 3 ==================== -->
+<section class="page">
+ <div class="page-body">
+  <header class="rh">
+    <img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" />
+    <span class="kicker">Technical Specification Sheet</span>
+  </header>
+  <div style="height:22px"></div>
+
+  <h3 class="sec">Freight Mathematics</h3>
+  <p style="font-size:13px;margin:0 0 6px">One 44,000-lb truckload of ABC bagasse absorbs roughly 26,400 gallons of water-based liquid.
+  The same truckload of wood pellet covers 13,200 gallons; of clay, 5,275 gallons.</p>
+  <div class="callout">One truck of bagasse&nbsp; = &nbsp;2 trucks of wood pellet&nbsp; = &nbsp;5 trucks of clay</div>
+
+  <h3 class="sec">Honeycomb Microstructure Holds More</h3>
+  <p style="font-size:13px;margin:0 0 22px">Peer-reviewed studies of bagasse-derived sorbents describe a honeycomb-like internal structure with
+  cavities and channels at the micro and macro scale (Castro et al., 2017). Native wood porosity is
+  dominated by sub-2-nanometer pathways and slow capillary uptake (Plötze et al., 2020). Bagasse
+  moves liquid faster, holds more of it, and breaks down on schedule.</p>
+
+  <h3 class="sec">Bulk Quantities</h3>
+  <ul class="chk" style="margin-bottom:24px">
+    <li>Bulk shipped via truckload</li>
+    <li>1-ton super sacks</li>
+    <li>40-lb retail bags (palletized)</li>
+  </ul>
+
+  <h3 class="sec">Contact &amp; Ordering</h3>
+  <div class="contact">
+    <div>
+      <div class="who"><span class="f" id="repName" data-ph="Daniel Villamizar" data-empty="1"></span></div>
+      <div class="row"><span class="f" id="repPhone" data-ph="(phone)" data-empty="1"></span></div>
+      <div class="row"><span class="f" id="repEmail" data-ph="dvillamizar@americanbiocarbon.com" data-empty="1"></span></div>
+    </div>
+    <div>
+      <div class="who">Victor Jehle</div>
+      <div class="row">561-593-4168 ext 126</div>
+      <div class="row">victor.jehle@americanbiocarbon.com</div>
+    </div>
+    <div class="org">
+      <b>American BioCarbon, LLC</b><br>
+      32525 Highway 1 South, White Castle, LA 70788<br>
+      americanbiocarbon.com
+    </div>
+  </div>
+  <p class="note">Specification current as of <span class="f" id="specDate" data-ph="July 2026" data-empty="1"></span>. For latest updates, contact sales.</p>
+ </div>
+  <footer class="rf">
+    <span>American BioCarbon, LLC · White Castle, Louisiana</span>
+    <span class="pg">3</span>
+    <span class="site">americanbiocarbon.com</span>
+  </footer>
+</section>
+
+<script>
+/* ---- Live customization: bind bar inputs to the sheet ---- */
+function setField(id, val, isInput){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(val && val.trim()){ el.textContent = val.trim(); el.removeAttribute('data-empty'); }
+  else { el.textContent = ''; el.setAttribute('data-empty','1'); }
+}
+function bind(inputId, targetId){
+  const inp = document.getElementById(inputId);
+  inp.addEventListener('input', ()=> apply());
+}
+function apply(){
+  const prepared = document.getElementById('c-prepared').value;
+  const chip = document.getElementById('preparedChip');
+  if(prepared && prepared.trim()){
+    document.getElementById('preparedName').textContent = prepared.trim();
+    chip.removeAttribute('data-empty');
+  } else { chip.setAttribute('data-empty','1'); }
+
+  setField('repName',  document.getElementById('c-repname').value);
+  setField('repPhone', document.getElementById('c-repphone').value);
+  setField('repEmail', document.getElementById('c-repemail').value);
+  setField('specDate', document.getElementById('c-date').value);
+}
+['c-prepared','c-date','c-repname','c-repphone','c-repemail'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', apply);
+});
+</script>
+</body>
+</html>

@@ -102,7 +102,6 @@ function carbonPillar(c){
         <div class="kicker" style="color:#e79aad">${raw(c.kicker)}</div>
         <h2>${raw(c.h)}</h2>
         <p class="cp-body">${raw(c.body)}</p>
-        <p class="cp-thesis">${raw(c.lead)}</p>
         <div class="cp-metrics">
           ${c.metrics.map(m=>`<div class="cp-m"><b>${raw(m.n)}</b><span>${raw(m.l)}</span></div>`).join("")}
         </div>

@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>American BioCarbon Bagasse-Based Biochar — Technical, Nutritional & Environmental Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   AMERICAN BIOCARBON — Bagasse-Based Biochar Report (customer-facing)
+   Editable HTML template · regenerates to PDF. ABC branding only.
+   Lab reports segregated to a separate INTERNAL file.
+   ============================================================ */
+:root{
+  --navy-600:#24478a; --navy-700:#1a376c; --navy-800:#122a52; --navy-900:#0d1f3d;
+  --navy-50:#eef2f9; --navy-100:#d9e2f1; --navy-400:#6f93c9;
+  --crimson-500:#d7153f; --crimson-600:#b91237; --crimson-50:#fdeaef;
+  --ink:#1a1a1a; --slate:#3e4a5f; --mute:#63676e;
+  --paper:#f7f8fa; --paper-2:#eef1f5; --line:#e2e6ee; --line-2:#c4cfe6; --white:#fff;
+  --f-sans:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--f-sans);color:var(--ink);background:var(--paper-2);line-height:1.5;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* customize bar (screen only) */
+.cust{position:sticky;top:0;z-index:50;background:var(--navy-900);color:#fff;padding:12px 20px;
+  display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.cust h4{margin:0 12px 0 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#9db3d6;align-self:center;font-weight:700}
+.cust label{display:flex;flex-direction:column;gap:4px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#9db3d6;font-weight:600}
+.cust input{font-family:var(--f-sans);font-size:13px;padding:5px 9px;border:1px solid #33507f;border-radius:6px;background:#0d1f3d;color:#fff;min-width:150px}
+.cust input:focus{outline:2px solid var(--crimson-500);outline-offset:1px}
+.cust .hint{font-size:10.5px;color:#6f93c9;align-self:center;max-width:230px}
+.cust button{font-family:var(--f-sans);font-weight:700;font-size:12px;padding:7px 14px;border:0;border-radius:6px;background:var(--crimson-500);color:#fff;cursor:pointer;letter-spacing:.03em}
+.cust button:hover{background:var(--crimson-600)}
+
+/* page canvas */
+.page{background:var(--white);width:8.5in;min-height:11in;margin:22px auto;padding:0.72in 0.7in 0.55in;
+  box-shadow:0 8px 30px rgba(13,31,61,.14);position:relative;display:flex;flex-direction:column}
+.page-body{flex:1 0 auto}
+.rh{display:flex;justify-content:space-between;align-items:center;border-bottom:2.5px solid var(--navy-700);padding-bottom:10px}
+.rh img{height:26px;width:auto}
+.rh .kicker{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--navy-700);font-weight:700}
+
+.title{font-size:29px;line-height:1.12;font-weight:700;color:var(--navy-800);margin:26px 0 4px}
+.title .reg{font-size:.6em;vertical-align:super}
+.subtitle{font-size:15px;color:var(--slate);font-weight:500;margin:0}
+.rule{width:88px;height:4px;background:var(--crimson-500);border-radius:2px;margin:16px 0 22px}
+.prepared{display:inline-flex;gap:8px;align-items:baseline;background:var(--navy-50);border:1px solid var(--line-2);
+  border-left:4px solid var(--crimson-500);border-radius:6px;padding:7px 14px;font-size:12.5px;color:var(--slate);margin:0 0 20px}
+.prepared b{color:var(--navy-800)}
+.prepared[data-empty="1"]{display:none}
+
+/* numbered section heading */
+h3.sec{font-size:16px;color:var(--navy-700);font-weight:700;margin:22px 0 12px;display:flex;align-items:center;gap:10px;line-height:1.2}
+h3.sec:first-child{margin-top:0}
+h3.sec .n{flex:0 0 auto;width:22px;height:22px;border-radius:5px;background:var(--navy-700);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+h4.mini{font-size:14px;color:var(--navy-700);font-weight:700;margin:0 0 10px;padding-left:11px;border-left:4px solid var(--crimson-500);line-height:1.2}
+.center-h{text-align:center;color:var(--navy-800);font-weight:700;font-size:15px;margin:6px 0 14px}
+
+p{font-size:13px;margin:0 0 12px}
+ul.chk{list-style:none;padding:0;margin:0 0 12px;font-size:13px}
+ul.chk li{position:relative;padding:4px 0 4px 18px;break-inside:avoid}
+ul.chk li::before{content:"";position:absolute;left:0;top:11px;width:7px;height:7px;border-radius:50%;background:var(--crimson-500)}
+ul.chk.tight li{padding-top:2px;padding-bottom:2px}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13px;margin:2px 0 8px}
+thead th{background:var(--navy-700);color:#fff;text-align:left;font-weight:600;padding:9px 13px;font-size:12.5px}
+tbody td{padding:8px 13px;border-bottom:1px solid var(--line)}
+tbody tr:nth-child(even){background:var(--paper)}
+td.prop{color:var(--navy-700);font-weight:600}
+.subhead td{background:var(--navy-800)!important;color:#fff;font-weight:600;font-size:11.5px;letter-spacing:.04em;padding:6px 13px}
+.hl td{background:var(--crimson-50)!important;font-weight:600;color:var(--navy-800)}
+
+/* structure two-col (observed vs implications) */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-bottom:10px}
+.two .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson-600);font-weight:700;margin-bottom:8px}
+
+/* SEM image */
+.sem{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--paper);padding:10px;margin-bottom:6px}
+.sem img{width:100%;height:auto;display:block;border-radius:4px}
+
+/* callouts */
+.summary-box{background:var(--navy-50);border-left:4px solid var(--navy-700);border-radius:8px;padding:14px 18px;margin:14px 0}
+.summary-box .st{text-align:center;font-weight:700;color:var(--navy-800);font-size:14px;margin-bottom:4px}
+.summary-box p{font-size:12.5px;margin:0}
+.important{background:var(--crimson-50);border-left:4px solid var(--crimson-500);border-radius:8px;padding:14px 18px;margin:12px 0 0}
+.important b{color:var(--crimson-600)}
+.important p{font-size:12.5px;margin:0}
+
+/* nutrient + NPK layout */
+.npkgrid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start;margin-bottom:6px}
+.npkbox{background:var(--navy-700);color:#fff;border-radius:12px;padding:22px 18px;text-align:center}
+.npkbox .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#9db3d6;font-weight:700}
+.npkbox .f{font-size:15px;font-weight:600;margin:8px 0 2px}
+.npkbox .big{font-size:34px;font-weight:700;letter-spacing:.02em}
+
+.footnote{font-size:10.5px;color:var(--mute);font-style:italic;margin:2px 0 0}
+
+.rf{margin-top:22px;padding-top:10px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:var(--mute)}
+.rf .pg{width:22px;height:22px;border-radius:50%;background:var(--navy-700);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px}
+.rf .site{color:var(--navy-700);font-weight:600}
+.f-ed{border-bottom:1.5px dotted var(--navy-400)}
+.f-ed[data-empty="1"]::before{content:attr(data-ph);color:#9db3d6;font-style:italic}
+
+@page{size:Letter;margin:0}
+@media print{
+  body{background:#fff}
+  .cust{display:none !important}
+  .page{width:auto;height:11in;min-height:0;margin:0;box-shadow:none;padding:0.55in 0.62in;
+    page-break-after:always;overflow:hidden;position:relative}
+  .page:last-child{page-break-after:auto}
+  .page-body{flex:none}
+  .rf{position:absolute;left:0.62in;right:0.62in;bottom:0.4in;margin-top:0}
+  .f-ed{border-bottom:none}
+}
+</style>
+</head>
+<body>
+
+<div class="cust" id="custBar">
+  <h4>Customize</h4>
+  <label>Prepared for<input id="c-prepared" placeholder="Prospect / company" /></label>
+  <label>Date<input id="c-date" placeholder="e.g. July 2026" /></label>
+  <button onclick="window.print()">Save as PDF ⭳</button>
+  <span class="hint">Personalize, then Save as PDF. Blank fields fall back to defaults.</span>
+</div>
+
+<!-- ===== PAGE 1 ===== -->
+<section class="page"><div class="page-body">
+  <header class="rh">
+    <img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" />
+    <span class="kicker">Technical, Nutritional &amp; Environmental Report</span>
+  </header>
+  <h1 class="title">American BioCarbon<span class="reg">®</span> Bagasse-Based Biochar</h1>
+  <p class="subtitle">Technical, Nutritional &amp; Environmental Report</p>
+  <div class="rule"></div>
+  <div class="prepared" id="preparedChip" data-empty="1">Prepared for <b id="preparedName"></b></div>
+
+  <h3 class="sec"><span class="n">1</span> Executive Summary</h3>
+  <p>American BioCarbon® (AB) Bagasse-based Biochar is a 100% organic, carbon-rich soil amendment
+  produced from 100% sugarcane bagasse in Louisiana, USA.</p>
+  <p>Based on 12 independent IBI laboratory analyses (available on request), the product demonstrates
+  consistent quality, stable carbon structure, measurable inherent nutrients (N-P-K), and extremely low
+  heavy metal concentrations.</p>
+  <p style="margin-bottom:6px">AB Bagasse-based Biochar functions simultaneously as:</p>
+  <ul class="chk">
+    <li>A <b>soil conditioner</b> (structure, porosity, water retention)</li>
+    <li>A <b>nutrient-retention matrix</b></li>
+    <li>A <b>slow-release source of naturally occurring plant nutrients</b></li>
+    <li>A <b>long-term soil carbon input</b></li>
+  </ul>
+
+  <h3 class="sec"><span class="n">2</span> Feedstock &amp; Sustainability</h3>
+  <ul class="chk">
+    <li>Feedstock: <b>Untreated sugarcane bagasse</b></li>
+    <li>Source: Agricultural by-product of cane sugar manufacturing</li>
+    <li><b>No trees cut</b></li>
+    <li>No treated wood, biosolids, or municipal waste</li>
+    <li>Renewable, annually replenished biomass</li>
+  </ul>
+</div>
+  <footer class="rf"><span>American BioCarbon, LLC · White Castle, Louisiana</span><span class="pg">1</span><span class="site">americanbiocarbon.com</span></footer>
+</section>
+
+<!-- ===== PAGE 2 ===== -->
+<section class="page"><div class="page-body">
+  <header class="rh"><img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" /><span class="kicker">Technical, Nutritional &amp; Environmental Report</span></header>
+  <div style="height:20px"></div>
+  <div class="sem"><img src="../assets/products/biochar-sem-structure.png" alt="SEM images of carbonized wood and bagasse" /></div>
+  <h4 class="center-h" style="margin-top:16px">Structural Differences Observed by SEM</h4>
+  <div class="center-h" style="color:var(--crimson-600);font-size:13px;margin-bottom:12px">Carbonized Wood Biochar</div>
+  <div class="two">
+    <div>
+      <div class="lbl">Observed Structure</div>
+      <ul class="chk tight">
+        <li>Irregular, fractured pore network</li>
+        <li>Predominantly <b>collapsed vessels and disconnected pores</b></li>
+        <li>Wide variability in pore size and shape</li>
+        <li>More brittle carbon matrix with broken cell walls</li>
+      </ul>
+    </div>
+    <div>
+      <div class="lbl">Implications</div>
+      <ul class="chk tight">
+        <li>Lower effective pore connectivity</li>
+        <li>Water is held primarily in <b>macropores</b>, which drain more readily</li>
+        <li>Reduced internal surface area available for nutrient adsorption</li>
+        <li>Minimal inherent nutrient contribution (low ash content)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+  <footer class="rf"><span>American BioCarbon, LLC · White Castle, Louisiana</span><span class="pg">2</span><span class="site">americanbiocarbon.com</span></footer>
+</section>
+
+<!-- ===== PAGE 3 ===== -->
+<section class="page"><div class="page-body">
+  <header class="rh"><img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" /><span class="kicker">Technical, Nutritional &amp; Environmental Report</span></header>
+  <div style="height:20px"></div>
+  <div class="center-h" style="color:var(--crimson-600);font-size:13px;margin-bottom:12px">Carbonized Bagasse-Based Biochar</div>
+  <div class="two">
+    <div>
+      <div class="lbl">Observed Structure</div>
+      <ul class="chk tight">
+        <li>Highly <b>ordered, honeycomb-like cellular architecture</b></li>
+        <li>Long, continuous channels aligned with original vascular fiber structure</li>
+        <li>Smooth, intact pore walls with high interconnectivity</li>
+        <li>Uniform pore dimensions at the 10–50 µm scale</li>
+      </ul>
+    </div>
+    <div>
+      <div class="lbl">Implications</div>
+      <ul class="chk tight">
+        <li>Significantly higher <b>capillary water retention</b></li>
+        <li>Stronger nutrient adsorption and retention within pore walls</li>
+        <li>Enhanced microbial colonization due to protected pore habitats</li>
+        <li>Higher mineral ash retention (K, P, Ca, Mg) embedded in the carbon matrix</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 class="center-h" style="margin-top:18px">Functional Comparison (Soil Performance)</h4>
+  <table>
+    <thead><tr><th>Property</th><th>Wood Biochar</th><th>Bagasse Biochar</th></tr></thead>
+    <tbody>
+      <tr><td class="prop">Pore geometry</td><td>Random, fractured</td><td>Ordered, honeycomb</td></tr>
+      <tr><td class="prop">Pore connectivity</td><td>Low-moderate</td><td>High</td></tr>
+      <tr class="hl"><td class="prop">Water-holding capacity</td><td>~2× own weight</td><td>~3–3.5× own weight</td></tr>
+      <tr><td class="prop">Nutrient retention</td><td>Adsorptive only</td><td>Adsorptive + inherent nutrients</td></tr>
+      <tr><td class="prop">Ash / mineral content</td><td>Low</td><td>Moderate-high</td></tr>
+      <tr><td class="prop">Microbial habitat</td><td>Limited protection</td><td>Excellent protected niches</td></tr>
+      <tr><td class="prop">Performance in sandy soils</td><td>Moderate</td><td>Excellent</td></tr>
+      <tr><td class="prop">Performance in clay soils</td><td>Moderate</td><td>Improves porosity &amp; drainage</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="mini" style="margin-top:14px">Why This Matters Agronomically</h4>
+  <ul class="chk tight">
+    <li><b>Bagasse biochar</b> behaves like a <b>biological sponge</b>: it stores water and nutrients during wet periods and releases them gradually during drought or nutrient stress.</li>
+    <li>The continuous pore channels visible in the SEM images explain why bagasse biochar retains more water, reduces fertilizer leaching, and improves nutrient use efficiency.</li>
+  </ul>
+</div>
+  <footer class="rf"><span>American BioCarbon, LLC · White Castle, Louisiana</span><span class="pg">3</span><span class="site">americanbiocarbon.com</span></footer>
+</section>
+
+<!-- ===== PAGE 4 ===== -->
+<section class="page"><div class="page-body">
+  <header class="rh"><img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" /><span class="kicker">Technical, Nutritional &amp; Environmental Report</span></header>
+  <div style="height:20px"></div>
+  <p>Wood biochar, while still beneficial for carbon sequestration, lacks the same pore regularity and
+  nutrient-bearing ash, making it primarily a structural soil conditioner rather than a combined
+  conditioner + nutrient contributor.</p>
+  <div class="summary-box">
+    <div class="st">Wood-based Biochar &nbsp;–v–&nbsp; Bagasse-based Biochar · Summary Statement</div>
+    <p>SEM imaging clearly demonstrates that bagasse-derived biochar possesses a uniquely ordered,
+    honeycomb-like pore structure with superior pore connectivity compared to wood-derived biochar.
+    This structural difference directly translates into higher water-holding capacity, improved nutrient
+    retention, enhanced microbial habitat, and superior agronomic performance, particularly in sandy and
+    degraded soils.</p>
+  </div>
+
+  <h3 class="sec"><span class="n">3</span> Biochar Manufacturing Process</h3>
+  <ul class="chk tight">
+    <li>Oxygen-limited thermal carbonization (&gt;500 °C)</li>
+    <li>No chemical activators, binders, acids, or bases</li>
+    <li>Syngas generated during pyrolysis is captured and oxidized for process heat</li>
+    <li>Solid mass reduction ~65–75%, concentrating stable carbon and mineral ash</li>
+    <li>All production batches meet IBI H/C molar ratio &lt; 0.7, confirming long-term carbon stability</li>
+  </ul>
+
+  <h3 class="sec"><span class="n">4</span> Physical &amp; Chemical Characteristics</h3>
+  <table>
+    <thead><tr><th>Parameter</th><th>Typical Value</th></tr></thead>
+    <tbody>
+      <tr><td class="prop">Organic Carbon</td><td>~58–65% (dry basis)</td></tr>
+      <tr><td class="prop">Ash Content</td><td>~25–40%</td></tr>
+      <tr><td class="prop">H/C Molar Ratio</td><td>0.38–0.61 (≤0.7)</td></tr>
+      <tr><td class="prop">pH</td><td>~7.6–9.3</td></tr>
+      <tr><td class="prop">Surface Area</td><td>~215–300 m²/g</td></tr>
+      <tr><td class="prop">Bulk Density</td><td>~10–23 lb/ft³</td></tr>
+      <tr><td class="prop">EC</td><td>&lt;0.35 dS/m</td></tr>
+    </tbody>
+  </table>
+  <p style="margin:6px 0 0">These properties support: high water-holding capacity, nutrient adsorption, and microbial habitat.</p>
+</div>
+  <footer class="rf"><span>American BioCarbon, LLC · White Castle, Louisiana</span><span class="pg">4</span><span class="site">americanbiocarbon.com</span></footer>
+</section>
+
+<!-- ===== PAGE 5 ===== -->
+<section class="page"><div class="page-body">
+  <header class="rh"><img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" /><span class="kicker">Technical, Nutritional &amp; Environmental Report</span></header>
+  <div style="height:20px"></div>
+  <h3 class="sec"><span class="n">5</span> Carbon Stability &amp; Soil Conditioning Function</h3>
+  <p style="margin-bottom:6px">The honeycomb-like porous structure typical of bagasse-derived biochar:</p>
+  <ul class="chk tight">
+    <li>Improves soil aggregation and porosity</li>
+    <li>Increases plant-available water</li>
+    <li>Reduces nutrient leaching</li>
+    <li>Provides long-term habitat for beneficial microorganisms</li>
+  </ul>
+  <p>The carbon fraction is highly recalcitrant, supporting decades- to centuries-scale soil carbon retention.</p>
+
+  <h3 class="sec"><span class="n">6</span> Nutritional Value as a Soil Amendment</h3>
+  <p>Unlike many wood-based biochar, AB Bagasse-based Biochar contains measurable, naturally occurring
+  nutrients retained from the original biomass and mineral ash.</p>
+  <div class="npkgrid">
+    <table style="margin:0">
+      <thead><tr><th colspan="2">Average Nutrient Content (Dry Basis)</th></tr></thead>
+      <tbody>
+        <tr class="subhead"><td colspan="2">Elemental</td></tr>
+        <tr><td class="prop">Nitrogen (N)</td><td>~6%</td></tr>
+        <tr><td class="prop">Phosphorus (P)</td><td>~2%</td></tr>
+        <tr><td class="prop">Potassium (K)</td><td>~7%</td></tr>
+        <tr class="subhead"><td colspan="2">Secondary nutrients commonly present</td></tr>
+        <tr><td class="prop">Calcium (Ca)</td><td>~0.8–1.5%</td></tr>
+        <tr><td class="prop">Magnesium (Mg)</td><td>~1.0–2.0%</td></tr>
+      </tbody>
+    </table>
+    <div class="npkbox">
+      <div class="k">Fertilizer Equivalent</div>
+      <div class="f">N - P₂O₅ - K₂O</div>
+      <div class="k" style="margin-top:6px">N P K</div>
+      <div class="big">6 - 2 - 7</div>
+    </div>
+  </div>
+  <div class="important">
+    <p><b>Important:</b> Nutrients are <b>inherent, not added</b>, and released gradually through soil biological
+    processes. AB Biochar contains organic fertilizer, that contribute to soil fertility and nutrient efficiency.</p>
+  </div>
+</div>
+  <footer class="rf"><span>American BioCarbon, LLC · White Castle, Louisiana</span><span class="pg">5</span><span class="site">americanbiocarbon.com</span></footer>
+</section>
+
+<!-- ===== PAGE 6 ===== -->
+<section class="page"><div class="page-body">
+  <header class="rh"><img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" /><span class="kicker">Technical, Nutritional &amp; Environmental Report</span></header>
+  <div style="height:20px"></div>
+  <h3 class="sec"><span class="n">7</span> Heavy Metal &amp; Trace Element Analysis</h3>
+  <p style="margin-bottom:8px">Heavy metals in AB Bagasse-based Biochar are far below IBI, EPA Class A, and organic-use concern thresholds.</p>
+  <h4 class="center-h" style="font-size:13px">Average Heavy Metals (mg/kg, dry basis)</h4>
+  <table>
+    <thead><tr><th>Element</th><th>Avg</th><th>IBI Threshold</th></tr></thead>
+    <tbody>
+      <tr><td class="prop">Arsenic (As)</td><td>~0.55</td><td>13</td></tr>
+      <tr><td class="prop">Cadmium (Cd)</td><td>~0.31</td><td>1.4</td></tr>
+      <tr><td class="prop">Chromium (Cr)</td><td>~14.5</td><td>93</td></tr>
+      <tr><td class="prop">Cobalt (Co)</td><td>~1.5</td><td>34</td></tr>
+      <tr><td class="prop">Copper (Cu)</td><td>~7.4</td><td>143</td></tr>
+      <tr><td class="prop">Lead (Pb)</td><td>~2.7</td><td>121</td></tr>
+      <tr><td class="prop">Mercury (Hg)</td><td>ND</td><td>1</td></tr>
+      <tr><td class="prop">Nickel (Ni)</td><td>~6.1</td><td>47</td></tr>
+      <tr><td class="prop">Selenium (Se)</td><td>ND</td><td>2</td></tr>
+      <tr><td class="prop">Zinc (Zn)</td><td>~105</td><td>416</td></tr>
+    </tbody>
+  </table>
+  <p class="footnote">All values are one to two orders of magnitude below limits.</p>
+
+  <h3 class="sec"><span class="n">8</span> Source of Minerals &amp; Trace Elements</h3>
+  <p style="margin-bottom:6px">Trace elements originate from:</p>
+  <ul class="chk tight">
+    <li>Naturally occurring Louisiana sugarcane field soils</li>
+    <li>Mineral ash retained during carbonization</li>
+    <li>Concentration via mass reduction (no addition)</li>
+  </ul>
+</div>
+  <footer class="rf"><span>American BioCarbon, LLC · White Castle, Louisiana</span><span class="pg">6</span><span class="site">americanbiocarbon.com</span></footer>
+</section>
+
+<!-- ===== PAGE 7 ===== -->
+<section class="page"><div class="page-body">
+  <header class="rh"><img src="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731" alt="American BioCarbon" /><span class="kicker">Technical, Nutritional &amp; Environmental Report</span></header>
+  <div style="height:20px"></div>
+  <h3 class="sec"><span class="n">9</span> Agronomic Performance Summary</h3>
+  <p style="margin-bottom:6px">AB Bagasse-Based Biochar:</p>
+  <ul class="chk tight">
+    <li>Improves water-holding capacity (≈3–3.5× its weight)</li>
+    <li>Reduces fertilizer runoff and leaching</li>
+    <li>Enhances nutrient use efficiency</li>
+    <li>Improves performance in sandy and heavy clay soils</li>
+    <li>Supports drought resilience</li>
+  </ul>
+
+  <h3 class="sec"><span class="n">10</span> Regulatory &amp; Certification Positioning</h3>
+  <ul class="chk tight">
+    <li>Nonsynthetic soil amendment</li>
+    <li>Inherent plant nutrients</li>
+    <li>Heavy metals below concern thresholds</li>
+    <li>IBI certified</li>
+    <li>USDA Organic certification (pending)</li>
+    <li>OMRI Certified</li>
+    <li>Compatible with carbon removal and soil carbon accounting frameworks</li>
+  </ul>
+
+  <h3 class="sec"><span class="n">11</span> Intended Use</h3>
+  <ul class="chk tight">
+    <li>Soil amendment and soil conditioner</li>
+    <li>Nutrient retention matrix</li>
+    <li>Long-term soil carbon input</li>
+    <li>Suitable for agriculture, horticulture, land reclamation, and soil remediation</li>
+  </ul>
+
+  <h3 class="sec"><span class="n">12</span> Conclusion</h3>
+  <div class="summary-box">
+    <p>Based on 12 independent IBI laboratory analyses, American BioCarbon® Bagasse-Based biochar is a
+    high-quality, nutrient-bearing biochar that delivers both physical soil improvement and inherent fertility
+    benefits, while meeting the strictest industry and regulatory standards.</p>
+  </div>
+</div>
+  <footer class="rf"><span>American BioCarbon, LLC · White Castle, Louisiana</span><span class="pg">7</span><span class="site">americanbiocarbon.com</span></footer>
+</section>
+
+<script>
+function apply(){
+  const prepared=document.getElementById('c-prepared').value;
+  const chip=document.getElementById('preparedChip');
+  if(prepared&&prepared.trim()){document.getElementById('preparedName').textContent=prepared.trim();chip.removeAttribute('data-empty');}
+  else{chip.setAttribute('data-empty','1');}
+}
+['c-prepared','c-date'].forEach(id=>document.getElementById(id).addEventListener('input',apply));
+</script>
+</body>
+</html>

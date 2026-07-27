@@ -192,7 +192,6 @@ section.block > .wrap > .lead{margin-left:auto;margin-right:auto}
 .cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
 .carbon-pillar h2{font-size:34px;color:#fff;margin:10px 0 16px;max-width:15ch}
 .cp-body{color:#c7d3ea;font-size:17px;max-width:60ch;margin-bottom:16px}
-.cp-thesis{color:#9fb4da;font-size:15px;max-width:60ch;border-left:3px solid var(--gold);padding-left:16px}
 .cp-metrics{display:flex;flex-direction:row;flex-wrap:nowrap;gap:20px;margin-top:26px}
 .cp-m{flex:1 1 0;min-width:0}
 .cp-m b{display:block;font-family:var(--f-head);font-size:24px;color:#fff;line-height:1}
