@@ -717,7 +717,7 @@ const PRODUCTS = {
     specs:[
       ["Organic carbon","~58 to 65% (dry basis)"],
       ["Water holding","Up to ~3 to 3.5× its weight (per technical report)"],
-      ["Nutrients","Inherent NPK ~6-2-7 + Ca/Mg"],
+      ["Nutrients","Inherent NPK ~0.6-0.2-0.7 + Ca/Mg"],
       ["Surface area","~215 to 300 m²/g"],
       ["pH","~7.6 to 9.3"],
       ["H/C molar ratio","<0.7 (durable carbon)"],
