@@ -400,20 +400,26 @@ section.block > .wrap > .lead{margin-left:auto;margin-right:auto}
 /* product-card (compact) */
 .pcard .thumb{aspect-ratio:4/3}
 
-/* 4-up product grid on /buy: tighter padding & type so 4 cards fit a row cleanly */
-.shop-grid-sm{gap:14px}
-.shop-grid-sm .card .body{padding:13px 14px;gap:6px}
-.shop-grid-sm .card .body h3{font-size:15.5px}
-.shop-grid-sm .buycard .claim{font-size:12.5px}
-.shop-grid-sm .icp{font-size:10px}
-.shop-grid-sm .uses{gap:6px;margin:5px 0 2px}
-.shop-grid-sm .uses li{font-size:12px;padding-left:15px}
-.shop-grid-sm .chips span{font-size:9.5px;padding:2px 7px}
-.shop-grid-sm .availline{font-size:10.5px;padding-top:7px}
-.shop-grid-sm .buy-docs{font-size:10.5px}
-.shop-grid-sm .btn-sm{font-size:12.5px;padding:8px 14px}
-@media (max-width:1180px){ .shop-grid-sm.c4{grid-template-columns:repeat(2,1fr)} }
-@media (max-width:640px){ .shop-grid-sm.c4{grid-template-columns:1fr} }
+/* 3-up product grid on /buy: samples across the top row, the matching bulk SKUs in the
+   row below (see renderBuy). Three columns instead of four buys ~90px of card width, so
+   the product shot gets a taller frame and the body type can sit at reading size. */
+.shop-grid{gap:22px}
+.shop-grid .pcard .thumb{aspect-ratio:5/4}
+/* Bags are portrait, so a square frame is what actually makes them bigger. */
+.shop-grid .pcard .thumb-bag{aspect-ratio:1/1}
+/* Bag renders are contained, so padding is what caps their size: tighten it on this grid
+   (site default is 8%, see the *-bag rule above) to fill the larger frame. */
+.shop-grid .buycard .thumb img[src*="-bag."]{padding:4%}
+/* Photographic shots are cover-cropped, so a slight scale is the equivalent zoom. */
+.shop-grid .buycard .thumb img:not([src*="-bag."]){transform:scale(1.06);transition:transform .2s}
+.shop-grid .buycard:hover .thumb img:not([src*="-bag."]){transform:scale(1.1)}
+.shop-grid .card .body{padding:18px 20px;gap:8px}
+.shop-grid .card .body h3{font-size:19px}
+.shop-grid .buycard .claim{font-size:14px}
+.shop-grid .uses{gap:7px;margin:6px 0 2px}
+.shop-grid .uses li{font-size:13px}
+@media (max-width:1080px){ .shop-grid.c3{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:680px){ .shop-grid.c3{grid-template-columns:1fr} }
 .thumb-blank{width:100%;height:100%}
 .pdp-slide-blank{width:100%;height:100%;background:var(--paper-2);border-radius:var(--r-lg)}
 

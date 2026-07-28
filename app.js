@@ -605,8 +605,12 @@ function buyCard(p){
   const thumb = p.img
     ? `<img src="${p.img}" alt="${raw(p.name)}" loading="lazy">`
     : `<div class="thumb-blank" aria-hidden="true"></div>`;
+  // Bag renders are contained inside the frame, so they need a squarer one to read at size;
+  // photographic shots crop to fill and stay on the wider default. See .thumb-bag.
+  // Match the same "-bag." marker the stylesheet uses; some srcs carry a ?v= cache token.
+  const bagShot = /-bag\.[a-z0-9]+(\?|$)/i.test(p.img||"");
   return `<div class="card pcard buycard${isLive?"":" is-q4"}" data-cat="${raw(p.cat||"")}">
-    <div class="thumb">${thumb}</div>
+    <div class="thumb${bagShot?" thumb-bag":""}">${thumb}</div>
     <div class="body">
       <span class="icp">${raw(p.category)}</span>
       <h3>${raw(p.name)}</h3>
@@ -797,13 +801,18 @@ document.addEventListener("click", e=>{
 function renderBuy(){
   const B = HOME.buy;
   setMeta({title:"Products, Bagasse Absorbents, Biochar & Soil | American BioCarbon",desc:"Browse American BioCarbon's sugarcane-bagasse product line: industrial absorbent pellets and crumble, OMRI-listed 100% biochar, biochar-infused soil, and carbon removal. Request a free sample.",slug:"/buy"});
-  const live = B.products.filter(p=>p.avail==="live");
+  // 3-up grid: samples fill the top row in catalog order, then the matching bulk (metric
+  // ton) SKUs fill the row underneath, so each column reads sample-above-bulk. Sorting
+  // here rather than in data.js keeps the homepage showcase order untouched.
+  const isBulk = p => /-mt$/.test(p.id);
+  const live = B.products.filter(p=>p.avail==="live")
+    .sort((a,b)=> (isBulk(a)?1:0) - (isBulk(b)?1:0));
   const q4 = B.products.filter(p=>p.avail==="q4");
   const filters = B.filters.map((f,i)=>`<button class="filter-btn${i===0?" active":""}" data-filter="${raw(f)}">${raw(f)}</button>`).join("");
   const group = (label, list) => list.length ? `
     <div class="shop-group">
       <div class="shop-group-h">${raw(label)} <span class="count">(${list.length})</span></div>
-      <div class="cards c4 shop-grid shop-grid-sm">${list.map(buyCard).join("")}</div>
+      <div class="cards c3 shop-grid">${list.map(buyCard).join("")}</div>
     </div>` : "";
   return `
   <section class="shop-head"><div class="wrap">
