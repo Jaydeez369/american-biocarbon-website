@@ -335,6 +335,15 @@ const HOME = {
           { h:"Water and nutrient retention", body:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
         ],
         img:ASSETS.biocharBulkPhoto, variantId:"54184340914468", docIds:["spec","sds"] },
+      { id:"biochar-infused-soil", name:"Biochar-Infused Soil", avail:"q4", cat:"Soil", category:"Growing Media · Ready to Use Blend", accent:"soil",
+        claim:"Multipurpose Fiber and coffee chaff, pre-blended with our carbon negative bagasse biochar. No mixing. Coming Q4.",
+        uses:["Potting and container gardening","Raised beds and garden bed fill","Water retention in sandy soil"],
+        chips:["½ lb sample bag","Ready to use","Biochar infused"], unit:"½ lb Sample Bag", sampleWeight:"½ LB", photo:ASSETS.biocharLg, img:ASSETS.soilBag, free:true, docIds:["spec"],
+        bag:{ banner:"BIOCHAR-INFUSED SOIL", iconSet:"soil",
+          icons:["Natural Biomass","Agricultural Waste","Superior Water Retention","Enhanced Root Development"],
+          uses:"Potting & Container Gardening | Raised Beds & Garden Bed Fill | Lawn Patch & Overseeding Prep | Starting Seedlings & Transplants | Improving Water Retention in Sandy or Fast Draining Soil",
+          desc:"A ready to use growing soil pre-blended with our Multipurpose Fiber, coffee chaff, and carbon negative bagasse biochar, so you get the water retention, nutrient holding, and soil-aeration benefits of biochar without any mixing or guesswork. Just fill your bed, pot, or planting hole and go. Built on the same sustainably sourced, Louisiana sugarcane biochar as our standalone soil amendment, this blend gives your plants a strong, carbon rich foundation from the very first watering.",
+          ingredients:"MICROBE TREATED SUGARCANE BAGASSE, BIOCHAR AND COFFEE CHAFF", omri:false } },
       { id:"absorbent-pellets", name:"Absorbent Pellets", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Spill Control", accent:"aqua",
         claim:"An up to 5:1 absorption ratio means crews open fewer bags per spill and haul away less material.",
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
@@ -390,15 +399,6 @@ const HOME = {
           { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },
         ],
         img:ASSETS.pelletsPhoto, variantId:"55923046023460", docIds:["spec","sds"] },
-      { id:"biochar-infused-soil", name:"Biochar-Infused Soil", avail:"q4", cat:"Soil", category:"Growing Media · Ready to Use Blend", accent:"soil",
-        claim:"Multipurpose Fiber and coffee chaff, pre-blended with our carbon negative bagasse biochar. No mixing. Coming Q4.",
-        uses:["Potting and container gardening","Raised beds and garden bed fill","Water retention in sandy soil"],
-        chips:["½ lb sample bag","Ready to use","Biochar infused"], unit:"½ lb Sample Bag", sampleWeight:"½ LB", photo:ASSETS.biocharLg, img:ASSETS.soilBag, free:true, docIds:["spec"],
-        bag:{ banner:"BIOCHAR-INFUSED SOIL", iconSet:"soil",
-          icons:["Natural Biomass","Agricultural Waste","Superior Water Retention","Enhanced Root Development"],
-          uses:"Potting & Container Gardening | Raised Beds & Garden Bed Fill | Lawn Patch & Overseeding Prep | Starting Seedlings & Transplants | Improving Water Retention in Sandy or Fast Draining Soil",
-          desc:"A ready to use growing soil pre-blended with our Multipurpose Fiber, coffee chaff, and carbon negative bagasse biochar, so you get the water retention, nutrient holding, and soil-aeration benefits of biochar without any mixing or guesswork. Just fill your bed, pot, or planting hole and go. Built on the same sustainably sourced, Louisiana sugarcane biochar as our standalone soil amendment, this blend gives your plants a strong, carbon rich foundation from the very first watering.",
-          ingredients:"MICROBE TREATED SUGARCANE BAGASSE, BIOCHAR AND COFFEE CHAFF", omri:false } },
       { id:"absorbent-fiber", name:"Multipurpose Fiber", avail:"q4", cat:"Absorbents", category:"Peat Moss Replacement · Locally Sourced", accent:"aqua",
         claim:"A renewable peat replacement for agricultural and horticultural growing media, enriching soil with excellent water holding capacity, and also built for spill cleanup and animal bedding. Coming Q4.",
         uses:["Enriching soil and growing media as a renewable peat replacement","Excellent water holding capacity","Promotes strong root growth through aeration","Pathogen free"],
@@ -412,8 +412,10 @@ const HOME = {
     filters:["All","Biochar","Soil","Absorbents"],
     bbqFootnote:{ label:"Louisiana Sweet BBQ Smoker Pellets (consumer/retail)", href:"https://americanbiocarbon.com/products/louisiana-sweet-bbq-smoker-pellets" }
   },
-  /* Agriculture leads here too, matching NAV and the hero carousel. Live products still
-     come before the Q4 ones: availability outranks category order. */
+  /* UNUSED. Nothing renders this: the homepage product showcase and /buy both read
+     HOME.buy.products (see the `zig` block in renderHome). Kept only because it is the
+     last place the short per-product ICP blurbs are written down. Edit buy.products for
+     anything that has to show up on the site. */
   categories:[
     { name:"100% Biochar", icp:"Distributors · blenders · growers", blurb:"OMRI listed bagasse biochar holds up to ~3 to 3.5× its weight in water, better moisture retention, faster compost. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSampleBiochar, href:"/shop/agricultural-biochar", img:ASSETS.biocharBag, avail:"live" },
     { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, less to haul away, low dust. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSamplePellets, href:"/shop/absorbent-pellets", img:ASSETS.pelletsBag, avail:"live" },
