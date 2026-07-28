@@ -4,3 +4,10 @@
 
 .DS_Store
 node_modules/
+
+# The publish root IS the repo root, so anything committed here is public.
+# Internal-only source material and local scratch artifacts must stay untracked.
+assets/spec-sheets/*INTERNAL*
+assets/spec-sheets/*.CLEAN.pdf
+spec-templates/_preview-*.pdf
+design-lab.html

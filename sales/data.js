@@ -990,6 +990,7 @@ const DATA = {
       { t:"Sample policy + success-criteria template + routing (Jesse+Victor+Daniel)", o:"Both", pri:"P0", eff:"S", out:"Repeatable trials", dep:"Sample SKUs", app:"Sample Request", del:"Sample SOP" },
       { t:"Sending infra: domains, inboxes, SPF/DKIM/DMARC, warm-up start", o:"Jesse", pri:"P0", eff:"M", out:"Deliverable cold email", dep:"Domains", app:"—", del:"Warming inboxes" },
       { t:"Launch first soft outbound batch (25 accounts, both tracks)", o:"Jesse", pri:"P1", eff:"S", out:"First conversations", dep:"List + copy + warm-up", app:"Activity", del:"25 sequences live" },
+      { t:"DNS cutover: point apex americanbiocarbon.com to the Cloudflare Pages marketing site (project american-biocarbon-website); move Shopify to a subdomain. Canonical/sitemap/robots already target the apex — no repo changes needed, DNS only.", o:"Jesse", pri:"P1", eff:"S", out:"Marketing site live at americanbiocarbon.com; canonical matches the serving host", dep:"Registrar/Cloudflare DNS access (currently Shopify-only)", app:"website/ infra", del:"Apex serves the Pages site" },
     ]},
     { phase:"Days 8–30", tasks:[
       { t:"Run outbound: biochar wedge (primary — ag distributors/blenders/composters/growers) + absorbent secondary", o:"Jesse (consultant)", pri:"P0", eff:"L", out:"Discovery/technical calls booked", dep:"List", app:"Deal/Activity", del:"Pipeline built" },
