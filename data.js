@@ -640,7 +640,7 @@ const PRODUCTS = {
       rows:[["Absorption","Up to ~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
     faq:[
       { q:"When should I use crumble vs pellets?", a:"Choose crumble for large area or high volume spills where fast, broad coverage matters; choose pellets for targeted cleanup." },
-      { q:"Can I get a sample, and what volumes are available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Metric ton supply, packaged in 1,650 lb super sacks, is available for immediate purchase, and truckload supply is on request." },
+      { q:"Can I get a sample, and what volumes are available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Metric ton supply, packaged in 1,650 lb super sacks, is available for immediate purchase, with FOB bulk bags ready in 7-10 business days, and truckload supply is on request." },
       { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request. The absorbents spec sheet covers both the pellet and crumble grades." },
     ],
     form:"quote",
