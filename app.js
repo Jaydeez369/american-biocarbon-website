@@ -521,6 +521,8 @@ function formContext(qs){
   return {
     productId: known ? id : null,
     productName: known ? PRODUCTS[id].name : null,
+    // Which of the three free samples this visitor arrived asking about, if any.
+    sampleChoice: (id && SAMPLE_FOR_PRODUCT[id]) || null,
     preorder: p.get("preorder") === "1",
   };
 }
@@ -568,7 +570,9 @@ function fieldHTML(fl, ctx){
     const hasOther = fl.options.some(o=>/^other$/i.test(o)||/something else/i.test(o));
     // Preselect the product the visitor clicked through from. Compared against the canonical
     // name resolved in formContext(), never against the raw query value.
-    const pre = (fl.n==="product" && ctx && ctx.productName) ? ctx.productName : null;
+    const pre = (fl.n==="product" && ctx && ctx.productName) ? ctx.productName
+              : (fl.n==="sample" && ctx && ctx.sampleChoice) ? ctx.sampleChoice
+              : null;
     const sel = o => (pre && o===pre) ? " selected" : "";
     input=`<select id="${id}" name="${fl.n}" ${fl.req?"required":""}><option value=""${pre?"":" selected"}>Select…</option>${fl.options.map(o=>`<option${sel(o)}>${raw(o)}</option>`).join("")}</select>`;
     if(hasOther){ input+=`<input type="text" class="other-input" name="${fl.n}_other" hidden aria-label="${raw(fl.label)}, please specify" placeholder="${raw(fl.otherPh||"Please specify")}">`; }

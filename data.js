@@ -1204,6 +1204,16 @@ const INDUSTRIES = {
 };
 
 /* ============ FORMS ============ */
+// The three free sample SKUs. Every "Request a Sample Kit" form offers exactly these, so the
+// choice can never drift from the live catalogue; labels match the product names in HOME.buy.
+const SAMPLE_CHOICES = ["Absorbent Pellets (1 lb)","Absorbent Crumble (1 lb)","100% Biochar (½ lb)"];
+// Maps a product id arriving as ?product= to its SAMPLE_CHOICES entry, so clicking
+// "Request a Sample Kit" from a product page lands with that sample already selected.
+const SAMPLE_FOR_PRODUCT = {
+  "absorbent-pellets": SAMPLE_CHOICES[0],
+  "absorbent-crumble": SAMPLE_CHOICES[1],
+  "agricultural-biochar": SAMPLE_CHOICES[2],
+};
 const FORMS = {
   bedding:{
     name:"Request a Sample Kit",
@@ -1213,7 +1223,7 @@ const FORMS = {
       { n:"firstName", label:"First name", type:"text", req:true },
       { n:"lastName", label:"Last name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
-      { n:"email", label:"Work email", type:"email", req:true },
+      { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"operationType", label:"Operation type", type:"select", req:true, options:["Commercial poultry","Livestock / cattle","Equine","Bedding distributor / farm supply","Animal-care facility","Other"], otherPh:"e.g. Research farm, Zoo / sanctuary" },
       { n:"application", label:"Animal or housing application", type:"text", req:true, ph:"e.g. broiler house, tie-stall barn, box stalls" },
@@ -1232,26 +1242,21 @@ const FORMS = {
   sample:{
     name:"Request a Sample Kit",
     h:"Request a Sample Kit",
-    sub:"Request one complimentary sample bag per company, shipping and handling included. Additional sample bags are available for purchase. Tell us your use case and we'll ship it with the SDS and spec sheet. A specialist replies within one business day.",
+    sub:"One complimentary sample bag per company, shipping included. We'll send the SDS and spec sheet with it and reply within one business day.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
-      { n:"email", label:"Work email", type:"email", req:true },
+      { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
-      { n:"location", label:"Location (city / state)", type:"text", req:false },
+      { n:"sample", label:"Which sample?", type:"select", req:true, options:SAMPLE_CHOICES },
       { n:"buyerType", label:"Buyer type", type:"select", req:false, options:["Oilfield services","Spill response","Environmental remediation","Industrial operations","Landfill / waste","Municipal / disaster","Other"], otherPh:"e.g. Marine terminal, Mining, Pipeline" },
-      { n:"fluid", label:"Fluid or material to absorb", type:"text", req:true, ph:"e.g. drilling mud, crude, produced water, solvent, leachate" },
+      { n:"fluid", label:"Fluid or material to absorb", type:"select", req:true, options:["Drilling mud / reserve pit","Crude oil / hydrocarbons","Produced water","Solvents / chemicals","Landfill leachate","Paint / coatings / sludge","Other"], otherPh:"e.g. glycol, acid, food grade oil" },
       { n:"useCase", label:"Use case", type:"text", req:true, ph:"e.g. reserve-pit solidification, spill cleanup, leachate control" },
-      { n:"current", label:"Current absorbent material", type:"text", req:false, ph:"e.g. wood pellets, clay" },
-      { n:"volume", label:"Estimated tonnage per month", type:"number", req:false, ph:"e.g. 20 (tons)" },
-      { n:"format", label:"Product format needed", type:"select", req:false, options:["Pellets","Crumble","Bulk","1 MT bulk bag","Not sure"] },
-      { n:"timeline", label:"Timeline", type:"select", req:false, options:["Active need now","This quarter","Evaluating","Just researching"] },
-      { n:"request", label:"Request type", type:"select", req:true, options:["One complimentary sample bag","Additional sample bags (purchase)","Sample + bulk quote","Spec sheet / SDS","Talk to a specialist"] },
     ],
-    confirm:"Thanks, your request for one complimentary sample bag is in (shipping and handling included). A specialist will reply within one business day with the SDS and spec sheet attached. Need more than one bag? Just reply and we'll set up a purchase.",
-    autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. Attached are the SDS and spec sheet for our bagasse absorbent. A specialist will follow up within one business day to confirm your use case, volume, and ship to., American BioCarbon, White Castle, LA",
-    routing:"Industrial → specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach SDS/spec.",
-    scoring:"+ truckload volume, + zone A/B, + active-now timeline, + named use case; - personal email, - 'just researching'."
+    confirm:"Thanks, your request for one complimentary sample bag is in (shipping included). A specialist will reply within one business day with the SDS and spec sheet attached.",
+    autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. Attached are the SDS and spec sheet for our bagasse absorbent. A specialist will follow up within one business day to confirm your use case and ship to., American BioCarbon, White Castle, LA",
+    routing:"Industrial → specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach SDS/spec; tag by buyerType + fluid.",
+    scoring:"+ named fluid, + named use case, + qualified buyer type; - personal email, - no stated use case."
   },
   quote:{
     name:"Request a Quote",
@@ -1260,10 +1265,10 @@ const FORMS = {
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
-      { n:"email", label:"Work email", type:"email", req:true },
+      { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"product", label:"Product", type:"select", req:true, options:["Absorbent Pellets","100% Biochar","Absorbent Crumble","Multipurpose Fiber","Multiple / not sure"] },
-      { n:"request", label:"Request type", type:"select", req:false, options:["Bulk quote","Spec sheet / SDS","Sample first","Talk to specialist"] },
+      { n:"request", label:"Request type", type:"select", req:false, options:["Bulk quote","Spec sheet / SDS","Sample first","Talk to a specialist"] },
       { n:"location", label:"Ship to (city / state)", type:"text", req:true },
       { n:"format", label:"Format", type:"select", req:false, options:["Bulk","1 MT bulk bag","20/40 lb bags","Truckload","Not sure"] },
       { n:"volume", label:"Estimated volume & frequency", type:"text", req:true, ph:"e.g. 2 truckloads / month" },
@@ -1278,40 +1283,38 @@ const FORMS = {
   biochar:{
     name:"Request a Sample Kit",
     h:"Request a Sample Kit",
-    sub:"Your biochar sample is free, shipping and handling included. For growers, blenders, composters, and distributors. Tell us your use and we'll send it with the spec sheet and its up to ~3 to 3.5× water holding figure (per our technical report).",
+    sub:"Your biochar sample is free, shipping included. We'll send the spec sheet with it and reply within one business day.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company / farm", type:"text", req:true },
       { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
-      { n:"buyerType", label:"You are a", type:"select", req:true, options:["Distributor / co-op","Soil blender","Composter","Grower","Landscape / nursery","Other"], otherPh:"e.g. Golf course, Vineyard, Greenhouse" },
-      { n:"useCase", label:"Intended use", type:"text", req:true, ph:"e.g. compost trial, blend, field trial" },
-      { n:"volume", label:"Estimated volume", type:"text", req:false, ph:"e.g. 5 tons for a trial" },
-      { n:"resale", label:"Resale or own use", type:"select", req:false, options:["Resale","Own use","Both"] },
-      { n:"certs", label:"Certifications needed", type:"text", req:false, ph:"e.g. OMRI" },
+      { n:"sample", label:"Which sample?", type:"select", req:true, options:SAMPLE_CHOICES },
+      { n:"buyerType", label:"You are a", type:"select", req:true, options:["Grower","Soil blender","Composter","Landscape / nursery","Distributor / co-op","Other"], otherPh:"e.g. golf course, vineyard, greenhouse" },
+      { n:"useCase", label:"Intended use", type:"select", req:true, options:["Soil amendment / field application","Compost blending","Potting or growing media","Turf / landscape","Trial before bulk purchase","Resale","Other"], otherPh:"e.g. livestock bedding, nursery substrate" },
     ],
-    confirm:"Thanks, your free biochar sample request is in (shipping and handling included). We'll follow up within one business day with the sample, spec sheet, and (for composters) a side by side windrow trial protocol.",
+    confirm:"Thanks, your free biochar sample request is in (shipping included). We'll follow up within one business day with the sample and spec sheet. Composters: ask about our side by side windrow trial protocol.",
     autoreply:"Subject: Your American BioCarbon biochar sample\n\nThanks for your interest. The spec sheet is attached; we'll confirm your sample and ship to shortly. Composters: ask about our side by side windrow trial protocol., American BioCarbon",
-    routing:"Create Account + Contact + Deal (type: Sample, segment: ag); route to distributor/ag lead.",
-    scoring:"+ distributor/blender/composter, + resale, + volume; - consumer/home use."
+    routing:"Create Account + Contact + Deal (type: Sample, segment: ag); route to distributor/ag lead; tag by buyerType + intended use.",
+    scoring:"+ distributor/blender/composter, + resale, + trial-before-bulk; - consumer/home use."
   },
   distributor:{
     name:"Distributor Program Inquiry",
     h:"Distributor Program Inquiry",
-    sub:"Distributor and reseller pricing: add a carbon negative biochar line without over-committing inventory. We send the margin model and a low-volume stocking pilot.",
+    sub:"Add a carbon negative line without over-committing inventory. We'll send the margin model and a low-volume stocking pilot within one business day.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
-      { n:"email", label:"Work email", type:"email", req:true },
+      { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
+      { n:"buyerType", label:"Business type", type:"select", req:true, options:["Distributor / wholesaler","Industrial & safety supply","Farm supply / retail","Ag co-op","Landscape / nursery supply","Environmental services","Other"], otherPh:"e.g. e-commerce, private label" },
+      { n:"line", label:"Line you'd carry", type:"select", req:true, options:["Absorbents","Biochar / agriculture","Both"] },
       { n:"geography", label:"Geography served", type:"text", req:true, ph:"e.g. Gulf Coast, TX & LA" },
-      { n:"volume", label:"Estimated annual volume", type:"text", req:false, ph:"e.g. 200 tons / year" },
-      { n:"packaging", label:"Packaging needs", type:"select", req:false, options:["Bulk","1 MT bulk bag","Bagged retail","Mixed"] },
     ],
     confirm:"Thanks, we'll send the distributor margin model and stocking pilot options within one business day.",
     autoreply:"Subject: American BioCarbon distributor program\n\nThanks for your interest in carrying our line. We're preparing the margin model and stocking pilot details for your geography., American BioCarbon",
-    routing:"Create Account + Distributor Agreement (draft) + Deal; route to founder/distributor lead.",
-    scoring:"+ multi-branch, + organic demand region, + volume; - national-exclusivity-first."
+    routing:"Create Account + Distributor Agreement (draft) + Deal; route to founder/distributor lead; tag by business type + line.",
+    scoring:"+ multi-branch, + organic demand region, + both lines; - national-exclusivity-first."
   },
   carbon:{
     name:"Request Carbon Removal Info",
@@ -1320,7 +1323,7 @@ const FORMS = {
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
-      { n:"email", label:"Work email", type:"email", req:true },
+      { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"buyerType", label:"Buyer type", type:"select", req:true, options:["Corporate / ESG","Carbon broker","Marketplace","Project developer","Other"], otherPh:"e.g. Airline, Tech company, Investment fund" },
       { n:"annual", label:"Annual CDR interest (tCO₂e)", type:"text", req:false, ph:"e.g. 5,000 tCO₂e / year" },
@@ -1340,7 +1343,7 @@ const FORMS = {
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
-      { n:"email", label:"Work email", type:"email", req:true },
+      { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"role", label:"Your role", type:"select", req:true, options:["Procurement / Purchasing","Operations","EHS / Safety","Environmental / Remediation","Agronomy / Technical","Sustainability / Carbon","Distribution / Resale","Other"], otherPh:"e.g. R&D, Consultant, Facilities" },
       { n:"industry", label:"Industry / application", type:"select", req:true, options:["Oil & gas","Spill response","Environmental remediation","Industrial operations","Landfill / leachate","Municipal / disaster","Agriculture / distribution","Soil blending / compost","Carbon / ESG","Other"], otherPh:"e.g. Marine, Mining, Pipeline" },
@@ -1359,7 +1362,7 @@ const FORMS = {
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
-      { n:"email", label:"Work email", type:"email", req:true },
+      { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"topic", label:"What do you need?", type:"select", req:true, options:["Industrial absorbent","Agriculture / biochar","Distributor program","Carbon removal","Something else"], otherPh:"e.g. Partnership, Media, Co-location" },
       { n:"message", label:"Message", type:"textarea", req:false },
