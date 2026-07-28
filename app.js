@@ -586,7 +586,7 @@ function buyCard(p){
   const primaryLabel = isBuyNow ? "Buy Now" : "Request a Sample Kit";
   const primary = isLive
     ? `<a class="btn btn-primary btn-sm" href="${isBuyNow?"/shop/"+p.id:"/request-sample?product="+p.id}">${primaryLabel}</a>`
-    : `<a class="btn btn-primary btn-sm" href="/request-sample?preorder=1&product=${p.id}">Request a Sample Kit</a>`;
+    : `<a class="btn btn-primary btn-sm" href="/request-sample?preorder=1&product=${p.id}">Stay informed</a>`;
   const cta = isLive
     ? `<div class="btn-row">${primary}</div>
        <a class="notify" href="/contact?product=${p.id}">Talk to a specialist →</a>`
@@ -595,8 +595,7 @@ function buyCard(p){
     ? `<img src="${p.img}" alt="${raw(p.name)}" loading="lazy">`
     : `<div class="thumb-blank" aria-hidden="true"></div>`;
   return `<div class="card pcard buycard${isLive?"":" is-q4"}" data-cat="${raw(p.cat||"")}">
-    <div class="thumb">${thumb}
-      <span class="avail ${isLive?"avail-live":"avail-q4"}">${isLive?"Live · ships 4 to 7 biz days":"Coming Q4"}</span></div>
+    <div class="thumb">${thumb}</div>
     <div class="body">
       <span class="icp">${raw(p.category)}</span>
       <h3>${raw(p.name)}</h3>
@@ -733,7 +732,6 @@ function renderShopProduct(id){
         ${slides.length>1?`<div class="pdp-thumbs">${slides.map((s,i)=>`<button class="pdp-thumb${i===0?" active":""}" data-slide="${i}" aria-label="View ${i+1}"><img src="${s.src}" alt=""></button>`).join("")}</div>`:""}
       </div>
       <div class="pdp-info">
-        <span class="avail avail-live" style="position:static;display:inline-block;margin-bottom:14px">Live · ships 4 to 7 biz days</span>
         <h1>${raw(p.name)}${p.unit?", "+raw(p.unit):""}</h1>
         ${priceHTML}
         <p class="pdp-lead">${raw(p.claim)}</p>
