@@ -716,7 +716,11 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
    with the logo, the Buy Now button and the gaps it needs ~1120px to lay out. Below that
    it used to overrun the viewport (menu and CTA both extended past the right edge). */
 @media(max-width:1140px){
-  .menu{display:none;position:absolute;top:84px;left:0;right:0;flex-direction:column;background:var(--graphite);padding:10px;border-bottom:1px solid #24478a;gap:2px}
+  /* top:100% (not a hardcoded 84px) so the drawer always hangs off the bottom of the
+     header, and max-height + overflow-y so a drawer taller than the viewport scrolls
+     instead of clipping its last items off-screen. overscroll-behavior:contain keeps
+     the scroll from chaining to the page behind it. */
+  .menu{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:var(--graphite);padding:10px;border-bottom:1px solid #24478a;gap:2px;max-height:calc(100vh - 94px);max-height:calc(100dvh - 94px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .menu.open{display:flex} .menu>.item{width:100%} .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;background:#1e3a6e;border-color:#24478a;margin:2px 0}
   .dropdown a{color:#c4cfe6} .dropdown a:hover{background:#24478a;color:#fff}
   .burger{display:block}
