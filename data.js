@@ -48,9 +48,12 @@ const BRAND = {
 /* Primary + secondary CTAs used across the site */
 const CTA = {
   sample:  { label:"Request a Sample Kit",      href:"/request-sample" },
-  freeSamplePellets: { label:"Buy Now", href:"/shop/absorbent-pellets" },
-  freeSampleBiochar: { label:"Buy Now", href:"/shop/agricultural-biochar" },
-  freeSampleCrumble: { label:"Buy Now", href:"/shop/absorbent-crumble" },
+  // Every "Buy Now" outside a product page sends the visitor to the products listing so
+  // they see the whole line and pick a size, instead of jumping straight into one SKU's
+  // checkout. renderProduct swaps this href for the Shopify cart link on product pages,
+  // where the choice has already been made (see SHOPIFY_CHECKOUT in app.js). One entry,
+  // not three per-product ones, because the destination no longer varies by product.
+  buyNow:  { label:"Buy Now", href:"/buy" },
   // Kept for the /request-quote destination page only. No page CTA points here any more:
   // the site is sample-led (CTA.sample / CTA.specialist). The single remaining entry point
   // is a bulk SKU that has no Shopify checkout yet (see renderShopProduct in app.js).
@@ -252,7 +255,7 @@ const HOME = {
   hero:{
     chosen:"Fewer bags per spill. Less material to haul away.",
     sub:"Our sugarcane bagasse absorbents hold up to roughly 5x their weight in liquid, so crews open fewer bags and fewer loads need to be hauled away for disposal. Engineered for oilfield fluids, spill response, and industrial remediation.",
-    primary:CTA.freeSamplePellets, secondary:CTA.sample,
+    primary:CTA.buyNow, secondary:CTA.sample,
     proofLine:["Up to 5× weight absorption","SDS & spec sheet available"],
     image:ASSETS.pelletsPhoto,
     /* Full-bleed cinematic carousel, each slide pairs a massive edge-to-edge
@@ -261,15 +264,15 @@ const HOME = {
       { label:"100% Biochar", img:ASSETS.hands, pos:"50% 50%", zoom:1.06, origin:"50% 55%",
         h:"Carbon that stays<br>in the ground.",
         sub:"OMRI listed bagasse biochar, building soil aeration, water retention, and nutrient retention while locking durable carbon away for the long term.",
-        primary:{label:"Buy Now",href:"/shop/agricultural-biochar"}, secondary:CTA.sample },
+        primary:CTA.buyNow, secondary:CTA.sample },
       { label:"Absorbent Pellets", img:ASSETS.heroPellets, pos:"50% 62%", zoom:1.24, origin:"50% 82%",
         h:"Fewer bags per spill.<br>Less material to haul away.",
         sub:"Sugarcane bagasse absorbent pellets hold up to roughly 5x their weight in liquid, so crews open fewer bags and fewer loads need to be hauled away for disposal.",
-        primary:CTA.freeSamplePellets, secondary:CTA.sample },
+        primary:CTA.buyNow, secondary:CTA.sample },
       { label:"Absorbent Crumble", img:ASSETS.pelletsPhoto, pos:"50% 58%", zoom:1.1, origin:"50% 72%",
         h:"Cover more ground,<br>in less time.",
         sub:"Higher coverage, faster absorption, quicker cleanup. A coarser grade that spreads fast across wide area, high volume spills, with the same high capacity bagasse absorption.",
-        primary:{label:"Buy Now",href:"/shop/absorbent-crumble"},
+        primary:CTA.buyNow,
         // ?product= resolves through SAMPLE_FOR_PRODUCT so the form lands preset to the
         // crumble sample rather than making the visitor pick the grade again.
         secondary:{label:"Request a Sample Kit",href:"/request-sample?product=absorbent-crumble"} },
@@ -325,10 +328,10 @@ const HOME = {
         ],
         img:ASSETS.biocharBag, variantId:"46496458539300", docIds:["spec","sds"] },
       { id:"agricultural-biochar-mt", name:"100% Biochar", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI listed · Bulk Supply", accent:"amber",
-        claim:"Bulk 1 metric ton bag of the same OMRI listed biochar, ready to ship now.",
+        claim:"The same OMRI listed biochar sold by the metric ton, packaged in 1,650 lb super sacks, ready to ship now.",
         uses:["Soil amendment for gardens, beds, and lawns","Water and nutrient retention","Supports faster compost cycles","Carbon negative soil carbon storage"],
-        chips:["1 metric ton bulk bag","OMRI listed","100% bagasse"], unit:"1 Metric Ton Bulk Bag", price:450, priceLabel:"$450 / metric ton", photo:ASSETS.biocharPhoto,
-        desc:"The same OMRI listed 100% bagasse biochar sold as a 1 metric ton bulk bag, ready for immediate purchase.",
+        chips:["Sold by the metric ton","Packaged in 1,650 lb super sacks","OMRI listed","100% bagasse"], unit:"1 Metric Ton", packaging:"1,650 lb super sacks", price:450, priceLabel:"$450 / metric ton", photo:ASSETS.biocharPhoto,
+        desc:"The same OMRI listed 100% bagasse biochar sold by the metric ton and packaged in 1,650 lb super sacks, ready for immediate purchase.",
         gallery:[ ASSETS.biocharBulkPhoto, ASSETS.biocharBag ],
         sections:[
           { h:"How to use", body:"A general guideline is 10 to 25 pounds of biochar per 100 square feet. Loosen the soil and remove debris, remove 2 to 3 inches of topsoil, sprinkle the biochar, then replace the topsoil." },
@@ -354,10 +357,10 @@ const HOME = {
         ],
         img:ASSETS.pelletsBag, variantId:"47285744566564", docIds:["spec","sds"] },
       { id:"absorbent-pellets-mt", name:"Absorbent Pellets", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Bulk Supply", accent:"aqua",
-        claim:"Bulk 1,650 lb super sack of the same up to 5:1 absorption pellets, ready to ship now.",
+        claim:"The same up to 5:1 absorption pellets sold by the metric ton, packaged in 1,650 lb super sacks, ready to ship now.",
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
-        chips:["1,650 lb super sack","100% bagasse","Low dust"], unit:"1,650 lb Super Sack", price:275, priceLabel:"$275 / super sack", photo:ASSETS.pelletsPhoto,
-        desc:"The same up to 5:1 absorption sugarcane bagasse pellets sold as a 1,650 lb super sack, ready for immediate purchase.",
+        chips:["Sold by the metric ton","Packaged in 1,650 lb super sacks","100% bagasse","Low dust"], unit:"1 Metric Ton", packaging:"1,650 lb super sacks", price:275, priceLabel:"$275 / metric ton", photo:ASSETS.pelletsPhoto,
+        desc:"The same up to 5:1 absorption sugarcane bagasse pellets sold by the metric ton and packaged in 1,650 lb super sacks, ready for immediate purchase.",
         gallery:[ ASSETS.pelletsPhoto ],
         sections:[
           { h:"Spill cleanup and remediation", body:"Soak up soil runoff, solvents, drilling and frac fluids, and other non-viscous liquids. Sprinkle the pellets over the spill, wait for full absorption, then sweep up and dispose of the saturated material per your local requirements." },
@@ -381,10 +384,10 @@ const HOME = {
           desc:"A renewable, plant based absorbent made from sugarcane bagasse, offered in a coarser crumble form for faster, broader coverage. Like our standard pellets, the crumble soaks up several times its own weight in liquid, outperforming standard wood based absorbents. Simply spread over the mess, let it fully absorb, then sweep up and dispose. Renewable, sustainably sourced, and built for demanding industrial and household cleanup jobs.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE", omri:false } },
       { id:"absorbent-crumble-mt", name:"Absorbent Crumble", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Bulk Supply", accent:"aqua",
-        claim:"Bulk 1,650 lb super sack of the same coarse grade crumble, ready to ship now.",
+        claim:"The same coarse grade crumble sold by the metric ton, packaged in 1,650 lb super sacks, ready to ship now.",
         uses:["Large area and high volume spill coverage","Fast, broad application","Drilling and frac fluid solidification","Disaster and flood cleanup"],
-        chips:["1,650 lb super sack","Coarse grade","100% bagasse"], unit:"1,650 lb Super Sack", price:275, priceLabel:"$275 / super sack", photo:ASSETS.pelletsPhoto, gallery:[ ASSETS.pelletsPhoto ],
-        desc:"The same up to 5:1 absorption sugarcane bagasse crumble sold as a 1,650 lb super sack, ready for immediate purchase.",
+        chips:["Sold by the metric ton","Packaged in 1,650 lb super sacks","Coarse grade","100% bagasse"], unit:"1 Metric Ton", packaging:"1,650 lb super sacks", price:275, priceLabel:"$275 / metric ton", photo:ASSETS.pelletsPhoto, gallery:[ ASSETS.pelletsPhoto ],
+        desc:"The same up to 5:1 absorption sugarcane bagasse crumble sold by the metric ton and packaged in 1,650 lb super sacks, ready for immediate purchase.",
         sections:[
           { h:"Large area spill cleanup", body:"Broadcast the crumble across the spill in fewer passes than a fine sorbent needs, let it fully absorb, then sweep up and dispose of the saturated material per your local requirements." },
           { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },
@@ -412,17 +415,6 @@ const HOME = {
     filters:["All","Biochar","Soil","Absorbents"],
     bbqFootnote:{ label:"Louisiana Sweet BBQ Smoker Pellets (consumer/retail)", href:"https://americanbiocarbon.com/products/louisiana-sweet-bbq-smoker-pellets" }
   },
-  /* UNUSED. Nothing renders this: the homepage product showcase and /buy both read
-     HOME.buy.products (see the `zig` block in renderHome). Kept only because it is the
-     last place the short per-product ICP blurbs are written down. Edit buy.products for
-     anything that has to show up on the site. */
-  categories:[
-    { name:"100% Biochar", icp:"Distributors · blenders · growers", blurb:"OMRI listed bagasse biochar holds up to ~3 to 3.5× its weight in water, better moisture retention, faster compost. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSampleBiochar, href:"/shop/agricultural-biochar", img:ASSETS.biocharBag, avail:"live" },
-    { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, less to haul away, low dust. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSamplePellets, href:"/shop/absorbent-pellets", img:ASSETS.pelletsBag, avail:"live" },
-    { name:"Absorbent Crumble", icp:"Large area & high volume spills", blurb:"Higher coverage, faster absorption, quicker cleanup across a wide footprint, same high capacity. Sample bags and 1,650 lb super sack supply available now.", cta:{label:"Buy Now",href:"/shop/absorbent-crumble"}, href:"/shop/absorbent-crumble", img:ASSETS.crumbleBag, avail:"live" },
-    { name:"Biochar-Infused Soil", icp:"Landscape · nursery · retail", blurb:"Multipurpose Fiber and coffee chaff, pre-blended with biochar's water- and nutrient holding benefits. No mixing. Coming Q4.", cta:{label:"Stay informed",href:"/request-sample?preorder=1&product=biochar-infused-soil"}, href:"/product/biochar-infused-soil", img:ASSETS.soilBag, avail:"q4" },
-    { name:"Carbon Removal", icp:"Corporate ESG · brokers · marketplaces", blurb:"Puro.earth certified CORCs generated by real biochar deployment, backed by MRV.", cta:CTA.carbon, href:"/product/carbon-removal", img:ASSETS.hands, avail:"q4" },
-  ],
   socialProof:{
     placeholder:true, // SCAFFOLD, replace with real, verifiable proof before publishing
     kicker:"Trusted in the field",
@@ -439,7 +431,7 @@ const HOME = {
   feature:{
     kicker:"Oil & Gas · Industrial Remediation",
     h:"Engineered for the field",
-    body:"Solidify drilling and frac fluids, clean up oil and non-viscous chemical spills, and control landfill leachate with a renewable sorbent that cuts bag count and disposal weight. Available in bulk, one metric ton bulk bags, and truckload volumes, with SDS and spec sheets on request.",
+    body:"Solidify drilling and frac fluids, clean up oil and non-viscous chemical spills, and control landfill leachate with a renewable sorbent that cuts bag count and disposal weight. Available in bulk, by the metric ton in 1,650 lb super sacks, and in truckload volumes, with SDS and spec sheets on request.",
     bullets:[
       "Drilling & frac fluid solidification",
       "Oil & non-viscous chemical spill cleanup",
@@ -555,7 +547,7 @@ const PRODUCTS = {
       schema:"Product + FAQPage + BreadcrumbList" },
     h1:"Industrial Absorbent Pellets That Hold up to 5× Their Weight",
     sub:"A plant based bagasse sorbent for drilling fluids, spills, and leachate, holding up to ~5× its weight vs about 2.5× for wood pellets means roughly half the bags and lighter saturated disposal per spill, plus low dust.",
-    primary:CTA.freeSamplePellets, secondary:CTA.sample, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
+    primary:CTA.buyNow, secondary:CTA.sample, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
     proofRow:["Up to 5:1 absorption","100% organic biomass (no additives)","~32 lb/ft³ bulk density","Free 1 lb sample · volume supply Q4"],
 
     appsHeading:"How Absorbent Pellets Applications Help Your Spill Response &amp; Remediation Operations",
@@ -594,7 +586,7 @@ const PRODUCTS = {
     faq:[
       { q:"What liquids do the pellets absorb?", a:"Oil, fuels, and non-viscous chemicals and aqueous streams. For a specific fluid, request the spec sheet and SDS so we can confirm suitability." },
       { q:"How is it disposed of?", a:"Saturated material is swept up and disposed of per your local requirements and the absorbed material's profile. Because it holds up to ~5× its weight vs ~2.5× for wood, you fill roughly half the bags and haul away less saturated material, fewer pounds at by the pound rates and fewer truckloads." },
-      { q:"Can I get a sample, and when is volume supply available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Volume supply (bulk, one metric ton bags, truckload) comes online with our Q4 capacity ramp; if the sample performs, you can reserve supply and lock pricing now." },
+      { q:"Can I get a sample, and when is volume supply available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Volume supply (bulk, metric tons in 1,650 lb super sacks, truckload) comes online with our Q4 capacity ramp; if the sample performs, you can reserve supply and lock pricing now." },
       { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request." },
     ],
     form:"sample",
@@ -604,13 +596,13 @@ const PRODUCTS = {
     name:"Absorbent Crumble", icp:"Large area & high volume spill coverage",
     intent:"Procure a fast spreading absorbent",
     seo:{ title:"Absorbent Crumble, Fast, Broad Coverage Bagasse Sorbent | American BioCarbon",
-      desc:"A coarser bagasse absorbent crumble for large area and high volume spills. Spreads fast, holds up to 5× its weight. Free 1 lb samples and 1,650 lb super sacks ship now.",
+      desc:"A coarser bagasse absorbent crumble for large area and high volume spills. Spreads fast, holds up to 5× its weight. Free 1 lb samples ship now, with metric ton supply in 1,650 lb super sacks.",
       slug:"/absorbent-crumble", keyword:"absorbent crumble",
       secondary:["large area spill absorbent","high volume spill absorbent","plant based absorbent"],
       schema:"Product + FAQPage" },
     h1:"Absorbent Crumble for Fast, Broad Coverage",
-    sub:"A coarser bagasse form that spreads quickly across large area and high volume spills, same up to 5:1 performance, faster to lay down. Free 1 lb samples and 1,650 lb super sacks ship now.",
-    primary:CTA.freeSampleCrumble, secondary:CTA.sample, image:ASSETS.crumblePhoto, mock:ASSETS.pelletsMock,
+    sub:"A coarser bagasse form that spreads quickly across large area and high volume spills, same up to 5:1 performance, faster to lay down. Free 1 lb samples ship now, with metric ton supply in 1,650 lb super sacks.",
+    primary:CTA.buyNow, secondary:CTA.sample, image:ASSETS.crumblePhoto, mock:ASSETS.pelletsMock,
     proofRow:["Up to 5:1 absorption","Coarse, fast spreading","100% organic biomass","Bulk & truckload"],
 
     appsHeading:"How Absorbent Crumble Applications Help Your Large Area Spill Response &amp; Remediation Operation",
@@ -639,8 +631,8 @@ const PRODUCTS = {
       ["Absorption ratio","Up to ~5:1, non-viscous"],
       ["Texture","Coarse crumble (faster spread)"],
       ["Material","100% organic sugarcane bagasse"],
-      ["Form factors","1 lb sample bag · 1,650 lb super sack · bulk"],
-      ["Availability","Free 1 lb samples and 1,650 lb super sacks ship now"],
+      ["Form factors","1 lb sample bag · metric ton in 1,650 lb super sacks · bulk"],
+      ["Availability","Free 1 lb samples ship now; metric ton supply in 1,650 lb super sacks"],
       ["Documentation","SDS + spec sheet on request"],
     ],
     comparison:{ h:"Vs the status quo",
@@ -648,7 +640,7 @@ const PRODUCTS = {
       rows:[["Absorption","Up to ~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
     faq:[
       { q:"When should I use crumble vs pellets?", a:"Choose crumble for large area or high volume spills where fast, broad coverage matters; choose pellets for targeted cleanup." },
-      { q:"Can I get a sample, and what volumes are available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. 1,650 lb super sacks are available for immediate purchase, and truckload supply is on request." },
+      { q:"Can I get a sample, and what volumes are available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Metric ton supply, packaged in 1,650 lb super sacks, is available for immediate purchase, and truckload supply is on request." },
       { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request. The absorbents spec sheet covers both the pellet and crumble grades." },
     ],
     form:"quote",
@@ -693,7 +685,7 @@ const PRODUCTS = {
       ["Material","100% microbe treated sugarcane bagasse fiber"],
       ["Form","Loose fiber (fast spreading)"],
       ["Uses","Bedding · absorbent · soil amendment"],
-      ["Form factors","Bulk · 1 metric ton bulk bag"],
+      ["Form factors","Bulk · metric ton in 1,650 lb super sacks"],
       ["Availability","Free 1 lb samples now; volume supply from Q4"],
       ["Documentation","SDS + spec sheet on request"],
     ],
@@ -702,7 +694,7 @@ const PRODUCTS = {
       rows:[["Source","Locally grown (Louisiana)","Mined bogs / harvested wood"],["Renewable","100% renewable","Finite / slow-growing"],["Versatility","Bedding, absorbent & soil","Single-purpose"],["Carbon impact","Carbon neutral","Harvesting releases CO₂"]] },
     faq:[
       { q:"Can one material really cover bedding, cleanup, and soil?", a:"Yes. It is the same bagasse fiber. Use it loose for animal bedding, spread it for spill cleanup, or work it into soil as a renewable peat alternative." },
-      { q:"When is volume supply available?", a:"Free 1 lb samples ship now (4 to 7 business days). Bulk and one metric ton bulk bag supply comes online with our Q4 capacity ramp, so you can reserve supply and lock pricing now." },
+      { q:"When is volume supply available?", a:"Free 1 lb samples ship now (4 to 7 business days). Bulk and metric ton supply in 1,650 lb super sacks comes online with our Q4 capacity ramp, so you can reserve supply and lock pricing now." },
     ],
     form:"quote",
     internal:["/product/absorbent-pellets","/industry/animal-bedding","/industry/soil-blenders","/technical"]
@@ -717,8 +709,8 @@ const PRODUCTS = {
       schema:"Product + FAQPage + BreadcrumbList" },
     h1:"OMRI Listed Bagasse Biochar for Water &amp; Nutrient Retention",
     sub:"A locally sourced, carbon negative sugarcane biochar that improves water and nutrient retention, supports soil microbiology, and can help shorten compost turnover ~10 to 30%.",
-    primary:CTA.freeSampleBiochar, secondary:CTA.spec, image:ASSETS.biocharPhoto, mock:ASSETS.biocharMock,
-    proofRow:["OMRI Listed · IBI Certified","Holds up to ~3 to 3.5× its weight in water","Inherent NPK + Ca/Mg","Free sample · volume supply Q4"],
+    primary:CTA.buyNow, secondary:CTA.spec, image:ASSETS.biocharPhoto, mock:ASSETS.biocharMock,
+    proofRow:["OMRI Listed · IBI Certified","Holds up to ~3 to 3.5× its weight in water","Inherent NPK + Ca/Mg"],
 
     specsFirst:true, appsKicker:"", appsHeading:"How Bagasse Biochar Applications Help Your Soil &amp; Growing Operation",
     useCases:["Less irrigation &amp; water waste","Less fertilizer waste","Soil structure &amp; root penetration","Microbial &amp; fungal habitat","pH buffering","Faster composting","Drought resilience","Durable carbon sequestration"],

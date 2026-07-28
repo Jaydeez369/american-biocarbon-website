@@ -317,7 +317,7 @@ function renderHome(){
     // Every currently live product (isLive) is a Buy Now / shop item; everything else
     // (Coming Q4) uses "Stay informed" instead of a purchase CTA.
     const primary = isLive
-      ? {label:"Buy Now",href:"/shop/"+p.id}
+      ? CTA.buyNow
       : {label:"Stay informed",href:"/request-sample?preorder=1&product="+p.id};
     const secondary = null;
     const media = p.img ? `<img src="${p.img}" alt="${raw(p.name)}">` : `<div class="thumb-blank" aria-hidden="true"></div>`;
@@ -404,7 +404,7 @@ function renderProduct(id){
       ${crumbs([{label:"Home",href:"/"},{label:p.name}])}
       <h1>${raw(p.h1)}</h1>
       <p class="sub">${raw(p.sub)}</p>
-      <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light",SPEC_SPECID[id])}${p.tertiary?btn(p.tertiary,"btn-ghost-light"):""}</div>
+      <div class="btn-row">${btn(productPrimary(id, p.primary))}${btn(p.secondary,"btn-ghost-light",SPEC_SPECID[id])}${p.tertiary?btn(p.tertiary,"btn-ghost-light"):""}</div>
       ${(()=>{const isOffer=s=>/free|sample|q4|volume supply/i.test(s);const offer=(p.proofRow||[]).find(isOffer);const specs=(p.proofRow||[]).filter(x=>!isOffer(x));return `${offer?`<p class="cta-note">${raw(offer)}</p>`:""}${specs.length?`<p class="proofline">${specs.map(raw).join(" · ")}</p>`:""}`;})()}
     </div>
     <div class="media"><img src="${p.image}" alt="${raw(p.name)}"></div>
@@ -693,15 +693,24 @@ const SHOPIFY_CHECKOUT = {
   "agricultural-biochar": SHOP_DOMAIN + "/cart/54185346335012:1",
   // Third $0 variant of the same "Product Samples" product (Shopify spells it "Abosrbent Crumble").
   "absorbent-crumble":   SHOP_DOMAIN + "/cart/55922925175076:1",
-  // 1 metric ton (2,204.6 lb) bulk bags, 10 in stock each. Live Shopify products:
-  // "Absorbent Pellets - 2200 lbs Super Sack" / "100% Biochar - 2200lbs (4 Cubic Yard) supersack".
+  // Sold BY THE METRIC TON; packaged in 1,650 lb super sacks (the priced unit is the
+  // metric ton, the sack is the package - keep the two distinct in all copy).
   "absorbent-pellets-mt":   SHOP_DOMAIN + "/cart/54182475170084:1",
   "agricultural-biochar-mt": SHOP_DOMAIN + "/cart/54184340914468:1",
-  // Standalone Shopify product "Absorbent Crumble" (10749467459876), $275 super sack.
+  // Standalone Shopify product "Absorbent Crumble" (10749467459876), $275 / metric ton.
   "absorbent-crumble-mt": SHOP_DOMAIN + "/cart/55923046023460:1",
 };
 // ids whose primary CTA reads "Buy Now" instead of "Request a Sample Kit"
 const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble","absorbent-crumble-mt"]);
+/* A product page is the one place "Buy Now" means buy THIS, so it goes straight to the
+   Shopify cart. Everywhere else the same button routes to /buy (see CTA.buyNow), because
+   the visitor has not picked a product or a size yet. If a product has no checkout, the
+   CTA is left exactly as data.js declared it rather than promising a purchase. */
+function productPrimary(id, cta){
+  return (cta && /buy now/i.test(cta.label||"") && SHOPIFY_CHECKOUT[id])
+    ? { ...cta, href: SHOPIFY_CHECKOUT[id] }
+    : cta;
+}
 // Products with an approved, product-specific spec-sheet PDF available for DIRECT
 // download (maps site id -> SPEC_SHEETS key). Anything not listed here has no approved
 // file yet and must use a "Request Spec Sheet" action instead of an incorrect download.
@@ -755,7 +764,7 @@ function renderShopProduct(id){
             ? `<a href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
             : `<a href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
         </div>
-        <p class="pdp-secure">${p.priceLabel ? raw(p.priceLabel)+" bulk bag." : `Free ${raw(p.sampleWeight||"")} sample.`} Ships in 4 to 7 business days from White Castle, LA.</p>
+        <p class="pdp-secure">${p.priceLabel ? raw(p.priceLabel)+(p.packaging?`, packaged in ${raw(p.packaging)}.`:".") : `Free ${raw(p.sampleWeight||"")} sample.`} Ships in 4 to 7 business days from White Castle, LA.</p>
         ${p.truckloadQ4?`<p class="pdp-secure" style="color:var(--dim)">Bulk bag and truckload supply available Q4.</p>`:""}
       </div>
     </div>
