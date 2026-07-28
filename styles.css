@@ -35,10 +35,10 @@ h1,h2,h3,h4{font-family:var(--f-head);line-height:1.12;letter-spacing:0;text-wra
 
 /* ---------- Header ---------- */
 header.site{position:sticky;top:0;z-index:50;background:rgba(26,55,108,.97);backdrop-filter:blur(8px);border-bottom:1px solid #24478a}
-.nav{display:flex;align-items:center;gap:20px;height:84px}
+.nav{display:flex;align-items:center;gap:20px;height:94px}
 /* brand anchor must not shrink in the flex row, or the logo img collapses to 0px width */
 .nav>a:first-of-type{flex:0 0 auto;display:inline-flex;align-items:center}
-.nav .logo{height:52px;width:auto;flex:0 0 auto}
+.nav .logo{height:64px;width:auto;flex:0 0 auto}
 .nav .logo-txt{color:#fff;font-weight:800;font-size:18px;letter-spacing:-.5px;white-space:nowrap}
 .nav .spring{flex:1}
 .app-tabs{display:flex;gap:2px;background:#12294f;border:1px solid #24478a;border-radius:8px;padding:3px;margin-left:14px}

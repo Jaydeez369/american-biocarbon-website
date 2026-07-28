@@ -319,7 +319,7 @@ const HOME = {
           { h:"Water and nutrient retention", body:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
         ],
         img:ASSETS.biocharBag, variantId:"46496458539300", docIds:["spec","sds"] },
-      { id:"agricultural-biochar-mt", name:"100% Biochar, 1 Metric Ton", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI listed · Bulk Supply", accent:"amber",
+      { id:"agricultural-biochar-mt", name:"100% Biochar", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI listed · Bulk Supply", accent:"amber",
         claim:"Bulk 1 metric ton bag of the same OMRI listed biochar, ready to ship now.",
         uses:["Soil amendment for gardens, beds, and lawns","Water and nutrient retention","Supports faster compost cycles","Carbon negative soil carbon storage"],
         chips:["1 metric ton bulk bag","OMRI listed","100% bagasse"], unit:"1 Metric Ton Bulk Bag", price:450, priceLabel:"$450 / metric ton", photo:ASSETS.biocharPhoto,
