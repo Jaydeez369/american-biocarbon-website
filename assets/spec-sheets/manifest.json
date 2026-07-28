@@ -9,7 +9,7 @@
       "title": "American BioCarbon Absorbent Pellets - Technical Specification Sheet",
       "description": "Complete technical specifications for American BioCarbon Absorbent Pellets including absorption ratios, bulk density, applications, cost/freight comparisons, and sustainability profile.",
       "availability": "published",
-      "last_updated": "2026-07-21"
+      "last_updated": "2026-07-28"
     },
     {
       "id": "biochar-premium-spec",
@@ -20,14 +20,24 @@
       "title": "American BioCarbon Bagasse-Based Biochar - Technical, Nutritional & Environmental Report",
       "description": "Complete technical specifications for American BioCarbon Bagasse-Based Biochar including carbon content, inherent nutrients (N-P-K), SEM microstructure analysis, heavy-metal analysis, and 12 independent IBI laboratory certifications.",
       "availability": "published",
-      "last_updated": "2026-07-21"
+      "last_updated": "2026-07-28"
     }
   ],
   "by_product": {
-    "absorbent-pellets": ["absorbent-pellets-spec"],
-    "absorbent-crumble": ["absorbent-pellets-spec"],
-    "agricultural-biochar": ["biochar-premium-spec"],
-    "biochar-infused-soil": ["biochar-premium-spec"],
-    "biosoil": ["biochar-premium-spec"]
+    "absorbent-pellets": [
+      "absorbent-pellets-spec"
+    ],
+    "absorbent-crumble": [
+      "absorbent-pellets-spec"
+    ],
+    "agricultural-biochar": [
+      "biochar-premium-spec"
+    ],
+    "biochar-infused-soil": [
+      "biochar-premium-spec"
+    ],
+    "biosoil": [
+      "biochar-premium-spec"
+    ]
   }
 }
