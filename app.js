@@ -247,9 +247,9 @@ function renderChrome(){
       <div class="foot-cta"><a class="btn btn-primary btn-sm" href="/request-sample">Request a Sample Kit</a><a class="btn btn-ghost-light btn-sm" href="/contact">Talk to a Specialist</a></div>
     </div>
     <div><h4>Products</h4>
+      <a href="/product/agricultural-biochar">100% Biochar</a><a href="/product/biochar-infused-soil">Biochar-Infused Soil</a>
       <a href="/product/absorbent-pellets">Absorbent Pellets</a><a href="/product/absorbent-crumble">Absorbent Crumble</a>
-      <a href="/product/absorbent-fiber">Multipurpose Fiber</a><a href="/product/agricultural-biochar">100% Biochar</a>
-      <a href="/product/biochar-infused-soil">Biochar-Infused Soil</a>
+      <a href="/product/absorbent-fiber">Multipurpose Fiber</a>
       <a href="/product/carbon-removal">Carbon Removal</a></div>
     <div><h4>Industries</h4>
       <a href="/industry/oil-gas">Oil &amp; Gas</a><a href="/industry/industrial-remediation">Industrial Remediation</a>

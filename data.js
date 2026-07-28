@@ -69,10 +69,14 @@ const CTA = {
 };
 
 /* Top navigation */
+/* Order mirrors the hero carousel, which opens on biochar: agriculture leads, then the
+   industries that buy the absorbents, then the absorbents themselves. */
 const NAV = [
-  { label:"Absorbents", children:[
-    { label:"Absorbent Pellets", href:"/product/absorbent-pellets" },
-    { label:"Absorbent Crumble", href:"/product/absorbent-crumble" },
+  { label:"Agriculture", children:[
+    { label:"100% Biochar", href:"/product/agricultural-biochar" },
+    { label:"Biochar-Infused Soil", href:"/product/biochar-infused-soil" },
+    { label:"Soil Blenders & Compost", href:"/industry/soil-blenders" },
+    { label:"Distributors & Resellers", href:"/distributors-resellers-agriculture" },
   ]},
   { label:"Industries", children:[
     { label:"Oil & Gas", href:"/industry/oil-gas" },
@@ -83,11 +87,9 @@ const NAV = [
     { label:"Animal Bedding", href:"/industry/animal-bedding" },
     { label:"Distributors & Resellers", href:"/distributors-resellers-industries" },
   ]},
-  { label:"Agriculture", children:[
-    { label:"100% Biochar", href:"/product/agricultural-biochar" },
-    { label:"Biochar-Infused Soil", href:"/product/biochar-infused-soil" },
-    { label:"Soil Blenders & Compost", href:"/industry/soil-blenders" },
-    { label:"Distributors & Resellers", href:"/distributors-resellers-agriculture" },
+  { label:"Absorbents", children:[
+    { label:"Absorbent Pellets", href:"/product/absorbent-pellets" },
+    { label:"Absorbent Crumble", href:"/product/absorbent-crumble" },
   ]},
   { label:"Carbon Removal", href:"/product/carbon-removal" },
   { label:"Products", href:"/buy" },
@@ -267,7 +269,10 @@ const HOME = {
       { label:"Absorbent Crumble", img:ASSETS.pelletsPhoto, pos:"50% 58%", zoom:1.1, origin:"50% 72%",
         h:"Cover more ground,<br>in less time.",
         sub:"Higher coverage, faster absorption, quicker cleanup. A coarser grade that spreads fast across wide area, high volume spills, with the same high capacity bagasse absorption.",
-        primary:{label:"Buy Now",href:"/shop/absorbent-crumble"}, secondary:CTA.spec },
+        primary:{label:"Buy Now",href:"/shop/absorbent-crumble"},
+        // ?product= resolves through SAMPLE_FOR_PRODUCT so the form lands preset to the
+        // crumble sample rather than making the visitor pick the grade again.
+        secondary:{label:"Request a Sample Kit",href:"/request-sample?product=absorbent-crumble"} },
       { label:"Biochar-Infused Soil", img:ASSETS.heroSoil, pos:"50% 50%", zoom:1.05, origin:"50% 50%",
         h:"Ready to use soil,<br>biochar built in.",
         sub:"A ready to use growing soil pre-blended with our Multipurpose Fiber, coffee chaff, and carbon negative bagasse biochar for water retention, nutrient holding, and aeration with no mixing.",
@@ -404,12 +409,14 @@ const HOME = {
           desc:"Microbe treated sugarcane bagasse fiber, grown and processed in Louisiana. As a renewable replacement for mined peat, it enriches soil and growing media, holds water exceptionally well, and promotes strong root growth through aeration, all while being pathogen free. It also spreads quickly across wide areas for spill cleanup and works just as well as soft animal bedding. Renewable, biodegradable, and locally grown.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE FIBER", omri:false } },
     ],
-    filters:["All","Absorbents","Biochar","Soil"],
+    filters:["All","Biochar","Soil","Absorbents"],
     bbqFootnote:{ label:"Louisiana Sweet BBQ Smoker Pellets (consumer/retail)", href:"https://americanbiocarbon.com/products/louisiana-sweet-bbq-smoker-pellets" }
   },
+  /* Agriculture leads here too, matching NAV and the hero carousel. Live products still
+     come before the Q4 ones: availability outranks category order. */
   categories:[
-    { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, less to haul away, low dust. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSamplePellets, href:"/shop/absorbent-pellets", img:ASSETS.pelletsBag, avail:"live" },
     { name:"100% Biochar", icp:"Distributors · blenders · growers", blurb:"OMRI listed bagasse biochar holds up to ~3 to 3.5× its weight in water, better moisture retention, faster compost. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSampleBiochar, href:"/shop/agricultural-biochar", img:ASSETS.biocharBag, avail:"live" },
+    { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, less to haul away, low dust. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSamplePellets, href:"/shop/absorbent-pellets", img:ASSETS.pelletsBag, avail:"live" },
     { name:"Absorbent Crumble", icp:"Large area & high volume spills", blurb:"Higher coverage, faster absorption, quicker cleanup across a wide footprint, same high capacity. Sample bags and 1,650 lb super sack supply available now.", cta:{label:"Buy Now",href:"/shop/absorbent-crumble"}, href:"/shop/absorbent-crumble", img:ASSETS.crumbleBag, avail:"live" },
     { name:"Biochar-Infused Soil", icp:"Landscape · nursery · retail", blurb:"Multipurpose Fiber and coffee chaff, pre-blended with biochar's water- and nutrient holding benefits. No mixing. Coming Q4.", cta:{label:"Stay informed",href:"/request-sample?preorder=1&product=biochar-infused-soil"}, href:"/product/biochar-infused-soil", img:ASSETS.soilBag, avail:"q4" },
     { name:"Carbon Removal", icp:"Corporate ESG · brokers · marketplaces", blurb:"Puro.earth certified CORCs generated by real biochar deployment, backed by MRV.", cta:CTA.carbon, href:"/product/carbon-removal", img:ASSETS.hands, avail:"q4" },
