@@ -35,7 +35,16 @@ h1,h2,h3,h4{font-family:var(--f-head);line-height:1.12;letter-spacing:0;text-wra
 
 /* ---------- Header ---------- */
 header.site{position:sticky;top:0;z-index:50;background:rgba(26,55,108,.97);backdrop-filter:blur(8px);border-bottom:1px solid #24478a}
+header.site .wrap{max-width:var(--wrap-head)}
 .nav{display:flex;align-items:center;gap:20px;height:94px}
+/* Centre the primary menu on the header itself, not on the gap between the logo and the
+   Buy Now button: those two are different widths, so a flex spring on each side would
+   leave the menu visibly off-centre. Absolute + translate is what actually centres it.
+   Desktop only; under 1140px the menu becomes the burger drawer (see Responsive). */
+@media(min-width:1141px){
+  .nav{position:relative}
+  .nav .menu{position:absolute;left:50%;transform:translateX(-50%)}
+}
 /* brand anchor must not shrink in the flex row, or the logo img collapses to 0px width */
 .nav>a:first-of-type{flex:0 0 auto;display:inline-flex;align-items:center}
 .nav .logo{height:64px;width:auto;flex:0 0 auto}
@@ -703,11 +712,16 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
 
 /* ---------- Responsive ---------- */
 .mobile-cta{display:none}
-@media(max-width:940px){
+/* Nav collapses to the burger at 1140px, not 940: the seven-item menu is ~836px wide, so
+   with the logo, the Buy Now button and the gaps it needs ~1120px to lay out. Below that
+   it used to overrun the viewport (menu and CTA both extended past the right edge). */
+@media(max-width:1140px){
   .menu{display:none;position:absolute;top:84px;left:0;right:0;flex-direction:column;background:var(--graphite);padding:10px;border-bottom:1px solid #24478a;gap:2px}
   .menu.open{display:flex} .menu>.item{width:100%} .dropdown{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;background:#1e3a6e;border-color:#24478a;margin:2px 0}
   .dropdown a{color:#c4cfe6} .dropdown a:hover{background:#24478a;color:#fff}
   .burger{display:block}
+}
+@media(max-width:940px){
   .phead .grid,.split,.two-col-copy,.offer-grid,.cp-grid{grid-template-columns:1fr}
   /* stacked: media returns to a clean fixed ratio instead of column-fill height */
   .phead .media,.split .media{height:auto;min-height:0;aspect-ratio:16/10}

@@ -83,5 +83,10 @@
   --sh-dark-3:0 8px 40px -8px rgba(0,0,0,.55);
 
   /* ---------- LAYOUT ---------- */
-  --wrap:1160px;
+  /* Every .wrap on the site reads this, so the hero and every section band widen
+     together and stay aligned to one another. The header runs wider on purpose
+     (--wrap-head): it carries nav chrome, not reading copy, so it can use the extra
+     room without stretching body text past a comfortable measure. */
+  --wrap:1240px;
+  --wrap-head:1320px;
 }
