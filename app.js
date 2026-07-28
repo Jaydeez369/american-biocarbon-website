@@ -616,7 +616,7 @@ function buyCard(p){
       <h3>${raw(p.name)}</h3>
       <p class="claim">${raw(p.claim)}</p>
       ${p.uses?`<ul class="uses">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
-      <div class="chips">${(p.chips||[]).filter(c=>/sample bag|metric ton/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
+      <div class="chips">${(p.chips||[]).filter(c=>/sample bag|metric ton|super sack/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
       <div class="availline">${isLive?(p.priceLabel?"FOB bulk bags ready in 7-10 business days.":"Free sample ships in 4 to 7 business days. Bulk and truckload by quote."):"Coming Q4. Request a sample on a 30 day lead time."}</div>
       ${docs}
       ${cta}
