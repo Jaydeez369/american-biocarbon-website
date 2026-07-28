@@ -681,16 +681,14 @@ const SHOP_DOMAIN = "https://americanbiocarbon.com";
 const SHOPIFY_CHECKOUT = {
   "absorbent-pellets":   SHOP_DOMAIN + "/cart/54185346302244:1",
   "agricultural-biochar": SHOP_DOMAIN + "/cart/54185346335012:1",
-  // TODO: crumble 1 lb free-sample variant (added in Shopify, ID not yet supplied).
-  // Until the ID is filled in, the CTA falls back to /request-sample?product=absorbent-crumble.
-  // "absorbent-crumble":  SHOP_DOMAIN + "/cart/<CRUMBLE_SAMPLE_VARIANT_ID>:1",
+  // Third $0 variant of the same "Product Samples" product (Shopify spells it "Abosrbent Crumble").
+  "absorbent-crumble":   SHOP_DOMAIN + "/cart/55922925175076:1",
   // 1 metric ton (2,204.6 lb) bulk bags, 10 in stock each. Live Shopify products:
   // "Absorbent Pellets - 2200 lbs Super Sack" / "100% Biochar - 2200lbs (4 Cubic Yard) supersack".
   "absorbent-pellets-mt":   SHOP_DOMAIN + "/cart/54182475170084:1",
   "agricultural-biochar-mt": SHOP_DOMAIN + "/cart/54184340914468:1",
-  // TODO: crumble 1,650 lb super sack (Jesse is creating the Shopify listing).
-  // Until then the CTA falls back to /contact?product=absorbent-crumble-mt&intent=purchase.
-  // "absorbent-crumble-mt": SHOP_DOMAIN + "/cart/<CRUMBLE_SUPERSACK_VARIANT_ID>:1",
+  // Standalone Shopify product "Absorbent Crumble" (10749467459876), $275 super sack.
+  "absorbent-crumble-mt": SHOP_DOMAIN + "/cart/55923046023460:1",
 };
 // ids whose primary CTA reads "Buy Now" instead of "Request a Sample Kit"
 const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble","absorbent-crumble-mt"]);
