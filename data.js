@@ -60,7 +60,7 @@ const CTA = {
   specDownload: { label:"Download Spec Sheet",      href:"/request-docs?doc=spec" },
   sds:     { label:"Request SDS",                  href:"/request-docs?doc=sds" },
   docs:    { label:"Request Technical Package",     href:"/request-docs" },
-  specialist:{ label:"Talk to a Remediation Specialist", href:"/contact" },
+  specialist:{ label:"Talk to a Specialist", href:"/contact" },
   biochar: { label:"Request a Sample Kit", href:"/request-sample?type=biochar" },
   carbon:  { label:"Request Carbon Removal Info",   href:"/contact?type=carbon" },
   beddingSample: { label:"Request a Sample Kit",  href:"/request-sample?type=bedding" },
@@ -267,7 +267,7 @@ const HOME = {
       { label:"Absorbent Crumble", img:ASSETS.pelletsPhoto, pos:"50% 58%", zoom:1.1, origin:"50% 72%",
         h:"Cover more ground,<br>in less time.",
         sub:"Higher coverage, faster absorption, quicker cleanup. A coarser grade that spreads fast across wide area, high volume spills, with the same high capacity bagasse absorption.",
-        primary:{label:"Buy Now",href:"/shop/absorbent-crumble"}, secondary:CTA.specDownload, specProduct:"absorbent-crumble" },
+        primary:{label:"Buy Now",href:"/shop/absorbent-crumble"}, secondary:CTA.spec },
       { label:"Biochar-Infused Soil", img:ASSETS.heroSoil, pos:"50% 50%", zoom:1.05, origin:"50% 50%",
         h:"Ready to use soil,<br>biochar built in.",
         sub:"A ready to use growing soil pre-blended with our Multipurpose Fiber, coffee chaff, and carbon negative bagasse biochar for water retention, nutrient holding, and aeration with no mixing.",
@@ -1248,9 +1248,9 @@ const FORMS = {
       { n:"timeline", label:"Timeline", type:"select", req:false, options:["Active need now","This quarter","Evaluating","Just researching"] },
       { n:"request", label:"Request type", type:"select", req:true, options:["One complimentary sample bag","Additional sample bags (purchase)","Sample + bulk quote","Spec sheet / SDS","Talk to a specialist"] },
     ],
-    confirm:"Thanks, your request for one complimentary sample bag is in (shipping and handling included). A remediation specialist will reply within one business day with the SDS and spec sheet attached. Need more than one bag? Just reply and we'll set up a purchase.",
+    confirm:"Thanks, your request for one complimentary sample bag is in (shipping and handling included). A specialist will reply within one business day with the SDS and spec sheet attached. Need more than one bag? Just reply and we'll set up a purchase.",
     autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. Attached are the SDS and spec sheet for our bagasse absorbent. A specialist will follow up within one business day to confirm your use case, volume, and ship to., American BioCarbon, White Castle, LA",
-    routing:"Industrial → remediation specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach SDS/spec.",
+    routing:"Industrial → specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach SDS/spec.",
     scoring:"+ truckload volume, + zone A/B, + active-now timeline, + named use case; - personal email, - 'just researching'."
   },
   quote:{
@@ -1354,7 +1354,7 @@ const FORMS = {
   },
   contact:{
     name:"Talk to a Specialist",
-    h:"Talk to a Remediation Specialist",
+    h:"Talk to a Specialist",
     sub:"Tell us what you're solving. We'll reply within one business day with the right documentation and next step.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },

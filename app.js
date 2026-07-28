@@ -83,9 +83,10 @@ function initHeroCarousel(){
 
 /* ---- shared components ---- */
 function btn(cta, cls="btn-primary", specProduct=null){
-  // For spec sheet downloads, use onclick instead of href
-  if(cta.label === "Download Spec Sheet" && specProduct){
-    return `<a class="btn ${cls}" href="javascript:void(0)" onclick="downloadSpecSheet('${specProduct}')">${raw(cta.label)}</a>`;
+  // Any spec-sheet CTA on a product that HAS an approved PDF downloads it directly instead
+  // of dropping the visitor into the request form. specProduct is a SPEC_SHEETS key.
+  if(/spec sheet/i.test(cta.label||"") && specProduct && SPEC_SHEETS[specProduct]){
+    return `<a class="btn ${cls}" href="javascript:void(0)" onclick="downloadSpecSheet('${specProduct}')">Download Spec Sheet</a>`;
   }
   return `<a class="btn ${cls}" href="${cta.href}">${raw(cta.label)}</a>`;
 }
@@ -385,7 +386,9 @@ function renderProduct(id){
     <div><div class="eyebrow-line"></div><h2 style="font-size:28px">Specifications</h2>
       <p class="lead" style="margin:10px 0 18px">Request the full spec sheet and SDS for test conditions and handling.</p>
       ${specTable(p.specs)}
-      ${(id==="absorbent-pellets" || id==="agricultural-biochar") ? `<div style="margin-top:18px"><a class="btn btn-sm btn-ghost" href="javascript:void(0)" onclick="downloadSpecSheet('${id==="absorbent-pellets"?"absorbent-pellets":"biochar"}')">Download Full Spec Sheet</a></div>` : ""}</div>
+      <div style="margin-top:18px">${SPEC_SPECID[id]
+        ? `<a class="btn btn-sm btn-ghost" href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[id]}')">Download Full Spec Sheet</a>`
+        : `<a class="btn btn-sm btn-ghost" href="/request-docs?doc=spec&product=${id}">Request Full Spec Sheet</a>`}</div></div>
     <div><div class="eyebrow-line"></div><h2 style="font-size:28px">${raw(p.comparison.h)}</h2>
       <div style="margin-top:18px">${cmpTable(p.comparison)}</div>
       ${p.comparison.image?`<figure class="cmp-fig"><img src="${p.comparison.image}" alt="${raw(p.comparison.imageAlt||"")}" loading="lazy"><figcaption>${raw(p.comparison.imageAlt||"")}</figcaption></figure>`:""}</div>
@@ -401,7 +404,7 @@ function renderProduct(id){
       ${crumbs([{label:"Home",href:"/"},{label:p.name}])}
       <h1>${raw(p.h1)}</h1>
       <p class="sub">${raw(p.sub)}</p>
-      <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light")}${p.tertiary?btn(p.tertiary,"btn-ghost-light"):""}</div>
+      <div class="btn-row">${btn(p.primary)}${btn(p.secondary,"btn-ghost-light",SPEC_SPECID[id])}${p.tertiary?btn(p.tertiary,"btn-ghost-light"):""}</div>
       ${(()=>{const isOffer=s=>/free|sample|q4|volume supply/i.test(s);const offer=(p.proofRow||[]).find(isOffer);const specs=(p.proofRow||[]).filter(x=>!isOffer(x));return `${offer?`<p class="cta-note">${raw(offer)}</p>`:""}${specs.length?`<p class="proofline">${specs.map(raw).join(" · ")}</p>`:""}`;})()}
     </div>
     <div class="media"><img src="${p.image}" alt="${raw(p.name)}"></div>
@@ -579,7 +582,11 @@ function fieldHTML(fl, ctx){
 function buyCard(p){
   const isLive = p.avail==="live";
   const isBuyNow = BUY_NOW_IDS.has(p.id);
-  const docLink = id => `<a href="/request-docs?doc=${id}&product=${p.id}">${id==="sds"?"SDS":"Spec sheet"}</a>`;
+  // Spec sheets we hold as an approved PDF download straight from the card; everything
+  // else (and every SDS) still routes through the request form.
+  const docLink = id => (id==="spec" && SPEC_SPECID[p.id])
+    ? `<a href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Spec sheet</a>`
+    : `<a href="/request-docs?doc=${id}&product=${p.id}">${id==="sds"?"SDS":"Spec sheet"}</a>`;
   const docs = isLive
     ? `<div class="buy-docs">${(p.docIds||[]).map(docLink).join("<span>·</span>")}</div>`
     : `<div class="buy-docs muted">Spec sheet coming</div>`;
@@ -699,9 +706,8 @@ const SPEC_SPECID = {
   "agricultural-biochar": "biochar",
   "absorbent-pellets-mt": "absorbent-pellets",
   "agricultural-biochar-mt": "biochar",
-  // The absorbents spec sheet covers pellets AND crumble (see manifest.json by_product).
-  "absorbent-crumble": "absorbent-pellets",
-  "absorbent-crumble-mt": "absorbent-pellets",
+  // Crumble is deliberately NOT here: the absorbents PDF is written for pellets, so crumble
+  // stays on "Request Spec Sheet" until it has its own approved sheet.
 };
 function renderShopProduct(id){
   const p = (HOME.buy.products||[]).find(x=>x.id===id);
@@ -1250,7 +1256,7 @@ function renderEnvironmentalRemediation(){
     <div class="proc-left">
       <div class="proc-copy">
         <div class="eyebrow-line"></div><h2 style="font-size:28px;margin-bottom:10px">Ready to cut costs and stay on timeline?</h2>
-        <p class="lead">Talk to a remediation specialist. We'll scope your project and get a pilot test scheduled within 48 hours.</p>
+        <p class="lead">Talk to a specialist. We'll scope your project and get a pilot test scheduled within 48 hours.</p>
       </div>
       <img class="procimg" src="assets/industry/environmental-remediation.jpg?v=v2" alt="Environmental remediation site" loading="lazy">
     </div>
