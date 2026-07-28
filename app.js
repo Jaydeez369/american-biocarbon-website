@@ -617,7 +617,7 @@ function buyCard(p){
       <p class="claim">${raw(p.claim)}</p>
       ${p.uses?`<ul class="uses">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
       <div class="chips">${(p.chips||[]).filter(c=>/sample bag|metric ton/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
-      <div class="availline">${isLive?(p.priceLabel?"Bulk bag ships in 4 to 7 business days.":"Free sample ships in 4 to 7 business days. Bulk and truckload by quote."):"Coming Q4. Request a sample on a 30 day lead time."}</div>
+      <div class="availline">${isLive?(p.priceLabel?"FOB bulk bags ready in 7-10 business days.":"Free sample ships in 4 to 7 business days. Bulk and truckload by quote."):"Coming Q4. Request a sample on a 30 day lead time."}</div>
       ${docs}
       ${cta}
     </div>
@@ -704,6 +704,15 @@ const SHOPIFY_CHECKOUT = {
   // Standalone Shopify product "Absorbent Crumble" (10749467459876), $275 / metric ton.
   "absorbent-crumble-mt": SHOP_DOMAIN + "/cart/55923046023460:1",
 };
+/* Bulk SKUs are priced per metric ton and buyers routinely order several tons, so their
+   PDP gets a quantity stepper. Sample bags stay one-per-order (free, one to a customer). */
+const BULK_QTY_IDS = new Set(["absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble-mt"]);
+const QTY_MAX = 40; // larger orders go through a specialist, not self-serve checkout
+// A Shopify cart permalink ends in "<variantId>:<qty>" - swap the qty in place.
+function cartUrlQty(url, qty){
+  const n = Math.max(1, Math.min(QTY_MAX, parseInt(qty,10) || 1));
+  return String(url).replace(/:\d+$/, ":" + n);
+}
 // ids whose primary CTA reads "Buy Now" instead of "Request a Sample Kit"
 const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble","absorbent-crumble-mt"]);
 /* A product page is the one place "Buy Now" means buy THIS, so it goes straight to the
@@ -773,7 +782,8 @@ function renderShopProduct(id){
         <p class="pdp-lead">${raw(p.claim)}</p>
         ${p.uses?`<ul class="uses" style="margin:12px 0 14px">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
         <div class="chips" style="margin:0 0 18px">${(p.chips||[]).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
-        <a class="btn btn-primary" href="${checkoutHref}" style="width:100%;justify-content:center">${ctaLabel}</a>
+        ${qtyHTML}
+        <a class="btn btn-primary" data-buy-link href="${checkoutHref}" style="width:100%;justify-content:center">${ctaLabel}</a>
         <div class="pdp-links" style="margin-top:12px">
           ${isBuyNow ? `<a href="/contact?product=${p.id}">Talk to a specialist</a>
           <span>·</span>` : ""}
@@ -781,7 +791,7 @@ function renderShopProduct(id){
             ? `<a href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
             : `<a href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
         </div>
-        <p class="pdp-secure">${p.priceLabel ? raw(p.priceLabel)+(p.packaging?`, packaged in ${raw(p.packaging)}.`:".") : `Free ${raw(p.sampleWeight||"")} sample.`} Ships in 4 to 7 business days from White Castle, LA.</p>
+        <p class="pdp-secure">${p.priceLabel ? raw(p.priceLabel)+(p.packaging?`, packaged in ${raw(p.packaging)}.`:".") : `Free ${raw(p.sampleWeight||"")} sample.`} ${p.priceLabel ? "FOB bulk bags ready in 7-10 business days from White Castle, LA." : "Ships in 4 to 7 business days from White Castle, LA."}</p>
         ${p.truckloadQ4?`<p class="pdp-secure" style="color:var(--dim)">Bulk bag and truckload supply available Q4.</p>`:""}
       </div>
     </div>
@@ -797,7 +807,7 @@ function renderShopProduct(id){
           ? `<a class="btn btn-dark" href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
           : `<a class="btn btn-dark" href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
         <a class="btn btn-ghost" href="/request-docs?doc=sds&product=${p.id}">Request SDS</a>
-        <a class="btn btn-ghost" href="${checkoutHref}">${ctaLabel}</a>
+        <a class="btn btn-ghost" data-buy-link href="${checkoutHref}">${ctaLabel}</a>
       </div>
       <p class="pdp-meta" style="margin-top:16px">Ships from White Castle, Louisiana. ${p.truckloadQ4?"Truckload supply available Q4.":""}</p>
     </div>
@@ -810,6 +820,29 @@ document.addEventListener("click", e=>{
   const i = t.dataset.slide;
   media.querySelectorAll(".pdp-slide").forEach(s=>s.classList.toggle("active", s.dataset.slide===i));
   media.querySelectorAll(".pdp-thumb").forEach(x=>x.classList.toggle("active", x===t));
+});
+/* PDP quantity stepper (bulk metric-ton SKUs only). The Shopify cart permalink carries
+   the quantity, so every Buy Now link on the page is rewritten to "<variant>:<qty>" and
+   the running total is kept in sync. Nothing here touches sample-bag pages. */
+function syncQty(row, qty){
+  const n = Math.max(1, Math.min(QTY_MAX, parseInt(qty,10) || 1));
+  const input = row.querySelector("[data-qty-input]");
+  if(input) input.value = n;
+  const base = row.dataset.baseHref || "";
+  document.querySelectorAll("[data-buy-link]").forEach(a=>{ a.href = cartUrlQty(base, n); });
+  const unit = parseFloat(row.dataset.unitPrice) || 0;
+  const total = row.querySelector("[data-qty-total]");
+  if(total) total.textContent = `metric ton${n>1?"s":""}` + (unit ? ` · $${(unit*n).toLocaleString()} total` : "");
+}
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-qty-step]"); if(!b) return;
+  const row = b.closest("[data-qty-row]"); if(!row) return;
+  const cur = parseInt(row.querySelector("[data-qty-input]").value,10) || 1;
+  syncQty(row, cur + (+b.dataset.qtyStep));
+});
+document.addEventListener("change", e=>{
+  const i = e.target.closest("[data-qty-input]"); if(!i) return;
+  syncQty(i.closest("[data-qty-row]"), i.value);
 });
 function renderBuy(){
   const B = HOME.buy;
@@ -831,7 +864,7 @@ function renderBuy(){
   <section class="shop-head"><div class="wrap">
     ${crumbs([{label:"Home",href:"/"},{label:"Products"}])}
     <h1>Products</h1>
-    <p class="shop-sub">Free samples ship in 4 to 7 business days · bulk bag and truckload by freight aware quote.</p>
+    <p class="shop-sub">Free samples ship in 4 to 7 business days · FOB bulk bags ready in 7-10 business days · truckload by freight aware quote.</p>
   </div></section>
 
   <section class="block" style="padding-top:28px"><div class="wrap">
