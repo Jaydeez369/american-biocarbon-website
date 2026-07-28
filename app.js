@@ -243,7 +243,7 @@ function renderChrome(){
     <div>
       <img class="logo" src="${ASSETS.logoRev}" alt="American BioCarbon">
       <p class="addr">${raw(BRAND.legal)}<br>${raw(BRAND.address)}<br>${raw(BRAND.location)}</p>
-      <div class="foot-cta"><a class="btn btn-primary btn-sm" href="/request-quote">Request a Quote</a><a class="btn btn-ghost-light btn-sm" href="/request-sample">Request a Sample Kit</a></div>
+      <div class="foot-cta"><a class="btn btn-primary btn-sm" href="/request-sample">Request a Sample Kit</a><a class="btn btn-ghost-light btn-sm" href="/contact">Talk to a Specialist</a></div>
     </div>
     <div><h4>Products</h4>
       <a href="/product/absorbent-pellets">Absorbent Pellets</a><a href="/product/absorbent-crumble">Absorbent Crumble</a>
@@ -257,7 +257,7 @@ function renderChrome(){
     <div><h4>Resources</h4>
       <a href="/technical">Certifications &amp; Technical Data</a><a href="/compare">Compare vs Wood Pellets</a>
       <a href="/about">About</a><a href="/contact">Contact</a>
-      <a href="/request-sample">Request a Sample Kit</a><a href="/request-quote">Request a Quote</a></div>
+      <a href="/request-sample">Request a Sample Kit</a><a href="/contact">Talk to a Specialist</a></div>
   </div>
   <div class="legal"><span>© ${new Date().getFullYear()} ${raw(BRAND.name)}. All rights reserved.</span></div>`;
   const burger = $("#burger");
@@ -473,7 +473,7 @@ function renderIndustry(id){
 
   ${industryTech(id)}
   ${faqBlock(n.faq)}
-  ${ctaBand({h:"Ready to test it on your next job?",sub:"Get a free sample. If it performs, we'll talk volume and pricing. A specialist follows up within one business day.",primary:CTA.sample,secondary:CTA.quote})}`;
+  ${ctaBand({h:"Ready to test it on your next job?",sub:"Get a free sample. If it performs, we'll talk volume and pricing. A specialist follows up within one business day.",primary:CTA.sample,secondary:CTA.specialist})}`;
 }
 function industryTech(id){
   const ids = TECH.byIndustry[id]; if(!ids||!ids.length) return "";
@@ -589,7 +589,7 @@ function buyCard(p){
     : `<a class="btn btn-primary btn-sm" href="/request-sample?preorder=1&product=${p.id}">Request a Sample Kit</a>`;
   const cta = isLive
     ? `<div class="btn-row">${primary}</div>
-       <a class="notify" href="/request-quote?product=${p.id}">Request a Quote →</a>`
+       <a class="notify" href="/contact?product=${p.id}">Talk to a specialist →</a>`
     : `<div class="btn-row">${primary}</div>`;
   const thumb = p.img
     ? `<img src="${p.img}" alt="${raw(p.name)}" loading="lazy">`
@@ -681,13 +681,19 @@ const SHOP_DOMAIN = "https://americanbiocarbon.com";
 const SHOPIFY_CHECKOUT = {
   "absorbent-pellets":   SHOP_DOMAIN + "/cart/54185346302244:1",
   "agricultural-biochar": SHOP_DOMAIN + "/cart/54185346335012:1",
-  // 1 metric ton (2,204.6 lb) bulk bags, $200 / $400, 10 in stock each. Live Shopify products:
+  // TODO: crumble 1 lb free-sample variant (added in Shopify, ID not yet supplied).
+  // Until the ID is filled in, the CTA falls back to /request-sample?product=absorbent-crumble.
+  // "absorbent-crumble":  SHOP_DOMAIN + "/cart/<CRUMBLE_SAMPLE_VARIANT_ID>:1",
+  // 1 metric ton (2,204.6 lb) bulk bags, 10 in stock each. Live Shopify products:
   // "Absorbent Pellets - 2200 lbs Super Sack" / "100% Biochar - 2200lbs (4 Cubic Yard) supersack".
   "absorbent-pellets-mt":   SHOP_DOMAIN + "/cart/54182475170084:1",
   "agricultural-biochar-mt": SHOP_DOMAIN + "/cart/54184340914468:1",
+  // TODO: crumble 1,650 lb super sack (Jesse is creating the Shopify listing).
+  // Until then the CTA falls back to /contact?product=absorbent-crumble-mt&intent=purchase.
+  // "absorbent-crumble-mt": SHOP_DOMAIN + "/cart/<CRUMBLE_SUPERSACK_VARIANT_ID>:1",
 };
 // ids whose primary CTA reads "Buy Now" instead of "Request a Sample Kit"
-const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-mt","agricultural-biochar-mt"]);
+const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble","absorbent-crumble-mt"]);
 // Products with an approved, product-specific spec-sheet PDF available for DIRECT
 // download (maps site id -> SPEC_SHEETS key). Anything not listed here has no approved
 // file yet and must use a "Request Spec Sheet" action instead of an incorrect download.
@@ -696,6 +702,9 @@ const SPEC_SPECID = {
   "agricultural-biochar": "biochar",
   "absorbent-pellets-mt": "absorbent-pellets",
   "agricultural-biochar-mt": "biochar",
+  // The absorbents spec sheet covers pellets AND crumble (see manifest.json by_product).
+  "absorbent-crumble": "absorbent-pellets",
+  "absorbent-crumble-mt": "absorbent-pellets",
 };
 function renderShopProduct(id){
   const p = (HOME.buy.products||[]).find(x=>x.id===id);
@@ -705,15 +714,18 @@ function renderShopProduct(id){
   const photos = (p.gallery && p.gallery.length) ? p.gallery : (p.img ? [p.img] : []);
   const slides = photos.map(src=>({src}));
   const slideHTML = (s,i,ctx)=> `<div class="pdp-slide${i===0?" active":""}" data-slide="${i}"><img src="${s.src}" alt="${raw(p.name)}"></div>`;
-  const isBuyNow = BUY_NOW_IDS.has(p.id);
-  const ctaLabel = isBuyNow ? "Buy Now" : "Request a Sample Kit";
+  // "Buy Now" only when a real Shopify checkout exists; otherwise the CTA must describe
+  // where it actually goes (sample request form / quote request), not promise a purchase.
+  const hasCheckout = !!SHOPIFY_CHECKOUT[p.id];
+  const isBuyNow = BUY_NOW_IDS.has(p.id) && hasCheckout;
+  const ctaLabel = isBuyNow ? "Buy Now" : (p.priceLabel ? "Talk to a specialist" : "Request a Sample Kit");
   // Bulk (metric-ton) SKUs are paid; the sample bags stay free. Both are Shopify checkouts.
   const priceHTML = p.priceLabel
     ? `<div class="pdp-price">${raw(p.priceLabel)}${p.stock?` <span>· ${p.stock} in stock</span>`:""}</div>`
     : `<div class="pdp-price free">Free sample <span>· shipping &amp; handling included</span></div>`;
   const checkoutHref = SHOPIFY_CHECKOUT[p.id]
     ? SHOPIFY_CHECKOUT[p.id]
-    : (p.priceLabel ? `/request-quote?product=${p.id}&intent=purchase` : `/request-sample?product=${p.id}`);
+    : (p.priceLabel ? `/contact?product=${p.id}&intent=purchase` : `/request-sample?product=${p.id}`);
   return `
   <section class="block" style="padding-top:34px"><div class="wrap">
     ${crumbs([{label:"Products",href:"/buy"},{label:p.name}], "margin-bottom:22px")}
@@ -731,8 +743,8 @@ function renderShopProduct(id){
         <div class="chips" style="margin:0 0 18px">${(p.chips||[]).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
         <a class="btn btn-primary" href="${checkoutHref}" style="width:100%;justify-content:center">${ctaLabel}</a>
         <div class="pdp-links" style="margin-top:12px">
-          <a href="/request-quote?product=${p.id}">Request a Quote</a>
-          <span>·</span>
+          ${isBuyNow ? `<a href="/contact?product=${p.id}">Talk to a specialist</a>
+          <span>·</span>` : ""}
           ${SPEC_SPECID[p.id]
             ? `<a href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
             : `<a href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
@@ -832,7 +844,7 @@ function renderCompare(){
       <tbody>${HOME.comparison.rows.map(r=>`<tr>${r.map(x=>`<td>${raw(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
     <div class="callout" style="margin-top:22px"><b>Why it matters for procurement:</b> higher absorption per bag lowers bag count, crew handling, and disposal weight, the three costs that add up on every job. A trial pallet lets you measure it head to head against what you use today.</div>
   </div></section>
-  ${ctaBand({h:"See it hold twice the load",sub:"Request a sample kit and run bagasse against your current sorbent on the next spill.",primary:CTA.sample,secondary:CTA.quote})}`;
+  ${ctaBand({h:"See it hold twice the load",sub:"Request a sample kit and run bagasse against your current sorbent on the next spill.",primary:CTA.sample,secondary:CTA.specialist})}`;
 }
 
 /* ================= TECHNICAL DATA / RESOURCES (gated) ================= */
@@ -902,7 +914,7 @@ function renderTechnical(){
   setMeta({title:"Technical Data & Research | American BioCarbon",desc:"Certifications, spec sheets, SDS, independent lab analyses, and peer reviewed research for bagasse absorbents and biochar. Request the technical package.",slug:"/technical",keyword:"bagasse biochar technical data"});
   const sBadge = s => ({verified:'<span class="badge b-ok">Verified</span>',lab:'<span class="badge b-lab">Lab tested</span>',field:'<span class="badge b-lab">Field study</span>',pending:'<span class="badge b-pend">Pending</span>'}[s]||"");
   const tBadge = t => ({peer:'<span class="badge b-ok">Peer reviewed</span>',field:'<span class="badge b-lab">Field study</span>',lab:'<span class="badge b-lab">Lab report</span>'}[t]||"");
-  const docHref = d => d.file ? d.file : CTA.quote.href;
+  const docHref = d => d.file ? d.file : CTA.docs.href;
   const docCards = TECH.docs.map(d=>{
     const href = docHref(d); const dl = d.file ? `download` : "";
     return `<div class="doccard" data-id="${raw(d.id)}">
@@ -921,7 +933,7 @@ function renderTechnical(){
     const spec = docObjs.find(d=>d.file);
     const action = spec
       ? `<a class="btn btn-primary btn-sm" href="${spec.file}" download>Download spec ${raw(spec.fmt||"PDF")}</a>`
-      : `<a class="btn btn-primary btn-sm" href="${CTA.quote.href}">Stay informed</a>`;
+      : `<a class="btn btn-primary btn-sm" href="${CTA.docs.href}">Stay informed</a>`;
     return `<tr><td><strong>${raw(n?n.name:id)}</strong></td><td>${docs.map(d=>raw(d)).join(" · ")}</td>
       <td>${action}</td></tr>`;
   }).join("");
@@ -930,7 +942,7 @@ function renderTechnical(){
     ${crumbs([{label:"Home",href:"/"},{label:"Technical Data &amp; Research"}])}
     <h1>Technical Data &amp; Research</h1>
     <p class="sub">Complete technical documentation, independent lab analyses, certifications, and peer reviewed research for industrial grade decision making.</p>
-    <div class="btn-row">${btn(CTA.quote)}${btn(CTA.specialist,"btn-ghost-light")}</div>
+    <div class="btn-row">${btn(CTA.sample)}${btn(CTA.specialist,"btn-ghost-light")}</div>
   </div></div></section>
 
   <section class="block"><div class="wrap">
@@ -1020,7 +1032,7 @@ function renderAbout(){
     <div><div class="kicker">Supply with integrity</div><h2 style="font-size:26px;margin:8px 0 12px">Traceability from field to product</h2>
       <p class="lead">We work directly with the Cora Texas Sugar Mill to capture bagasse, coffee processors for waste fiber, and local blenders to ensure every batch meets our performance standards. Local sourcing means faster turnaround, fresher materials, and complete supply chain visibility.</p></div>
   </div></section>
-  ${ctaBand({h:"Work with us",sub:"Get a free sample, or talk to a specialist about volume.",primary:CTA.sample,secondary:CTA.quote})}`;
+  ${ctaBand({h:"Work with us",sub:"Get a free sample, or talk to a specialist about volume.",primary:CTA.sample,secondary:CTA.specialist})}`;
 }
 
 /* ---- helpers ---- */
@@ -1283,7 +1295,7 @@ function renderResellersIndustries(){
 
   <section class="block" style="padding-top:96px;padding-bottom:96px"><div class="wrap" style="min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:28px">
     <p style="margin:0;font-size:40px;line-height:1.15;font-weight:700;max-width:16ch">Enterprise grade supply, one simple step away.</p>
-    <a class="btn btn-primary" href="/request-quote">Request a Quote</a>
+    <a class="btn btn-primary" href="/request-sample">Request a Sample Kit</a>
   </div></section>
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap"><div class="split proc-split">
@@ -1357,8 +1369,8 @@ function renderResellersAgriculture(){
     <p class="lead" style="margin-bottom:22px">Our platform makes it effortless. Place orders, track shipments, manage inventory all in one place.</p>
     <div class="btn-row" style="justify-content:center;gap:12px;margin-top:20px">
       ${btn(p.primary)}
-      <a class="btn btn-ghost-light" href="/request-quote">Request a Quote</a>
-      <a class="btn btn-ghost-light" href="/request-quote">Check Order Status</a>
+      <a class="btn btn-ghost-light" href="/contact">Talk to a Specialist</a>
+      <a class="btn btn-ghost-light" href="/contact?type=order-status">Check Order Status</a>
     </div>
   </div></section>
 

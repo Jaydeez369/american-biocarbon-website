@@ -10,15 +10,16 @@ const ASSETS = {
   logoColor:  CDN+"abc-logo-horiz_color.png?v=1710167731",
   logoRev:    CDN+"abc-logo-horiz_rev_38e8f78a-b79f-4c53-8b36-d10683e943cf.webp?v=1710182358",
   pelletsMock:CDN+"AbsorbentPelletsMock.jpg?v=1699280021",
-  pelletsPhoto:CDN+"AmericanBiocarbon2021-292.jpg?v=1699280021",
+  pelletsPhoto:CDN+"AmericanBiocarbon2021-292.jpg?v=1699280021", // pellets coming off the conveyor at the mill
+
   biocharMock:CDN+"100BiocharMock.jpg?v=1699279980",
   biocharPhoto:"assets/products/100-biochar-photo.jpg?v=v3",
   biocharLg:  CDN+"biochar-lg.jpg?v=1702141148",
   /* NEW canonical bag renders (local), one distinct bag per product */
   pelletsBag: "assets/products/absorbent-pellets-bag.png",
-  biocharBag: "assets/products/100-biochar-bag.png",
+  biocharBag: "assets/products/100-biochar-bag.png?v=v2",
   biocharSem: "assets/products/biochar-sem-structure.png",
-  fiberBag:   "assets/products/multi-use-fiber-bag.png",
+  fiberBag:   "assets/products/multi-use-fiber-bag.png?v=v3",
   soilBag:    "assets/products/biochar-infused-soil-bag.png",
   crumbleBag: "assets/products/absorbent-crumble-bag.png?v=v3",
   biocharBulkPhoto:"assets/products/biochar-bulk-supersack.jpg?v=v1",
@@ -49,6 +50,10 @@ const CTA = {
   sample:  { label:"Request a Sample Kit",      href:"/request-sample" },
   freeSamplePellets: { label:"Buy Now", href:"/shop/absorbent-pellets" },
   freeSampleBiochar: { label:"Buy Now", href:"/shop/agricultural-biochar" },
+  freeSampleCrumble: { label:"Buy Now", href:"/shop/absorbent-crumble" },
+  // Kept for the /request-quote destination page only. No page CTA points here any more:
+  // the site is sample-led (CTA.sample / CTA.specialist). The single remaining entry point
+  // is a bulk SKU that has no Shopify checkout yet (see renderShopProduct in app.js).
   quote:   { label:"Request a Quote",       href:"/request-quote" },
   compare: { label:"Compare vs Wood Pellets",       href:"/compare" },
   spec:    { label:"Request Spec Sheet",           href:"/request-docs?doc=spec" },
@@ -245,7 +250,7 @@ const HOME = {
   hero:{
     chosen:"Fewer bags per spill. Less material to haul away.",
     sub:"Our sugarcane bagasse absorbents hold up to roughly 5x their weight in liquid, so crews open fewer bags and fewer loads need to be hauled away for disposal. Engineered for oilfield fluids, spill response, and industrial remediation.",
-    primary:CTA.freeSamplePellets, secondary:CTA.quote,
+    primary:CTA.freeSamplePellets, secondary:CTA.sample,
     proofLine:["Up to 5× weight absorption","SDS & spec sheet available"],
     image:ASSETS.pelletsPhoto,
     /* Full-bleed cinematic carousel, each slide pairs a massive edge-to-edge
@@ -254,11 +259,11 @@ const HOME = {
       { label:"100% Biochar", img:ASSETS.hands, pos:"50% 50%", zoom:1.06, origin:"50% 55%",
         h:"Carbon that stays<br>in the ground.",
         sub:"OMRI listed bagasse biochar, building soil aeration, water retention, and nutrient retention while locking durable carbon away for the long term.",
-        primary:{label:"Buy Now",href:"/shop/agricultural-biochar"}, secondary:CTA.quote },
+        primary:{label:"Buy Now",href:"/shop/agricultural-biochar"}, secondary:CTA.sample },
       { label:"Absorbent Pellets", img:ASSETS.heroPellets, pos:"50% 62%", zoom:1.24, origin:"50% 82%",
         h:"Fewer bags per spill.<br>Less material to haul away.",
         sub:"Sugarcane bagasse absorbent pellets hold up to roughly 5x their weight in liquid, so crews open fewer bags and fewer loads need to be hauled away for disposal.",
-        primary:CTA.freeSamplePellets, secondary:CTA.quote },
+        primary:CTA.freeSamplePellets, secondary:CTA.sample },
       { label:"Absorbent Crumble", img:ASSETS.pelletsPhoto, pos:"50% 58%", zoom:1.1, origin:"50% 72%",
         h:"Cover more ground,<br>in less time.",
         sub:"Higher coverage, faster absorption, quicker cleanup. A coarser grade that spreads fast across wide area, high volume spills, with the same high capacity bagasse absorption.",
@@ -266,7 +271,7 @@ const HOME = {
       { label:"Biochar-Infused Soil", img:ASSETS.heroSoil, pos:"50% 50%", zoom:1.05, origin:"50% 50%",
         h:"Ready to use soil,<br>biochar built in.",
         sub:"A ready to use growing soil pre-blended with our Multipurpose Fiber, coffee chaff, and carbon negative bagasse biochar for water retention, nutrient holding, and aeration with no mixing.",
-        primary:{label:"Buy Now",href:"/shop/biochar-infused-soil"}, secondary:CTA.quote },
+        primary:{label:"Buy Now",href:"/shop/biochar-infused-soil"}, secondary:CTA.sample },
     ]
   },
   offer:{
@@ -278,7 +283,7 @@ const HOME = {
       { n:"02", t:"Test it head to head", d:"Run it beside your current absorbent on a real job." },
       { n:"03", t:"Scale on the numbers", d:"Fewer bags and less to haul away earn the bulk contract." },
     ],
-    primary:CTA.sample, secondary:CTA.quote
+    primary:CTA.sample, secondary:CTA.specialist
   },
 
   buy:{
@@ -297,6 +302,34 @@ const HOME = {
       // cartPermalink = Shopify cart deep-link (checkout engine). Format: https://<store-domain>/cart/<variantId>:1
       // NOTE: variant IDs below are the CURRENT live Shopify SKUs (Pellets 20 lb, Biochar 8 qt) used so checkout works
       // end-to-end today. Swap to the 1 lb / 8 oz SAMPLE variant IDs the moment Victor/Jesse create those SKUs.
+      { id:"agricultural-biochar", name:"100% Biochar", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI listed", accent:"amber",
+        claim:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water for better moisture and nutrient retention.",
+        uses:["Soil amendment for gardens, beds, and lawns","Water and nutrient retention","Supports faster compost cycles","Carbon negative soil carbon storage"],
+        chips:["½ lb sample bag","OMRI listed","100% bagasse"], unit:"½ lb Sample Bag", sampleWeight:"½ LB", photo:ASSETS.biocharPhoto, free:true, truckloadQ4:true,
+        bag:{ banner:"100% BIOCHAR", iconSet:"soil",
+          icons:["Natural Biomass","Agricultural Waste","Superior Water Retention","Enhanced Root Development"],
+          uses:"Garden & Lawn Soil Amendment | Vegetable & Flower Bed Enrichment | Tree & Orchard Planting | Farm & Crop Field Application | Improving Water Holding Capacity | Boosting Nutrient Retention & Microbial Activity | Long Term Carbon Sequestration in Soil",
+          desc:"A pure, carbon negative soil amendment made from Louisiana sugarcane bagasse. Our biochar's porous, honeycomb structure locks carbon into a stable, durable form that persists in soil, while improving water retention, nutrient availability, and aeration. It's OMRI Listed for organic use, so it fits right into organic gardens, farms, and landscaping programs. Simply mix into soil, water thoroughly to activate, and let it get to work building healthier ground from the roots up.",
+          ingredients:"MICROBE TREATED SUGARCANE BAGASSE", omri:true },
+        desc:"OMRI listed 100% bagasse biochar soil enhancer for healthy growth and carbon capture, made from pure Louisiana sugarcane fiber. It improves water and nutrient retention and holds up to 3 to 3.5 times its weight in water. Works as a soil amendment for gardens, beds, lawns, and trees.",
+        gallery:[ ASSETS.biocharBag, CDN+"AmericanBiocarbonBiochar1.jpg?v=1699279980" ],
+        sections:[
+          { h:"How to use", body:"A general guideline is 10 to 25 pounds of biochar per 100 square feet. Loosen the soil and remove debris, remove 2 to 3 inches of topsoil, sprinkle the biochar, then replace the topsoil." },
+          { h:"Water and monitor", body:"Water thoroughly to activate the product, saturating the soil to a depth of at least 6 inches. Check periodically so the soil stays moist but not waterlogged, and adjust the rate as needed. Add aggregates such as perlite if the soil retains too much water." },
+          { h:"Water and nutrient retention", body:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
+        ],
+        img:ASSETS.biocharBag, variantId:"46496458539300", docIds:["spec","sds"] },
+      { id:"agricultural-biochar-mt", name:"100% Biochar, 1 Metric Ton", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI listed · Bulk Supply", accent:"amber",
+        claim:"Bulk 1 metric ton bag of the same OMRI listed biochar, ready to ship now.",
+        uses:["Soil amendment for gardens, beds, and lawns","Water and nutrient retention","Supports faster compost cycles","Carbon negative soil carbon storage"],
+        chips:["1 metric ton bulk bag","OMRI listed","100% bagasse"], unit:"1 Metric Ton Bulk Bag", price:450, priceLabel:"$450 / metric ton", photo:ASSETS.biocharPhoto,
+        desc:"The same OMRI listed 100% bagasse biochar sold as a 1 metric ton bulk bag, ready for immediate purchase.",
+        gallery:[ ASSETS.biocharBulkPhoto, ASSETS.biocharBag ],
+        sections:[
+          { h:"How to use", body:"A general guideline is 10 to 25 pounds of biochar per 100 square feet. Loosen the soil and remove debris, remove 2 to 3 inches of topsoil, sprinkle the biochar, then replace the topsoil." },
+          { h:"Water and nutrient retention", body:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
+        ],
+        img:ASSETS.biocharBulkPhoto, variantId:"", docIds:["spec","sds"] },
       { id:"absorbent-pellets", name:"Absorbent Pellets", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Spill Control", accent:"aqua",
         claim:"An up to 5:1 absorption ratio means crews open fewer bags per spill and haul away less material.",
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
@@ -320,58 +353,38 @@ const HOME = {
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
         chips:["1,650 lb super sack","100% bagasse","Low dust"], unit:"1,650 lb Super Sack", price:275, priceLabel:"$275 / super sack", photo:ASSETS.pelletsPhoto,
         desc:"The same up to 5:1 absorption sugarcane bagasse pellets sold as a 1,650 lb super sack, ready for immediate purchase.",
-        gallery:[],
+        gallery:[ ASSETS.pelletsPhoto ],
         sections:[
           { h:"Spill cleanup and remediation", body:"Soak up soil runoff, solvents, drilling and frac fluids, and other non-viscous liquids. Sprinkle the pellets over the spill, wait for full absorption, then sweep up and dispose of the saturated material per your local requirements." },
           { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },
         ],
-        img:"", variantId:"", docIds:["spec","sds"] },
-      { id:"agricultural-biochar", name:"100% Biochar", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI listed", accent:"amber",
-        claim:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water for better moisture and nutrient retention.",
-        uses:["Soil amendment for gardens, beds, and lawns","Water and nutrient retention","Supports faster compost cycles","Carbon negative soil carbon storage"],
-        chips:["½ lb sample bag","OMRI listed","100% bagasse"], unit:"½ lb Sample Bag", sampleWeight:"½ LB", photo:ASSETS.biocharPhoto, free:true, truckloadQ4:true,
-        bag:{ banner:"100% BIOCHAR", iconSet:"soil",
-          icons:["Natural Biomass","Agricultural Waste","Superior Water Retention","Enhanced Root Development"],
-          uses:"Garden & Lawn Soil Amendment | Vegetable & Flower Bed Enrichment | Tree & Orchard Planting | Farm & Crop Field Application | Improving Water Holding Capacity | Boosting Nutrient Retention & Microbial Activity | Long Term Carbon Sequestration in Soil",
-          desc:"A pure, carbon negative soil amendment made from Louisiana sugarcane bagasse. Our biochar's porous, honeycomb structure locks carbon into a stable, durable form that persists in soil, while improving water retention, nutrient availability, and aeration. It's OMRI Listed for organic use, so it fits right into organic gardens, farms, and landscaping programs. Simply mix into soil, water thoroughly to activate, and let it get to work building healthier ground from the roots up.",
-          ingredients:"MICROBE TREATED SUGARCANE BAGASSE", omri:true },
-        desc:"OMRI listed 100% bagasse biochar soil enhancer for healthy growth and carbon capture, made from pure Louisiana sugarcane fiber. It improves water and nutrient retention and holds up to 3 to 3.5 times its weight in water. Works as a soil amendment for gardens, beds, lawns, and trees.",
-        gallery:[ ASSETS.biocharBag, CDN+"AmericanBiocarbonBiochar1.jpg?v=1699279980" ],
-        sections:[
-          { h:"How to use", body:"A general guideline is 10 to 25 pounds of biochar per 100 square feet. Loosen the soil and remove debris, remove 2 to 3 inches of topsoil, sprinkle the biochar, then replace the topsoil." },
-          { h:"Water and monitor", body:"Water thoroughly to activate the product, saturating the soil to a depth of at least 6 inches. Check periodically so the soil stays moist but not waterlogged, and adjust the rate as needed. Add aggregates such as perlite if the soil retains too much water." },
-          { h:"Water and nutrient retention", body:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
-        ],
-        img:ASSETS.biocharBag, variantId:"46496458539300", docIds:["spec","sds"] },
-      { id:"agricultural-biochar-mt", name:"100% Biochar, 1 Metric Ton", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI listed · Bulk Supply", accent:"amber",
-        claim:"Bulk 1 metric ton bag of the same OMRI listed biochar, ready to ship now.",
-        uses:["Soil amendment for gardens, beds, and lawns","Water and nutrient retention","Supports faster compost cycles","Carbon negative soil carbon storage"],
-        chips:["1 metric ton bulk bag","OMRI listed","100% bagasse"], unit:"1 Metric Ton Bulk Bag", price:400, priceLabel:"$400 / metric ton", photo:ASSETS.biocharPhoto,
-        desc:"The same OMRI listed 100% bagasse biochar sold as a 1 metric ton bulk bag, ready for immediate purchase.",
-        gallery:[ ASSETS.biocharBulkPhoto, ASSETS.biocharBag ],
-        sections:[
-          { h:"How to use", body:"A general guideline is 10 to 25 pounds of biochar per 100 square feet. Loosen the soil and remove debris, remove 2 to 3 inches of topsoil, sprinkle the biochar, then replace the topsoil." },
-          { h:"Water and nutrient retention", body:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
-        ],
-        img:ASSETS.biocharBulkPhoto, variantId:"", docIds:["spec","sds"] },
+        img:ASSETS.pelletsPhoto, variantId:"", docIds:["spec","sds"] },
       { id:"absorbent-crumble", name:"Absorbent Crumble", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Large Area Spills", accent:"aqua",
         claim:"Higher coverage, faster absorption, quicker cleanup. A coarser grade that spreads fast across a wide footprint with the same high capacity.",
         uses:["Large area and high volume spill coverage","Fast, broad application","Disaster and flood cleanup"],
-        chips:["1 lb sample bag","Coarse grade","100% bagasse"], unit:"1 lb Sample Bag", sampleWeight:"1 LB", photo:ASSETS.crumblePhoto, img:ASSETS.crumbleBag, gallery:[ ASSETS.crumbleBag, ASSETS.crumblePhoto ], free:true, docIds:["spec"],
+        chips:["1 lb sample bag","Coarse grade","100% bagasse"], unit:"1 lb Sample Bag", sampleWeight:"1 LB", photo:ASSETS.crumblePhoto, img:ASSETS.crumbleBag, gallery:[ ASSETS.crumbleBag, ASSETS.crumblePhoto ], free:true, docIds:["spec","sds"],
+        desc:"Super-absorbent multi-purpose bagasse crumble made from the fiber left over when sugar is processed, screened to a coarser grade that spreads fast across a wide footprint. An up to 5:1 absorption ratio suits large area spill cleanup, waste solidification, and remediation. Odorless, renewable, low dust, and easy to use.",
+        sections:[
+          { h:"Large area spill cleanup", body:"Broadcast the crumble across the spill in fewer passes than a fine sorbent needs, let it fully absorb, then sweep up and dispose of the saturated material per your local requirements." },
+          { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },
+          { h:"Disaster and flood response", body:"Standing water and wet debris arrive faster than a slow sorbent handles. The coarse grade lays down quickly to firm the ground for removal." },
+        ],
+        variantId:"", // TODO: crumble 1 lb sample variant ID from Shopify
         bag:{ banner:"ABSORBENT CRUMBLE", iconSet:"absorbent",
           icons:["Natural Biomass","Agricultural Waste","Naturally Absorbent Fibers","Superior Liquid Retention"],
           uses:"Spill Cleanup (Oil, Solvents & Non-Viscous Chemicals) | Animal Bedding | Landfill Leachate Control | Oil & Gas Fluid Remediation (Drilling & Fracking) | Large Area or High Volume Spill Coverage",
           desc:"A renewable, plant based absorbent made from sugarcane bagasse, offered in a coarser crumble form for faster, broader coverage. Like our standard pellets, the crumble soaks up several times its own weight in liquid, outperforming standard wood based absorbents. Simply spread over the mess, let it fully absorb, then sweep up and dispose. Renewable, sustainably sourced, and built for demanding industrial and household cleanup jobs.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE", omri:false } },
-      { id:"absorbent-fiber", name:"Multipurpose Fiber", avail:"q4", cat:"Absorbents", category:"Peat Moss Replacement · Locally Sourced", accent:"aqua",
-        claim:"A renewable peat replacement for agricultural and horticultural growing media, enriching soil with excellent water holding capacity, and also built for spill cleanup and animal bedding. Coming Q4.",
-        uses:["Enriching soil and growing media as a renewable peat replacement","Excellent water holding capacity","Promotes strong root growth through aeration","Pathogen free"],
-        chips:["1 lb sample bag","Locally sourced","Peat alternative"], sampleWeight:"1 LB", photo:ASSETS.pelletsPhoto, img:ASSETS.fiberBag, docIds:["spec"],
-        bag:{ banner:"MULTIPURPOSE FIBER · LOCALLY SOURCED", iconSet:"absorbent",
-          icons:["Locally Sourced","Renewable Peat Replacement","Water Holding Capacity","Pathogen Free"],
-          uses:"Soil & Growing Media Amendment (Renewable Peat Replacement) | Raised Beds & Container Gardening | Animal Bedding & Litter | Spill Cleanup (Oil, Solvents & Non-Viscous Chemicals) | Landfill Leachate Control",
-          desc:"Microbe treated sugarcane bagasse fiber, grown and processed in Louisiana. As a renewable replacement for mined peat, it enriches soil and growing media, holds water exceptionally well, and promotes strong root growth through aeration, all while being pathogen free. It also spreads quickly across wide areas for spill cleanup and works just as well as soft animal bedding. Renewable, biodegradable, and locally grown.",
-          ingredients:"MICROBE TREATED SUGARCANE BAGASSE FIBER", omri:false } },
+      { id:"absorbent-crumble-mt", name:"Absorbent Crumble 1650 lbs Super Sack", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Bulk Supply", accent:"aqua",
+        claim:"Bulk 1,650 lb super sack of the same coarse grade crumble, ready to ship now.",
+        uses:["Large area and high volume spill coverage","Fast, broad application","Drilling and frac fluid solidification","Disaster and flood cleanup"],
+        chips:["1,650 lb super sack","Coarse grade","100% bagasse"], unit:"1,650 lb Super Sack", price:275, priceLabel:"$275 / super sack", photo:ASSETS.pelletsPhoto, gallery:[ ASSETS.pelletsPhoto ],
+        desc:"The same up to 5:1 absorption sugarcane bagasse crumble sold as a 1,650 lb super sack, ready for immediate purchase.",
+        sections:[
+          { h:"Large area spill cleanup", body:"Broadcast the crumble across the spill in fewer passes than a fine sorbent needs, let it fully absorb, then sweep up and dispose of the saturated material per your local requirements." },
+          { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },
+        ],
+        img:ASSETS.pelletsPhoto, variantId:"", docIds:["spec","sds"] },
       { id:"biochar-infused-soil", name:"Biochar-Infused Soil", avail:"live", cat:"Soil", category:"Growing Media · Ready to Use Blend", accent:"soil",
         claim:"Multipurpose Fiber and coffee chaff, pre-blended with our carbon negative bagasse biochar. No mixing.",
         uses:["Potting and container gardening","Raised beds and garden bed fill","Water retention in sandy soil"],
@@ -381,6 +394,15 @@ const HOME = {
           uses:"Potting & Container Gardening | Raised Beds & Garden Bed Fill | Lawn Patch & Overseeding Prep | Starting Seedlings & Transplants | Improving Water Retention in Sandy or Fast Draining Soil",
           desc:"A ready to use growing soil pre-blended with our Multipurpose Fiber, coffee chaff, and carbon negative bagasse biochar, so you get the water retention, nutrient holding, and soil-aeration benefits of biochar without any mixing or guesswork. Just fill your bed, pot, or planting hole and go. Built on the same sustainably sourced, Louisiana sugarcane biochar as our standalone soil amendment, this blend gives your plants a strong, carbon rich foundation from the very first watering.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE, BIOCHAR AND COFFEE CHAFF", omri:false } },
+      { id:"absorbent-fiber", name:"Multipurpose Fiber", avail:"q4", cat:"Absorbents", category:"Peat Moss Replacement · Locally Sourced", accent:"aqua",
+        claim:"A renewable peat replacement for agricultural and horticultural growing media, enriching soil with excellent water holding capacity, and also built for spill cleanup and animal bedding. Coming Q4.",
+        uses:["Enriching soil and growing media as a renewable peat replacement","Excellent water holding capacity","Promotes strong root growth through aeration","Pathogen free"],
+        chips:["1 lb sample bag","Locally sourced","Peat alternative"], sampleWeight:"1 LB", photo:ASSETS.pelletsPhoto, img:ASSETS.fiberBag, docIds:["spec"],
+        bag:{ banner:"MULTIPURPOSE FIBER · LOCALLY SOURCED", iconSet:"absorbent",
+          icons:["Locally Sourced","Renewable Peat Replacement","Water Holding Capacity","Pathogen Free"],
+          uses:"Soil & Growing Media Amendment (Renewable Peat Replacement) | Raised Beds & Container Gardening | Animal Bedding & Litter | Spill Cleanup (Oil, Solvents & Non-Viscous Chemicals) | Landfill Leachate Control",
+          desc:"Microbe treated sugarcane bagasse fiber, grown and processed in Louisiana. As a renewable replacement for mined peat, it enriches soil and growing media, holds water exceptionally well, and promotes strong root growth through aeration, all while being pathogen free. It also spreads quickly across wide areas for spill cleanup and works just as well as soft animal bedding. Renewable, biodegradable, and locally grown.",
+          ingredients:"MICROBE TREATED SUGARCANE BAGASSE FIBER", omri:false } },
     ],
     filters:["All","Absorbents","Biochar","Soil"],
     bbqFootnote:{ label:"Louisiana Sweet BBQ Smoker Pellets (consumer/retail)", href:"https://americanbiocarbon.com/products/louisiana-sweet-bbq-smoker-pellets" }
@@ -388,7 +410,7 @@ const HOME = {
   categories:[
     { name:"Absorbent Pellets", icp:"Oil & gas · spill response · remediation", blurb:"Up to a 5:1 absorption ratio. Fewer bags, less to haul away, low dust. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSamplePellets, href:"/shop/absorbent-pellets", img:ASSETS.pelletsBag, avail:"live" },
     { name:"100% Biochar", icp:"Distributors · blenders · growers", blurb:"OMRI listed bagasse biochar holds up to ~3 to 3.5× its weight in water, better moisture retention, faster compost. Sample bags and 1 metric ton supply available now.", cta:CTA.freeSampleBiochar, href:"/shop/agricultural-biochar", img:ASSETS.biocharBag, avail:"live" },
-    { name:"Absorbent Crumble", icp:"Large area & high volume spills", blurb:"Higher coverage, faster absorption, quicker cleanup across a wide footprint, same high capacity.", cta:{label:"Buy Now",href:"/shop/absorbent-crumble"}, href:"/shop/absorbent-crumble", img:ASSETS.crumbleBag, avail:"live" },
+    { name:"Absorbent Crumble", icp:"Large area & high volume spills", blurb:"Higher coverage, faster absorption, quicker cleanup across a wide footprint, same high capacity. Sample bags and 1,650 lb super sack supply available now.", cta:{label:"Buy Now",href:"/shop/absorbent-crumble"}, href:"/shop/absorbent-crumble", img:ASSETS.crumbleBag, avail:"live" },
     { name:"Biochar-Infused Soil", icp:"Landscape · nursery · retail", blurb:"Multipurpose Fiber and coffee chaff, pre-blended with biochar's water- and nutrient holding benefits. No mixing.", cta:{label:"Buy Now",href:"/shop/biochar-infused-soil"}, href:"/shop/biochar-infused-soil", img:ASSETS.soilBag, avail:"live" },
     { name:"Carbon Removal", icp:"Corporate ESG · brokers · marketplaces", blurb:"Puro.earth certified CORCs generated by real biochar deployment, backed by MRV.", cta:CTA.carbon, href:"/product/carbon-removal", img:ASSETS.hands, avail:"q4" },
   ],
@@ -436,7 +458,7 @@ const HOME = {
     h:"Healthier soil, faster compost",
     body:"OMRI listed bagasse biochar holds up to ~3 to 3.5× its weight in water (per technical report) and improves nutrient retention, so blends hold moisture through dry spells and leach less fertilizer. Based on peer reviewed research on biochar in composting, it can help shorten compost turnover ~10 to 30% (validate in your own process). For distributors, soil blenders, compost yards, growers, and landscape supply.",
     bullets:["Holds up to ~3 to 3.5× its weight in water","Can help shorten compost cycles ~10 to 30% (research)","Inherent nutrients + microbial habitat","Bulk, bulk bag & bagged formats"],
-    primary:CTA.biochar, secondary:CTA.quote, image:ASSETS.biocharLg
+    primary:CTA.biochar, secondary:CTA.specialist, image:ASSETS.biocharLg
   },
   carbon:{
     kicker:"The dual revenue engine",
@@ -508,7 +530,7 @@ const HOME = {
   finalCta:{
     h:"Put it to the test",
     sub:"Request an industrial sample kit or a bulk quote. A specialist replies within one business day, with the SDS and spec sheet attached.",
-    primary:CTA.sample, secondary:CTA.quote
+    primary:CTA.sample, secondary:CTA.specialist
   }
 };
 
@@ -524,7 +546,7 @@ const PRODUCTS = {
       schema:"Product + FAQPage + BreadcrumbList" },
     h1:"Industrial Absorbent Pellets That Hold up to 5× Their Weight",
     sub:"A plant based bagasse sorbent for drilling fluids, spills, and leachate, holding up to ~5× its weight vs about 2.5× for wood pellets means roughly half the bags and lighter saturated disposal per spill, plus low dust.",
-    primary:CTA.freeSamplePellets, secondary:CTA.quote, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
+    primary:CTA.freeSamplePellets, secondary:CTA.sample, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
     proofRow:["Up to 5:1 absorption","100% organic biomass (no additives)","~32 lb/ft³ bulk density","Free 1 lb sample · volume supply Q4"],
 
     appsHeading:"How Absorbent Pellets Applications Help Your Spill Response &amp; Remediation Operations",
@@ -573,13 +595,13 @@ const PRODUCTS = {
     name:"Absorbent Crumble", icp:"Large area & high volume spill coverage",
     intent:"Procure a fast spreading absorbent",
     seo:{ title:"Absorbent Crumble, Fast, Broad Coverage Bagasse Sorbent | American BioCarbon",
-      desc:"A coarser bagasse absorbent crumble for large area and high volume spills. Spreads fast, holds up to 5× its weight. Bulk supply, SDS & spec on request.",
+      desc:"A coarser bagasse absorbent crumble for large area and high volume spills. Spreads fast, holds up to 5× its weight. Free 1 lb samples and 1,650 lb super sacks ship now.",
       slug:"/absorbent-crumble", keyword:"absorbent crumble",
       secondary:["large area spill absorbent","high volume spill absorbent","plant based absorbent"],
       schema:"Product + FAQPage" },
     h1:"Absorbent Crumble for Fast, Broad Coverage",
-    sub:"A coarser bagasse form that spreads quickly across large area and high volume spills, same up to 5:1 performance, faster to lay down.",
-    primary:CTA.quote, secondary:CTA.sample, image:ASSETS.crumblePhoto, mock:ASSETS.pelletsMock,
+    sub:"A coarser bagasse form that spreads quickly across large area and high volume spills, same up to 5:1 performance, faster to lay down. Free 1 lb samples and 1,650 lb super sacks ship now.",
+    primary:CTA.freeSampleCrumble, secondary:CTA.sample, image:ASSETS.crumblePhoto, mock:ASSETS.pelletsMock,
     proofRow:["Up to 5:1 absorption","Coarse, fast spreading","100% organic biomass","Bulk & truckload"],
 
     appsHeading:"How Absorbent Crumble Applications Help Your Large Area Spill Response &amp; Remediation Operation",
@@ -608,7 +630,8 @@ const PRODUCTS = {
       ["Absorption ratio","Up to ~5:1, non-viscous"],
       ["Texture","Coarse crumble (faster spread)"],
       ["Material","100% organic sugarcane bagasse"],
-      ["Form factors","Bulk · 1 metric ton bulk bag"],
+      ["Form factors","1 lb sample bag · 1,650 lb super sack · bulk"],
+      ["Availability","Free 1 lb samples and 1,650 lb super sacks ship now"],
       ["Documentation","SDS + spec sheet on request"],
     ],
     comparison:{ h:"Vs the status quo",
@@ -616,7 +639,8 @@ const PRODUCTS = {
       rows:[["Absorption","Up to ~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
     faq:[
       { q:"When should I use crumble vs pellets?", a:"Choose crumble for large area or high volume spills where fast, broad coverage matters; choose pellets for targeted cleanup." },
-      { q:"What volumes are available?", a:"Bulk and one metric ton bulk bags; truckload on request." },
+      { q:"Can I get a sample, and what volumes are available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. 1,650 lb super sacks are available for immediate purchase, and truckload supply is on request." },
+      { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request. The absorbents spec sheet covers both the pellet and crumble grades." },
     ],
     form:"quote",
     internal:["/product/absorbent-pellets","/industry/spill-response","/industry/industrial-remediation","/technical"]
@@ -631,7 +655,7 @@ const PRODUCTS = {
       schema:"Product + FAQPage" },
     h1:"Multipurpose Bagasse Fiber",
     sub:"One loose bagasse fiber, grown and processed in Louisiana, that handles spill cleanup, animal bedding, and soil amendment. A renewable replacement for mined peat and wood. Coming Q4.",
-    primary:CTA.quote, secondary:CTA.sample, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
+    primary:CTA.sample, secondary:CTA.specialist, image:ASSETS.pelletsPhoto, mock:ASSETS.pelletsMock,
     proofRow:["Renewable peat replacement","Loose, fast spreading fiber","100% organic biomass","Locally grown in Louisiana"],
 
     appsHeading:"How Multipurpose Bagasse Fiber Applications Help Your Bedding, Cleanup &amp; Soil Operations",
@@ -852,7 +876,7 @@ const INDUSTRIES = {
       schema:"Service + FAQPage" },
     h1:"Solidify Drilling &amp; Frac Fluids With Half the Bags",
     sub:"A plant based bagasse absorbent for oilfield fluid solidification and spill cleanup, up to 5:1 absorption vs ~2.5:1 for wood, with SDS and bulk supply.",
-    primary:CTA.sample, secondary:CTA.quote, image:"assets/industry/oil-gas.jpg?v=v2",
+    primary:CTA.sample, secondary:CTA.specialist, image:"assets/industry/oil-gas.jpg?v=v2",
 
     appsHeading:"How Bagasse Absorbent Applications Help Your Oilfield Operations",
     useCases:["Drill Spoil &amp; Reserve Pit Closure","Frac Tank Bottoms &amp; Produced Water","Rig-Side Discharge Handling","Frac-Out Remediation","Wellhead &amp; Access Road Spill Response","Disposal Weight &amp; HSE Materials Story"],
@@ -894,7 +918,7 @@ const INDUSTRIES = {
       schema:"Service + FAQPage" },
     h1:"A Renewable Industrial Absorbent That Cuts Bag Count",
     sub:"For remediation firms and industrial operations that need field performance, dependable supply, and documentation on one material.",
-    primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/industrial-remediation.jpg?v=v2",
+    primary:CTA.specialist, secondary:CTA.sample, image:"assets/industry/industrial-remediation.jpg?v=v2",
 
     appsHeading:"How Bagasse Absorbent Applications Help Your Industrial Remediation Operations",
     useCases:["Tank &amp; Vessel Cleanout Residuals","Secondary Containment &amp; Dike Recovery","Process Water &amp; Aqueous Waste","Sump, Pit &amp; Trench Dewatering","Machinery &amp; Hydraulic Spill Cleanup","Client Documentation &amp; Disposal Profiling"],
@@ -935,7 +959,7 @@ const INDUSTRIES = {
       schema:"Service + FAQPage" },
     h1:"Environmental Remediation With a Renewable, High Performance Absorbent",
     sub:"A plant based bagasse absorbent engineered for soil, groundwater, and environmental site remediation, up to 5:1 capacity, fewer bags, lower disposal costs.",
-    primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/environmental-remediation.jpg?v=v2",
+    primary:CTA.specialist, secondary:CTA.sample, image:"assets/industry/environmental-remediation.jpg?v=v2",
 
     appsHeading:"How Bagasse Absorbent Applications Help Your Environmental Remediation Sites",
     useCases:["Dredged Sediment Dewatering","Slurry Wall &amp; Trench Spoil Management","Hydrocarbon Impacted Soil &amp; Free Product","Landfill Leachate Handling","Excavation &amp; Groundwater Dewatering","Brownfield, Pipeline Spill &amp; HDD Frac Out Response"],
@@ -977,7 +1001,7 @@ const INDUSTRIES = {
       schema:"Service + FAQPage" },
     h1:"More Capture Per Bag. Fewer Trips to Disposal.",
     sub:"A bagasse absorbent built for spill response crews, soaks up more per bag so you carry less, sweep up clean, and haul lighter.",
-    primary:CTA.sample, secondary:CTA.quote, image:"assets/industry/spill-response.jpg?v=v2",
+    primary:CTA.sample, secondary:CTA.specialist, image:"assets/industry/spill-response.jpg?v=v2",
 
     appsHeading:"How Bagasse Absorbent Applications Help Your Spill Response Operation",
     useCases:["Oil &amp; Fuel Spill Cleanup","Non-Viscous Chemical Spill Containment","Traffic Incident &amp; Roadway Response","Flood &amp; Water Intrusion Cleanup","Storm Drain &amp; Waterway Protection","Saturated Waste Loadout"],
@@ -1018,7 +1042,7 @@ const INDUSTRIES = {
       schema:"Service + FAQPage" },
     h1:"Solidify Leachate With a Renewable, High Capacity Sorbent",
     sub:"A plant based bagasse absorbent for landfill leachate and aqueous waste solidification, up to 5:1 capacity, low dust, and reliable bulk supply.",
-    primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/landfill-leachate.jpg?v=v2",
+    primary:CTA.specialist, secondary:CTA.sample, image:"assets/industry/landfill-leachate.jpg?v=v2",
 
     appsHeading:"How Bagasse Absorbent Applications Help Your Landfill &amp; Leachate Operation",
     useCases:["Leachate Pond &amp; Lagoon Solidification","Tanker &amp; Roll Off Free Liquids Compliance","Collection Sump &amp; Riser Handling","Storm &amp; Overflow Event Capture","Sludge &amp; Dewatered Cake Conditioning","Pilot &amp; RFP Documentation Support"],
@@ -1059,7 +1083,7 @@ const INDUSTRIES = {
       schema:"Service + FAQPage" },
     h1:"A Differentiated Organic Line That Pulls Through",
     sub:"Add a carbon negative, OMRI listed bagasse biochar to your catalog, with a margin model, stocking pilot, and grower facing proof.",
-    primary:CTA.biochar, secondary:CTA.quote, image:ASSETS.biocharLg,
+    primary:CTA.biochar, secondary:CTA.specialist, image:ASSETS.biocharLg,
 
     appsHeading:"How Bagasse Biochar Applications Help Your Ag Input Catalog",
     useCases:["Grower Water Efficiency Programs","Compost &amp; Soil Blend Accounts","Organic &amp; Regenerative Lines","Nursery, Landscape &amp; Retail SKUs","Co-Branded Grower Trials","Carbon Program &amp; Sustainability Accounts"],
@@ -1100,7 +1124,7 @@ const INDUSTRIES = {
       schema:"Service + FAQPage" },
     h1:"Faster Compost. Better Moisture in Your Blends.",
     sub:"For composters, the core problem is turnover time, every extra day a windrow sits is pad space that can't take a new batch. Research shows biochar can shorten compost cycles ~10 to 30% (validate in your own process), so you finish more batches per year on the same pad. For blenders, it firms up moisture performance in premium and sandy mixes.",
-    primary:CTA.biochar, secondary:CTA.quote, image:"assets/industry/soil-blenders.jpg?v=v2",
+    primary:CTA.biochar, secondary:CTA.specialist, image:"assets/industry/soil-blenders.jpg?v=v2",
 
     appsHeading:"How Bagasse Biochar Applications Help Your Compost &amp; Blending Operation",
     useCases:["Compost Cycle Acceleration","Windrow Bulking &amp; Aeration","Premium Blend Water Holding","Organic / Carbon Negative SKU","Side by Side Trial Validation","Bulk Supply &amp; Freight Planning"],
@@ -1142,7 +1166,7 @@ const INDUSTRIES = {
       schema:"Service + FAQPage" },
     h1:"Drier Litter, Fewer Bags Per House",
     sub:"A plant based bagasse bedding absorbent that holds up to ~5× its weight in moisture, so litter stays drier longer, you go through fewer bags, and dust stays low. Bedding &amp; absorbency only, we make no feed or animal health claims.",
-    primary:CTA.sample, secondary:CTA.quote, image:ASSETS.pelletsPhoto,
+    primary:CTA.sample, secondary:CTA.specialist, image:ASSETS.pelletsPhoto,
 
     appsHeading:"How Bagasse Bedding Applications Help Your Poultry &amp; Livestock Operation",
     useCases:["Poultry House Litter","Equine &amp; Horse Stall Bedding","Cattle &amp; Livestock Bedding","Small Animal &amp; Pet Litter","Compostable Spent Bedding Disposal","Side By Side House Trial"],
@@ -1272,8 +1296,8 @@ const FORMS = {
     scoring:"+ distributor/blender/composter, + resale, + volume; - consumer/home use."
   },
   distributor:{
-    name:"Request a Quote",
-    h:"Request a Quote",
+    name:"Distributor Program Inquiry",
+    h:"Distributor Program Inquiry",
     sub:"Distributor and reseller pricing: add a carbon negative biochar line without over-committing inventory. We send the margin model and a low-volume stocking pilot.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
@@ -1424,7 +1448,7 @@ const ENV_REMEDIATION = {
     slug:"/environmental-remediation-solutions", keyword:"environmental remediation absorbent" },
   h1:"Remediation Made Efficient",
   sub:"For site managers who own the cost of containment and disposal",
-  primary:CTA.specialist, secondary:CTA.quote, image:"assets/industry/environmental-remediation.jpg?v=v2",
+  primary:CTA.specialist, secondary:CTA.sample, image:"assets/industry/environmental-remediation.jpg?v=v2",
 
   applications:["Dredged sediment dewatering","Slurry wall & trench spoil management","Hydrocarbon impacted soil","Brownfield & frac out response","Groundwater remediation","Landfill leachate handling"],
   appsHeading:"How Bagasse Absorbent Applications Help Your Remediation Sites",
@@ -1464,7 +1488,7 @@ const RESELLERS_INDUSTRIES = {
     slug:"/distributors-resellers-industries", keyword:"industrial absorbent distributor program" },
   h1:"A Better Margin. A Differentiated Story.",
   sub:"For industrial distributors and consolidated service providers",
-  primary:CTA.quote, secondary:CTA.biochar,
+  primary:CTA.sample, secondary:CTA.specialist,
   appsHeading:"How Bagasse Absorbent Applications Help Your Distribution Catalog",
   fieldApps:[
       { title:"Oilfield &amp; drilling accounts", detail:"Solidification &amp; spill supply",
@@ -1505,7 +1529,7 @@ const RESELLERS_AGRICULTURE = {
     slug:"/distributors-resellers-agriculture", keyword:"biochar distributor agriculture" },
   h1:"Premium Biochar. Premium Margins. Premium Support.",
   sub:"For agricultural distributors, soil blenders, and input cooperatives",
-  primary:CTA.biochar, secondary:CTA.quote,
+  primary:CTA.biochar, secondary:CTA.specialist,
   appsHeading:"How Bagasse Biochar Applications Help Your Ag Reseller Catalog",
   fieldApps:[
       { title:"Grower water efficiency programs", detail:"Sandy &amp; drought prone ground",

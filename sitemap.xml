@@ -27,6 +27,7 @@
   <!-- Shop -->
   <url><loc>https://americanbiocarbon.com/shop/absorbent-pellets</loc><priority>0.7</priority></url>
   <url><loc>https://americanbiocarbon.com/shop/agricultural-biochar</loc><priority>0.7</priority></url>
+  <url><loc>https://americanbiocarbon.com/shop/absorbent-crumble</loc><priority>0.7</priority></url>
 
   <!-- Reference -->
   <url><loc>https://americanbiocarbon.com/compare</loc><priority>0.7</priority></url>

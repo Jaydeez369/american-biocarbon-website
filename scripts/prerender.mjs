@@ -82,7 +82,7 @@ add("/", D.HOME.seo, null);
 for (const [id, p] of Object.entries(D.PRODUCTS)) {
   add(`/product/${id}`, p.seo, [productLd(id, p), breadcrumb([home, { name: p.name, path: `/product/${id}` }])]);
 }
-for (const id of ["absorbent-pellets", "agricultural-biochar"]) {
+for (const id of ["absorbent-pellets", "agricultural-biochar", "absorbent-crumble"]) {
   const p = D.PRODUCTS[id]; if (!p) continue;
   add(`/shop/${id}`, { title: `${p.name}, ${p.unit || "Buy"} | ${SITE_NAME}`, desc: p.desc || p.claim },
     [productLd(id, p), breadcrumb([home, { name: "Products", path: "/buy" }, { name: p.name, path: `/shop/${id}` }])]);
