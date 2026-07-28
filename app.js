@@ -746,6 +746,19 @@ function renderShopProduct(id){
   const checkoutHref = SHOPIFY_CHECKOUT[p.id]
     ? SHOPIFY_CHECKOUT[p.id]
     : (p.priceLabel ? `/contact?product=${p.id}&intent=purchase` : `/request-sample?product=${p.id}`);
+  // Metric-ton SKUs order in whole tons: stepper rewrites every [data-buy-link] on the page.
+  const showQty = hasCheckout && BULK_QTY_IDS.has(p.id);
+  const qtyHTML = showQty ? `
+        <div class="pdp-qtyrow" data-qty-row data-base-href="${checkoutHref}" data-unit-price="${p.price||0}">
+          <span class="pdp-qlabel">Quantity</span>
+          <div class="pdp-qty">
+            <button class="qty-btn" type="button" data-qty-step="-1" aria-label="Decrease quantity">&minus;</button>
+            <input class="qty-val" type="number" inputmode="numeric" min="1" max="${QTY_MAX}" value="1"
+                   data-qty-input aria-label="Quantity in metric tons" style="border:0;background:transparent;width:56px">
+            <button class="qty-btn" type="button" data-qty-step="1" aria-label="Increase quantity">+</button>
+          </div>
+          <span class="pdp-qlabel" data-qty-total style="font-weight:400;color:var(--mute)">metric ton${p.price?` · $${p.price.toLocaleString()} total`:""}</span>
+        </div>` : "";
   return `
   <section class="block" style="padding-top:34px"><div class="wrap">
     ${crumbs([{label:"Products",href:"/buy"},{label:p.name}], "margin-bottom:22px")}

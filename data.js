@@ -20,7 +20,7 @@ const ASSETS = {
   biocharBag: "assets/products/100-biochar-bag.png?v=v2",
   biocharSem: "assets/products/biochar-sem-structure.png",
   fiberBag:   "assets/products/multi-use-fiber-bag.png?v=v3",
-  soilBag:    "assets/products/biochar-infused-soil-bag.png",
+  soilBag:    "assets/products/biochar-infused-soil-bag.png?v=v2",
   crumbleBag: "assets/products/absorbent-crumble-bag.png?v=v3",
   biocharBulkPhoto:"assets/products/biochar-bulk-supersack.jpg?v=v1",
   crumblePhoto:"assets/products/absorbent-crumble-photo.jpg?v=v2",
@@ -640,7 +640,7 @@ const PRODUCTS = {
       rows:[["Absorption","Up to ~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
     faq:[
       { q:"When should I use crumble vs pellets?", a:"Choose crumble for large area or high volume spills where fast, broad coverage matters; choose pellets for targeted cleanup." },
-      { q:"Can I get a sample, and what volumes are available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Metric ton supply, packaged in 1,650 lb super sacks, is available for immediate purchase, and truckload supply is on request." },
+      { q:"Can I get a sample, and what volumes are available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Metric ton supply, packaged in 1,650 lb super sacks, is available for immediate purchase, with FOB bulk bags ready in 7-10 business days, and truckload supply is on request." },
       { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request. The absorbents spec sheet covers both the pellet and crumble grades." },
     ],
     form:"quote",
@@ -772,7 +772,7 @@ const PRODUCTS = {
       schema:"Product + FAQPage" },
     h1:"Ready to Use Biochar Soil, No Mixing",
     sub:"A growing soil pre-blended with carbon negative bagasse biochar, so you get the water holding, nutrient retention, and aeration benefits from the first watering.",
-    primary:CTA.biochar, secondary:CTA.spec, image:ASSETS.biocharLg, mock:ASSETS.biocharMock,
+    primary:CTA.biochar, secondary:CTA.spec, image:ASSETS.soilBag, mock:ASSETS.biocharMock,
     proofRow:["Pre-blended, no mixing","Carbon negative biochar base","Water & nutrient retention","Bagged & bulk"],
 
     appsHeading:"How Biochar-Infused Soil Applications Help Your Landscape, Nursery &amp; Growing Operation",
