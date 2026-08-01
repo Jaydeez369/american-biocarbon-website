@@ -12,9 +12,9 @@ const DATA = {
 
   /* -------- Proof hierarchy (claim discipline) -------- */
   proofTiers: [
-    { t:1, k:"proof-1", name:"Certified / Verified", ex:"OMRI Listed · IBI Certified · Puro.earth certified" },
-    { t:2, k:"proof-2", name:"Lab-tested", ex:"Control Labs IBI panels: H/C, surface area, heavy metals, NPK" },
-    { t:3, k:"proof-3", name:"Field-trial supported", ex:"USDA-ARS multi-year LA sugarcane bagasse biochar study" },
+    { t:1, k:"proof-1", name:"Certified / Listed", ex:"OMRI Listed · Puro.earth certified" },
+    { t:2, k:"proof-2", name:"Lab-tested", ex:"Control Labs, IBI test panel: H/C, surface area, heavy metals, NPK" },
+    { t:3, k:"proof-3", name:"Field-research supported", ex:"Published USDA-ARS research on LA sugarcane bagasse biochar (third-party, not our product)" },
     { t:4, k:"proof-4", name:"Customer-reported (anecdotal)", ex:"Charley's Chicks litter/mortality observations" },
     { t:5, k:"proof-5", name:"Hypothesis / needs validation", ex:"$/ton CDR revenue, yield lift %, feed claims" },
   ],
@@ -97,7 +97,7 @@ const DATA = {
       urgency:["Spring build season","New retail contract","Competitor launched biochar blend"],
       disq:["No storage for bulk","Outside freight-viable zone w/ small volume","Won't trial"],
       order:"Free sample + pallet blend trial → paid order against inventory on hand (LOI reserves Q4 supply as the fallback)", cycle:"2–6 weeks",
-      proof:["IBI/OMRI docs","Water-holding (3–3.5x) tech report","Spec sheet + SDS","Sample bag","Compost cycle-time data (if they cure feedstock)"],
+      proof:["OMRI listing + IBI test-panel lab reports","Water-holding (3–3.5x) tech report","Spec sheet + SDS","Sample bag","Compost cycle-time data (if they cure feedstock)"],
       objections:["Wood biochar cheaper","Freight","Need proof it blends"],
       offer:"Free qualified sample + pallet trial w/ blend guidance", channel:"Direct call + field visit + email",
       tags:["seg:soilblend","persona:ops","zoneA"],
@@ -114,7 +114,7 @@ const DATA = {
       urgency:["Pre-season stocking","Grant / cost-share programs","Competitor exclusivity threat"],
       disq:["Wants national exclusivity yr 1","No organic demand in region"],
       order:"Free sample + program preview → paid order against the 80 MT on hand + distributor LOI (reserves territory + Q4 volume)", cycle:"1–4 months",
-      proof:["USDA-ARS field study","Certs","Distributor margin calc","Grower ROI calc"],
+      proof:["Published USDA-ARS field research","OMRI listing + lab reports","Distributor margin calc","Grower ROI calc"],
       objections:["Unproven demand","Margin","Support/marketing help"],
       offer:"Stocking pilot + co-branded grower trial program", channel:"Direct + trade assoc + referral",
       tags:["seg:agdist","persona:catman","zoneA","zoneB"],
@@ -240,7 +240,7 @@ const DATA = {
       lang:"'turns', 'sell-through', 'program', 'margin', 'grower'",
       hates:"Unproven products with no pull-through plan",
       disc:["What's driving your organic/regenerative SKU decisions?","Which growers are asking about water or carbon?","What margin and support do you need to stock a new line?"],
-      open:"We're a Louisiana carbon-negative soil amendment with certs and a USDA-ARS field study — want to see the distributor margin + grower ROI model?",
+      open:"We're a Louisiana carbon-negative soil amendment, OMRI Listed and independently lab-tested, with published third-party USDA-ARS research on sugarcane bagasse biochar behind the category — want to see the distributor margin + grower ROI model?",
       cta:"Propose a stocking pilot + co-branded grower trial" },
     { id:"landbuyer", name:"Landscape Supply Buyer", seg:"Landscape/nursery",
       cares:"Velocity, premium margin, contractor demand, seasonal fit",
@@ -299,16 +299,16 @@ const DATA = {
         id:"biochar", product:"100% Biochar",
         audience:"MULTIPLE avatars — Distributors/Co-ops · Row-Crop & Specialty Farmers · Ranchers/Livestock · Poultry/Chicken farms · Compost/Soil Blenders · Nurseries/Greenhouses",
         avatar:"Biochar is the DYNAMIC product — one material, many different buyers, each with a different pain and a different lead benefit. Do NOT use a generic biochar pitch: pull the ONE benefit that matters to the buyer in front of you (water-holding for farmers, ammonia/odor for poultry & ranchers, cycle-time for composters, margin/differentiation for distributors, media performance for nurseries). Full per-avatar messaging, specs, benefit-by-mechanism, and industry comparisons live in the → Biochar Specs & Avatars tab. Common ground: they think in yards/blends/water-holding/OMRI/sell-through — NOT spills, SDS, or oilfield.",
-        positioning:"For ag distributors, soil/compost blenders, and growers, American BioCarbon 100% Biochar is an OMRI-listed, IBI-certified sugarcane-bagasse biochar whose ordered honeycomb pore structure holds ~3–3.5× its weight in water and carries inherent nutrients (~0.6-0.2-0.7 NPK + Ca/Mg) — a differentiated, carbon-negative SKU that improves water/nutrient retention and, per research, can shorten compost cycles ~10–30%.",
+        positioning:"For ag distributors, soil/compost blenders, and growers, American BioCarbon 100% Biochar is an OMRI-listed, independently lab-tested sugarcane-bagasse biochar whose ordered honeycomb pore structure holds ~3–3.5× its weight in water and carries inherent nutrients (~0.6-0.2-0.7 NPK + Ca/Mg) — a differentiated, carbon-negative SKU that improves water/nutrient retention and, per research, can shorten compost cycles ~10–30%.",
         oneLiner:"OMRI-listed sugarcane biochar that holds ~3–3.5× its weight in water and can shorten compost cycles ~10–30% — a differentiated, margin-accretive line.",
-        pitch30:"Commodity amendments compete on price alone. Ours is an OMRI-listed, IBI-certified bagasse biochar with an ordered honeycomb pore structure that holds ~3–3.5× its weight in water and carries inherent nutrients — so it firms up water-holding in sandy and premium blends and, per peer-reviewed research, can shorten compost cycles ~10–30%. Differentiated line, real supply story. Want a free sample to trial in one blend or windrow?",
-        pitch90:"American BioCarbon makes a 100% sugarcane-bagasse biochar at the Cora Texas mill in White Castle, LA. Unlike most wood biochar, bagasse has a naturally ordered honeycomb pore structure that holds roughly 3–3.5× its weight in water, retains nutrients, and gives soil microbes protected habitat — and it carries inherent nutrients (~0.6-0.2-0.7 NPK plus Ca/Mg). It's OMRI Listed and IBI Certified, lab-verified below IBI and EPA Class A heavy-metal thresholds, and backed by a multi-year USDA-ARS field study. For blenders it firms up moisture performance in sandy and premium mixes; for composters, peer-reviewed research shows biochar can shorten the cycle ~10–30% — more batches per year on the same pad. Best way to prove it is in your own operation: a free sample to run in one blend or a side-by-side windrow.",
-        proof:["OMRI Listed · IBI Certified","Holds ~3–3.5× its weight in water (technical report)","Inherent NPK ~0.6-0.2-0.7 + Ca/Mg","USDA-ARS multi-year bagasse field study","Compost cycle ~10–30% shorter (peer-reviewed — validate in own windrow)","Heavy metals well below IBI / EPA Class A"],
+        pitch30:"Commodity amendments compete on price alone. Ours is an OMRI-listed, independently lab-tested bagasse biochar with an ordered honeycomb pore structure that holds ~3–3.5× its weight in water and carries inherent nutrients — so it firms up water-holding in sandy and premium blends and, per peer-reviewed research, can shorten compost cycles ~10–30%. Differentiated line, real supply story. Want a free sample to trial in one blend or windrow?",
+        pitch90:"American BioCarbon makes a 100% sugarcane-bagasse biochar at the Cora Texas mill in White Castle, LA. Unlike most wood biochar, bagasse has a naturally ordered honeycomb pore structure that holds roughly 3–3.5× its weight in water, retains nutrients, and gives soil microbes protected habitat — and it carries inherent nutrients (~0.6-0.2-0.7 NPK plus Ca/Mg). It's OMRI Listed and independently lab-tested against the IBI test panel, measuring below IBI and EPA Class A heavy-metal thresholds. Published USDA-ARS research on sugarcane bagasse biochar supports the category (independent work, not a study of our product). For blenders it firms up moisture performance in sandy and premium mixes; for composters, peer-reviewed research shows biochar can shorten the cycle ~10–30% — more batches per year on the same pad. Best way to prove it is in your own operation: a free sample to run in one blend or a side-by-side windrow.",
+        proof:["OMRI Listed · IBI tested","Holds ~3–3.5× its weight in water (technical report)","Inherent NPK ~0.6-0.2-0.7 + Ca/Mg","Published USDA-ARS bagasse field research (third-party)","Compost cycle ~10–30% shorter (peer-reviewed — validate in own windrow)","Heavy metals well below IBI / EPA Class A"],
         neverSay:["spill / cleanup","absorbent / sorbent / 5:1","SDS for disposal","oilfield / leachate / remediation","bags per spill"]
       }
     ],
     productPos:[
-      { p:"Agricultural biochar", m:"Honeycomb bagasse structure → ~3–3.5x water-holding, inherent NPK + Ca/Mg, OMRI/IBI certified. A conditioner AND a nutrient-bearing matrix, not just black carbon." },
+      { p:"Agricultural biochar", m:"Honeycomb bagasse structure → ~3–3.5x water-holding, inherent NPK + Ca/Mg, OMRI listed and IBI tested. A conditioner AND a nutrient-bearing matrix, not just black carbon." },
       { p:"Biochar-infused soil", m:"Ready-to-use blend — water retention, nutrient-holding, aeration with zero mixing. Drops into beds, pots, installs from the first watering." },
       { p:"Absorbent pellets", m:"5:1 absorption vs ~2.5:1 for wood — fewer bags per spill, lower disposal volume, plant-based & carbon-neutral. Spill, leachate, oilfield fluid, disaster." },
       { p:"Absorbent crumble", m:"Coarser form for fast, broad coverage on large-area / high-volume spills. Same 100% bagasse, spreads faster." },
@@ -327,7 +327,7 @@ const DATA = {
       { claim:"Accelerates composting / shorter turnover time", rel:"Composters, soil blenders", src:"Peer-reviewed (general biochar)", tier:3, safe:"Research shows biochar can shorten the compost cycle ~10–30% and speed maturity — validate in your own windrow trial", risk:"'Our biochar cuts 14 days off your compost' (no VEJ-specific trial yet)" },
       { claim:"~3–3.5x water-holding capacity", rel:"Blenders, growers, landscape", src:"Lab-tested / American BioCarbon report", tier:2, safe:"Holds roughly 3–3.5x its weight in water (bagasse biochar, per technical report)", risk:"'Holds 5x water' as a blanket claim" },
       { claim:"5:1 absorption ratio", rel:"Remediation, oilfield, bedding", src:"Product spec / lab", tier:2, safe:"Up to ~5:1 absorption vs ~2.5:1 for wood pellets", risk:"'Absorbs any chemical' — specify non-viscous" },
-      { claim:"OMRI Listed / IBI Certified", rel:"Organic ag, distributors", src:"Certified", tier:1, safe:"OMRI Listed and IBI Certified", risk:"'USDA Organic certified' — it's PENDING" },
+      { claim:"OMRI Listed / IBI tested", rel:"Organic ag, distributors", src:"OMRI listing + Control Labs", tier:1, safe:"OMRI Listed, and independently lab-tested against the IBI test panel", risk:"'IBI Certified' in any form — we have NEVER held it. Also never 'USDA Organic' — no certification and no filed application." },
       { claim:"Puro.earth certified carbon", rel:"CDR/ESG buyers", src:"Certified", tier:1, safe:"Puro.earth certified carbon removal", risk:"Stating a fixed $/ton or tCO2e without confirmation" },
       { claim:"Low heavy metals", rel:"Organic, food-chain, compliance", src:"Lab (Control Labs IBI)", tier:2, safe:"Heavy metals 1–2 orders of magnitude below IBI/EPA Class A thresholds", risk:"'Zero contaminants'" },
       { claim:"Permanence / carbon-negative", rel:"CDR buyers", src:"Lab (H/C) + standard", tier:2, safe:"H/C molar ratio < 0.7 supports durable, long-term carbon retention", risk:"'Permanent forever' without standard reference" },
@@ -515,10 +515,10 @@ const DATA = {
   outreach:[
     { seg:"Soil Blenders", persona:"Ops Manager",
       steps:[
-        { t:"Email 1 — Day 0", b:"Subject: bagasse biochar for your blends\n\nHi {First} — we make a 100% sugarcane bagasse biochar out of White Castle. It screens clean into soil blends and holds ~3x its weight in water, so it firms up moisture performance in sandy mixes. OMRI Listed, IBI Certified.\n\nWorth a free sample bag to run in your premium blend? I'll include the spec + a quick blend guide.\n\n— {Me}, VEJ" },
+        { t:"Email 1 — Day 0", b:"Subject: bagasse biochar for your blends\n\nHi {First} — we make a 100% sugarcane bagasse biochar out of White Castle. It screens clean into soil blends and holds ~3x its weight in water, so it firms up moisture performance in sandy mixes. OMRI Listed, independently lab-tested.\n\nWorth a free sample bag to run in your premium blend? I'll include the spec + a quick blend guide.\n\n— {Me}, VEJ" },
         { t:"Call opener", b:"Hey {First}, {Me} with VEJ down in White Castle — we turn sugarcane bagasse into biochar for soil blenders. Quick reason I called: folks running sandy or premium mixes use it to hold moisture and carry nutrients. What are you blending right now?" },
         { t:"Voicemail", b:"{First}, it's {Me} with VEJ, 555-xxx. We make bagasse biochar for soil blends — holds about 3x its weight in water, screens clean. I'll send a spec by email; if it fits I'll drop you a free sample. Talk soon." },
-        { t:"LinkedIn note", b:"Hi {First} — we make Louisiana bagasse biochar for soil blenders (OMRI/IBI). Would love to send you a sample to trial in a blend. Open to it?" },
+        { t:"LinkedIn note", b:"Hi {First} — we make Louisiana bagasse biochar for soil blenders (OMRI Listed, independently lab-tested). Would love to send you a sample to trial in a blend. Open to it?" },
         { t:"Email 2 — Day 4 (value)", b:"Subject: the water-holding number\n\n{First} — quick proof: our bagasse biochar's honeycomb pore structure holds ~3–3.5x its weight in water (technical report attached), vs ~2x for typical wood biochar. That's the difference blenders feel in sandy mixes.\n\nWant a sample to test? Just need your best ship-to." },
         { t:"Email 3 — Day 9 (sample CTA)", b:"Subject: sample bag\n\n{First} — happy to ship a free qualified sample so you can run it in your own blend. If it performs, we scale to pallet then standing LTL. What blend would you test it in first?" },
         { t:"Breakup — Day 16", b:"Subject: close the loop\n\n{First} — I'll stop reaching out for now. If moisture performance or an organic/carbon-negative blend ever moves up your list, we're here and 300 miles away. I'll leave the spec attached." },
@@ -526,11 +526,11 @@ const DATA = {
       nurture:"Monthly: seasonal blend tips, a customer proof point, or a new cert/data drop. No hard sell." },
     { seg:"Ag Distributors", persona:"Category Manager",
       steps:[
-        { t:"Email 1 — Day 0", b:"Subject: carbon-negative organic SKU for your line\n\nHi {First} — VEJ makes a Louisiana bagasse biochar (OMRI Listed, IBI Certified, USDA-ARS field study behind it). Distributors use it as a differentiated organic/regenerative SKU with a water + carbon story growers are asking for.\n\nCan I send the distributor margin model + grower ROI calc?" },
+        { t:"Email 1 — Day 0", b:"Subject: carbon-negative organic SKU for your line\n\nHi {First} — VEJ makes a Louisiana bagasse biochar (OMRI Listed, independently lab-tested, with published USDA-ARS field research behind the category). Distributors use it as a differentiated organic/regenerative SKU with a water + carbon story growers are asking for.\n\nCan I send the distributor margin model + grower ROI calc?" },
         { t:"Call opener", b:"Hi {First}, {Me} with VEJ. We supply a carbon-negative bagasse biochar and I'm talking to distributors building out organic/regenerative lines. Are your growers asking about water efficiency or carbon yet?" },
-        { t:"Voicemail", b:"{First}, {Me} with VEJ, 555-xxx. Louisiana biochar, OMRI/IBI certified, with a distributor program and grower ROI model. Sending details by email — would value 15 minutes." },
-        { t:"LinkedIn note", b:"Hi {First} — building a distributor program for our Louisiana bagasse biochar (OMRI/IBI, carbon-negative). Think it could differentiate your organic line. Open to a quick look at the margin model?" },
-        { t:"Email 2 — Day 4", b:"Subject: the demand + margin question\n\n{First} — two things distributors ask: will it pull through, and what's the margin. On pull-through: it's OMRI-listed with a USDA-ARS field study and a grower water/fertilizer-efficiency story. On margin: attached model shows a stocking pilot at [placeholder] with volume rebates. Worth a call?" },
+        { t:"Voicemail", b:"{First}, {Me} with VEJ, 555-xxx. Louisiana biochar, OMRI listed and independently lab-tested, with a distributor program and grower ROI model. Sending details by email — would value 15 minutes." },
+        { t:"LinkedIn note", b:"Hi {First} — building a distributor program for our Louisiana bagasse biochar (OMRI listed, lab-tested, carbon-negative). Think it could differentiate your organic line. Open to a quick look at the margin model?" },
+        { t:"Email 2 — Day 4", b:"Subject: the demand + margin question\n\n{First} — two things distributors ask: will it pull through, and what's the margin. On pull-through: it's OMRI-listed, with published USDA-ARS field research on bagasse biochar and a grower water/fertilizer-efficiency story. On margin: attached model shows a stocking pilot at [placeholder] with volume rebates. Worth a call?" },
         { t:"Email 3 — Day 9", b:"Subject: co-branded grower trial\n\n{First} — best way to de-risk: a stocking pilot plus a co-branded grower trial so your reps have a local proof point. I'll supply samples + trial docs. Which branches would you start with?" },
         { t:"Breakup — Day 16", b:"Subject: parking this\n\n{First} — I'll pause here. When an organic/carbon SKU moves up the priority list, the margin model and trial program are ready to go." },
       ],
@@ -586,7 +586,7 @@ const DATA = {
     { s:"The waste-to-value story", p:"Origin + credibility", b:["Sugarcane bagasse: renewable ag byproduct, no trees cut","Oxygen-limited pyrolysis >500°C → stable biochar"], cta:"—" },
     { s:"Why bagasse beats wood", p:"Core differentiation", b:["Ordered honeycomb pore structure","~3–3.5x water-holding vs ~2x wood","Inherent NPK + Ca/Mg; 5:1 absorbency vs 2.5:1"], cta:"—" },
     { s:"Product family", p:"Show the range", b:["Bulk/bagged biochar","Biochar-infused soil","Absorbent pellets & crumble","Carbon removal credits"], cta:"—" },
-    { s:"Proof & certifications", p:"De-risk", b:["OMRI Listed · IBI Certified · Puro.earth certified","USDA-ARS multi-year field study","Heavy metals << IBI/EPA thresholds"], cta:"—" },
+    { s:"Proof & certifications", p:"De-risk", b:["OMRI Listed · IBI tested · Puro.earth certified","Published USDA-ARS field research (third-party)","Heavy metals well below IBI/EPA thresholds"], cta:"—" },
     { s:"The dual-value model", p:"The hook", b:["Every ton = product revenue + carbon-removal credit","We handle carbon; you get better product economics"], cta:"—" },
     { s:"Segment fit (tailor)", p:"Make it about them", b:["Blenders: moisture + organic SKU","Distributors: differentiated line + margin","Industrial: 5:1 absorbency + disposal savings"], cta:"—" },
     { s:"Economics / ROI", p:"Show the money", b:["Distributor margin model","Grower water/fertilizer efficiency","Cost-per-gallon captured (absorbent)"], cta:"Insert calculator output" },
@@ -656,7 +656,7 @@ const DATA = {
     { o:"I don't understand carbon credits", mean:"Confused / skeptical", resp:"Keep it simple: buy the product for performance; we handle carbon; it may improve your price. No action needed from them.", proof:"Dual-value one-pager", next:"Want the plain-English version?", disq:"—" },
     { o:"Freight kills the economics", mean:"Delivered cost fear", resp:"Freight-zone pricing; concentrate volume; carbon value + product margin defend delivered cost inside zone.", proof:"Freight-aware calc", next:"What volume/frequency could you commit?", disq:"Zone C + tiny volume" },
     { o:"We need proof it works", mean:"Risk-averse", resp:"That's exactly what the trial is for — define success up front, ship a sample, measure.", proof:"Field study + sample", next:"What would prove it to you?", disq:"Won't define success" },
-    { o:"We need organic certification", mean:"Compliance gate", resp:"OMRI Listed today; USDA Organic pending (don't overclaim). Provide OMRI + IBI docs.", proof:"Cert docs", next:"Is OMRI sufficient for your program?", disq:"—" },
+    { o:"We need organic certification", mean:"Compliance gate", resp:"OMRI Listed today. We are NOT USDA Organic certified and have no filed application — never imply otherwise. Provide the OMRI listing + IBI test-panel lab reports.", proof:"Cert docs", next:"Is OMRI sufficient for your program?", disq:"—" },
     { o:"We need specs / SDS", mean:"Procurement gate", resp:"Send spec sheet + SDS immediately; it's a buying signal.", proof:"Spec sheet + SDS", next:"Who else needs to see these?", disq:"—" },
     { o:"We need a trial first", mean:"Ready-ish", resp:"Great — qualify, set success criteria, ship. Trial is the path forward.", proof:"Sample workflow", next:"What use case + success metric?", disq:"—" },
     { o:"We need net terms", mean:"Cash-flow", resp:"Net-15 pilot → Net-30 established (placeholder policy). Tie to volume/reorder.", proof:"Terms sheet", next:"What terms does procurement require?", disq:"—" },
@@ -832,7 +832,7 @@ const DATA = {
         lanes:[
           {k:"product", items:[
             {t:"Review & approve website copy + both product tracks", o:"Victor + Daniel", pri:"P0", del:"Written sign-off / redlines to Jesse"},
-            {t:"Gather certs & spec sheets: SDS, OMRI, IBI, Puro (review carbon language)", o:"Victor + Daniel", pri:"P0", del:"Cert/spec pack"}]},
+            {t:"Gather certs & spec sheets: SDS, OMRI listing, IBI test-panel lab reports, Puro (review carbon language)", o:"Victor + Daniel", pri:"P0", del:"Cert/spec pack"}]},
           {k:"ops", items:[
             {t:"Stand up CRM objects / fields / stages in the app", o:"Jesse", pri:"P0", del:"Live pipeline of record"}]},
           {k:"bizdev", items:[
@@ -978,7 +978,7 @@ const DATA = {
     { phase:"First 7 days", note:"Two lanes running in parallel: Jesse builds the outbound machine; Victor gets the product, proof, and website launch-ready. Check items off as they land — they persist.", tasks:[
       { t:"✅ Temporary website build-out COMPLETE (localhost + combined-site)", o:"Jesse", pri:"P0", eff:"M", out:"Full site live for review", dep:"—", app:"website/", del:"Localhost site ready to hand to Victor", done:true },
       { t:"Review & approve website — copy, product pages, both tracks", o:"Victor + Daniel", pri:"P0", eff:"M", out:"Sign-off to publish", dep:"Temp site", app:"website/", del:"Written approval / redlines back to Jesse" },
-      { t:"Gather spec sheets + certifications: SDS, OMRI, IBI, Puro (+ review carbon language)", o:"Victor + Daniel", pri:"P0", eff:"L", out:"Cert/spec pack for site + collateral", dep:"Company + labs", app:"Collateral", del:"SDS + OMRI + IBI + Puro docs" },
+      { t:"Gather spec sheets + certifications: SDS, OMRI listing, IBI test-panel lab reports, Puro (+ review carbon language)", o:"Victor + Daniel", pri:"P0", eff:"L", out:"Cert/spec pack for site + collateral", dep:"Company + labs", app:"Collateral", del:"SDS + OMRI + IBI + Puro docs" },
       { t:"Company & product discovery — pull every doc: lab analyses, tech reports, prior-sales proof, facility/feedstock story", o:"Victor + Daniel", pri:"P0", eff:"L", out:"Complete proof library", dep:"Company", app:"Collateral", del:"Docs handed to Jesse for one-pagers" },
       { t:"Product photography — real product close-ups, bagged samples, facility/process shots", o:"Victor + Daniel", pri:"P1", eff:"M", out:"Usable photo set for site + social", dep:"Facility access", app:"website/ assets", del:"Photo library" },
       { t:"Sample / product testing — absorbency + water-holding, document results (claim-safe)", o:"Victor + Daniel", pri:"P1", eff:"M", out:"Own performance data", dep:"Product + lab", app:"Collateral", del:"Test result sheet" },
@@ -1019,7 +1019,7 @@ const DATA = {
   /* ============ 15. FINAL CHECKLIST ============ */
   checklist:{
     biochar:["Confirm the 80 MT of finished biochar is packaged, QC'd & ship-ready","Set biochar bulk price + minimum order qty by freight zone (internal)","Get freight/LTL quotes from White Castle for the top biochar zones","Stand up a biochar bulk-order / PO path (Shopify or manual invoice)","Sample→order SOP: on a winning trial, quote from the 80 MT within 24h","Track MT sold vs 80 MT on the dashboard"],
-    website:["✅ Temporary website build-out complete (localhost + combined-site)|done","Victor reviews & approves site copy + both product tracks","Create 2 sample SKUs in Shopify (Pellets 1 lb, Biochar 8 oz)","Wire Shopify variant IDs into the site sample forms","Publish certs/spec sheets to the site (SDS/OMRI/IBI/Puro)","Install/stage approved site in Shopify → publish over current site","Sample + reserve-supply forms route to Jesse + Victor + Daniel (tested end-to-end)"],
+    website:["✅ Temporary website build-out complete (localhost + combined-site)|done","Victor reviews & approves site copy + both product tracks","Create 2 sample SKUs in Shopify (Pellets 1 lb, Biochar 8 oz)","Wire Shopify variant IDs into the site sample forms","Publish certs/spec sheets to the site (SDS / OMRI listing / IBI-panel lab reports / Puro)","Install/stage approved site in Shopify → publish over current site","Sample + reserve-supply forms route to Jesse + Victor + Daniel (tested end-to-end)"],
     build:["CRM objects + fields (Account/Contact/Deal/Sample/LOI/Activity)","Sample→LOI funnel: statuses + sample tracker","Dashboards (samples shipped, sample→LOI, committed volume)","Target account list view (both tracks, freight-zoned)"],
     collateral:["Absorbent 1-pager (industrial — single-product)","Biochar 1-pager (ag — single-product)","Sample-kit insert + test protocol","Spec sheets + SDS (from Victor)","Comparison: pellets vs wood/clay · biochar vs wood biochar","Product photos (real close-ups + facility)"],
     lists:["150–200 accounts across BOTH product ICPs (Gulf South + freight-viable)","Contacts + verified emails (Apollo)","ICP-tagged + freight-zoned; shared with Victor"],
@@ -1043,7 +1043,7 @@ const DATA = {
       ["H/C molar ratio","<0.7 → durable, long-term carbon"],
       ["Heavy metals","1–2 orders of magnitude BELOW IBI & EPA Class A thresholds"],
       ["Bulk density","~80–320 kg/m³ (low density → full-truckload discipline, 1-MT bags)"],
-      ["Certifications","OMRI Listed · IBI Certified · Puro.earth carbon pathway · USDA Organic PENDING"],
+      ["Certifications","OMRI Listed · Puro.earth carbon pathway. Independently lab-tested against IBI test-panel thresholds (NOT IBI certified). No USDA Organic."],
       ["Carbon permanence","Stores carbon 200+ yrs (Puro methodology)"],
       ["CDR yield","~1.5–2.5 tCO2e per ton biochar (1.9 base case) — days-61–90 layer"],
     ],
@@ -1091,8 +1091,8 @@ const DATA = {
       ]},
     ],
     avatars:[
-      { name:"Ag Input Distributors & Co-ops", who:"Category / purchasing manager reselling inputs to growers", pain:"Need a differentiated, margin-accretive organic SKU their growers actually pull through", angle:"A carbon-negative, OMRI/IBI biochar with a real supply story + distributor margin — one line that differentiates the shelf", lead:"OMRI/IBI + USDA-ARS study + distributor margin model", sample:"Sample + program preview to evaluate with their team", claim:"" },
-      { name:"Row-Crop & Specialty Growers (Farmers)", who:"Farmer / agronomy lead on sandy, drought-prone, or degraded ground", pain:"Water and fertilizer cost; yield variability on poor soils", angle:"Holds ~3–3.5× its weight in water and keeps nutrients in the root zone — more efficient water + fertilizer, better resilience", lead:"Water-holding report + NUE + USDA-ARS field study", sample:"Sample for a controlled strip/plot trial", claim:"Frame yield as trial-measured; no blanket yield guarantees" },
+      { name:"Ag Input Distributors & Co-ops", who:"Category / purchasing manager reselling inputs to growers", pain:"Need a differentiated, margin-accretive organic SKU their growers actually pull through", angle:"A carbon-negative, OMRI listed and lab-tested biochar with a real supply story + distributor margin — one line that differentiates the shelf", lead:"OMRI listing + IBI-panel lab reports + published USDA-ARS research + distributor margin model", sample:"Sample + program preview to evaluate with their team", claim:"" },
+      { name:"Row-Crop & Specialty Growers (Farmers)", who:"Farmer / agronomy lead on sandy, drought-prone, or degraded ground", pain:"Water and fertilizer cost; yield variability on poor soils", angle:"Holds ~3–3.5× its weight in water and keeps nutrients in the root zone — more efficient water + fertilizer, better resilience", lead:"Water-holding report + NUE + published USDA-ARS field research (third-party)", sample:"Sample for a controlled strip/plot trial", claim:"Frame yield as trial-measured; no blanket yield guarantees" },
       { name:"Ranchers / Livestock & Pasture", who:"Rancher / land manager running pasture + livestock", pain:"Pasture productivity, soil water-holding, and manure/odor management", angle:"Improves pasture soil water + nutrient retention, and binds ammonia/odor in manure and high-traffic areas", lead:"Water-holding + ammonia/odor studies + soil health", sample:"Sample for a pasture soil or manure/bedding area trial", claim:"Environmental/soil framing; no animal-health claims" },
       { name:"Poultry / Chicken Farms", who:"Broiler/layer grower, barn manager, or integrator", pain:"Wet litter, ammonia, air quality, bird comfort — and feed efficiency (integrators)", angle:"TWO uses: (1) BEDDING/LITTER now — drier litter, lower ammonia, better air (claim-safe); (2) IN-FEED later — research shows FCR/gain + ammonia benefits at 0.5–1% (regulatory-gated)", lead:"Ammonia-reduction studies (bedding) · in-feed research pack (gated)", sample:"House trial on litter moisture/ammonia (bedding-only claims)", claim:"BEDDING/ABSORBENCY ONLY until AAFCO/FDA-CVM feed pathway clears. NO feed/health claims." },
       { name:"Compost Yards & Soil Blenders", who:"Owner/operator whose throughput is capped by cure time, or a blender needing differentiation", pain:"Turnover time caps batches/year; commodity blends compete on price", angle:"Shortens the compost cycle ~10–30% (more batches, same pad) and upgrades blends' water-holding + organic/carbon story", lead:"Compost cycle-time research + water-holding + windrow trial protocol", sample:"Bulk sample for a side-by-side windrow or blend trial", claim:"Cycle-time is Tier-3 general research — validate in THEIR windrow" },
@@ -1100,7 +1100,7 @@ const DATA = {
     ],
     guardrails:[
       "One material, MANY avatars — lead with the ONE benefit that matters to the buyer in front of you, not the whole list.",
-      "USDA Organic is PENDING — say OMRI Listed / IBI Certified only.",
+      "Never say IBI Certified (we have never held it) or USDA Organic (no certification, no filed application). Say OMRI Listed, and IBI tested for the lab work.",
       "Poultry IN-FEED and any feed/health claim is AAFCO/FDA-CVM gated — until cleared, sell poultry as BEDDING/environmental only.",
       "Compost cycle-time and yield lifts are Tier-3 general-biochar research → present as 'validate in your own trial,' never as a product-specific guarantee.",
       "Carbon/CDR is a days-61–90 layer — mention as upside, don't lead ag pitches with it.",
