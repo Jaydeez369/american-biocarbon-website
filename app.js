@@ -416,9 +416,9 @@ function renderProduct(id){
     <div class="split proc-split">
       <div class="proc-left">
         <div class="proc-copy">
-          <div class="kicker">Proof</div><h2 style="font-size:26px;margin:8px 0 12px">Certified and lab verified</h2>
+          <div class="kicker">Proof</div><h2 style="font-size:26px;margin:8px 0 12px">Certifications and independent lab testing</h2>
           ${(()=>{
-            // Product-accurate certifications. OMRI/IBI belong to the certified 100%
+            // Product-accurate certifications. The OMRI listing belongs to the 100%
             // biochar only, never to absorbents or the infused-soil blend.
             const CERT_SET = { "absorbent-pellets":"absorbents","absorbent-crumble":"absorbents","absorbent-fiber":"absorbents","agricultural-biochar":"biochar","biochar-infused-soil":"soil","carbon-removal":"carbon" };
             const set = (TECH.certSets[CERT_SET[id]] || TECH.certSets.absorbents).filter(c=>c.status!=="pending");
@@ -661,7 +661,7 @@ function bagIcon(i){
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 }
 // Faithful kraft sample-bag mockup matching the print mechanicals: tan stand-up pouch,
-// logo, accent banner, four feature icons, use-cases, oval product window, OMRI badge,
+// logo, accent banner, four feature icons, use-cases, oval product window, OMRI Listed badge,
 // description, ingredients, and footer. Uses container queries so text scales with size.
 function kraftBag(p){
   const b = p.bag;
@@ -1017,7 +1017,7 @@ function renderTechnical(){
 
   <section class="block"><div class="wrap">
     <div class="eyebrow-line" style="margin-bottom:8px"></div><h2 style="margin-top:0">Certifications &amp; Third Party Verification</h2>
-    <p class="lead" style="margin-bottom:20px">Our products are independently certified and lab verified to meet industry standards and regulations.</p>
+    <p class="lead" style="margin-bottom:20px">Current third-party listings and certifications, plus the independent laboratory analyses behind our published specifications.</p>
     <div class="icert-grid">${(TECH.primaryCerts||[]).map(c=>{
       const badge = c.logo
         ? `<img class="icert-logo" src="${c.logo}" alt="${raw(c.item)} certification logo">`
@@ -1028,7 +1028,7 @@ function renderTechnical(){
         : `<div class="icert-card">${inner}</div>`;
     }).join("")}</div>
     <h3 style="font-size:17px;margin:26px 0 12px">Additional verification</h3>
-    <div class="certgrid">${TECH.compliance.filter(c=>c.status!=="verified"||!(TECH.primaryCerts||[]).some(p=>c.item.startsWith(p.short))).map(c=>`<div class="certcard">
+    <div class="certgrid">${TECH.compliance.filter(c=>!(TECH.primaryCerts||[]).some(p=>c.item.toLowerCase().startsWith(p.short.toLowerCase()))).map(c=>`<div class="certcard">
       <div class="ct-top"><b>${raw(c.item)}</b>${sBadge(c.status)}</div>
       <span>${raw(c.scope)}</span></div>`).join("")}</div>
   </div></section>
@@ -1183,11 +1183,12 @@ function breadcrumbLd(items){ // items: [{name, path}]
       ...(it.path ? { item: SITE.origin+it.path } : {}) })) };
 }
 function productLd(p){
-  // Certifications in structured data must match the product. OMRI/IBI are the
-  // certified 100% biochar's only; Puro.earth is carbon removal's. Absorbents and
-  // the infused-soil blend carry neither, so they emit no certification claim.
+  // Certifications in structured data must match the product, and must be actual
+  // certifications/listings only. OMRI Listed is the 100% biochar's only; Puro.earth
+  // is carbon removal's. IBI testing is lab analysis, NOT a certification, so it is
+  // deliberately absent here. Absorbents and the infused-soil blend emit nothing.
   const key = prodId(p);
-  const CERT_NAMES = { "agricultural-biochar":["OMRI Listed","IBI Certified"], "carbon-removal":["Puro.earth Certified"] };
+  const CERT_NAMES = { "agricultural-biochar":["OMRI Listed"], "carbon-removal":["Puro.earth Certified"] };
   const certs = CERT_NAMES[key] || [];
   return { "@context":"https://schema.org", "@type":"Product",
     name: p.name, description: (p.seo&&p.seo.desc)||p.sub||p.claim||"",

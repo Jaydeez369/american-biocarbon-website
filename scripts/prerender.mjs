@@ -66,7 +66,8 @@ const add = (path, seo, ld) => routes.push({ path, seo: seo || {}, ld: ld || nul
 const home = { name: "Home", path: "/" };
 const breadcrumb = (items) => ({ "@context": "https://schema.org", "@type": "BreadcrumbList",
   itemListElement: items.map((it, i) => ({ "@type": "ListItem", position: i + 1, name: it.name, ...(it.path ? { item: ORIGIN + it.path } : {}) })) });
-const CERTS = { "agricultural-biochar": ["OMRI Listed", "IBI Certified"], "carbon-removal": ["Puro.earth Certified"] };
+// Actual certifications/listings only. IBI testing is lab analysis, not a certification.
+const CERTS = { "agricultural-biochar": ["OMRI Listed"], "carbon-removal": ["Puro.earth Certified"] };
 const productLd = (id, p) => {
   const certs = CERTS[id] || [];
   return { "@context": "https://schema.org", "@type": "Product", name: p.name,

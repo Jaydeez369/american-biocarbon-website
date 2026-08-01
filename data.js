@@ -103,18 +103,17 @@ const NAV = [
 /* Proof band (verify exact language before publishing, see CLAIMS) */
 const PROOF = {
   items:[
-    { icon:ASSETS.icCert, title:"Third-Party Certified", sub:"OMRI Listed · IBI Certified · Puro.earth" },
+    { icon:ASSETS.icCert, title:"Third-Party Verified", sub:"OMRI Listed · IBI Tested · Puro.earth Certified" },
     { icon:ASSETS.icLeaf, title:"Carbon Negative", sub:"Durable carbon storage from ag byproduct" },
     { icon:ASSETS.icTech, title:"Patented Process", sub:"Bagasse separation & controlled pyrolysis" },
   ],
   microRow:["Up to 5:1 absorption","Plant based & renewable","Bulk · bulk bag · truckload","SDS & spec on request"],
   certs:[
     { name:"OMRI Listed", status:"verified", note:"Organic input listing" },
-    { name:"IBI Certified", note:"Int'l Biochar Initiative program", status:"verified" },
+    { name:"IBI tested", note:"Analyzed against IBI test-panel thresholds, not IBI certified", status:"lab" },
     { name:"Puro.earth Certified", status:"verified", note:"CORC carbon removal pathway" },
-    { name:"Independent lab analyses", status:"lab", note:"Heavy metals well below IBI / EPA Class A thresholds" },
-    { name:"USDA-ARS field study", status:"field", note:"Multi-year sugarcane bagasse biochar study" },
-    { name:"USDA Organic", status:"pending", note:"PENDING, never present as certified" },
+    { name:"Independent lab analyses", status:"lab", note:"Heavy metals below IBI / EPA Class A thresholds" },
+    { name:"Published field research", status:"field", note:"Third-party USDA-ARS research on sugarcane bagasse biochar" },
   ]
 };
 
@@ -128,16 +127,15 @@ const TECH = {
   // renders an accessible monogram. `url` links to the official program page.
   primaryCerts:[
     { item:"OMRI Listed", short:"OMRI", label:"Organic input listing for soil amendment", status:"verified", url:"https://www.omri.org/omri-lists", logo:"" },
-    { item:"IBI Certified Biochar", short:"IBI", label:"International Biochar Initiative program", status:"verified", url:"https://biochar-international.org/certification/", logo:"" },
+    { item:"IBI Tested", short:"IBI", label:"Analyzed against International Biochar Initiative test-panel thresholds", status:"lab", url:"https://biochar-international.org/", logo:"" },
     { item:"Puro.earth", short:"Puro", label:"CORC carbon-removal methodology", status:"verified", url:"https://puro.earth/", logo:"" },
   ],
   compliance:[
     { item:"OMRI Listed", scope:"Organic input listing (soil amendment)", status:"verified" },
-    { item:"IBI Certified", scope:"Int'l Biochar Initiative program", status:"verified" },
+    { item:"IBI tested", scope:"Analyzed against IBI test-panel thresholds", status:"lab" },
     { item:"Puro.earth Certified", scope:"CORC carbon-removal methodology", status:"verified" },
     { item:"Independent lab analysis", scope:"Heavy metals below IBI / EPA Class A thresholds", status:"lab" },
-    { item:"USDA-ARS field study", scope:"Multi-year sugarcane bagasse biochar trials", status:"field" },
-    { item:"USDA Organic", scope:"Certification in progress", status:"pending" },
+    { item:"Published field research", scope:"Third-party USDA-ARS research on sugarcane bagasse biochar", status:"field" },
   ],
   // Document catalog, the gated deliverables (spec sheets first for primary products)
   docs:[
@@ -145,23 +143,23 @@ const TECH = {
     { id:"bio-spec", name:"100% Biochar, Spec Sheet", cat:"Agriculture", desc:"Organic carbon, water holding, NPK, particle size.", primary:true, file:"assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf", fmt:"PDF" },
     { id:"abs-sds", name:"Absorbent Pellets & Crumble, SDS", cat:"Absorbents", desc:"Safety data sheet for handling, storage, and disposal." },
     { id:"abs-disposal", name:"Saturated-Material Disposal Guidance", cat:"Absorbents", desc:"Handling and disposal profile for spent absorbent." },
-    { id:"bio-lab", name:"Independent Lab Analysis, Heavy Metals & Nutrients", cat:"Agriculture", desc:"Full IBI panel: metals vs thresholds, NPK, H/C ratio, surface area." },
-    { id:"omri-cert", name:"OMRI / IBI Certificates", cat:"Certification", desc:"Current listing documentation." },
+    { id:"bio-lab", name:"Independent Lab Analysis, Heavy Metals & Nutrients", cat:"Agriculture", desc:"IBI test panel: metals vs thresholds, NPK, H/C ratio, surface area." },
+    { id:"omri-cert", name:"OMRI Listing Documentation", cat:"Certification", desc:"Current OMRI listing documentation." },
     { id:"carbon-mrv", name:"Carbon Removal, Methodology & MRV Summary", cat:"Carbon", desc:"Puro.earth pathway, permanence (H/C), and MRV approach." },
     { id:"studies", name:"Peer Reviewed Research Package", cat:"Research", desc:"Curated studies on bagasse biochar and biochar in composting." },
   ],
   // Peer reviewed & field research (citations public; full package gated)
   studies:[
     { title:"Multi-Year Field Application of Sugarcane Bagasse Biochar", authors:"Lima, White & Webber, USDA-ARS", venue:"US Biochar Initiative Conference, 2019", type:"field",
-      finding:"Multi-year Louisiana field trials evaluating bagasse and cane-trash biochar effects on sugarcane and soil.", note:"Specific to sugarcane bagasse biochar.", url:"https://www.usda.gov" },
+      finding:"Multi-year Louisiana field trials evaluating bagasse and cane-trash biochar effects on sugarcane and soil.", note:"Independent third-party research on the feedstock class. American BioCarbon was not a study participant.", url:"https://www.usda.gov" },
     { title:"Biochar addition reduces nitrogen loss and accelerates the composting process", authors:"Bioresource Technology", venue:"Elsevier, 2021", type:"peer",
       finding:"Biochar shortened the composting cycle and reduced nitrogen loss by shifting the core microbial community.", note:"General biochar research.", url:"https://doi.org/10.1016/j.biortech.2021.125492" },
     { title:"Enhancing composting efficiency using biochar amendments", authors:"Scientific Reports", venue:"Nature, 2025", type:"peer",
       finding:"Biochar raised pile temperature and accelerated maturation while cutting greenhouse-gas emissions.", note:"General biochar research.", url:"https://www.nature.com/articles/s41598-025-21144-w" },
     { title:"Biochar's effect in the composting mechanism: a review", authors:"Bioresource Technology", venue:"Elsevier, 2023", type:"peer",
       finding:"Review: biochar shortens time to thermophilic phase, raises peak temperature, and speeds organic-matter degradation.", note:"General biochar research.", url:"https://doi.org/10.1016/j.biortech.2023.129329" },
-    { title:"American BioCarbon Bagasse Biochar, IBI Laboratory Analyses", authors:"Control Laboratories", venue:"IBI Certification Program", type:"lab",
-      finding:"Independent IBI panels: organic carbon 58 to 65%, H/C < 0.7, surface area ~230 to 260 m²/g, heavy metals well below thresholds.", note:"Product-specific lab data.", url:"https://biochar-international.org/certification/" },
+    { title:"American BioCarbon Bagasse Biochar, Independent Laboratory Analyses", authors:"Control Laboratories", venue:"IBI test panel", type:"lab",
+      finding:"Independent analyses run against the IBI test panel: organic carbon 58 to 65%, H/C < 0.7, typical surface area ~230 to 260 m²/g, heavy metals below IBI thresholds.", note:"Product-specific lab data. Testing against IBI thresholds; not an IBI certification.", url:"https://biochar-international.org/" },
   ],
   // Which documents matter to each industry (all gated)
   byIndustry:{
@@ -184,15 +182,14 @@ const TECH = {
     ],
     biochar:[
       { item:"OMRI Listed", scope:"Organic input listing", status:"verified" },
-      { item:"IBI Certified", scope:"Int'l Biochar Initiative program", status:"verified" },
+      { item:"IBI tested", scope:"Analyzed against IBI test-panel thresholds", status:"lab" },
       { item:"Independent lab analysis", scope:"Heavy metals below IBI / EPA Class A", status:"lab" },
-      { item:"USDA-ARS field study", scope:"Sugarcane bagasse biochar trials", status:"field" },
-      { item:"USDA Organic", scope:"Certification in progress", status:"pending" },
+      { item:"Published field research", scope:"Third-party research on sugarcane bagasse biochar", status:"field" },
     ],
-    // Biochar-infused soil is a blend, NOT the certified 100% biochar product. It does
-    // not carry the OMRI/IBI listing on its own; only reference the biochar it is built on.
+    // Biochar-infused soil is a blend, NOT the OMRI listed 100% biochar product. It does
+    // not carry the OMRI listing on its own; only reference the biochar it is built on.
     soil:[
-      { item:"Built on our carbon negative bagasse biochar", scope:"Same biochar as our 100% Biochar product", status:"verified" },
+      { item:"Built on our carbon negative bagasse biochar", scope:"Same biochar as our 100% Biochar product. The blend itself is not OMRI listed.", status:"verified" },
       { item:"Independent lab analysis", scope:"Biochar component composition & heavy-metal screening", status:"lab" },
     ],
     carbon:[
@@ -205,8 +202,8 @@ const TECH = {
     "absorbent-pellets":["abs-spec","abs-sds","abs-disposal"],
     "absorbent-crumble":["abs-spec","abs-sds","abs-disposal"],
     "agricultural-biochar":["bio-spec","bio-lab","omri-cert"],
-    // Infused soil is a blend, not the certified 100% biochar. Do not transfer the
-    // OMRI/IBI certificate or the biochar spec sheet to it; request-gate its docs.
+    // Infused soil is a blend, not the OMRI listed 100% biochar. Do not transfer the
+    // OMRI listing or the biochar spec sheet to it; request-gate its docs.
     "biochar-infused-soil":[],
     "carbon-removal":["carbon-mrv","bio-lab"]
   },
@@ -404,7 +401,7 @@ const HOME = {
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE, BIOCHAR AND COFFEE CHAFF", omri:false } },
       { id:"absorbent-fiber", name:"Multipurpose Fiber", avail:"q4", cat:"Absorbents", category:"Peat Moss Replacement · Locally Sourced", accent:"aqua",
         claim:"A renewable peat replacement for agricultural and horticultural growing media, enriching soil with excellent water holding capacity, and also built for spill cleanup and animal bedding. Coming Q4.",
-        uses:["Enriching soil and growing media as a renewable peat replacement","Excellent water holding capacity","Promotes strong root growth through aeration","Pathogen free"],
+        uses:["Enriching soil and growing media as a renewable peat replacement","High water holding capacity","Supports root growth through improved aeration","Heat treated during processing"],
         chips:["1 lb sample bag","Locally sourced","Peat alternative"], sampleWeight:"1 LB", photo:ASSETS.pelletsPhoto, img:ASSETS.fiberBag, docIds:["spec"],
         bag:{ banner:"MULTIPURPOSE FIBER · LOCALLY SOURCED", iconSet:"absorbent",
           icons:["Locally Sourced","Renewable Peat Replacement","Water Holding Capacity","Pathogen Free"],
@@ -708,9 +705,9 @@ const PRODUCTS = {
       secondary:["sugarcane biochar","organic biochar soil amendment","OMRI biochar","biochar for water retention","biochar soil amendment bulk","compost biochar additive"],
       schema:"Product + FAQPage + BreadcrumbList" },
     h1:"OMRI Listed Bagasse Biochar for Water &amp; Nutrient Retention",
-    sub:"A locally sourced, carbon negative sugarcane biochar that improves water and nutrient retention, supports soil microbiology, and can help shorten compost turnover ~10 to 30%.",
+    sub:"A locally sourced, carbon negative sugarcane biochar that improves water and nutrient retention, supports soil microbiology, and in published research has shortened compost turnover by roughly 10 to 30%.",
     primary:CTA.buyNow, secondary:CTA.spec, image:ASSETS.biocharPhoto, mock:ASSETS.biocharMock,
-    proofRow:["OMRI Listed · IBI Certified","Holds up to ~3 to 3.5× its weight in water","Inherent NPK + Ca/Mg"],
+    proofRow:["OMRI Listed · IBI tested","Holds up to ~3 to 3.5× its weight in water","Inherent NPK + Ca/Mg"],
 
     specsFirst:true, appsKicker:"", appsHeading:"How Bagasse Biochar Applications Help Your Soil &amp; Growing Operation",
     useCases:["Less irrigation &amp; water waste","Less fertilizer waste","Soil structure &amp; root penetration","Microbial &amp; fungal habitat","pH buffering","Faster composting","Drought resilience","Durable carbon sequestration"],
@@ -747,7 +744,7 @@ const PRODUCTS = {
       ["Surface area","~215 to 300 m²/g"],
       ["pH","~7.6 to 9.3"],
       ["H/C molar ratio","<0.7 (durable carbon)"],
-      ["Certifications","OMRI Listed · IBI Certified · USDA Organic pending"],
+      ["Certifications","OMRI Listed. Independently lab tested against IBI test-panel thresholds."],
       ["Availability","Free 8 oz samples now; bulk, 1 MT bag & bagged supply from Q4"],
     ],
     comparison:{ h:"Bagasse vs wood biochar",
@@ -755,7 +752,7 @@ const PRODUCTS = {
       rows:[["Pore structure","Ordered honeycomb","Random/fractured"],["Water-holding","Up to ~3 to 3.5×","~2×"],["Inherent nutrients","Yes","Minimal"],["Best for","Sandy/degraded, compost","Structural only"]],
       image:ASSETS.biocharSem, imageAlt:"SEM images comparing carbonized wood and carbonized bagasse pore structure" },
     faq:[
-      { q:"Is it certified organic?", a:"It is OMRI Listed and IBI Certified. USDA Organic certification is pending, we don't present it as certified until it is." },
+      { q:"Is it certified organic?", a:"It is OMRI Listed for use in organic production. It is also independently lab tested against the International Biochar Initiative (IBI) test panel, which is product testing rather than an IBI certification. We do not hold USDA Organic certification and do not present the product as USDA Organic certified." },
       { q:"Can it speed up composting?", a:"Peer reviewed research shows biochar can shorten compost cycles ~10 to 30% and raise pile temperature, shorter cycles mean more batches through the same windrow footprint. We recommend a side by side windrow trial to measure the effect in your own operation." },
       { q:"What are the distributor terms?", a:"Start with a free sample and a preview of the margin model. Full stocking volume comes online with our Q4 capacity ramp, and distributors can lock pricing now." },
     ],
@@ -1105,10 +1102,10 @@ const INDUSTRIES = {
         body:"Committing shelf space to an unproven line is risky, so run co-branded grower trials that build local proof.",
         benefit:"Local proof de-risks stocking and converts trial acres to orders." },
       { title:"Carbon Program &amp; Sustainability Accounts", detail:"Carbon negative sourcing",
-        body:"Sustainability accounts ask what carbon story you carry, so stock the carbon negative line backed by a USDA-ARS study.",
+        body:"Sustainability accounts ask what carbon story you carry, so stock a carbon negative line supported by published USDA-ARS research on sugarcane bagasse biochar.",
         benefit:"Gives sustainability accounts a documented reason to buy through you." },
     ],
-    proof:["OMRI · IBI certified","USDA-ARS field study","Margin model provided","Stocking pilot available"],
+    proof:["OMRI Listed · IBI tested","Published USDA-ARS field research","Margin model provided","Stocking pilot available"],
     procurement:["Distributor pricing & rebate tiers","Co-branded grower trial kit","Bulk & bulk bag supply","No first year exclusivity required"],
     faq:[
       { q:"How do you de-risk stocking?", a:"A stocking pilot plus a co-branded grower trial gives your reps a local proof point before you commit to volume." },
@@ -1149,7 +1146,7 @@ const INDUSTRIES = {
         body:"Because you cannot spec an unreliable input, bagasse biochar ships bulk with freight aware pricing and OMRI docs.",
         benefit:"Predictable supply and cost let you spec it into recurring recipes." },
     ],
-    proof:["Compost cycle time research (validate in your process)","Up to ~3 to 3.5× water holding in blends","OMRI · IBI certified","Bulk supply"],
+    proof:["Compost cycle time research (validate in your process)","Up to ~3 to 3.5× water holding in blends","OMRI Listed · IBI tested","Bulk supply"],
     procurement:["Windrow / blend trial protocol","Bulk & bulk bag supply","Freight aware pricing","Spec + OMRI docs"],
     faq:[
       { q:"How do I prove the compost-speed benefit?", a:"Run a side by side windrow: biochar amended vs control, same recipe and turning schedule, and measure days to maturity and peak temperature. We provide the trial protocol and data sheet." },
@@ -1348,7 +1345,7 @@ const FORMS = {
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"role", label:"Your role", type:"select", req:true, options:["Procurement / Purchasing","Operations","EHS / Safety","Environmental / Remediation","Agronomy / Technical","Sustainability / Carbon","Distribution / Resale","Other"], otherPh:"e.g. R&D, Consultant, Facilities" },
       { n:"industry", label:"Industry / application", type:"select", req:true, options:["Oil & gas","Spill response","Environmental remediation","Industrial operations","Landfill / leachate","Municipal / disaster","Agriculture / distribution","Soil blending / compost","Carbon / ESG","Other"], otherPh:"e.g. Marine, Mining, Pipeline" },
-      { n:"documents", label:"Which documents?", type:"select", req:true, options:["Absorbent spec sheet","Absorbent SDS","Absorbent spec + SDS","Biochar spec + lab analysis","OMRI / IBI / Puro certificates","Peer reviewed research package","All technical documents"] },
+      { n:"documents", label:"Which documents?", type:"select", req:true, options:["Absorbent spec sheet","Absorbent SDS","Absorbent spec + SDS","Biochar spec + lab analysis","OMRI listing + Puro.earth certification","Peer reviewed research package","All technical documents"] },
       { n:"useCase", label:"Use case (helps us send the right data)", type:"text", req:false },
     ],
     confirm:"Thanks, check your inbox. We've routed the requested documents to your email and a specialist will follow up if a spec or SDS needs tailoring to your application.",
@@ -1476,7 +1473,7 @@ const ENV_REMEDIATION = {
   caseStudy:{
     scenario:"2 acre brownfield with soil contamination and dewatering need.",
     previous:"Standard absorbent: 18 truck deliveries, 120 tons saturated waste.",
-    result:"American BioCarbon up to 5:1: 7 trucks, 48 tons saturated waste. Saved: 11 loads of logistics, 72 tons of disposal billing, zero compliance callbacks."
+    result:"American BioCarbon up to 5:1: 7 trucks, 48 tons saturated waste. Modeled difference: 11 fewer loads and 72 fewer tons to disposal."
   },
   procurement:[
     { step:"01", label:"Site scoping", desc:"Share your contamination profile. We confirm fit and send the spec sheet with available lab data." },
@@ -1555,7 +1552,7 @@ const RESELLERS_AGRICULTURE = {
 
   program:[
     { title:"Premium Margins", bullets:["Tiered pricing that rewards volume","Quarterly rebates for hitting targets","Co-op marketing budget"] },
-    { title:"Grower Support", bullets:["Windrow & soil trial protocols","USDA-ARS bagasse biochar field study data","Comparison ROI calculators"] },
+    { title:"Grower Support", bullets:["Windrow & soil trial protocols","Published USDA-ARS bagasse biochar field research","Comparison ROI calculators"] },
     { title:"Sales Enablement", bullets:["Co-branded case studies","Tech spec sheets","Certification docs"] },
     { title:"Reliable Supply", bullets:["Planned lead times as capacity scales","Flexible packaging","Seasonal forecasting"] },
     { title:"Direct Account Mgmt", bullets:["Dedicated account manager","Monthly reviews","Quarterly planning","Direct agronomic access"] }
@@ -1585,14 +1582,15 @@ const RESELLERS_AGRICULTURE = {
 const CLAIMS = [
   { claim:"Absorption 5:1", safe:"Holds up to ~5× its weight in liquid (non-viscous), vs ~2.5× for typical wood pellets, per available product data", risky:"'Absorbs any chemical / any spill' or a hard 5:1 with no qualifier", proof:"Product spec / lab", page:"Home, Pellets, Crumble, industries", status:"lab tested" },
   { claim:"Absorbency vs wood", safe:"Outperforms standard wood pellets (~2.5:1)", risky:"'Best absorbent on the market'", proof:"Product spec", page:"Compare, Pellets", status:"lab tested" },
-  { claim:"OMRI / IBI", safe:"OMRI Listed · IBI Certified", risky:"Implying broader approvals not held", proof:"Current listing IDs", page:"Proof band, Biochar, Technical", status:"verified" },
-  { claim:"USDA Organic", safe:"USDA Organic pending", risky:"'USDA Organic certified'", proof:"USDA status", page:"Proof band, Biochar", status:"needs verification" },
+  { claim:"OMRI", safe:"OMRI Listed", risky:"'OMRI Certified' / 'OMRI Certification' (OMRI lists, it does not certify)", proof:"Current OMRI listing ID", page:"Proof band, Biochar, Technical", status:"verified" },
+  { claim:"IBI", safe:"IBI tested, i.e. independently analyzed against the IBI test panel", risky:"'IBI Certified' in any form. American BioCarbon has never held IBI certification.", proof:"Control Laboratories analyses vs IBI thresholds", page:"Proof band, Biochar, Technical", status:"lab tested" },
+  { claim:"USDA Organic", safe:"(Not used) We hold no USDA Organic certification and no confirmed pending application", risky:"'USDA Organic certified' or 'pending'", proof:"USDA application receipt, none on file", page:"None (excluded)", status:"needs verification" },
   { claim:"Puro.earth", safe:"Puro.earth certified carbon removal (CORCs)", risky:"Fixed $/ton or tCO₂e without confirmation", proof:"Puro certification + MRV", page:"Carbon Removal", status:"verified" },
   { claim:"Heavy metals", safe:"Well below IBI / EPA Class A thresholds (per lab analyses)", risky:"'Zero contaminants / completely pure'", proof:"Independent lab reports", page:"Technical, Biochar", status:"lab tested" },
   { claim:"Water-holding", safe:"Holds up to ~3 to 3.5× its weight in water (per technical report)", risky:"'Holds 5× water' as a blanket claim", proof:"American BioCarbon technical report", page:"Biochar, Soil, Ag section", status:"lab tested" },
   { claim:"Carbon durability", safe:"H/C molar ratio <0.7 supports durable, long term carbon storage", risky:"'Permanent forever' with no standard", proof:"Lab H/C + Puro methodology", page:"Carbon, Technical", status:"lab tested" },
   { claim:"Compost speed", safe:"Research shows biochar can shorten compost cycles ~10 to 30%; validate in your own process", risky:"'Our biochar cuts 14 days off your compost'", proof:"Peer reviewed (general) + client's own trial", page:"Soil Blenders, Biochar", status:"field-supported" },
-  { claim:"USDA-ARS study", safe:"Backed by a multi-year USDA-ARS field study on sugarcane bagasse biochar", risky:"Overstating specific yield outcomes", proof:"Study citation", page:"Biochar, About", status:"field-supported" },
+  { claim:"USDA-ARS study", safe:"Supported by published USDA-ARS field research on sugarcane bagasse biochar (independent third-party work on the feedstock class)", risky:"Implying American BioCarbon's product was the study subject, or a study participant, or overstating specific yield outcomes", proof:"Study citation", page:"Biochar, About", status:"field-supported" },
   { claim:"Animal feed/health", safe:"(Not used), bedding absorbency only if added", risky:"Any feed or animal health benefit", proof:"AFIA/AAFCO/GRAS review", page:"None (excluded)", status:"needs verification" },
   { claim:"Carbon $/ton", safe:"Shared during diligence, methodology-specific", risky:"Public fixed price/ton or tCO₂e per ton", proof:"Puro methodology + verified data", page:"Carbon (diligence only)", status:"needs verification" },
 ];
