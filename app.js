@@ -1022,7 +1022,8 @@ function renderTechnical(){
       const badge = c.logo
         ? `<img class="icert-logo" src="${c.logo}" alt="${raw(c.item)} certification logo">`
         : `<span class="icert-mono" aria-hidden="true">${raw(c.short||c.item)}</span>`;
-      const inner = `${badge}<b class="icert-name">${raw(c.item)}</b><span class="icert-label">${raw(c.label)}</span>${sBadge(c.status)}`;
+      const lid = c.listingId ? `<span class="icert-label">Listing ID ${raw(c.listingId)}</span>` : "";
+      const inner = `${badge}<b class="icert-name">${raw(c.item)}</b><span class="icert-label">${raw(c.label)}</span>${lid}${sBadge(c.status)}`;
       return c.url
         ? `<a class="icert-card is-link" href="${c.url}" target="_blank" rel="noopener noreferrer" aria-label="${raw(c.item)}: ${raw(c.label)} (opens official program page)">${inner}<span class="icert-ext" aria-hidden="true">↗</span></a>`
         : `<div class="icert-card">${inner}</div>`;

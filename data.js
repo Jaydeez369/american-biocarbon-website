@@ -126,7 +126,9 @@ const TECH = {
   // drop-in slot for the official logo asset once supplied; until then the card
   // renders an accessible monogram. `url` links to the official program page.
   primaryCerts:[
-    { item:"OMRI Listed", short:"OMRI", label:"Organic input listing for soil amendment", status:"verified", url:"https://www.omri.org/omri-lists", logo:"" },
+    // listingId: fill in the current OMRI listing ID once Jesse supplies it. When set it
+    // renders under the card so a buyer can verify us directly in the OMRI list.
+    { item:"OMRI Listed", short:"OMRI", label:"Organic input listing for soil amendment", status:"verified", url:"https://www.omri.org/omri-lists", logo:"", listingId:"" },
     { item:"IBI Tested", short:"IBI", label:"Analyzed against International Biochar Initiative test-panel thresholds", status:"lab", url:"https://biochar-international.org/", logo:"" },
     { item:"Puro.earth", short:"Puro", label:"CORC carbon-removal methodology", status:"verified", url:"https://puro.earth/", logo:"" },
   ],
@@ -404,9 +406,9 @@ const HOME = {
         uses:["Enriching soil and growing media as a renewable peat replacement","High water holding capacity","Supports root growth through improved aeration","Heat treated during processing"],
         chips:["1 lb sample bag","Locally sourced","Peat alternative"], sampleWeight:"1 LB", photo:ASSETS.pelletsPhoto, img:ASSETS.fiberBag, docIds:["spec"],
         bag:{ banner:"MULTIPURPOSE FIBER · LOCALLY SOURCED", iconSet:"absorbent",
-          icons:["Locally Sourced","Renewable Peat Replacement","Water Holding Capacity","Pathogen Free"],
+          icons:["Locally Sourced","Renewable Peat Replacement","Water Holding Capacity","Heat Treated"],
           uses:"Soil & Growing Media Amendment (Renewable Peat Replacement) | Raised Beds & Container Gardening | Animal Bedding & Litter | Spill Cleanup (Oil, Solvents & Non-Viscous Chemicals) | Landfill Leachate Control",
-          desc:"Microbe treated sugarcane bagasse fiber, grown and processed in Louisiana. As a renewable replacement for mined peat, it enriches soil and growing media, holds water exceptionally well, and promotes strong root growth through aeration, all while being pathogen free. It also spreads quickly across wide areas for spill cleanup and works just as well as soft animal bedding. Renewable, biodegradable, and locally grown.",
+          desc:"Microbe treated sugarcane bagasse fiber, grown and processed in Louisiana. As a renewable replacement for mined peat, it enriches soil and growing media, holds water well, and supports strong root growth through improved aeration. It also spreads quickly across wide areas for spill cleanup and works as soft animal bedding. Renewable, biodegradable, and locally grown.",
           ingredients:"MICROBE TREATED SUGARCANE BAGASSE FIBER", omri:false } },
     ],
     filters:["All","Biochar","Soil","Absorbents"],
