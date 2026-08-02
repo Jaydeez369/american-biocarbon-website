@@ -711,7 +711,6 @@ footer.site .foot-cta a.btn:hover{color:#fff}
 footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a;font-size:12.5px;color:#cdd8ee;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 
 /* ---------- Responsive ---------- */
-.mobile-cta{display:none}
 /* Nav collapses to the burger at 1140px, not 940: the seven-item menu is ~836px wide, so
    with the logo, the Buy Now button and the gaps it needs ~1120px to lay out. Below that
    it used to overrun the viewport (menu and CTA both extended past the right edge). */
@@ -754,8 +753,6 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
   .hslide-h{font-size:34px} .hslide-sub{font-size:16px} .block h2{font-size:26px} .block{padding:52px 0}
   .hslide-content .wrap{padding-left:22px;padding-right:22px}
   footer.site .cols{grid-template-columns:1fr}
-  .mobile-cta{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(26,55,108,.97);border-top:1px solid #24478a;box-shadow:0 -6px 20px rgba(15,32,68,.28)}
-  .mobile-cta .btn{flex:1 1 0;min-width:0;padding:13px 10px;font-size:14.5px;white-space:nowrap}
 }
 
 /* ============================================================
