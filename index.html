@@ -22,10 +22,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://cdn.shopify.com" crossorigin />
-  <link rel="preload" as="image" href="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164" fetchpriority="high" />
+  <!-- imagesrcset/imagesizes must mirror the hero <img> srcset (app.js cdnSrcset), or the
+       preload fetches the full-size master and the element then picks a different
+       candidate, downloading the hero twice. -->
+  <link rel="preload" as="image" href="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164"
+        imagesrcset="https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164&amp;width=640 640w, https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164&amp;width=960 960w, https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164&amp;width=1280 1280w, https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164&amp;width=1920 1920w, https://cdn.shopify.com/s/files/1/0773/9270/7876/files/hands.webp?v=1686923164&amp;width=2560 2560w"
+        imagesizes="100vw" fetchpriority="high" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400..800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="tokens.css?v=65742628" />
-  <link rel="stylesheet" href="styles.css?v=a6fafa6a" />
+  <link rel="stylesheet" href="styles.css?v=0148e6b6" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -83,6 +88,6 @@
   <footer class="site"><div class="wrap" id="footer"><!-- injected --></div></footer>
 
   <script src="data.js?v=2acdb88a" defer></script>
-  <script src="app.js?v=8a6ded56" defer></script>
+  <script src="app.js?v=d568a7c8" defer></script>
 </body>
 </html>

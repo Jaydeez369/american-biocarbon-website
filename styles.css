@@ -469,7 +469,20 @@ ul.checks li{position:relative;padding:6px 0 6px 26px;color:var(--graphite);font
 ul.checks li::before{content:"";position:absolute;left:0;top:12px;width:12px;height:8px;border-left:2.5px solid var(--green);border-bottom:2.5px solid var(--green);transform:rotate(-45deg)}
 
 /* ---------- Tables ---------- */
-.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--white)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-lg);
+  /* Scroll affordance: the two "cover" gradients sit on the content (local) and slide
+     away as you scroll, revealing the fixed shadows underneath. When the table fits,
+     the covers overlap the shadows and nothing shows. Pure CSS, no JS, no markup. */
+  background:
+    linear-gradient(to right, var(--white) 30%, rgba(255,255,255,0)) left center,
+    linear-gradient(to left,  var(--white) 30%, rgba(255,255,255,0)) right center,
+    radial-gradient(farthest-side at 0 50%,   rgba(23,42,79,.16), rgba(23,42,79,0)) left center,
+    radial-gradient(farthest-side at 100% 50%, rgba(23,42,79,.16), rgba(23,42,79,0)) right center;
+  background-color:var(--white);
+  background-repeat:no-repeat;
+  background-size:44px 100%,44px 100%,15px 100%,15px 100%;
+  background-attachment:local,local,scroll,scroll;
+  overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:520px}
 thead th{background:var(--graphite);color:#fff;text-align:left;padding:13px 16px;font-size:13px;font-weight:700;letter-spacing:.3px}
 thead th:first-child{border-top-left-radius:var(--r-lg)} thead th:last-child{border-top-right-radius:var(--r-lg)}
@@ -742,7 +755,6 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
   footer.site .cols{grid-template-columns:1fr 1fr}
 }
 @media(max-width:560px){
-  body{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
   .cp-metrics{gap:12px;padding-top:22px}
   .cp-m b{font-size:20px}
   .cp-m span{font-size:12px;margin-top:4px}
@@ -858,3 +870,61 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
 .cmp-fig{margin:20px 0 0;padding:0}
 .cmp-fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#000}
 .cmp-fig figcaption{margin-top:8px;font-size:12.5px;line-height:1.45;color:var(--mute)}
+
+/* ============================================================
+   Small-screen legibility & touch targets
+   Two rules only: nothing renders below 12.5px, and anything you
+   tap is at least 44px tall (Apple HIG / Material minimum). Sizing
+   only - no layout, grid or color changes.
+   ============================================================ */
+@media (max-width:820px){
+  /* --- 12.5px type floor. These are the mono labels/badges that sit at 10.5-12px. --- */
+  .card .body .icp,
+  .doccard .cat,
+  .buycard .availline,
+  .buycard .notify,
+  .docrow.study .study-note,
+  .buy-docs,
+  .badge,
+  .cmp-fig figcaption,
+  .chips span,
+  .proofrow span,
+  .freenote,
+  .shop-doc,
+  .crumb,
+  .shop-head .crumb,
+  .phead .crumb,
+  .ab-hero .crumb,
+  .cp-m span,
+  .hdot-label,
+  .ab-eyebrow,
+  .ab-strip-note,
+  .ab-hero-fig figcaption{font-size:12.5px}
+
+  /* --- 44px touch targets. Scoped to real controls; inline links inside a
+         paragraph are deliberately excluded so body copy keeps its rhythm. --- */
+  .btn,
+  .cta-mini,
+  .burger,
+  .doccard .dc-dl,
+  .filter-btn,
+  .hero-toggle,
+  .rf-btn{min-height:44px}
+  .hero-toggle{width:44px;height:44px;min-width:44px}
+  /* Carousel dots are a 24px control today; the visible rule stays put, the tappable
+     area grows around it via padding so the hero layout is unchanged. */
+  .hdot{min-height:44px;justify-content:center}
+  /* Doc links inside a buy card ("spec | SDS") and breadcrumb links sit at ~19-20px. */
+  .buy-docs a,
+  .crumb a{display:inline-flex;align-items:center;min-height:44px}
+  /* "Request document" links sit inside table cells on the animal-bedding page. */
+  td > a{display:inline-flex;align-items:center;min-height:44px}
+  .rf-btn{padding:0 14px;display:inline-flex;align-items:center}
+  .burger{min-width:44px}
+  /* Standalone (block-level) links: nav, footer columns, doc titles, notify. */
+  .menu a,
+  footer.site .cols a,
+  .doccard a.dc-title,
+  .buycard .notify{display:block;min-height:44px;line-height:1.35;
+    padding-top:calc((44px - 1.35em) / 2);padding-bottom:calc((44px - 1.35em) / 2)}
+}

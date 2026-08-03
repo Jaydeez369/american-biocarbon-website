@@ -6,6 +6,20 @@ const esc = s => String(s??"").replace(/&(?!amp;|lt;|gt;|quot;|#39;|#)/g,"&amp;"
 // allow pre-escaped entities in copy (we author with &amp; etc.)
 const raw = s => String(s??"");
 
+// The hero slides are full-bleed and were shipping a single desktop master to every
+// device: a 375px phone downloaded the 1920px (and in two cases 2560px PNG) original.
+// The Shopify CDN resizes on demand via ?width=N, so emit a srcset and let the browser
+// pick. Returns "" for non-Shopify URLs so local assets are left alone.
+const CDN_WIDTHS = [640, 960, 1280, 1920, 2560];
+function cdnSrcset(url, sizes = "100vw") {
+  if (!url || !/cdn\.shopify\.com/.test(url)) return "";
+  // drop any width the asset URL already hardcodes, then re-add per candidate
+  const base = String(url).replace(/([?&])width=\d+&?/, "$1").replace(/[?&]$/, "");
+  const sep = base.includes("?") ? "&" : "?";
+  const set = CDN_WIDTHS.map(w => `${base}${sep}width=${w} ${w}w`).join(", ");
+  return `srcset="${set}" sizes="${sizes}"`;
+}
+
 /* ---- analytics (privacy-preserving, backend-agnostic) ----
    Pushes to window.dataLayer (GA4/GTM-ready) and window.abcEvents.
    Never sends PII (no field values), only event names + non-identifying context. */
@@ -340,7 +354,7 @@ function renderHome(){
     <h1 class="sr-only">American BioCarbon - sugarcane-bagasse industrial absorbents and biochar</h1>
     ${HS.map((s,i)=>{ const Ht = "h2"; return `
       <div class="hslide${i===0?" active":""}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${HS.length}: ${raw(s.label)}" aria-hidden="${i===0?"false":"true"}" ${i===0?"":"inert"}>
-        <img class="hslide-img" src="${s.img}" alt="${raw(s.label)}" style="object-position:${s.pos||'50% 55%'};--z:${s.zoom||1.05};--o:${s.origin||'50% 55%'}" ${i?'loading="lazy"':'fetchpriority="high"'}>
+        <img class="hslide-img" src="${s.img}" ${cdnSrcset(s.img)} alt="${raw(s.label)}" style="object-position:${s.pos||'50% 55%'};--z:${s.zoom||1.05};--o:${s.origin||'50% 55%'}" ${i?'loading="lazy"':'fetchpriority="high"'}>
         <div class="hslide-scrim"></div>
         <div class="hslide-content">
           <div class="wrap">
@@ -1305,7 +1319,7 @@ function renderEnvironmentalRemediation(){
           <div style="font-size:13px;color:var(--mute);margin-bottom:6px">American BioCarbon:</div>
           <b>${raw(p.caseStudy.result)}</b>
         </div>
-        <p style="font-size:12px;color:var(--mute);margin-top:10px">Modeled scenario based on up-to-5:1 absorption versus a typical wood or clay sorbent - not a specific customer result.</p>
+        <p style="font-size:12.5px;color:var(--mute);margin-top:10px">Modeled scenario based on up-to-5:1 absorption versus a typical wood or clay sorbent - not a specific customer result.</p>
       </div>
       <div>
         <div class="eyebrow-line"></div><h2 style="margin-top:6px">How we work with you</h2>
@@ -1420,7 +1434,7 @@ function renderResellersAgriculture(){
       ${p.timeline.map(t=>`<div style="padding:14px;background:var(--paper-2);border-left:4px solid var(--crimson);border-radius:2px">
         <div style="font-weight:700;color:var(--crimson);margin-bottom:4px">${raw(t.day)}</div>
         <b style="display:block;font-size:14px;margin-bottom:4px">${raw(t.label)}</b>
-        <p style="font-size:12px;line-height:1.4;color:#666;margin:0">${raw(t.desc)}</p>
+        <p style="font-size:12.5px;line-height:1.45;color:#666;margin:0">${raw(t.desc)}</p>
       </div>`).join("")}
     </div>
   </div></section>
