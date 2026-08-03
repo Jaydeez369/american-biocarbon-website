@@ -534,6 +534,20 @@ const HOME = {
   }
 };
 
+/* schema.org Product.category, per product. Read by both the client renderer
+   (app.js productLd) and the prerenderer, so the two cannot drift apart. Only
+   the three bagasse sorbents are absorbents: the 100% biochar is a soil
+   amendment, the pre-blend is growing media, and a CORC is a carbon credit
+   rather than a physical good. */
+const PRODUCT_CATEGORY = {
+  "absorbent-pellets":"Industrial Absorbent",
+  "absorbent-crumble":"Industrial Absorbent",
+  "absorbent-fiber":"Industrial Absorbent",
+  "agricultural-biochar":"Soil Amendment",
+  "biochar-infused-soil":"Growing Media",
+  "carbon-removal":"Carbon Removal Credit",
+};
+
 /* ============ PRODUCTS ============ */
 const PRODUCTS = {
   "absorbent-pellets":{

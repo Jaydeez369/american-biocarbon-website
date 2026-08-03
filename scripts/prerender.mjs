@@ -45,14 +45,14 @@ function loadData() {
     navigator: {}, location: { pathname: "/", search: "" }, console,
     __CAP: (o) => { captured = o; },
   };
-  const epilogue = `\n;__CAP({HOME:typeof HOME!=="undefined"?HOME:null,PRODUCTS:typeof PRODUCTS!=="undefined"?PRODUCTS:null,INDUSTRIES:typeof INDUSTRIES!=="undefined"?INDUSTRIES:null,ENV_REMEDIATION:typeof ENV_REMEDIATION!=="undefined"?ENV_REMEDIATION:null,RESELLERS_INDUSTRIES:typeof RESELLERS_INDUSTRIES!=="undefined"?RESELLERS_INDUSTRIES:null,RESELLERS_AGRICULTURE:typeof RESELLERS_AGRICULTURE!=="undefined"?RESELLERS_AGRICULTURE:null});`;
+  const epilogue = `\n;__CAP({HOME:typeof HOME!=="undefined"?HOME:null,PRODUCTS:typeof PRODUCTS!=="undefined"?PRODUCTS:null,INDUSTRIES:typeof INDUSTRIES!=="undefined"?INDUSTRIES:null,ENV_REMEDIATION:typeof ENV_REMEDIATION!=="undefined"?ENV_REMEDIATION:null,RESELLERS_INDUSTRIES:typeof RESELLERS_INDUSTRIES!=="undefined"?RESELLERS_INDUSTRIES:null,RESELLERS_AGRICULTURE:typeof RESELLERS_AGRICULTURE!=="undefined"?RESELLERS_AGRICULTURE:null,PRODUCT_CATEGORY:typeof PRODUCT_CATEGORY!=="undefined"?PRODUCT_CATEGORY:null});`;
   vm.runInNewContext(src + epilogue, sandbox, { filename: "data.js" });
   return captured;
 }
 
 const D = loadData();
-if (!D.HOME || !D.PRODUCTS || !D.INDUSTRIES) {
-  console.error("✗ Prerender: could not extract HOME/PRODUCTS/INDUSTRIES from data.js.");
+if (!D.HOME || !D.PRODUCTS || !D.INDUSTRIES || !D.PRODUCT_CATEGORY) {
+  console.error("✗ Prerender: could not extract HOME/PRODUCTS/INDUSTRIES/PRODUCT_CATEGORY from data.js.");
   process.exit(1);
 }
 
@@ -71,7 +71,8 @@ const CERTS = { "agricultural-biochar": ["OMRI Listed"], "carbon-removal": ["Pur
 const productLd = (id, p) => {
   const certs = CERTS[id] || [];
   return { "@context": "https://schema.org", "@type": "Product", name: p.name,
-    description: (p.seo && p.seo.desc) || p.sub || p.claim || "", category: "Industrial Absorbent",
+    description: (p.seo && p.seo.desc) || p.sub || p.claim || "",
+    category: D.PRODUCT_CATEGORY[id] || "Industrial Absorbent",
     brand: { "@type": "Brand", name: SITE_NAME }, image: OG_IMAGE,
     manufacturer: { "@type": "Organization", name: SITE_NAME },
     ...(certs.length ? { hasCertification: certs.map((c) => ({ "@type": "Certification", name: c })) } : {}) };

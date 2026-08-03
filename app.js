@@ -1204,9 +1204,13 @@ function productLd(p){
   const key = prodId(p);
   const CERT_NAMES = { "agricultural-biochar":["OMRI Listed"], "carbon-removal":["Puro.earth Certified"] };
   const certs = CERT_NAMES[key] || [];
+  // Category must describe the product too. Only the three bagasse sorbents are
+  // absorbents; the biochar is a soil amendment, the blend is growing media, and
+  // a CORC is a carbon credit, not a physical good.
+  const category = PRODUCT_CATEGORY[key] || "Industrial Absorbent";
   return { "@context":"https://schema.org", "@type":"Product",
     name: p.name, description: (p.seo&&p.seo.desc)||p.sub||p.claim||"",
-    category: "Industrial Absorbent", brand: { "@type":"Brand", name: SITE.name },
+    category, brand: { "@type":"Brand", name: SITE.name },
     image: SITE.origin+SITE.ogImage,
     manufacturer: { "@type":"Organization", name: SITE.name },
     ...(certs.length ? { hasCertification: certs.map(c=>({ "@type":"Certification", name:c })) } : {}) };
