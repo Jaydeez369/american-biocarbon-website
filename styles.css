@@ -899,7 +899,13 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
   .hdot-label,
   .ab-eyebrow,
   .ab-strip-note,
-  .ab-hero-fig figcaption{font-size:12.5px}
+  .ab-hero-fig figcaption,
+  .ac-benefit span,
+  .ac-cta,
+  .filt-h,
+  .rf-label,
+  .doccard .fmt,
+  .hero-toggle-ic{font-size:12.5px}
 
   /* --- 44px touch targets. Scoped to real controls; inline links inside a
          paragraph are deliberately excluded so body copy keeps its rhythm. --- */
@@ -913,10 +919,13 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
   .hero-toggle{width:44px;height:44px;min-width:44px}
   /* Carousel dots are a 24px control today; the visible rule stays put, the tappable
      area grows around it via padding so the hero layout is unchanged. */
-  .hdot{min-height:44px;justify-content:center}
-  /* Doc links inside a buy card ("spec | SDS") and breadcrumb links sit at ~19-20px. */
+  .hdot{min-height:44px;min-width:44px;justify-content:center}
+  /* Doc links inside a buy card ("spec | SDS") and breadcrumb links sit at ~19-20px.
+     Short labels ("SDS", "Home") also fall well under 44px wide, so the tappable box
+     is widened and the text centred inside it. The visible type is unchanged. */
   .buy-docs a,
-  .crumb a{display:inline-flex;align-items:center;min-height:44px}
+  .crumb a{display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;min-width:44px}
   /* "Request document" links sit inside table cells on the animal-bedding page. */
   td > a{display:inline-flex;align-items:center;min-height:44px}
   .rf-btn{padding:0 14px;display:inline-flex;align-items:center}

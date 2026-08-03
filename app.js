@@ -436,8 +436,7 @@ function renderProduct(id){
             // biochar only, never to absorbents or the infused-soil blend.
             const CERT_SET = { "absorbent-pellets":"absorbents","absorbent-crumble":"absorbents","absorbent-fiber":"absorbents","agricultural-biochar":"biochar","biochar-infused-soil":"soil","carbon-removal":"carbon" };
             const set = (TECH.certSets[CERT_SET[id]] || TECH.certSets.absorbents).filter(c=>c.status!=="pending");
-            const usda = (CERT_SET[id]==="biochar") ? `<p class="form-note">USDA Organic certification in progress.</p>` : "";
-            return `<ul class="checks">${set.slice(0,4).map(c=>`<li><b>${raw(c.item)}</b>, ${raw(c.scope)}</li>`).join("")}</ul>${usda}`;
+            return `<ul class="checks">${set.slice(0,4).map(c=>`<li><b>${raw(c.item)}</b>, ${raw(c.scope)}</li>`).join("")}</ul>`;
           })()}
         </div>
         <img class="procimg" src="assets/industry/${id}.jpg?v=v2" alt="${raw(p.name)}" loading="lazy">
