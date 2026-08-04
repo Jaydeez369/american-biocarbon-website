@@ -1228,6 +1228,30 @@ const SAMPLE_FOR_PRODUCT = {
   "absorbent-crumble": SAMPLE_CHOICES[1],
   "agricultural-biochar": SAMPLE_CHOICES[2],
 };
+
+/* Where a submitted form is delivered. Single source of truth: edit here, not in app.js.
+   Keys match FORMS keys; DEFAULT catches anything not listed. The three sample-request
+   forms (bedding, sample, biochar) go to the sample desk.
+   NOTE: delivery requires LEAD_ENDPOINT below to be set. Until then submissions are
+   NOT sent anywhere - see the comment on LEAD_ENDPOINT. */
+const SAMPLE_DESK = ["sarah.boone@americanbiocarbon.com","victor.jehle@americanbiocarbon.com"];
+const LEAD_RECIPIENTS = {
+  bedding: SAMPLE_DESK,   // Request a Sample Kit - animal bedding
+  sample:  SAMPLE_DESK,   // Request a Sample Kit - industrial absorbents
+  biochar: SAMPLE_DESK,   // Request a Sample Kit - agricultural biochar
+  DEFAULT: SAMPLE_DESK,
+};
+
+/* POST target for form submissions. Handled by the Pages Function in functions/api/lead.js,
+   which runs before static assets and before the SPA fallback in _redirects.
+   The payload posted is { form, recipients, fields, page, ts }.
+   NOTE: the function ignores the recipients sent from here and mails a fixed list held
+   server side, so the endpoint cannot be abused as an open relay. The LEAD_RECIPIENTS
+   list above is therefore intent and logging only: to change who actually receives a
+   lead, edit RECIPIENTS in functions/api/lead.js as well.
+   Delivery also requires the RESEND_API_KEY secret to be set on the Pages project. */
+const LEAD_ENDPOINT = "/api/lead";
+
 const FORMS = {
   bedding:{
     name:"Request a Sample Kit",

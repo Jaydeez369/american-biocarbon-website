@@ -569,10 +569,30 @@ function buildForm(kind, mountSel, qs){
     if(btn){ btn.disabled=true; btn.textContent="Sending…"; }
     // event only, no field values; product id is catalog context, not PII
     track("lead_submit", { form: kind, routing: (f.routing||"").split(".")[0], ...(ctx.productId?{product:ctx.productId}:{}) });
+    deliverLead(kind, form);
     mount.innerHTML = `<div class="form-success" role="status" tabindex="-1">✓ ${raw(f.confirm)}</div>`;
     const ok = mount.querySelector(".form-success"); if(ok) ok.focus();
     window.scrollTo({top:mount.getBoundingClientRect().top+window.scrollY-120,behavior:"smooth"});
   });
+}
+/* Deliver a submitted lead to the addresses configured in data.js LEAD_RECIPIENTS.
+   Fire-and-forget: the visitor already has their confirmation, so a delivery failure must
+   never surface as an error to them - it is logged for us instead. If LEAD_ENDPOINT is
+   empty nothing is sent and a warning is logged, which is the pre-launch state. */
+function deliverLead(kind, form){
+  const to = (typeof LEAD_RECIPIENTS!=="undefined" && (LEAD_RECIPIENTS[kind]||LEAD_RECIPIENTS.DEFAULT)) || [];
+  if(typeof LEAD_ENDPOINT==="undefined" || !LEAD_ENDPOINT){
+    console.warn(`[lead] ${kind}: LEAD_ENDPOINT is not set - submission was NOT delivered. Intended recipients: ${to.join(", ")}`);
+    return;
+  }
+  const fields = {};
+  new FormData(form).forEach((v,k)=>{ fields[k]=v; });
+  fetch(LEAD_ENDPOINT, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ form:kind, recipients:to, fields, page:location.pathname+location.hash, ts:new Date().toISOString() }),
+    keepalive:true
+  }).catch(err=>console.error(`[lead] ${kind}: delivery failed`, err));
 }
 function fieldHTML(fl, ctx){
   const req = fl.req?` <span class="req">*</span>`:"";
