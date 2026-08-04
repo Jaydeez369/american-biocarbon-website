@@ -16,10 +16,14 @@
  *                   root SPF record for Microsoft 365 and Proofpoint is never touched.
  */
 
-const RECIPIENTS = [
-  "sarah.boone@americanbiocarbon.com",
-  "victor.jehle@americanbiocarbon.com",
-];
+/* sales@ is the canonical destination for every website enquiry. It is a real, monitored
+   address: Shopify's authenticated notification sender and an order-notification recipient.
+   Deliberately NOT sarah.boone@ / victor.jehle@americanbiocarbon.com, which the handoff docs
+   specified but which appear nowhere in the live Shopify configuration. Sarah and Victor
+   actually work from sboone@cs-ops.com and victor.jehle@cs-ops.com, so mail to the
+   americanbiocarbon.com spellings may reach no inbox at all. Routing to sales@ keeps
+   delivery on an address known to be live, and it can be fanned out from there. */
+const RECIPIENTS = ["sales@americanbiocarbon.com"];
 
 const DEFAULT_FROM = "American BioCarbon <leads@send.americanbiocarbon.com>";
 const MAX_BODY_BYTES = 32 * 1024;

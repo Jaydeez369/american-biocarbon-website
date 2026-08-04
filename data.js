@@ -1237,7 +1237,7 @@ const SAMPLE_FOR_PRODUCT = {
    NOTE: this list is intent and logging only. The Pages Function in functions/api/lead.js
    holds the authoritative recipient list and ignores whatever the browser sends, so that
    the endpoint cannot be used to mail arbitrary addresses. Change both together. */
-const SAMPLE_DESK = ["sarah.boone@americanbiocarbon.com","victor.jehle@americanbiocarbon.com"];
+const SAMPLE_DESK = ["sales@americanbiocarbon.com"];
 const LEAD_RECIPIENTS = {
   bedding:     SAMPLE_DESK,   // Request a Sample Kit - animal bedding
   sample:      SAMPLE_DESK,   // Request a Sample Kit - industrial absorbents
