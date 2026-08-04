@@ -1229,17 +1229,24 @@ const SAMPLE_FOR_PRODUCT = {
   "agricultural-biochar": SAMPLE_CHOICES[2],
 };
 
-/* Where a submitted form is delivered. Single source of truth: edit here, not in app.js.
-   Keys match FORMS keys; DEFAULT catches anything not listed. The three sample-request
-   forms (bedding, sample, biochar) go to the sample desk.
-   NOTE: delivery requires LEAD_ENDPOINT below to be set. Until then submissions are
-   NOT sent anywhere - see the comment on LEAD_ENDPOINT. */
+/* Where a submitted form is delivered. Keys match FORMS keys; DEFAULT catches anything
+   not listed. Every form on the site currently goes to Sarah and Victor: that is a
+   deliberate decision (confirmed 2026-08-04), not an oversight or a placeholder. Quote,
+   distributor, docs and contact enquiries were previously undirected; routing them here
+   is what stops them being dropped. Split them out when there is a reason to.
+   NOTE: this list is intent and logging only. The Pages Function in functions/api/lead.js
+   holds the authoritative recipient list and ignores whatever the browser sends, so that
+   the endpoint cannot be used to mail arbitrary addresses. Change both together. */
 const SAMPLE_DESK = ["sarah.boone@americanbiocarbon.com","victor.jehle@americanbiocarbon.com"];
 const LEAD_RECIPIENTS = {
-  bedding: SAMPLE_DESK,   // Request a Sample Kit - animal bedding
-  sample:  SAMPLE_DESK,   // Request a Sample Kit - industrial absorbents
-  biochar: SAMPLE_DESK,   // Request a Sample Kit - agricultural biochar
-  DEFAULT: SAMPLE_DESK,
+  bedding:     SAMPLE_DESK,   // Request a Sample Kit - animal bedding
+  sample:      SAMPLE_DESK,   // Request a Sample Kit - industrial absorbents
+  biochar:     SAMPLE_DESK,   // Request a Sample Kit - agricultural biochar
+  quote:       SAMPLE_DESK,   // Request a quote
+  distributor: SAMPLE_DESK,   // Distributor and reseller enquiries
+  docs:        SAMPLE_DESK,   // Technical document requests
+  contact:     SAMPLE_DESK,   // General contact
+  DEFAULT:     SAMPLE_DESK,
 };
 
 /* POST target for form submissions. Handled by the Pages Function in functions/api/lead.js,
