@@ -1280,7 +1280,7 @@ const FORMS = {
       { n:"message", label:"Anything else (optional)", type:"textarea", req:false },
     ],
     confirm:"Thanks, your animal bedding sample request is in. A bedding supply specialist will reply within one business day to confirm the sample, the ship to, and the measurements for your side by side comparison, and to send the product specifications.",
-    autoreply:"Subject: Your American BioCarbon bedding sample\n\nThanks for requesting a bagasse animal bedding sample. The product specifications are attached. A bedding supply specialist will follow up within one business day to confirm your ship to and the comparison you want to run against your current bedding., American BioCarbon, White Castle, LA",
+    autoreply:"Subject: Your American BioCarbon bedding sample\n\nThanks for requesting a bagasse animal bedding sample. A bedding supply specialist will follow up within one business day with the product specifications, to confirm your ship to, and to agree the comparison you want to run against your current bedding., American BioCarbon, White Castle, LA",
     routing:"Bedding → bedding supply specialist queue. Create Account + Contact + Deal (type: Bedding Sample) + Sample Request; attach product specifications.",
     scoring:"+ commercial operation, + named current material, + defined measurement, + in-region ship to; - personal email, - no measurable need."
   },
@@ -1299,7 +1299,7 @@ const FORMS = {
       { n:"useCase", label:"Use case", type:"text", req:true, ph:"e.g. reserve-pit solidification, spill cleanup, leachate control" },
     ],
     confirm:"Thanks, your request for one complimentary sample bag is in (shipping included). A specialist will reply within one business day with the SDS and spec sheet attached.",
-    autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. Attached are the SDS and spec sheet for our bagasse absorbent. A specialist will follow up within one business day to confirm your use case and ship to., American BioCarbon, White Castle, LA",
+    autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. The specification sheet for our bagasse absorbent pellets is here: https://americanbiocarbon.com/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf\n\nA specialist will follow up within one business day to confirm your use case and ship to, and can supply safety documentation for your application., American BioCarbon, White Castle, LA",
     routing:"Industrial → specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach SDS/spec; tag by buyerType + fluid.",
     scoring:"+ named fluid, + named use case, + qualified buyer type; - personal email, - no stated use case."
   },
@@ -1321,7 +1321,7 @@ const FORMS = {
       { n:"timeline", label:"Timeline", type:"select", req:false, options:["Active need now","This quarter","Evaluating"] },
     ],
     confirm:"Thanks, your bulk quote request is in. We'll reply within one business day with freight aware pricing plus the SDS and spec sheet.",
-    autoreply:"Subject: Your American BioCarbon bulk quote\n\nThanks for your quote request. We're preparing freight aware pricing for your volume and ship to. Meanwhile, the SDS and spec sheet are attached., American BioCarbon",
+    autoreply:"Subject: Your American BioCarbon bulk quote\n\nThanks for your quote request. We're preparing freight aware pricing for your volume and ship to.\n\nMeanwhile the specification sheets are here:\nAbsorbent pellets: https://americanbiocarbon.com/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf\nPremium biochar: https://americanbiocarbon.com/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf, American BioCarbon",
     routing:"Create Account + Contact + Deal (type: Bulk / Truckload); assign to sales; freight-zone the ship to.",
     scoring:"+ volume tier, + recurring frequency, + zone A/B, + active-now."
   },
@@ -1339,7 +1339,7 @@ const FORMS = {
       { n:"useCase", label:"Intended use", type:"select", req:true, options:["Soil amendment / field application","Compost blending","Potting or growing media","Turf / landscape","Trial before bulk purchase","Resale","Other"], otherPh:"e.g. livestock bedding, nursery substrate" },
     ],
     confirm:"Thanks, your free biochar sample request is in (shipping included). We'll follow up within one business day with the sample and spec sheet. Composters: ask about our side by side windrow trial protocol.",
-    autoreply:"Subject: Your American BioCarbon biochar sample\n\nThanks for your interest. The spec sheet is attached; we'll confirm your sample and ship to shortly. Composters: ask about our side by side windrow trial protocol., American BioCarbon",
+    autoreply:"Subject: Your American BioCarbon biochar sample\n\nThanks for your interest. The premium biochar specification sheet is here: https://americanbiocarbon.com/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf\n\nWe'll confirm your sample and ship to shortly. Composters: ask about our side by side windrow trial protocol., American BioCarbon",
     routing:"Create Account + Contact + Deal (type: Sample, segment: ag); route to distributor/ag lead; tag by buyerType + intended use.",
     scoring:"+ distributor/blender/composter, + resale, + trial-before-bulk; - consumer/home use."
   },
@@ -1396,7 +1396,7 @@ const FORMS = {
       { n:"useCase", label:"Use case (helps us send the right data)", type:"text", req:false },
     ],
     confirm:"Thanks, check your inbox. We've routed the requested documents to your email and a specialist will follow up if a spec or SDS needs tailoring to your application.",
-    autoreply:"Subject: Your American BioCarbon technical documents\n\nThanks for your request. Attached are the spec sheets, SDS, and/or lab data for your application. Our full peer reviewed research package is included where requested. A specialist will follow up within one business day., American BioCarbon, White Castle, LA",
+    autoreply:"Subject: Your American BioCarbon technical documents\n\nThanks for your request. The published specification sheets are here:\nAbsorbent pellets: https://americanbiocarbon.com/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf\nPremium biochar: https://americanbiocarbon.com/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf\n\nA specialist will follow up within one business day with the lab data, safety documentation and research relevant to your application., American BioCarbon, White Castle, LA",
     routing:"Gated download. Create Contact + Activity (doc request) + Deal if volume signal; tag by role + industry + documents; deliver files by email.",
     scoring:"+ procurement/EHS role, + oil&gas/remediation industry, + 'all documents', + named use case; - personal email, - student/research-only."
   },
