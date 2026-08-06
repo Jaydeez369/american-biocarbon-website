@@ -8,5 +8,16 @@
 # E7: canonicalize duplicate topic URLs to their richer dedicated landing pages
 /industry/environmental-remediation    /environmental-remediation-solutions    301
 /industry/distributors    /distributors-resellers-industries    301
+# Shopify commerce paths must NEVER reach the SPA fallback below. Post-cutover the apex
+# serves this site, so a stale /cart/<variant>:<qty> permalink would match /* and render
+# the homepage with a 200 - a broken checkout that looks like a working page and shows up
+# in no error log (verified 2026-08-06). Bounce them to the store instead.
+# These MUST stay above the /* fallback; _redirects matches top-down, first rule wins.
+# Requires shop.americanbiocarbon.com to be Shopify's PRIMARY domain - if the apex is
+# still primary, Shopify 301s back here and the two rules form an infinite loop.
+/cart           https://shop.americanbiocarbon.com/cart              302
+/cart/*         https://shop.americanbiocarbon.com/cart/:splat       302
+/checkouts/*    https://shop.americanbiocarbon.com/checkouts/:splat  302
+/checkout       https://shop.americanbiocarbon.com/checkout          302
 # Marketing site hash-router SPA fallback
 /*    /index.html    200

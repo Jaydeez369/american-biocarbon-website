@@ -29,8 +29,8 @@ const DATA = {
 
   /* ============ 1. EXECUTIVE SUMMARY ============ */
   exec: {
-    thesis: "BIOCHAR IS NOW PRIORITY #1 and is BULK-CAPABLE: we hold 80 metric tons of finished biochar ready to ship, so winning biochar trials can convert straight to paid orders against inventory on hand. Absorbent Pellets stay SAMPLES-FIRST for now — ongoing production capacity (~400 MT/mo) isn't committed for pellet tonnage yet, so we don't quote bulk pellets. Across both products the door-opener is the same: get free performance samples of our two live products (100% Biochar first, Absorbent Pellets second) into buyers' hands — that is the first win we optimize the entire machine for. Outreach never mentions LOIs, contracts, or commitments; the only ask is 'test a free sample against what you use now.' The engine follows the ReRoofGen / Instantly playbook: 1,000+ verified contacts, warmed multi-inbox domains, many short hyper-targeted-to-ICP campaigns, and heavy A/B testing. LOIs, reorders, bulk orders, and the CDR/carbon layer are all quiet later steps that only happen 1:1 after a sample wins a trial and Q4 capacity firms up.",
-    wedge: "BIOCHAR IS PRIORITY #1. We now hold 80 metric tons of finished 100% biochar ready to ship — real, sellable tonnage, not a future promise. Biochar into ag distributors, compost/soil blenders, nurseries, ranchers, and growers is both the highest-leverage channel (one distributor represents many acres) AND, uniquely, bulk-capable today: samples open the door and winning trials convert straight into paid orders against inventory on hand. Absorbent Pellets into oil & gas, spill-response, landfill, and industrial EHS buyers are now the SECONDARY track — still a fast free-sample yes with recurring demand, run in parallel but never ahead of biochar. Everything beyond these two products shows as 'Coming Q4.'",
+    thesis: "BIOCHAR IS NOW PRIORITY #1 and is BULK-CAPABLE: we hold 80 metric tons of finished biochar ready to ship, so winning biochar trials can convert straight to paid orders against inventory on hand. Absorbent Pellets and Absorbent Crumble are ALSO sellable by the metric ton now — $275/MT in 1,650 lb super sacks, live checkout. What still waits for Q4 is TRUCKLOAD supply on every line, since ongoing capacity (~400 MT/mo) isn't committed to TL tonnage yet. Across all three live products the door-opener is the same: get free performance samples (100% Biochar ½ lb, Absorbent Pellets 1 lb, Absorbent Crumble 1 lb) into buyers' hands — that is the first win we optimize the entire machine for. Outreach never mentions LOIs, contracts, or commitments; the only ask is 'test a free sample against what you use now.' The engine follows the ReRoofGen / Instantly playbook: 1,000+ verified contacts, warmed multi-inbox domains, many short hyper-targeted-to-ICP campaigns, and heavy A/B testing. Metric-ton orders, truckload LOIs, reorders, and the CDR/carbon layer are all quiet later steps that only happen 1:1 after a sample wins a trial.",
+    wedge: "BIOCHAR IS PRIORITY #1. We now hold 80 metric tons of finished 100% biochar ready to ship — real, sellable tonnage, not a future promise. Biochar into ag distributors, compost/soil blenders, nurseries, ranchers, and growers is both the highest-leverage channel (one distributor represents many acres) AND, uniquely, bulk-capable today: samples open the door and winning trials convert straight into paid orders against inventory on hand. Absorbent Pellets and Crumble into oil & gas, spill-response, landfill, and industrial EHS buyers are the SECONDARY track — a fast free-sample yes with recurring demand, also sellable by the metric ton ($275/MT), run in parallel but never ahead of biochar on margin ($450/MT). Biochar-Infused Soil and Multipurpose Fiber show as 'Coming Q4', as does truckload supply on every line.",
     reinforce: [
       "Free sample in hand IS the Month-1 conversion event. Nothing is asked for beyond a test — no PO, no LOI, no commitment.",
       "Run it like ReRoofGen: many parallel hyper-ICP-targeted email campaigns + calls + DMs, A/B tested on subject line, opener, and angle. Same free-sample offer, packaging tuned per segment.",
@@ -45,7 +45,7 @@ const DATA = {
 
   /* ============ 2. ASSUMPTIONS + MISSING INPUTS ============ */
   assumptions: [
-    { a:"Capacity is constrained (~400 MT/mo) — NOT enough to commit bulk now; Month 1 sells free samples + LOIs only, bulk supply comes online Q4", why:"Governs what we can promise: no bulk POs, LOIs lock future Q4 supply", conf:"High", verify:"Confirm Q4 capacity ramp timing & tons/month by product with ops" },
+    { a:"Capacity is constrained (~400 MT/mo) — enough for metric-ton super-sack orders now, NOT enough to commit truckload tonnage; TL supply comes online Q4", why:"Governs what we can promise: MT orders yes, TL contracts no, LOIs lock future Q4 truckload supply", conf:"High", verify:"Confirm Q4 capacity ramp timing & tons/month by product with ops" },
     { a:"Delivered product margin survives freight inside ~300 mi", why:"Bulk low-density product; freight can erase margin", conf:"Med", verify:"Real LTL/TL rates by zone from 2–3 carriers" },
     { a:"CDR credits are monetizable per deployed ton via Puro.earth pathway", why:"Second revenue layer underpins pricing", conf:"Med", verify:"MRV cost, $/tCO2e, buyer/broker, issuance lag" },
     { a:"20/40lb + 1MT bags + bulk are all currently packable", why:"Determines which segments we can serve now", conf:"Med", verify:"Confirm live packaging formats & lead times" },
@@ -121,8 +121,8 @@ const DATA = {
       rank:{ speed:4, recurring:5, margin:4, carbon:5, strategic:5, freight:4, complexity:3 }
     },
     {
-      id:"remediation", group:"Industrial", name:"Spill-Response & Environmental Remediation", tag:"Pellet beachhead · fastest sample→LOI (secondary track)",
-      summary:"Contractors and enviro firms buying absorbents for spills, leachate, and industrial cleanup. The fastest pellet sample→LOI cycle, but the SECONDARY track — biochar (80 MT on hand, ready now) is priority #1. Pellets are samples-first, with bulk on the Q4 capacity ramp. Absorbent pellets (up to ~5:1) beat wood (~2.5:1) on performance-per-dollar.",
+      id:"remediation", group:"Industrial", name:"Spill-Response & Environmental Remediation", tag:"Pellet/crumble beachhead · fastest sample→LOI (secondary track)",
+      summary:"Contractors and enviro firms buying absorbents for spills, leachate, and industrial cleanup. The fastest absorbent sample→LOI cycle, but the SECONDARY track — biochar (80 MT on hand, ready now) is priority #1. Both forms carry live $275/MT super-sack SKUs, so a trial win on either converts to a paid order; only truckload volume waits on the Q4 ramp. Form follows the spill: pellets for confined work and thinner fluids (gas-side), crumble for large-area, high-volume cleanup (oil-side). Crumble-fit accounts must sit inside the tighter ~200mi freight ring. Absorbent pellets (up to ~5:1) beat wood (~2.5:1) on performance-per-dollar.",
       firmo:"Field service contractors · buys absorbents recurring · compliance-driven",
       titles:["Procurement Manager","Project Manager","Safety / EHS Manager","Warehouse Buyer"],
       econ:"Procurement / Ops Director", tech:"EHS / Project manager", user:"Field crews",
@@ -282,10 +282,10 @@ const DATA = {
 
   /* ============ 5. MESSAGING ============ */
   messaging: {
-    splitRule:"TWO SEPARATE AVATARS — NEVER mix products in one pitch. Absorbent Pellets and Biochar go to two completely different people with different pain, language, proof, and channel. An absorbent pitch never says 'biochar / soil / compost / OMRI / carbon.' A biochar pitch never says 'spill / absorbent / SDS-for-disposal / oilfield / leachate.' Every email, call, landing page, one-pager, and deck is SINGLE-PRODUCT. If a contact somehow fits both, run two separate threads.",
+    splitRule:"TWO SEPARATE AVATARS — NEVER mix products in one pitch. Absorbent Pellets/Crumble and Biochar go to two completely different people with different pain, language, proof, and channel. An absorbent pitch never says 'biochar / soil / compost / OMRI / carbon.' A biochar pitch never says 'spill / absorbent / SDS-for-disposal / oilfield / leachate.' Every email, call, landing page, one-pager, and deck is SINGLE-PRODUCT. If a contact somehow fits both, run two separate threads.",
     tracks:[
       {
-        id:"absorbent", product:"Absorbent Pellets",
+        id:"absorbent", product:"Absorbent Pellets & Crumble",
         audience:"Oil & Gas · Spill Response · Environmental Remediation · Landfill · Industrial EHS",
         avatar:"An HSE/EHS manager, field/ops supervisor, or procurement lead at an industrial or oilfield operation. They already buy clay or wood absorbents on a recurring, budgeted line. They think in bags-per-spill, disposal weight and cost, SDS, approvals, and job cost — NOT agronomy, soil, or carbon. They want proof it performs on a real cleanup and that it won't fail a compliance review.",
         positioning:"For industrial, oilfield, spill-response, and landfill teams, American BioCarbon Absorbent Pellets are a plant-based sugarcane-bagasse sorbent that holds up to ~5× its weight (vs ~2.5× for wood) — so crews open about half the bags and send lighter saturated waste to disposal, at a fraction of the cost-per-gallon of clay or cellulose.",
@@ -311,7 +311,7 @@ const DATA = {
       { p:"Agricultural biochar", m:"Honeycomb bagasse structure → ~3–3.5x water-holding, inherent NPK + Ca/Mg, OMRI listed and IBI tested. A conditioner AND a nutrient-bearing matrix, not just black carbon." },
       { p:"Biochar-infused soil", m:"Ready-to-use blend — water retention, nutrient-holding, aeration with zero mixing. Drops into beds, pots, installs from the first watering." },
       { p:"Absorbent pellets", m:"5:1 absorption vs ~2.5:1 for wood — fewer bags per spill, lower disposal volume, plant-based & carbon-neutral. Spill, leachate, oilfield fluid, disaster." },
-      { p:"Absorbent crumble", m:"Coarser form for fast, broad coverage on large-area / high-volume spills. Same 100% bagasse, spreads faster." },
+      { p:"Absorbent crumble", m:"Coarser form for fast, broad coverage on large-area / high-volume spills. Same 100% bagasse, spreads faster. Sellable now; oil-side and large-area fit; ~150-200mi freight ring." },
       { p:"Carbon removal credits", m:"Durable removal (H/C < 0.7), Puro-certified, generated by deploying the product. Sold as a layer on top of product movement — supply is our tons deployed." },
     ],
     comparisons:[
@@ -469,7 +469,7 @@ const DATA = {
     { o:"Deal / Opportunity", key:"Deal type, stage, value, margin, carbon fields" },
     { o:"Sample Request", key:"Product, size, qual gate, ship date, follow-up" },
     { o:"LOI (Letter of Intent)", key:"Committed Q4 volume, locked price band, territory, status" },
-    { o:"Order (Q4+)", key:"SKU, tons, packaging, delivery, invoice — post-capacity" },
+    { o:"Order (live)", key:"SKU, tons, packaging, delivery, invoice — metric-ton now, truckload post-Q4" },
     { o:"Fulfillment Handoff", key:"Logistics, application guidance, MRV docs" },
     { o:"Carbon / MRV Record", key:"tCO2e est, MRV status, issuance, buyer" },
     { o:"Activity / Task", key:"Type, owner, due, outcome" },
@@ -603,7 +603,7 @@ const DATA = {
     { id:"freight", name:"Freight-Aware Delivered Margin", inputs:["Product revenue","COGS","Freight cost"], formula:"delivered margin = revenue − COGS − freight; margin % = /revenue", saves:["delivered margin","est. freight"] },
   ],
   sample:{
-    sizes:["Absorbent Pellets — 1 lb sample (free, S&H incl.)","100% Biochar — 8 oz sample (free, S&H incl.)","(Q4+) pallet/bulk once capacity is online"],
+    sizes:["Absorbent Pellets — 1 lb sample (free, S&H incl.)","Absorbent Crumble — 1 lb sample (free, S&H incl.)","100% Biochar — 8 oz sample (free, S&H incl.)","LIVE bulk: Biochar $450/MT · Pellets & Crumble $275/MT (1,650 lb super sacks)","(Q4+) truckload supply once capacity is online"],
     gates:["Confirmed ICP + use case","Named decision-maker (who can sign an LOI)","Agreed success criteria","Ship-to address"],
     fields:["account","contact","product","sample size","use case","success criteria","ship-to","ship date","carrier/tracking","follow-up date","outcome"],
     follow:["Day 0 ship confirmation","Day 3 'arrived?'","Day 7 trial check-in","Day 10 results + present LOI"],
@@ -682,8 +682,8 @@ const DATA = {
       { p:"1MT bulk bag", unit:"/ bag", note:"Distributor / large grower" },
       { p:"20/40 lb retail", unit:"/ bag", note:"Landscape/nursery/retail; highest $/lb" },
       { p:"Biochar-infused soil", unit:"/ yd³ or / bag", note:"Value-added blend margin" },
-      { p:"Absorbent pellets", unit:"/ lb or / pallet", note:"Industrial recurring" },
-      { p:"Absorbent crumble", unit:"/ lb or / pallet", note:"Large-area coverage" },
+      { p:"Absorbent pellets", unit:"/ lb or / pallet", note:"Industrial recurring (bulk Q4)" },
+      { p:"Absorbent crumble", unit:"/ lb or / pallet", note:"Large-area coverage; sellable now" },
     ],
     dealEval:["product revenue","product gross margin","freight","expected CDR revenue (EST)","MRV cost","blended gross margin","strategic value","expansion value"],
     sampleDeal:[
@@ -817,7 +817,7 @@ const DATA = {
 
   /* ============ 12b. DAILY ACTION PLAN (top-of-app focus) ============ */
   daily:{
-    mission:"Move the 80 MT of biochar. Get free samples into ag, soil, and grower buyers' hands, then convert winning trials to paid orders against inventory on hand. Absorbent pellets are the secondary track: samples first, LOIs after a win. Cold outreach always leads with a free sample, never a bulk pitch.",
+    mission:"Move the 80 MT of biochar. Get free samples into ag, soil, and grower buyers' hands, then convert winning trials to paid orders against inventory on hand. Absorbent crumble is sellable now and converts a trial win to a paid order. Absorbent pellets are the secondary track: samples first, LOIs after a win. Cold outreach always leads with a free sample, never a bulk pitch.",
     target:"By end of Week 2: 15-25 biochar samples shipped, first reorders and POs against the 80 MT, both tracks live.",
     sectors:[
       {k:"bizdev",   t:"Business Development", c:"#5b9bd5", d:"Lists, accounts, calls, LOI conversations"},
@@ -1027,7 +1027,7 @@ const DATA = {
   },
 
   /* ============ 14. BIOCHAR — SPECS, DATA & AVATARS ============
-     Biochar is the DYNAMIC product: one material, many buyers. Absorbent pellets = one industrial avatar;
+     Biochar is the DYNAMIC product: one material, many buyers. Absorbent pellets & crumble = one industrial avatar;
      biochar sells across ag distribution, row-crop farmers, ranchers/livestock, poultry (bedding + in-feed),
      compost/blenders, and nursery/greenhouse — each with a different benefit that matters to THEM.
      Pull the spec + the ONE comparison + the ONE benefit that fits the avatar in front of you. */

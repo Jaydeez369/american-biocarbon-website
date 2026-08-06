@@ -720,7 +720,27 @@ function kraftBag(p){
     </div>
   </div>`;
 }
-const SHOP_DOMAIN = "https://americanbiocarbon.com";
+/* Which hostname serves the Shopify store - it MOVES at DNS cutover, so derive it
+   rather than hardcoding, because a constant someone must remember to flip on cutover
+   day is a constant that ships wrong.
+
+   Before cutover: the apex IS the Shopify storefront, and this site lives on
+   *.pages.dev. Cart permalinks must go to the apex.
+   After cutover:  the apex serves THIS site, and Shopify moves to shop. Cart
+   permalinks sent to the apex would hit the SPA fallback in _redirects and render
+   the homepage with a 200 - a checkout that fails silently (verified 2026-08-06).
+
+   So: if we are being served FROM the apex, the cutover has happened and Shopify is
+   on shop. Otherwise we are on pages.dev and Shopify is still on the apex.
+
+   This requires shop.americanbiocarbon.com to exist AND be Shopify's PRIMARY domain
+   before the apex is repointed - Shopify 301s every secondary domain to the primary,
+   which would bounce checkout right back into the SPA fallback. See
+   handoff/CUTOVER-RUNBOOK.md; the three steps are atomic. */
+const APEX_HOSTS = new Set(["americanbiocarbon.com", "www.americanbiocarbon.com"]);
+const SHOP_DOMAIN = APEX_HOSTS.has(location.hostname)
+  ? "https://shop.americanbiocarbon.com"
+  : "https://americanbiocarbon.com";
 // Shopify cart permalinks - site product id to checkout URL (variant:qty).
 // Store: American BioCarbon (de7e4a). Both are $0 free-sample variants of the
 // "Product Samples" product (10493867753764). Clicking sends the shopper to
