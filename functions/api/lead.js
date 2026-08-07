@@ -14,6 +14,8 @@
  *   RESEND_API_KEY  secret. API key from the Resend account.
  *   LEAD_FROM       optional. Verified sender, defaults to the send. subdomain so the
  *                   root SPF record for Microsoft 365 and Proofpoint is never touched.
+ *   LEAD_TO         optional. Comma separated override for the internal recipient list,
+ *                   for proving delivery against a test inbox. Unset in production.
  *   SITE_ORIGIN     optional. Base URL for links inside emails. Defaults to the apex.
  *                   Point it at the pages.dev URL before cutover: the spec-sheet PDFs
  *                   404 on the apex until the apex actually serves this site.
@@ -34,8 +36,21 @@ import { buildAutoreply, buildInternalLead } from "./_email.js";
    something accepts mail at that address, but nobody has confirmed it is a monitored
    mailbox rather than a catch-all. A lead sitting unread in a catch-all is indistinguishable
    from a lead that was never sent, which is the exact failure this whole endpoint exists to
-   prevent. Add it back once someone confirms who reads it. */
-const RECIPIENTS = ["sboone@cs-ops.com", "victor.jehle@cs-ops.com"];
+   prevent. Add it back once someone confirms who reads it.
+
+   LEAD_TO overrides this list. It exists so end-to-end delivery can be proved against a
+   test inbox without mailing the sales desk, which is the only reason to ever set it.
+   Leave it unset in production: unset means the two addresses below, which is the whole
+   point of hardcoding them. Note this is an env var read by the server, NOT the client
+   supplied "recipients" array, which is still ignored for the open-relay reason above. */
+const DEFAULT_RECIPIENTS = ["sboone@cs-ops.com", "victor.jehle@cs-ops.com"];
+
+function recipientsFrom(env) {
+  const override = typeof env.LEAD_TO === "string" ? env.LEAD_TO.trim() : "";
+  if (!override) return DEFAULT_RECIPIENTS;
+  const list = override.split(",").map((s) => s.trim()).filter(Boolean);
+  return list.length ? list : DEFAULT_RECIPIENTS;
+}
 
 const DEFAULT_FROM = "American BioCarbon <leads@send.americanbiocarbon.com>";
 const MAX_BODY_BYTES = 32 * 1024;
@@ -102,7 +117,7 @@ export async function onRequest({ request, env }) {
   const internal = buildInternalLead(form, fields, page, env);
   const notify = {
     from,
-    to: RECIPIENTS,
+    to: recipientsFrom(env),
     subject: internal.subject,
     text: internal.text,
     html: internal.html,
