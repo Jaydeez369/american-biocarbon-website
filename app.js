@@ -398,7 +398,7 @@ function renderProduct(id){
   const specsSection = grey => `
   <section class="block"${grey?` style="background:var(--paper-2)"`:""}><div class="wrap"><div class="split">
     <div><div class="eyebrow-line"></div><h2 style="font-size:28px">Specifications</h2>
-      <p class="lead" style="margin:10px 0 18px">Request the full spec sheet and SDS for test conditions and handling.</p>
+      <p class="lead" style="margin:10px 0 18px">Request the full spec sheet for test conditions and handling.</p>
       ${specTable(p.specs)}
       <div style="margin-top:18px">${SPEC_SPECID[id]
         ? `<a class="btn btn-sm btn-ghost" href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[id]}')">Download Full Spec Sheet</a>`
@@ -620,10 +620,10 @@ function buyCard(p){
   const isLive = p.avail==="live";
   const isBuyNow = BUY_NOW_IDS.has(p.id);
   // Spec sheets we hold as an approved PDF download straight from the card; everything
-  // else (and every SDS) still routes through the request form.
+  // else still routes through the request form.
   const docLink = id => (id==="spec" && SPEC_SPECID[p.id])
     ? `<a href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Spec sheet</a>`
-    : `<a href="/request-docs?doc=${id}&product=${p.id}">${id==="sds"?"SDS":"Spec sheet"}</a>`;
+    : `<a href="/request-docs?doc=${id}&product=${p.id}">Spec sheet</a>`;
   const docs = isLive
     ? `<div class="buy-docs">${(p.docIds||[]).map(docLink).join("<span>·</span>")}</div>`
     : `<div class="buy-docs muted">Spec sheet coming</div>`;
@@ -859,7 +859,6 @@ function renderShopProduct(id){
         ${SPEC_SPECID[p.id]
           ? `<a class="btn btn-dark" href="javascript:void(0)" onclick="downloadSpecSheet('${SPEC_SPECID[p.id]}')">Download Spec Sheet</a>`
           : `<a class="btn btn-dark" href="/request-docs?doc=spec&product=${p.id}">Request Spec Sheet</a>`}
-        <a class="btn btn-ghost" href="/request-docs?doc=sds&product=${p.id}">Request SDS</a>
         <a class="btn btn-ghost" data-buy-link href="${checkoutHref}">${ctaLabel}</a>
       </div>
       <p class="pdp-meta" style="margin-top:16px">Ships from White Castle, Louisiana. ${p.truckloadQ4?"Truckload supply available Q4.":""}</p>
@@ -929,7 +928,7 @@ function renderBuy(){
       <div class="shop-main">
         ${group("Available now", live)}
         ${group("Coming Q4 2026", q4)}
-        <p class="shop-doc">Spec sheets, SDS &amp; OMRI listing (biochar) available on request, <a href="/technical">Technical Data →</a></p>
+        <p class="shop-doc">Spec sheets &amp; OMRI listing (biochar) available on request, <a href="/technical">Technical Data →</a></p>
       </div>
     </div>
   </div></section>`;
@@ -1034,7 +1033,7 @@ function bindResourceFilters(){
   empty && empty.querySelector("[data-rf-reset]") && empty.querySelector("[data-rf-reset]").addEventListener("click", reset);
 }
 function renderTechnical(){
-  setMeta({title:"Technical Data & Research | American BioCarbon",desc:"Certifications, spec sheets, SDS, independent lab analyses, and peer reviewed research for bagasse absorbents and biochar. Request the technical package.",slug:"/technical",keyword:"bagasse biochar technical data"});
+  setMeta({title:"Technical Data & Research | American BioCarbon",desc:"Certifications, spec sheets, independent lab analyses, and peer reviewed research for bagasse absorbents and biochar. Request the technical package.",slug:"/technical",keyword:"bagasse biochar technical data"});
   const sBadge = s => ({verified:'<span class="badge b-ok">Verified</span>',lab:'<span class="badge b-lab">Lab tested</span>',field:'<span class="badge b-lab">Field study</span>',pending:'<span class="badge b-pend">Pending</span>'}[s]||"");
   const tBadge = t => ({peer:'<span class="badge b-ok">Peer reviewed</span>',field:'<span class="badge b-lab">Field study</span>',lab:'<span class="badge b-lab">Lab report</span>'}[t]||"");
   const docHref = d => d.file ? d.file : CTA.docs.href;
@@ -1089,7 +1088,7 @@ function renderTechnical(){
 
   <section class="block" style="background:var(--paper-2)"><div class="wrap">
     <div class="eyebrow-line"></div><h2>Complete Technical Documentation</h2>
-    <p class="lead" style="margin-bottom:20px">Spec sheets, SDS, lab analyses, certificates, and complete research documentation.</p>
+    <p class="lead" style="margin-bottom:20px">Spec sheets, lab analyses, certificates, and complete research documentation.</p>
     ${resourceFilterBar()}
     <div class="docgrid" id="docgrid">${docCards}</div>
     <div class="doc-empty" id="docEmpty" hidden>
@@ -1124,8 +1123,8 @@ function renderTechnical(){
     <div>
       <div class="kicker">Get your documentation package</div>
       <h2 style="font-size:28px;margin:8px 0 12px">Request technical data for your application</h2>
-      <p class="lead">Select your industry and we'll send a curated package of specs, SDS, analyses, certifications, and research. A specialist will follow up to answer questions and discuss any custom specifications needed for your work.</p>
-      <ul class="checks">${["Spec sheets tailored to your product line","Complete Safety Data Sheets (SDS)","Independent lab analyses &amp; certificates","Peer reviewed research package","Direct specialist access for technical questions"].map(x=>`<li>${raw(x)}</li>`).join("")}</ul>
+      <p class="lead">Select your industry and we'll send a curated package of specs, analyses, certifications, and research. A specialist will follow up to answer questions and discuss any custom specifications needed for your work.</p>
+      <ul class="checks">${["Spec sheets tailored to your product line","Independent lab analyses &amp; certificates","Peer reviewed research package","Direct specialist access for technical questions"].map(x=>`<li>${raw(x)}</li>`).join("")}</ul>
     </div>
     <div class="formcard" id="pform"></div>
   </div></div></section>`;

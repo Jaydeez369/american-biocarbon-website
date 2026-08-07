@@ -61,7 +61,6 @@ const CTA = {
   compare: { label:"Compare vs Wood Pellets",       href:"/compare" },
   spec:    { label:"Request Spec Sheet",           href:"/request-docs?doc=spec" },
   specDownload: { label:"Download Spec Sheet",      href:"/request-docs?doc=spec" },
-  sds:     { label:"Request SDS",                  href:"/request-docs?doc=sds" },
   docs:    { label:"Request Technical Package",     href:"/request-docs" },
   specialist:{ label:"Talk to a Specialist", href:"/contact" },
   biochar: { label:"Request a Sample Kit", href:"/request-sample?type=biochar" },
@@ -107,7 +106,7 @@ const PROOF = {
     { icon:ASSETS.icLeaf, title:"Carbon Negative", sub:"Durable carbon storage from ag byproduct" },
     { icon:ASSETS.icTech, title:"Patented Process", sub:"Bagasse separation & controlled pyrolysis" },
   ],
-  microRow:["Up to 5:1 absorption","Plant based & renewable","Bulk · bulk bag · truckload","SDS & spec on request"],
+  microRow:["Up to 5:1 absorption","Plant based & renewable","Bulk · bulk bag · truckload","Spec sheet on request"],
   certs:[
     { name:"OMRI Listed", status:"verified", note:"Organic input listing" },
     { name:"IBI tested", note:"Analyzed against IBI test-panel thresholds, not IBI certified", status:"lab" },
@@ -143,7 +142,6 @@ const TECH = {
   docs:[
     { id:"abs-spec", name:"Absorbent Pellets & Crumble, Spec Sheet", cat:"Absorbents", desc:"Absorbency ratio, bulk density, granulation, form factors.", primary:true, file:"assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf", fmt:"PDF" },
     { id:"bio-spec", name:"100% Biochar, Spec Sheet", cat:"Agriculture", desc:"Organic carbon, water holding, NPK, particle size.", primary:true, file:"assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf", fmt:"PDF" },
-    { id:"abs-sds", name:"Absorbent Pellets & Crumble, SDS", cat:"Absorbents", desc:"Safety data sheet for handling, storage, and disposal." },
     { id:"abs-disposal", name:"Saturated-Material Disposal Guidance", cat:"Absorbents", desc:"Handling and disposal profile for spent absorbent." },
     { id:"bio-lab", name:"Independent Lab Analysis, Heavy Metals & Nutrients", cat:"Agriculture", desc:"IBI test panel: metals vs thresholds, NPK, H/C ratio, surface area." },
     { id:"omri-cert", name:"OMRI Listing Documentation", cat:"Certification", desc:"Current OMRI listing documentation." },
@@ -165,22 +163,21 @@ const TECH = {
   ],
   // Which documents matter to each industry (all gated)
   byIndustry:{
-    "oil-gas":["abs-spec","abs-sds","abs-disposal"],
-    "industrial-remediation":["abs-spec","abs-sds","abs-disposal"],
-    "environmental-remediation":["abs-spec","abs-sds","abs-disposal"],
-    "spill-response":["abs-spec","abs-sds"],
-    "landfill-leachate":["abs-spec","abs-sds","abs-disposal"],
-    "animal-bedding":["abs-spec","abs-sds"],
+    "oil-gas":["abs-spec","abs-disposal"],
+    "industrial-remediation":["abs-spec","abs-disposal"],
+    "environmental-remediation":["abs-spec","abs-disposal"],
+    "spill-response":["abs-spec"],
+    "landfill-leachate":["abs-spec","abs-disposal"],
+    "animal-bedding":["abs-spec"],
     "distributors":["bio-spec","bio-lab","omri-cert"],
     "soil-blenders":["bio-spec","bio-lab","omri-cert","studies"]
   },
-  gateNote:"Spec sheets, SDS, lab analyses, and the research package are provided on request. Submit your details and we'll email the documents relevant to your application.",
+  gateNote:"Spec sheets, lab analyses, and the research package are provided on request. Submit your details and we'll email the documents relevant to your application.",
   // Product-accurate certification sets (absorbents don't carry organic listings)
   certSets:{
     absorbents:[
       { item:"100% organic biomass", scope:"Sugarcane bagasse, no chemical additives", status:"verified" },
       { item:"Independent lab analysis", scope:"Composition & heavy-metal screening", status:"lab" },
-      { item:"Safety Data Sheet (SDS)", scope:"Handling, storage & disposal", status:"verified" },
     ],
     biochar:[
       { item:"OMRI Listed", scope:"Organic input listing", status:"verified" },
@@ -201,8 +198,8 @@ const TECH = {
     ]
   },
   byProduct:{
-    "absorbent-pellets":["abs-spec","abs-sds","abs-disposal"],
-    "absorbent-crumble":["abs-spec","abs-sds","abs-disposal"],
+    "absorbent-pellets":["abs-spec","abs-disposal"],
+    "absorbent-crumble":["abs-spec","abs-disposal"],
     "agricultural-biochar":["bio-spec","bio-lab","omri-cert"],
     // Infused soil is a blend, not the OMRI listed 100% biochar. Do not transfer the
     // OMRI listing or the biochar spec sheet to it; request-gate its docs.
@@ -215,24 +212,24 @@ const TECH = {
   // byIndustry so they stay accurate to the underlying content.
   resourceFilters:{
     product:[
-      { key:"absorbents", label:"Absorbents", ids:["abs-spec","abs-sds","abs-disposal"] },
+      { key:"absorbents", label:"Absorbents", ids:["abs-spec","abs-disposal"] },
       { key:"biochar",    label:"Biochar",    ids:["bio-spec","bio-lab","omri-cert","studies"] },
       { key:"carbon",     label:"Carbon Removal", ids:["carbon-mrv","bio-lab"] },
     ],
     useCase:[
-      { key:"spill",       label:"Spill Response",   ids:["abs-spec","abs-sds","abs-disposal"] },
-      { key:"oilgas",      label:"Oil & Gas / Drilling", ids:["abs-spec","abs-sds","abs-disposal"] },
-      { key:"remediation", label:"Remediation",      ids:["abs-spec","abs-sds","abs-disposal"] },
-      { key:"landfill",    label:"Landfill Leachate", ids:["abs-spec","abs-sds","abs-disposal"] },
+      { key:"spill",       label:"Spill Response",   ids:["abs-spec","abs-disposal"] },
+      { key:"oilgas",      label:"Oil & Gas / Drilling", ids:["abs-spec","abs-disposal"] },
+      { key:"remediation", label:"Remediation",      ids:["abs-spec","abs-disposal"] },
+      { key:"landfill",    label:"Landfill Leachate", ids:["abs-spec","abs-disposal"] },
       { key:"soil",        label:"Soil & Compost",   ids:["bio-spec","bio-lab","omri-cert","studies"] },
       { key:"carbon",      label:"Carbon Removal",   ids:["carbon-mrv","bio-lab"] },
     ],
     industry:[
-      { key:"oil-gas",                   label:"Oil & Gas",                ids:["abs-spec","abs-sds","abs-disposal"] },
-      { key:"industrial-remediation",    label:"Industrial Remediation",   ids:["abs-spec","abs-sds","abs-disposal"] },
-      { key:"environmental-remediation", label:"Environmental Remediation", ids:["abs-spec","abs-sds","abs-disposal"] },
-      { key:"spill-response",            label:"Spill Response",           ids:["abs-spec","abs-sds"] },
-      { key:"landfill-leachate",         label:"Landfill Leachate",        ids:["abs-spec","abs-sds","abs-disposal"] },
+      { key:"oil-gas",                   label:"Oil & Gas",                ids:["abs-spec","abs-disposal"] },
+      { key:"industrial-remediation",    label:"Industrial Remediation",   ids:["abs-spec","abs-disposal"] },
+      { key:"environmental-remediation", label:"Environmental Remediation", ids:["abs-spec","abs-disposal"] },
+      { key:"spill-response",            label:"Spill Response",           ids:["abs-spec"] },
+      { key:"landfill-leachate",         label:"Landfill Leachate",        ids:["abs-spec","abs-disposal"] },
       { key:"soil-blenders",             label:"Soil Blenders & Compost",  ids:["bio-spec","bio-lab","omri-cert","studies"] },
       { key:"distributors",              label:"Distributors",             ids:["bio-spec","bio-lab","omri-cert"] },
     ]
@@ -255,7 +252,7 @@ const HOME = {
     chosen:"Fewer bags per spill. Less material to haul away.",
     sub:"Our sugarcane bagasse absorbents hold up to roughly 5x their weight in liquid, so crews open fewer bags and fewer loads need to be hauled away for disposal. Engineered for oilfield fluids, spill response, and industrial remediation.",
     primary:CTA.buyNow, secondary:CTA.sample,
-    proofLine:["Up to 5× weight absorption","SDS & spec sheet available"],
+    proofLine:["Up to 5× weight absorption","Spec sheet available"],
     image:ASSETS.pelletsPhoto,
     /* Full-bleed cinematic carousel, each slide pairs a massive edge-to-edge
        photo with its own product-matched hero statement. */
@@ -284,9 +281,9 @@ const HOME = {
   offer:{
     kicker:"Test It On Your Terms",
     h:"Run it against your current sorbent, before you switch a thing",
-    body:"Tell us the job and we'll ship an industrial sample kit with the SDS and spec sheet. Put it head to head with the wood or clay you use today, count the bags, weigh the disposal. If it earns the switch, we scale you to bulk, bulk bag, or truckload supply on freight aware pricing.",
+    body:"Tell us the job and we'll ship an industrial sample kit with the spec sheet. Put it head to head with the wood or clay you use today, count the bags, weigh the disposal. If it earns the switch, we scale you to bulk, bulk bag, or truckload supply on freight aware pricing.",
     steps:[
-      { n:"01", t:"Request a sample", d:"Give us the fluid, site, and volume. Samples ship in 4 to 7 business days with SDS + spec." },
+      { n:"01", t:"Request a sample", d:"Give us the fluid, site, and volume. Samples ship in 4 to 7 business days with the spec sheet." },
       { n:"02", t:"Test it head to head", d:"Run it beside your current absorbent on a real job." },
       { n:"03", t:"Scale on the numbers", d:"Fewer bags and less to haul away earn the bulk contract." },
     ],
@@ -297,10 +294,10 @@ const HOME = {
     kicker:"Products · Samples & Bulk",
     h:"Order samples. Request bulk quotes.",
     sub:"Order a sample, run the head to head in your own operation, then scale to a freight aware bulk bag or truckload contract. Checkout is secured by Shopify.",
-    trust:["Samples ship in 4 to 7 business days","OMRI listed biochar","SDS & spec sheets on every SKU","US freight aware bulk pricing","Checkout secured by Shopify"],
+    trust:["Samples ship in 4 to 7 business days","OMRI listed biochar","Spec sheets on every SKU","US freight aware bulk pricing","Checkout secured by Shopify"],
     steps:[
       { n:"01", t:"Order a sample or request a quote", d:"Buy a sample SKU online, or request a freight aware bulk quote." },
-      { n:"02", t:"Evaluate on your terms", d:"Review the spec sheet + SDS and run your own head to head test." },
+      { n:"02", t:"Evaluate on your terms", d:"Review the spec sheet and run your own head to head test." },
       { n:"03", t:"Scale to a contract", d:"Move to a bulk bag or truckload supply agreement on freight aware pricing." },
     ],
     // cartPermalink stays empty until Victor/Jesse create the sample SKUs in Shopify;
@@ -325,7 +322,7 @@ const HOME = {
           { h:"Water and monitor", body:"Water thoroughly to activate the product, saturating the soil to a depth of at least 6 inches. Check periodically so the soil stays moist but not waterlogged, and adjust the rate as needed. Add aggregates such as perlite if the soil retains too much water." },
           { h:"Water and nutrient retention", body:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
         ],
-        img:ASSETS.biocharBag, variantId:"46496458539300", docIds:["spec","sds"] },
+        img:ASSETS.biocharBag, variantId:"46496458539300", docIds:["spec"] },
       { id:"agricultural-biochar-mt", name:"100% Biochar", avail:"live", cat:"Biochar", category:"Soil Amendment · OMRI listed · Bulk Supply", accent:"amber",
         claim:"The same OMRI listed biochar sold by the metric ton.",
         uses:["Soil amendment for gardens, beds, and lawns","Water and nutrient retention","Supports faster compost cycles","Carbon negative soil carbon storage"],
@@ -336,7 +333,7 @@ const HOME = {
           { h:"How to use", body:"A general guideline is 10 to 25 pounds of biochar per 100 square feet. Loosen the soil and remove debris, remove 2 to 3 inches of topsoil, sprinkle the biochar, then replace the topsoil." },
           { h:"Water and nutrient retention", body:"OMRI listed bagasse biochar holds up to 3 to 3.5 times its weight in water, improving moisture and nutrient retention and supporting soil microbiology." },
         ],
-        img:ASSETS.biocharBulkPhoto, variantId:"54184340914468", docIds:["spec","sds"] },
+        img:ASSETS.biocharBulkPhoto, variantId:"54184340914468", docIds:["spec"] },
       { id:"absorbent-pellets", name:"Absorbent Pellets", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Spill Control", accent:"aqua",
         claim:"An up to 5:1 absorption ratio means crews open fewer bags per spill and haul away less material.",
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
@@ -354,7 +351,7 @@ const HOME = {
           { h:"Animal bedding", body:"Use as bedding by adding about a half gallon of water to the bag for wet bedding, or scatter the pellets across the habitat floor for dry bedding." },
           { h:"Pet litter", body:"A renewable, low dust alternative to traditional litter for cats, rabbits, ferrets, birds, and more." },
         ],
-        img:ASSETS.pelletsBag, variantId:"47285744566564", docIds:["spec","sds"] },
+        img:ASSETS.pelletsBag, variantId:"47285744566564", docIds:["spec"] },
       { id:"absorbent-pellets-mt", name:"Absorbent Pellets", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Bulk Supply", accent:"aqua",
         claim:"The same up to 5:1 absorption pellets sold in 1,650 lb super sacks, ready to ship now.",
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
@@ -365,11 +362,11 @@ const HOME = {
           { h:"Spill cleanup and remediation", body:"Soak up soil runoff, solvents, drilling and frac fluids, and other non-viscous liquids. Sprinkle the pellets over the spill, wait for full absorption, then sweep up and dispose of the saturated material per your local requirements." },
           { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },
         ],
-        img:ASSETS.pelletsPhoto, variantId:"54182475170084", docIds:["spec","sds"] },
+        img:ASSETS.pelletsPhoto, variantId:"54182475170084", docIds:["spec"] },
       { id:"absorbent-crumble", name:"Absorbent Crumble", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Large Area Spills", accent:"aqua",
         claim:"Higher coverage, faster absorption, quicker cleanup. A coarser grade that spreads fast across a wide footprint with the same high capacity.",
         uses:["Large area and high volume spill coverage","Fast, broad application","Disaster and flood cleanup"],
-        chips:["1 lb sample bag","Coarse grade","100% bagasse"], unit:"1 lb Sample Bag", sampleWeight:"1 LB", photo:ASSETS.crumblePhoto, img:ASSETS.crumbleBag, gallery:[ ASSETS.crumbleBag, ASSETS.crumblePhoto ], free:true, docIds:["spec","sds"],
+        chips:["1 lb sample bag","Coarse grade","100% bagasse"], unit:"1 lb Sample Bag", sampleWeight:"1 LB", photo:ASSETS.crumblePhoto, img:ASSETS.crumbleBag, gallery:[ ASSETS.crumbleBag, ASSETS.crumblePhoto ], free:true, docIds:["spec"],
         desc:"Super-absorbent multi-purpose bagasse crumble made from the fiber left over when sugar is processed, screened to a coarser grade that spreads fast across a wide footprint. An up to 5:1 absorption ratio suits large area spill cleanup, waste solidification, and remediation. Odorless, renewable, low dust, and easy to use.",
         sections:[
           { h:"Large area spill cleanup", body:"Broadcast the crumble across the spill in fewer passes than a fine sorbent needs, let it fully absorb, then sweep up and dispose of the saturated material per your local requirements." },
@@ -391,7 +388,7 @@ const HOME = {
           { h:"Large area spill cleanup", body:"Broadcast the crumble across the spill in fewer passes than a fine sorbent needs, let it fully absorb, then sweep up and dispose of the saturated material per your local requirements." },
           { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },
         ],
-        img:ASSETS.pelletsPhoto, variantId:"55923046023460", docIds:["spec","sds"] },
+        img:ASSETS.pelletsPhoto, variantId:"55923046023460", docIds:["spec"] },
       { id:"biochar-infused-soil", name:"Biochar-Infused Soil", avail:"q4", cat:"Soil", category:"Growing Media · Ready to Use Blend", accent:"soil",
         claim:"Multipurpose Fiber and coffee chaff, pre-blended with our carbon negative bagasse biochar. No mixing. Coming Q4.",
         uses:["Potting and container gardening","Raised beds and garden bed fill","Water retention in sandy soil"],
@@ -430,14 +427,14 @@ const HOME = {
   feature:{
     kicker:"Oil & Gas · Industrial Remediation",
     h:"Engineered for the field",
-    body:"Solidify drilling and frac fluids, clean up oil and non-viscous chemical spills, and control landfill leachate with a renewable sorbent that cuts bag count and disposal weight. Available in bulk, by the metric ton in 1,650 lb super sacks, and in truckload volumes, with SDS and spec sheets on request.",
+    body:"Solidify drilling and frac fluids, clean up oil and non-viscous chemical spills, and control landfill leachate with a renewable sorbent that cuts bag count and disposal weight. Available in bulk, by the metric ton in 1,650 lb super sacks, and in truckload volumes, with spec sheets on request.",
     bullets:[
       "Drilling & frac fluid solidification",
       "Oil & non-viscous chemical spill cleanup",
       "Landfill leachate control",
       "Industrial aqueous waste streams",
       "Bulk, bulk bag & truckload supply",
-      "SDS + spec sheet on request",
+      "Spec sheet on request",
     ],
     primary:CTA.specialist, secondary:CTA.sample, image:ASSETS.pelletsPhoto
   },
@@ -529,7 +526,7 @@ const HOME = {
     ],
   finalCta:{
     h:"Put it to the test",
-    sub:"Request an industrial sample kit or a bulk quote. A specialist replies within one business day, with the SDS and spec sheet attached.",
+    sub:"Request an industrial sample kit or a bulk quote. A specialist replies within one business day, with the spec sheet attached.",
     primary:CTA.sample, secondary:CTA.specialist
   }
 };
@@ -554,7 +551,7 @@ const PRODUCTS = {
     name:"Absorbent Pellets", icp:"Oil & gas · spill response · environmental remediation · landfill",
     intent:"Evaluate & procure an industrial sorbent",
     seo:{ title:"Industrial Absorbent Pellets, Up to 5:1 Bagasse Sorbent | American BioCarbon",
-      desc:"Plant based bagasse absorbent pellets that hold up to 5× their weight in liquid, vs ~2.5× for wood. Fewer bags, less to haul away. Bulk supply, SDS & spec on request.",
+      desc:"Plant based bagasse absorbent pellets that hold up to 5× their weight in liquid, vs ~2.5× for wood. Fewer bags, less to haul away. Bulk supply, spec sheet on request.",
       slug:"/absorbent-pellets", keyword:"industrial absorbent pellets",
       secondary:["oil spill absorbent pellets","plant based absorbent","wood pellet alternative absorbent","biodegradable absorbent pellets"],
       schema:"Product + FAQPage + BreadcrumbList" },
@@ -591,16 +588,16 @@ const PRODUCTS = {
       ["Bulk density","~32 lb/ft³ (≈510 kg/m³)"],
       ["Availability","Free 1 lb samples now; bulk & 1 MT bag supply from Q4"],
       ["Dust","Low"],
-      ["Documentation","SDS + spec sheet on request"],
+      ["Documentation","Spec sheet on request"],
     ],
     comparison:{ h:"Vs the status quo",
       cols:["","Bagasse Pellets","Wood Pellets","Clay"],
       rows:[["Absorption","Up to ~5:1","~2.5:1","Low"],["Bags per job","Fewest","~2× more","Most"],["Disposal weight","Lightest","Heavier","Heaviest"],["Renewable","Yes","Yes","No"]] },
     faq:[
-      { q:"What liquids do the pellets absorb?", a:"Oil, fuels, and non-viscous chemicals and aqueous streams. For a specific fluid, request the spec sheet and SDS so we can confirm suitability." },
+      { q:"What liquids do the pellets absorb?", a:"Oil, fuels, and non-viscous chemicals and aqueous streams. For a specific fluid, request the spec sheet so we can confirm suitability." },
       { q:"How is it disposed of?", a:"Saturated material is swept up and disposed of per your local requirements and the absorbed material's profile. Because it holds up to ~5× its weight vs ~2.5× for wood, you fill roughly half the bags and haul away less saturated material, fewer pounds at by the pound rates and fewer truckloads." },
       { q:"Can I get a sample, and when is volume supply available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Volume supply (bulk, metric tons in 1,650 lb super sacks, truckload) comes online with our Q4 capacity ramp; if the sample performs, you can reserve supply and lock pricing now." },
-      { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request." },
+      { q:"Do you provide a spec sheet?", a:"Yes, it is available on request and sent automatically when you submit a sample or quote request." },
     ],
     form:"sample",
     internal:["/product/absorbent-crumble","/industry/oil-gas","/industry/landfill-leachate","/technical"]
@@ -646,7 +643,7 @@ const PRODUCTS = {
       ["Material","100% organic sugarcane bagasse"],
       ["Form factors","1 lb sample bag · metric ton in 1,650 lb super sacks · bulk"],
       ["Availability","Free 1 lb samples ship now; metric ton supply in 1,650 lb super sacks"],
-      ["Documentation","SDS + spec sheet on request"],
+      ["Documentation","Spec sheet on request"],
     ],
     comparison:{ h:"Vs the status quo",
       cols:["","Bagasse Crumble","Wood Pellets","Clay"],
@@ -654,7 +651,7 @@ const PRODUCTS = {
     faq:[
       { q:"When should I use crumble vs pellets?", a:"Choose crumble for large area or high volume spills where fast, broad coverage matters; choose pellets for targeted cleanup." },
       { q:"Can I get a sample, and what volumes are available?", a:"Yes, free 1 lb samples ship now (4 to 7 business days) so you can test against your current absorbent. Metric ton supply, packaged in 1,650 lb super sacks, is available for immediate purchase, with FOB bulk bags ready in 7-10 business days, and truckload supply is on request." },
-      { q:"Do you provide an SDS and spec sheet?", a:"Yes, both are available on request and sent automatically when you submit a sample or quote request. The absorbents spec sheet covers both the pellet and crumble grades." },
+      { q:"Do you provide a spec sheet?", a:"Yes, it is available on request and sent automatically when you submit a sample or quote request. The absorbents spec sheet covers both the pellet and crumble grades." },
     ],
     form:"quote",
     internal:["/product/absorbent-pellets","/industry/spill-response","/industry/industrial-remediation","/technical"]
@@ -663,7 +660,7 @@ const PRODUCTS = {
     name:"Multipurpose Fiber", icp:"Spill response · animal bedding · soil blenders · remediation",
     intent:"Source a versatile, locally grown bagasse fiber and peat alternative",
     seo:{ title:"Multipurpose Bagasse Fiber, Peat Moss Alternative & Absorbent | American BioCarbon",
-      desc:"Louisiana-sourced, microbe-treated bagasse fiber: a renewable peat-moss alternative for spill cleanup, animal bedding, and soil amendment. Bulk supply, SDS & spec on request.",
+      desc:"Louisiana-sourced, microbe-treated bagasse fiber: a renewable peat-moss alternative for spill cleanup, animal bedding, and soil amendment. Bulk supply, spec sheet on request.",
       slug:"/multipurpose-fiber", keyword:"peat moss alternative fiber",
       secondary:["bagasse absorbent fiber","renewable animal bedding","loose absorbent fiber","locally sourced peat replacement"],
       schema:"Product + FAQPage" },
@@ -700,7 +697,7 @@ const PRODUCTS = {
       ["Uses","Bedding · absorbent · soil amendment"],
       ["Form factors","Bulk · metric ton in 1,650 lb super sacks"],
       ["Availability","Free 1 lb samples now; volume supply from Q4"],
-      ["Documentation","SDS + spec sheet on request"],
+      ["Documentation","Spec sheet on request"],
     ],
     comparison:{ h:"Bagasse fiber vs mined peat & wood",
       cols:["","Bagasse Fiber","Peat / Wood"],
@@ -884,12 +881,12 @@ const INDUSTRIES = {
   "oil-gas":{
     name:"Oil & Gas Remediation", icp:"Oilfield services · procurement · HSE",
     seo:{ title:"Drilling & Frac Fluid Absorbent, Plant Based, Up to 5:1 | American BioCarbon",
-      desc:"Solidify drilling and frac fluids and clean spills with a plant based absorbent that holds up to 5× its weight, fewer bags, less to haul away. Bulk supply, SDS on request.",
+      desc:"Solidify drilling and frac fluids and clean spills with a plant based absorbent that holds up to 5× its weight, fewer bags, less to haul away. Bulk supply, spec sheet on request.",
       slug:"/industries/oil-gas", keyword:"drilling fluid absorbent",
       secondary:["fracking fluid remediation absorbent","oil spill absorbent pellets","industrial absorbent pellets"],
       schema:"Service + FAQPage" },
     h1:"Solidify Drilling &amp; Frac Fluids With Half the Bags",
-    sub:"A plant based bagasse absorbent for oilfield fluid solidification and spill cleanup, up to 5:1 absorption vs ~2.5:1 for wood, with SDS and bulk supply.",
+    sub:"A plant based bagasse absorbent for oilfield fluid solidification and spill cleanup, up to 5:1 absorption vs ~2.5:1 for wood, with bulk supply.",
     primary:CTA.sample, secondary:CTA.specialist, image:"assets/industry/oil-gas.jpg?v=v2",
 
     appsHeading:"How Bagasse Absorbent Applications Help Your Oilfield Operations",
@@ -912,12 +909,12 @@ const INDUSTRIES = {
         benefit:"Contain, absorb, and sweep up with no special equipment." },
       { title:"Disposal Weight &amp; HSE Materials Story", detail:"Bag count &amp; documentation",
         body:"With disposal billed by weight, bagasse absorbs up to 5:1 versus ~2.5:1 wood, cutting mass roughly in half.",
-        benefit:"Fewer bags per job and lighter loads, with SDS on request." },
+        benefit:"Fewer bags per job and lighter loads, with the spec sheet on request." },
     ],
-    proof:["Up to 5:1 absorption (non-viscous)","SDS on request","Bulk, bulk bag & truckload","Carbon neutral material"],
-    procurement:["SDS + spec sheet provided","Bulk / bulk bag / truckload formats","Freight zoned pricing from White Castle, LA","Trial pallet available for head to head field test"],
+    proof:["Up to 5:1 absorption (non-viscous)","Spec sheet on request","Bulk, bulk bag & truckload","Carbon neutral material"],
+    procurement:["Spec sheet provided","Bulk / bulk bag / truckload formats","Freight zoned pricing from White Castle, LA","Trial pallet available for head to head field test"],
     faq:[
-      { q:"Can it handle water based drilling fluids?", a:"Yes, it's used to solidify aqueous fluids and non-viscous streams. Share your fluid profile and we'll confirm fit and send the SDS." },
+      { q:"Can it handle water based drilling fluids?", a:"Yes, it's used to solidify aqueous fluids and non-viscous streams. Share your fluid profile and we'll confirm fit and send the spec sheet." },
       { q:"How fast can we get a trial pallet?", a:"Request a sample kit with your site location; we'll stage a trial pallet for your next job." },
     ],
     form:"sample",
@@ -926,7 +923,7 @@ const INDUSTRIES = {
   "industrial-remediation":{
     name:"Industrial Remediation", icp:"Environmental remediation firms · industrial ops",
     seo:{ title:"Plant Based Industrial Absorbent for Remediation | American BioCarbon",
-      desc:"A renewable industrial absorbent for spill and fluid remediation, holds up to 5× its weight, fewer bags, less to haul away. Bulk supply, SDS & spec on request.",
+      desc:"A renewable industrial absorbent for spill and fluid remediation, holds up to 5× its weight, fewer bags, less to haul away. Bulk supply, spec sheet on request.",
       slug:"/industries/industrial-remediation", keyword:"industrial absorbent",
       secondary:["environmental remediation absorbent","plant based absorbent","spill response absorbent"],
       schema:"Service + FAQPage" },
@@ -952,14 +949,14 @@ const INDUSTRIES = {
       { title:"Machinery &amp; Hydraulic Spill Cleanup", detail:"Plant floor &amp; equipment spills",
         body:"Oil and hydraulic spills cause slip hazards on plant floors, so bagasse pellets contain them on contact.",
         benefit:"Contains and clears spills fast, then disposes per your requirements." },
-      { title:"Client Documentation &amp; Disposal Profiling", detail:"SDS, spec &amp; solid profiling",
-        body:"Firms chase SDS and spec paperwork across suppliers, so one bagasse absorbent covers the job with documentation provided.",
+      { title:"Client Documentation &amp; Disposal Profiling", detail:"Spec sheet &amp; solid profiling",
+        body:"Firms chase spec paperwork across suppliers, so one bagasse absorbent covers the job with documentation provided.",
         benefit:"One documented material for field work and the sustainability story." },
     ],
-    proof:["Up to 5:1 absorption","SDS + spec on request","Bulk & truckload supply","Renewable, low dust"],
-    procurement:["Documentation package (SDS, spec)","Bulk / bulk bag / truckload","Freight aware pricing","Trial before switching"],
+    proof:["Up to 5:1 absorption","Spec sheet on request","Bulk & truckload supply","Renewable, low dust"],
+    procurement:["Documentation package (spec sheet)","Bulk / bulk bag / truckload","Freight aware pricing","Trial before switching"],
     faq:[
-      { q:"Do you supply documentation for our clients?", a:"Yes, SDS and spec sheets are available on request and included when you submit a sample or quote request." },
+      { q:"Do you supply documentation for our clients?", a:"Yes, spec sheets are available on request and included when you submit a sample or quote request." },
     ],
     form:"quote",
     products:["absorbent-pellets","absorbent-crumble"]
@@ -967,7 +964,7 @@ const INDUSTRIES = {
   "environmental-remediation":{
     name:"Environmental Remediation", icp:"Remediation contractors · environmental firms",
     seo:{ title:"Environmental Remediation Absorbent, Plant Based, Up to 5:1 | American BioCarbon",
-      desc:"A renewable absorbent for soil, groundwater, and environmental remediation. Holds up to 5× its weight, fewer bags, lower disposal costs. Bulk supply, SDS on request.",
+      desc:"A renewable absorbent for soil, groundwater, and environmental remediation. Holds up to 5× its weight, fewer bags, lower disposal costs. Bulk supply, spec sheet on request.",
       slug:"/industries/environmental-remediation", keyword:"environmental remediation absorbent",
       secondary:["soil remediation absorbent","environmental cleanup absorbent","plant based absorbent"],
       schema:"Service + FAQPage" },
@@ -997,11 +994,11 @@ const INDUSTRIES = {
         body:"Fluid from brownfield releases and frac outs migrates fast until coarse crumble spreads to cover the wide footprint.",
         benefit:"Coarse crumble covers a wide footprint quickly to contain releases." },
     ],
-    proof:["Up to 5:1 absorption","SDS + spec on request","Bulk & truckload supply","100% renewable material"],
-    procurement:["Documentation package (SDS, spec)","Bulk / bulk bag / truckload","Freight aware pricing","Trial pilot available"],
+    proof:["Up to 5:1 absorption","Spec sheet on request","Bulk & truckload supply","100% renewable material"],
+    procurement:["Documentation package (spec sheet)","Bulk / bulk bag / truckload","Freight aware pricing","Trial pilot available"],
     faq:[
-      { q:"How does your absorbent handle contaminated soil?", a:"Our bagasse pellets and crumble capture non-viscous liquids and aqueous waste at up to 5:1. Share your contamination profile and we'll confirm fit and send the SDS with application guidance." },
-      { q:"Can we run a site trial?", a:"Yes, we support pilot testing at the site with the full documentation package (SDS, spec, certifications) to confirm performance on your specific remediation challenge." },
+      { q:"How does your absorbent handle contaminated soil?", a:"Our bagasse pellets and crumble capture non-viscous liquids and aqueous waste at up to 5:1. Share your contamination profile and we'll confirm fit and send the spec sheet with application guidance." },
+      { q:"Can we run a site trial?", a:"Yes, we support pilot testing at the site with the full documentation package (spec sheet, certifications) to confirm performance on your specific remediation challenge." },
     ],
     form:"quote",
     products:["absorbent-pellets","absorbent-crumble"]
@@ -1009,7 +1006,7 @@ const INDUSTRIES = {
   "spill-response":{
     name:"Spill Response", icp:"Spill-response contractors · emergency crews",
     seo:{ title:"Spill Response Absorbent, Fewer Bags, Faster Cleanup | American BioCarbon",
-      desc:"A plant based spill-response absorbent that holds up to 5× its weight, fewer bags on the truck, faster cleanup, less to haul away. Bulk supply, SDS on request.",
+      desc:"A plant based spill-response absorbent that holds up to 5× its weight, fewer bags on the truck, faster cleanup, less to haul away. Bulk supply, spec sheet on request.",
       slug:"/industries/spill-response", keyword:"spill response absorbent",
       secondary:["oil spill absorbent pellets","disaster cleanup absorbent","plant based absorbent"],
       schema:"Service + FAQPage" },
@@ -1039,8 +1036,8 @@ const INDUSTRIES = {
         body:"Disposal is billed by weight and a low capacity sorbent doubles the tonnage, so bagasse holds up to 5x its weight.",
         benefit:"About half the saturated mass to disposal." },
     ],
-    proof:["Up to 5:1 absorption","Pellet & crumble forms","Low dust","SDS on request"],
-    procurement:["Rapid ship bulk supply","SDS + spec","Trial pallet","Standing reorder terms"],
+    proof:["Up to 5:1 absorption","Pellet & crumble forms","Low dust","Spec sheet on request"],
+    procurement:["Rapid ship bulk supply","Spec sheet","Trial pallet","Standing reorder terms"],
     faq:[
       { q:"Which form for a large spill?", a:"Use crumble for fast, broad coverage on large area events; pellets for targeted cleanup." },
     ],
@@ -1050,7 +1047,7 @@ const INDUSTRIES = {
   "landfill-leachate":{
     name:"Landfill Leachate", icp:"Landfill operators · waste management · public works",
     seo:{ title:"Landfill Leachate Absorbent, Solidify Aqueous Waste at Up to 5:1 | American BioCarbon",
-      desc:"Solidify leachate and aqueous waste with a plant based absorbent that holds up to 5× its weight. Renewable, low dust, bulk supply. SDS & spec on request.",
+      desc:"Solidify leachate and aqueous waste with a plant based absorbent that holds up to 5× its weight. Renewable, low dust, bulk supply. Spec sheet on request.",
       slug:"/industries/landfill-leachate", keyword:"landfill leachate absorbent",
       secondary:["leachate solidification","aqueous waste absorbent","plant based absorbent"],
       schema:"Service + FAQPage" },
@@ -1080,10 +1077,10 @@ const INDUSTRIES = {
         body:"Switching sorbents means proving it and clearing procurement, so we scope a pilot and RFP ready kit.",
         benefit:"Backs the switch with documentation for compliance and procurement review." },
     ],
-    proof:["Up to 5:1 absorption","Renewable, low dust","SDS + spec","Bulk supply"],
+    proof:["Up to 5:1 absorption","Renewable, low dust","Spec sheet","Bulk supply"],
     procurement:["Pilot for the budget cycle","RFP ready documentation kit","Bulk / truckload","Freight aware pricing"],
     faq:[
-      { q:"Can we run a pilot?", a:"Yes, we'll scope a pilot aligned to your budget cycle and provide an RFP ready documentation kit (spec, SDS, certifications)." },
+      { q:"Can we run a pilot?", a:"Yes, we'll scope a pilot aligned to your budget cycle and provide an RFP ready documentation kit (spec sheet, certifications)." },
     ],
     form:"quote",
     products:["absorbent-pellets","absorbent-crumble"]
@@ -1287,7 +1284,7 @@ const FORMS = {
   sample:{
     name:"Request a Sample Kit",
     h:"Request a Sample Kit",
-    sub:"One complimentary sample bag per company, shipping included. We'll send the SDS and spec sheet with it and reply within one business day.",
+    sub:"One complimentary sample bag per company, shipping included. We'll send the spec sheet with it and reply within one business day.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
@@ -1298,29 +1295,29 @@ const FORMS = {
       { n:"fluid", label:"Fluid or material to absorb", type:"select", req:true, options:["Drilling mud / reserve pit","Crude oil / hydrocarbons","Produced water","Solvents / chemicals","Landfill leachate","Paint / coatings / sludge","Other"], otherPh:"e.g. glycol, acid, food grade oil" },
       { n:"useCase", label:"Use case", type:"text", req:true, ph:"e.g. reserve-pit solidification, spill cleanup, leachate control" },
     ],
-    confirm:"Thanks, your request for one complimentary sample bag is in (shipping included). A specialist will reply within one business day with the SDS and spec sheet attached.",
-    autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. The specification sheet for our bagasse absorbent pellets is here: https://americanbiocarbon.com/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf\n\nA specialist will follow up within one business day to confirm your use case and ship to, and can supply safety documentation for your application., American BioCarbon, White Castle, LA",
-    routing:"Industrial → specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach SDS/spec; tag by buyerType + fluid.",
+    confirm:"Thanks, your request for one complimentary sample bag is in (shipping included). A specialist will reply within one business day with the spec sheet attached.",
+    autoreply:"Subject: Your American BioCarbon sample kit\n\nThanks for requesting a sample kit. The specification sheet for our bagasse absorbent pellets is here: https://americanbiocarbon.com/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf\n\nA specialist will follow up within one business day to confirm your use case and ship to, and answer any handling questions for your application., American BioCarbon, White Castle, LA",
+    routing:"Industrial → specialist queue. Create Account + Contact + Deal (type: Sample) + Sample Request; auto-attach spec sheet; tag by buyerType + fluid.",
     scoring:"+ named fluid, + named use case, + qualified buyer type; - personal email, - no stated use case."
   },
   quote:{
     name:"Request a Quote",
     h:"Request a Quote",
-    sub:"Give us your volume and location for freight aware pricing. SDS and spec included with your quote.",
+    sub:"Give us your volume and location for freight aware pricing. Spec sheet included with your quote.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
       { n:"email", label:"Email", type:"email", req:true },
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"product", label:"Product", type:"select", req:true, options:["Absorbent Pellets","100% Biochar","Absorbent Crumble","Multipurpose Fiber","Multiple / not sure"] },
-      { n:"request", label:"Request type", type:"select", req:false, options:["Bulk quote","Spec sheet / SDS","Sample first","Talk to a specialist"] },
+      { n:"request", label:"Request type", type:"select", req:false, options:["Bulk quote","Spec sheet","Sample first","Talk to a specialist"] },
       { n:"location", label:"Ship to (city / state)", type:"text", req:true },
       { n:"format", label:"Format", type:"select", req:false, options:["Bulk","1 MT bulk bag","20/40 lb bags","Truckload","Not sure"] },
       { n:"volume", label:"Estimated volume & frequency", type:"text", req:true, ph:"e.g. 2 truckloads / month" },
       { n:"useCase", label:"Use case", type:"text", req:false },
       { n:"timeline", label:"Timeline", type:"select", req:false, options:["Active need now","This quarter","Evaluating"] },
     ],
-    confirm:"Thanks, your bulk quote request is in. We'll reply within one business day with freight aware pricing plus the SDS and spec sheet.",
+    confirm:"Thanks, your bulk quote request is in. We'll reply within one business day with freight aware pricing plus the spec sheet.",
     autoreply:"Subject: Your American BioCarbon bulk quote\n\nThanks for your quote request. We're preparing freight aware pricing for your volume and ship to.\n\nMeanwhile the specification sheets are here:\nAbsorbent pellets: https://americanbiocarbon.com/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf\nPremium biochar: https://americanbiocarbon.com/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf, American BioCarbon",
     routing:"Create Account + Contact + Deal (type: Bulk / Truckload); assign to sales; freight-zone the ship to.",
     scoring:"+ volume tier, + recurring frequency, + zone A/B, + active-now."
@@ -1383,8 +1380,8 @@ const FORMS = {
   },
   docs:{
     name:"Request Technical Documentation",
-    h:"Request Spec Sheets, SDS &amp; Technical Data",
-    sub:"Tell us where to send it and we'll email the documents relevant to your application, spec sheets, SDS, lab analyses, certificates, and our research package.",
+    h:"Request Spec Sheets &amp; Technical Data",
+    sub:"Tell us where to send it and we'll email the documents relevant to your application, spec sheets, lab analyses, certificates, and our research package.",
     fields:[
       { n:"name", label:"Name", type:"text", req:true },
       { n:"company", label:"Company", type:"text", req:true },
@@ -1392,11 +1389,11 @@ const FORMS = {
       { n:"phone", label:"Phone", type:"tel", req:true, ph:"e.g. (225) 555-0134" },
       { n:"role", label:"Your role", type:"select", req:true, options:["Procurement / Purchasing","Operations","EHS / Safety","Environmental / Remediation","Agronomy / Technical","Sustainability / Carbon","Distribution / Resale","Other"], otherPh:"e.g. R&D, Consultant, Facilities" },
       { n:"industry", label:"Industry / application", type:"select", req:true, options:["Oil & gas","Spill response","Environmental remediation","Industrial operations","Landfill / leachate","Municipal / disaster","Agriculture / distribution","Soil blending / compost","Carbon / ESG","Other"], otherPh:"e.g. Marine, Mining, Pipeline" },
-      { n:"documents", label:"Which documents?", type:"select", req:true, options:["Absorbent spec sheet","Absorbent SDS","Absorbent spec + SDS","Biochar spec + lab analysis","OMRI listing + Puro.earth certification","Peer reviewed research package","All technical documents"] },
+      { n:"documents", label:"Which documents?", type:"select", req:true, options:["Absorbent spec sheet","Biochar spec + lab analysis","OMRI listing + Puro.earth certification","Peer reviewed research package","All technical documents"] },
       { n:"useCase", label:"Use case (helps us send the right data)", type:"text", req:false },
     ],
-    confirm:"Thanks, check your inbox. We've routed the requested documents to your email and a specialist will follow up if a spec or SDS needs tailoring to your application.",
-    autoreply:"Subject: Your American BioCarbon technical documents\n\nThanks for your request. The published specification sheets are here:\nAbsorbent pellets: https://americanbiocarbon.com/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf\nPremium biochar: https://americanbiocarbon.com/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf\n\nA specialist will follow up within one business day with the lab data, safety documentation and research relevant to your application., American BioCarbon, White Castle, LA",
+    confirm:"Thanks, check your inbox. We've routed the requested documents to your email and a specialist will follow up if a spec sheet needs tailoring to your application.",
+    autoreply:"Subject: Your American BioCarbon technical documents\n\nThanks for your request. The published specification sheets are here:\nAbsorbent pellets: https://americanbiocarbon.com/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf\nPremium biochar: https://americanbiocarbon.com/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf\n\nA specialist will follow up within one business day with the lab data and research relevant to your application., American BioCarbon, White Castle, LA",
     routing:"Gated download. Create Contact + Activity (doc request) + Deal if volume signal; tag by role + industry + documents; deliver files by email.",
     scoring:"+ procurement/EHS role, + oil&gas/remediation industry, + 'all documents', + named use case; - personal email, - student/research-only."
   },
@@ -1480,7 +1477,7 @@ const ANIMAL_BEDDING = {
       ["Commercial formats","Bulk, bulk bag & truckload"],
       ["Current availability","Samples available now"],
       ["Product specifications","Request document"],
-      ["SDS status","Request document"],
+      ["Spec sheet","Request document"],
     ]
   },
 
@@ -1546,7 +1543,7 @@ const RESELLERS_INDUSTRIES = {
         body:"Spill response contractors staging sorbent on the truck get a fast-shipping, high-capacity option from you.",
         benefit:"Up to 5:1 capacity means fewer bags and repeat orders." },
       { title:"Environmental &amp; remediation firms", detail:"Documented sorbent line",
-        body:"Remediation and industrial buyers who require documentation get a plant-based sorbent with SDS and spec sheet.",
+        body:"Remediation and industrial buyers who require documentation get a plant-based sorbent with a full spec sheet.",
         benefit:"A differentiated line with the documentation buyers require." },
       { title:"Landfill &amp; waste operators", detail:"Leachate solidification",
         body:"Landfill and waste accounts must solidify leachate and aqueous waste streams using a weight-driven consumable.",

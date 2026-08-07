@@ -270,8 +270,9 @@ export function renderEmail({ style = "classic", preheader = "", heading = "", b
  *
  * Copy is derived from data.js `autoreply`, restructured into headline/paragraphs/links so
  * it renders as a designed email rather than a pasted text blob. Claims are deliberately
- * conservative: a specialist "can supply" safety documentation, because there is no
- * approved SDS on file yet. Do not upgrade that to "attached" or "enclosed" without one.
+ * conservative: no email offers safety documentation at all, because there is no
+ * approved SDS on file. Do not add one back until a real document exists - a buyer who
+ * asks for a document we cannot produce is worse than never having offered it.
  * ------------------------------------------------------------------ */
 const ONE_DAY = "within one business day";
 
@@ -301,7 +302,7 @@ export const SEQUENCES = {
     build: (o) => ({
       paras: [
         "Thanks for requesting a sample kit. One complimentary sample bag per company, shipping included.",
-        `A specialist will follow up ${ONE_DAY} to confirm your use case and ship-to address, and can supply safety documentation for your application.`,
+        `A specialist will follow up ${ONE_DAY} to confirm your use case and ship-to address, and answer any handling questions for your application.`,
       ],
       links: [{ label: "Absorbent Pellets - specification sheet (PDF)", href: o + SPEC.pellets }],
       cta: null,
@@ -384,7 +385,7 @@ export const SEQUENCES = {
     build: (o) => ({
       paras: [
         "Thanks for your request. The current specification sheets are below.",
-        "A specialist will follow up with laboratory data and any safety documentation you need for your application.",
+        "A specialist will follow up with the laboratory data you need for your application.",
       ],
       links: [
         { label: "Absorbent Pellets - specification sheet (PDF)", href: o + SPEC.pellets },

@@ -26,11 +26,11 @@ summary:{
     {icp:"Strategic / partner & warm relationships",pct:"~5%",why:"Relationship-led sample placements across any customer type; warm-intro funnel into the sample motion.",cls:"badge-blue"}
   ],
   allocationNote:"BIOCHAR IS PRIORITY #1 (~65% combined). We hold 80 MT of finished biochar ready to ship, so the biochar channel is not just highest-leverage — it's the fastest path to actual revenue: a winning free-sample trial converts straight to a paid order against inventory on hand. Absorbent is now the SECONDARY track (~30% combined) — still samples-first (ongoing capacity ~400 MT/mo isn't committed for pellet bulk yet). Carbon/CDR is PARKED for Month 1 — revisit days 61–90. Every ICP gets its OWN hyper-targeted campaign (ReRoofGen/Instantly-style) — free-sample offer up front, bulk/order ask only after a biochar trial wins, A/B tested per segment.",
-  offer:"The Free-Sample Offer: a free, performance-grade sample of the live product (Pellets 1 lb / Biochar 8 oz) + a written test protocol + spec sheet/SDS, shipped to their door so they can test it against what they use now — zero cost, zero commitment. Risk-reversed and commitment-free: 'Test it free against your current material. If it doesn't outperform, throw it away — no ask, no strings.' (What happens after a winning trial — reorders, standing supply, an LOI to lock Q4 pricing — is handled 1:1 later and NEVER mentioned in the opening touch.)",
+  offer:"The Free-Sample Offer: a free, performance-grade sample of the live product (Pellets 1 lb / Biochar 8 oz) + a written test protocol + spec sheet, shipped to their door so they can test it against what they use now — zero cost, zero commitment. Risk-reversed and commitment-free: 'Test it free against your current material. If it doesn't outperform, throw it away — no ask, no strings.' (What happens after a winning trial — reorders, standing supply, an LOI to lock Q4 pricing — is handled 1:1 later and NEVER mentioned in the opening touch.)",
   ctaPaths:[
     "Free sample → 'Worth testing a free sample against what you use now?' (THE primary CTA everywhere)",
     "Next-job test → 'Want a sample kit staged for your next spill/job?'",
-    "Spec sheet → 'Want the spec sheet + SDS to review first?' (soft yes → sample)",
+    "Spec sheet → 'Want the spec sheet to review first?' (soft yes → sample)",
     "Sourcing intro → 'Who owns absorbent/input sourcing on your team?' (routing → sample)"
   ],
   goals:{
@@ -119,7 +119,7 @@ campaigns:[
    pain:"Buying clay/wood absorbents that soak poorly per pound, generate heavy disposal weight, and carry no sustainability story for ESG-pressured operations.",
    offer:"Free 1-lb Absorbent Pellet sample + written test protocol + head-to-head comparison vs current absorbent, shipped to their door. Zero cost, zero commitment — 'test it on your next spill against what you use now.'",
    cta:"Worth testing a free sample against what you use now?",cta2:"Who handles absorbent sourcing on your team?",
-   magnet:"Spec sheet + SDS + wood/clay comparison sheet",
+   magnet:"Spec sheet + wood/clay comparison sheet",
    angle:"Plant-based absorbent from sugarcane bagasse that absorbs up to ~5x its weight (EST) — potentially less material and lighter disposal per spill, with a cleaner sustainability story. The ask is just a free test — no commitment, no LOI talk.",
    proof:["Prior industrial sales","Product/facility photos","Spec sheet + lab data (verified only)"],
    disq:["No spill/absorbent spend","No recurring absorbent need","Pure one-off spot-buyer"],
@@ -475,7 +475,7 @@ scriptLibrary:{
      ],
      objections:[
        {o:"Procurement/bid process",b:"Makes sense — this is just a free sample so your team has real data before any bid or budget cycle. No commitment now. Where should I ship it?"},
-       {o:"Regulatory approval needed",b:"Fair — the free sample is exactly how you'd start that review. I'll include the SDS and spec so your compliance folks can look. Ship-to?"}
+       {o:"Regulatory approval needed",b:"Fair — the free sample is exactly how you'd start that review. I'll include the spec sheet so your compliance folks can look. Ship-to?"}
      ],
      voicemails:[
        {style:"VM-1",b:"Hi {First}, {Me} with American BioCarbon — plant-based leachate/odor media, ~5x absorption. I'd like to send a free sample for a site trial. Reach me at {phone}. Thanks."}
@@ -759,7 +759,7 @@ sampleFlow:{
   qualQuestions:["What liquid/spill type (pellets) or crop/blend (biochar) would you test it on?","Roughly what volume would you need monthly/annually once we're at full capacity?","What are you using now, and what does it cost delivered?","What would make you switch — absorption/water-holding, disposal weight, price, sustainability?","Who signs an LOI on your side, and what's their bar?"],
   formFields:["Account + contact","Product + sample size (Pellets 1 lb / Biochar 8 oz)","Use-case / liquid or crop type","Estimated future volume (Q4+)","Current product + cost","Success criteria (how they'll judge it)","Ship-to address + zip","Decision-maker + timeline for an LOI"],
   approval:["Auto-approve sample if ICP-fit + qualification complete","Victor/Ops reviews any non-standard request","Reject/redirect if no real use-case or pure freebie-seeker"],
-  shipping:["Ship within 48h of qualification (4–7 biz days to arrive from White Castle, LA)","Capture tracking + ship date in CRM","Box includes: product sample, spec sheet + SDS, written test protocol, success-criteria sheet, and the LOI one-pager"],
+  shipping:["Ship within 48h of qualification (4–7 biz days to arrive from White Castle, LA)","Capture tracking + ship date in CRM","Box includes: product sample, spec sheet, written test protocol, success-criteria sheet, and the LOI one-pager"],
   followTiming:["Day of delivery: 'it landed — here's the 2-minute test protocol'","Day 3: 'did you get a chance to run it?'","Day 7: results check-in + capture outcome","Day 10: present the LOI if positive; capture objection if not"],
   trialDoc:["Ask for a photo/short note of the result (claim-safe)","Log performance vs current (absorption / water-holding), handling impression, ease of use","This becomes case-study-safe proof + the justification for the LOI"],
   loiConversion:["Trigger the LOI when sample outcome = Positive","Present a short LOI: committed future volume × locked Q4 price band + reserved territory/priority — non-binding until Q4 delivery","Send within 48h of a positive trial","Follow up in 2 days: 'does this lock the terms you want for the fall? happy to adjust volume/territory'","On signature: log committed volume → the funding metric"],
@@ -769,7 +769,7 @@ sampleFlow:{
 
 /* ---------------------------------------------------------- 15. FINAL EXECUTION CHECKLIST */
 launch:{
-  before:["Website: hero + O&G + industrial-remediation + free-sample + LOI/reserve-supply pages live (Victor-approved)","Forms: sample + LOI submit → routes to Jesse + Victor + Daniel (tested end-to-end)","Sample SKUs: Pellets 1 lb + Biochar 8 oz created in Shopify; variant IDs wired into site","Certs: SDS / OMRI listing / IBI-panel lab reports / Puro gathered by Victor; carbon + certification language reviewed for overstatement","CRM: Account/Contact/Deal/Campaign/Activity/Sample/LOI fields + ICP/campaign tags live","Collateral: spec sheet + SDS + comparison sheet + sample-kit insert + LOI one-pager ready","Target list: 150–200 accounts across BOTH products sourced, verified, tagged; shared with Victor","Sending: 1–2 secondary domains warmed, SPF/DKIM/DMARC passing, opt-out + address in template","Calls: scripts + phone line + CRM logging ready","Sample workflow: qualification + 48h ship SLA + LOI one-pager in every box","Dashboard: daily activity + sample→LOI funnel cards live","Social: LinkedIn profile + company page live","Analytics: form/CTA/reply/bounce tracking installed"],
+  before:["Website: hero + O&G + industrial-remediation + free-sample + LOI/reserve-supply pages live (Victor-approved)","Forms: sample + LOI submit → routes to Jesse + Victor + Daniel (tested end-to-end)","Sample SKUs: Pellets 1 lb + Biochar 8 oz created in Shopify; variant IDs wired into site","Certs: SDS / OMRI listing / IBI-panel lab reports / Puro gathered by Victor; carbon + certification language reviewed for overstatement","CRM: Account/Contact/Deal/Campaign/Activity/Sample/LOI fields + ICP/campaign tags live","Collateral: spec sheet + comparison sheet + sample-kit insert + LOI one-pager ready","Target list: 150–200 accounts across BOTH products sourced, verified, tagged; shared with Victor","Sending: 1–2 secondary domains warmed, SPF/DKIM/DMARC passing, opt-out + address in template","Calls: scripts + phone line + CRM logging ready","Sample workflow: qualification + 48h ship SLA + LOI one-pager in every box","Dashboard: daily activity + sample→LOI funnel cards live","Social: LinkedIn profile + company page live","Analytics: form/CTA/reply/bounce tracking installed"],
   first48:[
     {t:"Verify infra",d:"Send 5 test emails to yourself across inboxes; confirm inbox placement + tracking; submit sample form as a test → confirm CRM record."},
     {t:"Load the list",d:"Confirm 100 CMP-OG accounts tagged; rank top 30 by priority score."},
