@@ -14,25 +14,31 @@
  *   RESEND_API_KEY  secret. API key from the Resend account.
  *   LEAD_FROM       optional. Verified sender, defaults to the send. subdomain so the
  *                   root SPF record for Microsoft 365 and Proofpoint is never touched.
+ *   SITE_ORIGIN     optional. Base URL for links inside emails. Defaults to the apex.
+ *                   Point it at the pages.dev URL before cutover: the spec-sheet PDFs
+ *                   404 on the apex until the apex actually serves this site.
+ *
+ * Two emails go out per submission: the lead to the sales desk, then an auto-reply to the
+ * visitor. Templates live in _email.js, shared with scripts/build-email-previews.mjs so the
+ * approved preview and the delivered mail cannot drift apart.
  */
+import { buildAutoreply, buildInternalLead } from "./_email.js";
 
-/* sales@ is the canonical destination for every website enquiry. It is a real, monitored
-   address: Shopify's authenticated notification sender and an order-notification recipient.
-   Deliberately NOT sarah.boone@ / victor.jehle@americanbiocarbon.com, which the handoff docs
-   specified but which appear nowhere in the live Shopify configuration. Sarah and Victor
-   actually work from sboone@cs-ops.com and victor.jehle@cs-ops.com, so mail to the
-   americanbiocarbon.com spellings may reach no inbox at all. Routing to sales@ keeps
-   delivery on an address known to be live, and it can be fanned out from there. */
-const RECIPIENTS = ["sales@americanbiocarbon.com"];
+/* Website enquiries go to the two people who actually work the leads, by name.
+   These addresses are taken from the live Shopify staff accounts (Settings > Users,
+   verified 2026-08-06), NOT from the handoff docs, which specified
+   sarah.boone@ / victor.jehle@americanbiocarbon.com - spellings that appear nowhere in any
+   live system and may reach no inbox at all.
+
+   sales@americanbiocarbon.com is deliberately NOT here. A test send did deliver to it, so
+   something accepts mail at that address, but nobody has confirmed it is a monitored
+   mailbox rather than a catch-all. A lead sitting unread in a catch-all is indistinguishable
+   from a lead that was never sent, which is the exact failure this whole endpoint exists to
+   prevent. Add it back once someone confirms who reads it. */
+const RECIPIENTS = ["sboone@cs-ops.com", "victor.jehle@cs-ops.com"];
 
 const DEFAULT_FROM = "American BioCarbon <leads@send.americanbiocarbon.com>";
 const MAX_BODY_BYTES = 32 * 1024;
-const MAX_FIELD_LEN = 5000;
-
-const esc = (s) =>
-  String(s).replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
-  );
 
 /* Pull the visitor address out of whatever the form called it, so a reply goes to the
    prospect rather than to us. Returns null if nothing looks like an address. */
@@ -81,43 +87,64 @@ export async function onRequest({ request, env }) {
     return json(500, { error: "mail transport not configured" });
   }
 
-  const rows = Object.entries(fields)
-    .filter(([k]) => k !== "_gotcha" && k !== "website_url")
-    .map(
-      ([k, v]) =>
-        `<tr><td style="padding:4px 12px 4px 0;vertical-align:top;color:#555">${esc(k)}</td>` +
-        `<td style="padding:4px 0">${esc(String(v).slice(0, MAX_FIELD_LEN))}</td></tr>`
-    )
-    .join("");
-
-  const text = Object.entries(fields)
-    .filter(([k]) => k !== "_gotcha" && k !== "website_url")
-    .map(([k, v]) => `${k}: ${String(v).slice(0, MAX_FIELD_LEN)}`)
-    .join("\n");
-
   const replyTo = replyToFrom(fields);
-  const body = {
-    from: env.LEAD_FROM || DEFAULT_FROM,
+  const from = env.LEAD_FROM || DEFAULT_FROM;
+
+  const send = (payload) =>
+    fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+  /* 1. The lead itself. This is the one that must not fail: a lost lead is lost revenue,
+        whereas a missing auto-reply is a poor experience we can recover from. */
+  const internal = buildInternalLead(form, fields, page, env);
+  const notify = {
+    from,
     to: RECIPIENTS,
-    subject: `Website form: ${form}`,
-    text: `${text}\n\nPage: ${page}\nReceived: ${new Date().toISOString()}`,
-    html:
-      `<p style="font:14px system-ui">New <strong>${esc(form)}</strong> submission from the website.</p>` +
-      `<table style="font:14px system-ui;border-collapse:collapse">${rows}</table>` +
-      `<p style="font:12px system-ui;color:#777">Page: ${esc(page)}<br>Received: ${new Date().toISOString()}</p>`,
+    subject: internal.subject,
+    text: internal.text,
+    html: internal.html,
   };
-  if (replyTo) body.reply_to = replyTo;
+  if (replyTo) notify.reply_to = replyTo;
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
+  const res = await send(notify);
   if (!res.ok) {
     console.error("[lead] delivery failed", res.status, await res.text().catch(() => ""));
     return json(502, { error: "delivery failed" });
   }
+
+  /* 2. The auto-reply to the visitor. Deliberately AFTER the lead and deliberately
+        non-fatal: if this throws or the address bounces, we still captured the lead and
+        already returned it to the desk. Failures are logged loudly so they show up in
+        `wrangler pages deployment tail` rather than vanishing.
+
+        Skipped entirely when the form carries no usable address (e.g. a form with only a
+        phone field) - better to send nothing than to guess a recipient. */
+  if (replyTo) {
+    try {
+      const reply = buildAutoreply(form, fields, env);
+      if (reply) {
+        const r = await send({
+          from,
+          to: [replyTo],
+          reply_to: "sales@americanbiocarbon.com",
+          subject: reply.subject,
+          text: reply.text,
+          html: reply.html,
+        });
+        if (!r.ok) {
+          console.error("[lead] autoreply failed", r.status, await r.text().catch(() => ""), { form });
+        }
+      } else {
+        console.warn("[lead] no autoreply sequence for form", form);
+      }
+    } catch (err) {
+      console.error("[lead] autoreply threw", String(err), { form });
+    }
+  }
+
   return new Response(null, { status: 204 });
 }
 

@@ -31,6 +31,17 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400..800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="tokens.css?v=65742628" />
   <link rel="stylesheet" href="styles.css?v=f3cb0480" />
+  <!-- GA4. app.js track() forwards site events here once gtag is defined (see app.js). The
+       SPA changes routes without a document load, so page_view is sent manually on each
+       route render instead of automatically; send_page_view:false stops the double count
+       on first load. Snapshots are prerendered from this file, so every route inherits it. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B5HFTSQGWF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B5HFTSQGWF', { send_page_view: false });
+  </script>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -88,6 +99,6 @@
   <footer class="site"><div class="wrap" id="footer"><!-- injected --></div></footer>
 
   <script src="data.js?v=76c0badf" defer></script>
-  <script src="app.js?v=265765c9" defer></script>
+  <script src="app.js?v=034c944f" defer></script>
 </body>
 </html>

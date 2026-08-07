@@ -1193,6 +1193,15 @@ function setMeta(seo, opts={}){
   const canonical = SITE.origin + (opts.canonical || (path==="/" ? "/" : path));
   const image = SITE.origin + (opts.image || SITE.ogImage);
   _link("canonical", canonical);
+  /* GA4 page_view. index.html configures gtag with send_page_view:false, because this is a
+     hash/history SPA: without that, GA counts the first load and never sees another route.
+     setMeta runs once per route render, so it is the one place that reliably knows the new
+     title and canonical. The _gaLast guard matters - some routes call setMeta twice while
+     resolving data, which would otherwise double-count the pageview. */
+  if (typeof window.gtag === "function" && window._gaLast !== canonical) {
+    window._gaLast = canonical;
+    window.gtag("event", "page_view", { page_title: title, page_location: canonical, page_path: path });
+  }
   _meta('meta[property="og:site_name"]','property','og:site_name', SITE.name);
   _meta('meta[property="og:locale"]','property','og:locale', SITE.locale);
   _meta('meta[property="og:type"]','property','og:type', opts.type||"website");
