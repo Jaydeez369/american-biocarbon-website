@@ -3,8 +3,11 @@
 # nothing and the file is served anyway (verified in production, 2026-07-17).
 # The publish root IS the repo root: anything committed here is public. Internal docs
 # therefore live outside the repo (../website-internal-docs/), not behind a rule.
-# Sales OS is its own app under /sales/ - serve it directly, never via the SPA fallback
-/sales/*    /sales/:splat    200
+# Sales OS is its own app under /sales/. It needs NO rule: static assets win over the
+# /* fallback on their own. A self-referential "/sales/* -> /sales/:splat 200" rewrite
+# lived here and broke it - Pages resolved the no-op rewrite, found nothing, and fell
+# through to /* -> /index.html, so every sales asset returned the marketing homepage as
+# text/html. The page rendered unstyled with no nav (verified in production, 2026-08-07).
 # E7: canonicalize duplicate topic URLs to their richer dedicated landing pages
 /industry/environmental-remediation    /environmental-remediation-solutions    301
 /industry/distributors    /distributors-resellers-industries    301
