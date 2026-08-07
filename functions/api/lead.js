@@ -45,11 +45,19 @@ import { buildAutoreply, buildInternalLead } from "./_email.js";
    supplied "recipients" array, which is still ignored for the open-relay reason above. */
 const DEFAULT_RECIPIENTS = ["sboone@cs-ops.com", "victor.jehle@cs-ops.com"];
 
+/* Resolve who gets the internal lead. Returns {list} or {error}; never falls back to the
+   sales desk when an override was clearly intended but unusable.
+
+   FAIL CLOSED. A set-but-empty LEAD_TO is a misconfigured test, not a request to mail the
+   real desk, so it refuses to send instead of quietly reverting. The earlier version
+   returned DEFAULT_RECIPIENTS here, which is the shape of bug that mails the people a test
+   was written to protect. */
 function recipientsFrom(env) {
-  const override = typeof env.LEAD_TO === "string" ? env.LEAD_TO.trim() : "";
-  if (!override) return DEFAULT_RECIPIENTS;
-  const list = override.split(",").map((s) => s.trim()).filter(Boolean);
-  return list.length ? list : DEFAULT_RECIPIENTS;
+  const raw = typeof env.LEAD_TO === "string" ? env.LEAD_TO.trim() : "";
+  if (!raw) return { list: DEFAULT_RECIPIENTS, overridden: false };
+  const list = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  if (!list.length) return { error: "LEAD_TO is set but contains no address" };
+  return { list, overridden: true };
 }
 
 const DEFAULT_FROM = "American BioCarbon <leads@send.americanbiocarbon.com>";
@@ -92,6 +100,29 @@ export async function onRequest({ request, env }) {
      tell it was rejected, but send nothing. */
   if (fields._gotcha || fields.website_url) return new Response(null, { status: 204 });
 
+  /* Dry run: report how THIS deployment would route a lead, and send nothing.
+
+     Cloudflare binds env vars per deployment and the production alias keeps serving the
+     previous build for a while after a new one goes live, so a LEAD_TO added in the
+     dashboard may simply not exist on the build actually answering the request. There was
+     no way to detect that except by sending, which is exactly the thing that must not be
+     got wrong: on 2026-08-07 a test POST hit the older build and mailed the live desk.
+     Check `overridden` here before sending anything real.
+
+     Deliberately reports no addresses, only whether an override is in effect. This endpoint
+     is public, and echoing the recipient list back would hand every scraper the sales desk. */
+  if (payload.dry_run === true) {
+    const resolved = recipientsFrom(env);
+    return json(200, {
+      dryRun: true,
+      overridden: resolved.overridden ?? false,
+      recipientCount: resolved.list ? resolved.list.length : 0,
+      configError: resolved.error ?? null,
+      mailConfigured: Boolean(env.RESEND_API_KEY),
+      commit: env.CF_PAGES_COMMIT_SHA ?? null,
+    });
+  }
+
   if (!Object.keys(fields).length) return json(400, { error: "no fields submitted" });
 
   const key = env.RESEND_API_KEY;
@@ -114,10 +145,16 @@ export async function onRequest({ request, env }) {
 
   /* 1. The lead itself. This is the one that must not fail: a lost lead is lost revenue,
         whereas a missing auto-reply is a poor experience we can recover from. */
+  const resolved = recipientsFrom(env);
+  if (resolved.error) {
+    console.error("[lead] refusing to send:", resolved.error, { form, page });
+    return json(500, { error: "recipient configuration invalid" });
+  }
+
   const internal = buildInternalLead(form, fields, page, env);
   const notify = {
     from,
-    to: recipientsFrom(env),
+    to: resolved.list,
     subject: internal.subject,
     text: internal.text,
     html: internal.html,
