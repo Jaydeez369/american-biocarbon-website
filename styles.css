@@ -618,12 +618,15 @@ tbody td:first-child{font-weight:650;color:var(--ink)}
 .docrow.study em{display:block;margin-top:6px;font-style:normal;color:var(--graphite);font-size:14px}
 
 /* ---------- Certification cards (condensed grid) ---------- */
-.certgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.certcard{background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;display:flex;flex-direction:column;gap:7px;transition:.15s}
+/* Centered row so a short list (2-3 items) sits under the middle of the section
+   rather than hugging the left edge of a full-width auto-fill grid. */
+.certgrid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px}
+.certcard{flex:0 1 360px;background:var(--white);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px 24px;display:flex;flex-direction:column;gap:9px;transition:.15s}
 .certcard:hover{box-shadow:var(--sh);border-color:var(--line-2)}
-.certcard .ct-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.certcard b{font-family:var(--f-head);font-size:16px;font-weight:600;color:var(--ink);line-height:1.2}
-.certcard span{font-size:13px;color:var(--dim);line-height:1.45}
+.certcard .ct-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.certcard b{font-family:var(--f-head);font-size:18px;font-weight:600;color:var(--ink);line-height:1.2}
+.certcard span{font-size:14px;color:var(--dim);line-height:1.5}
+@media(max-width:640px){.certcard{flex-basis:100%}}
 
 /* ---------- Certification icon cards ---------- */
 .icert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
