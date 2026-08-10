@@ -1169,7 +1169,7 @@ function linkLabel(href){
   if(href.includes("compare")) return "Compare";
   return "Learn more";
 }
-const SITE = { origin:"https://americanbiocarbon.com", name:"American BioCarbon", locale:"en_US", ogImage:"/assets/og-image.png" };
+const SITE = { origin:"https://americanbiocarbon.com", name:"American BioCarbon", locale:"en_US", ogImage:"/assets/og-image.png?v=2" };
 function _meta(sel, attr, key, val){
   let m=document.head.querySelector(sel);
   if(!m){ m=document.createElement("meta"); m.setAttribute(attr,key); document.head.appendChild(m); }

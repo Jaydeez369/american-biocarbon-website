@@ -31,7 +31,10 @@ import vm from "node:vm";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const ORIGIN = "https://americanbiocarbon.com";
 const SITE_NAME = "American BioCarbon";
-const OG_IMAGE = ORIGIN + "/assets/og-image.png";
+/* Versioned by hand: /assets/* ships immutable for a year (see _headers), and stamp-assets
+   only content-hashes .css/.js. Without a bump, every scraper that already cached the old
+   card - iMessage in particular - keeps serving it. Bump when og-image.png changes. */
+const OG_IMAGE = ORIGIN + "/assets/og-image.png?v=2";
 
 // ---- Load data.js in a sandbox and capture the data consts ---------------------------
 // data.js is plain `const X = {...}` declarations. Concatenate an epilogue in the SAME
