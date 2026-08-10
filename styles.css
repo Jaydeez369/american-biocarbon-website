@@ -123,8 +123,17 @@ section.block > .wrap > .lead{margin-left:auto;margin-right:auto}
   radial-gradient(120% 90% at 50% 46%,transparent 40%,rgba(8,15,32,.5) 100%)}
 .hslide-content{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 0 108px}
 .hslide-content .wrap{width:100%}
-.hslide-kicker{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#fff;
-  display:inline-block;padding:7px 16px;border:1px solid rgba(255,255,255,.4);border-radius:30px;background:rgba(255,255,255,.08);backdrop-filter:blur(4px);margin-bottom:26px}
+/* Hero eyebrow: the slide's product name, carried between two fading hairlines.
+   Deliberately not a chip. A bordered, frosted pill turns to mud over a busy
+   photo and competes with the serif headline for the eye, and on a phone it
+   stacks as a second box right on top of the title. Same job as the
+   .eyebrow-line on section bands, reversed out for photo. */
+.hslide-kicker{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:26px;
+  text-shadow:0 1px 14px rgba(0,0,0,.6)}
+.hslide-kicker::before,.hslide-kicker::after{content:"";height:1px;flex:0 0 auto;width:clamp(24px,7vw,76px);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.75))}
+.hslide-kicker::after{background:linear-gradient(90deg,rgba(255,255,255,.75),transparent)}
 .hslide-h{font-family:var(--f-head);color:#fff;font-size:76px;line-height:1.02;letter-spacing:-.5px;text-shadow:0 2px 30px rgba(0,0,0,.45);margin:0 auto;max-width:16ch}
 .hslide-sub{color:#e6ebf5;font-size:20px;line-height:1.55;margin:24px auto 34px;max-width:60ch;text-shadow:0 1px 16px rgba(0,0,0,.5)}
 .hslide-btns{justify-content:center}
@@ -767,6 +776,8 @@ footer.site .legal{margin-top:36px;padding-top:18px;border-top:1px solid #24478a
   .logo-strip{grid-template-columns:1fr 1fr}
   .hslide-h{font-size:34px} .hslide-sub{font-size:16px} .block h2{font-size:26px} .block{padding:52px 0}
   .hslide-content .wrap{padding-left:22px;padding-right:22px}
+  /* the longest label (BIOCHAR-INFUSED SOIL) has to clear its hairlines on a 375px screen */
+  .hslide-kicker{font-size:13px;letter-spacing:.2em;gap:12px}
   footer.site .cols{grid-template-columns:1fr}
 }
 
