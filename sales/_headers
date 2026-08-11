@@ -2,8 +2,11 @@
 # On the main site this file is just served as a static asset at /sales/_headers and is
 # ignored; Cloudflare only applies the _headers found at a project's own build-output root.
 
-# Internal tool. noindex is a crawl hint, NOT access control - this project still needs
-# Cloudflare Access in front of it before sharing (it contains COGS, price floors, margins).
+# Internal tool. noindex is a crawl hint, NOT access control. The actual access control is
+# functions/_middleware.js, a Pages Function that password-gates every route at the edge
+# before any asset is served (this project contains COGS, price floors, margins, and the
+# account roster). That middleware requires the SALES_OS_PASSWORD variable to be set on the
+# deployment; with it unset the whole project returns 503 rather than serving unprotected.
 /*
   X-Robots-Tag: noindex, nofollow
   X-Content-Type-Options: nosniff
