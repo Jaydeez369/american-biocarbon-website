@@ -19,11 +19,6 @@ function rerender(){
   const id = (location.hash || "#" + NAV[0].items[0].id).slice(1);
   render();
   go(id, { keepScroll:true });   // restore the active section without jumping to top
-  // an open calendar day lives inside #content, so put it back or ticking a task inside it
-  // would close the panel out from under the user
-  if(window.gtmOpenCalDay != null && typeof window.gtmCalPick === "function"){
-    window.gtmCalPick(window.gtmOpenCalDay, { restore:true });
-  }
   window.scrollTo(0, y);
 }
 window.toggleChk = el => { const on = !el.classList.contains("done"); el.classList.toggle("done", on); setCheck(el.dataset.k, on); rerender(); };
@@ -59,25 +54,22 @@ function script(label,body){
    anchored to a $700/ton biochar price that the live $450/MT site price superseded, so it
    was actively misleading rather than merely idle. The playbook owns the market model now.
    Recoverable from git history if it is ever wanted back, re-derived at live prices. */
+/* Ordered by the live motion, not by planning hierarchy: launch the campaigns, send the
+   outreach, work the replies in the pipeline. Everything below Execute is reference material
+   you open when a specific question comes up, not something you read top to bottom. */
 const LEAN_NAV=[
-  {group:"Focus",items:[
-    {id:"daily",ic:"◎",t:"Daily Plan"},
-  ]},
-  {group:"Pipeline",items:[
-    {id:"crm",ic:"◉",t:"Sales Pipeline"},
-  ]},
-  {group:"Plan",items:[
-    {id:"strategy",ic:"◆",t:"Strategy & ICP"},
-    {id:"product",ic:"❝",t:"Product & Messaging"},
+  {group:"Launch",items:[
+    {id:"launch",ic:"◎",t:"Launchpad"},
+    {id:"strategy",ic:"◆",t:"Campaigns & ICP"},
   ]},
   {group:"Execute",items:[
-    {id:"outreach",ic:"✦",t:"Accounts & Outreach"},
+    {id:"outreach",ic:"✦",t:"Outreach Engine"},
+    {id:"crm",ic:"◉",t:"Sales Pipeline"},
+  ]},
+  {group:"Reference",items:[
+    {id:"product",ic:"❝",t:"Product & Messaging"},
     {id:"playbook",ic:"▷",t:"Assets & Playbook"},
-  ]},
-  {group:"Grow",items:[
     {id:"onboarding",ic:"✍",t:"Onboarding & Scale"},
-  ]},
-  {group:"Collaborate",items:[
     {id:"marketing",ic:"⇄",t:"Sales × Marketing"},
   ]},
 ];
@@ -107,64 +99,61 @@ function page(id,inner){return `<section class="section" id="sec-${id}">${inner}
 function head(t,sub){return `<h1 class="page-h">${t}</h1><p class="page-sub">${sub}</p>`;}
 function sec(num,t){return `<h2 class="sec"><span class="num">${num}</span>${t}</h2>`;}
 
-/* --- Daily Action Plan (top-of-app focus) --- */
-/* Daily Plan is now the ONE canonical hub: this header + the clickable 30-day
-   calendar + foundation checklist + launch gates + 31–90 horizon are all composed
-   into a single "daily" section (see LEAN_SECTIONS). Progress is measured across
-   the calendar's per-day tasks (cal:* keys), so the mission bar reflects real work. */
-function rDaily(){
-  const D=DATA.daily;
-  const cal=(typeof GTM!=="undefined"&&GTM.calendar)||[];
-  const calKeys=[];
-  cal.forEach(c=>{ (c.jesse||[]).forEach((_,i)=>calKeys.push(`cal:${c.d}:j:${i}`)); (c.victor||[]).forEach((_,i)=>calKeys.push(`cal:${c.d}:v:${i}`)); });
-  const st=checkStats(calKeys, calKeys.map(()=>false));
-  const pct=st.total?Math.round(st.done/st.total*100):0;
-  return page("today",
-    head("Daily Plan","One page to run the day. Every checkbox persists across reloads.")+
+/* --- Launchpad: the top-of-app focus --- */
+/* This used to be a "Daily Plan" built around a clickable 30-day calendar (184 dated
+   checkboxes running Jul 17 to Aug 15) plus a 31-90 horizon and a 30/60/90 roadmap. All
+   of it is gone. The dates had already run out, the plan described standing up a machine
+   that is now standing, and a rep opening the tool was met with a stale to-do list instead
+   of the thing they are actually about to do.
+
+   What replaces it is the live motion: pull the Apollo list, load the campaigns into
+   Instantly, send. Everything here is either a number the operator needs before sending or
+   a link into the section that does the work. */
+function rLaunchpad(){
+  const s = (typeof GTM !== "undefined" && GTM.summary) || {};
+  const camps = (typeof GTM !== "undefined" && GTM.campaigns) || [];
+  const bio = camps.filter(c => c.primary || c.bioPriority).length;
+
+  /* Pre-send gates. These are the things that make a send either land or burn the domain,
+     so they are checkboxes rather than prose. Keys are launch:* and persist like every
+     other checklist in the app. */
+  const gates = [
+    ["list",   "Apollo list pulled and deduped against the existing roster"],
+    ["verify", "Emails verified, catch-alls and role accounts stripped"],
+    ["icp",    "Every contact tagged to an ICP code so replies attribute to a campaign"],
+    ["inbox",  "Sending inboxes warmed, SPF / DKIM / DMARC passing"],
+    ["copy",   "Campaign copy loaded, claim guardrails checked against the playbook"],
+    ["optout", "Opt-out link and physical address in every template"],
+    ["crm",    "Contacts imported into the Sales Pipeline so replies have somewhere to land"],
+  ];
+  const gk = gates.map(([k]) => "launch:" + k);
+  const st = checkStats(gk, gk.map(() => false));
+  const pct = st.total ? Math.round(st.done / st.total * 100) : 0;
+
+  return page("launch",
+    head("Launchpad","Pull the list, load the campaigns, send. Everything else in this app supports one of those three.")+
     `<div class="note ok" style="border-left:4px solid var(--green-bright);font-size:14px;margin-bottom:14px">
-       <b style="color:var(--green-bright)">🔥 TOP PRIORITY: SELL THE BIOCHAR.</b> ${BIOCHAR_INVENTORY_LINE} Every task below moves this inventory. Absorbent runs second by effort, not by availability: pellets and crumble both have live $275/MT SKUs today.
+       <b style="color:var(--green-bright)">🔥 TOP PRIORITY: SELL THE BIOCHAR.</b> ${BIOCHAR_INVENTORY_LINE} Absorbent runs second by effort, not by availability: pellets and crumble both have live $275/MT SKUs today.
      </div>`+
-    /* The one blocker that gates every deal, sourced from 00-index.md. It sits above the
-       mission on purpose: every freight radius, margin figure and quote in this app is
-       downstream of it, and a rep who does not know that will quote a number that is not real. */
+    /* The one blocker that gates every deal, sourced from 00-index.md. It sits high on
+       purpose: every freight radius, margin figure and quote in this app is downstream of
+       it, and a rep who does not know that will quote a number that is not real. */
     `<div class="note warn" style="border-left:4px solid var(--gold-soft);font-size:13.5px;margin-bottom:14px">
-       <b>⛔ BLOCKER: freight and COGS are unverified.</b> No firm biochar price goes out beyond the published $450/MT site price. Every freight radius and margin figure in this app is provisional until Finance confirms cost per ton and zone freight rates. The old $700/ton figure was an internal placeholder and is superseded.
+       <b>⛔ BLOCKER: freight and COGS are unverified.</b> No firm biochar price goes out beyond the published $450/MT site price. Every freight radius and margin figure in this app is provisional until Finance confirms cost per ton and zone freight rates.
      </div>`+
     `<div class="daily-mission card pad-lg">
-       <div class="dm-row"><span class="dm-tag">THE MISSION</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}% of calendar tasks</span></div>
-       <p class="dm-mission">${esc(D.mission)}</p>
-       <div class="note" style="margin-top:10px"><b>2-week target:</b> ${esc(D.target)}</div>
-       <div class="note ok" style="margin-top:8px"><b>Work top to bottom:</b> <b>① Calendar</b> (click a day for its tasks) → <b>② Foundation checklist</b> (what must be true to sell) → <b>③ Launch gates</b> (before outbound) → <b>④ Days 31-90 horizon</b>.</div>
-     </div>`
+       <div class="dm-row"><span class="dm-tag">PRE-SEND GATES</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
+       <p class="dm-mission">Nothing sends until these are green. A cold campaign fired at an unverified list off a cold inbox does not just underperform, it burns the sending domain for every campaign after it.</p>
+       <div class="chk-grid" style="margin-top:10px">${gates.map(([k,label]) => chk("launch:"+k, esc(label))).join("")}</div>
+     </div>`+
+    sec("1","The offer")+
+    `<div class="card pad-lg"><p style="color:var(--text);font-size:14.5px;line-height:1.65">${esc(s.offer||"")}</p></div>`+
+    sec("2","Where the effort goes")+
+    `<div class="note"><b>${camps.length} campaigns, ${bio} of them biochar-led.</b> Full targeting, proof and disqualifiers per campaign are in <a href="#strategy" onclick="go('strategy')">Strategy &amp; ICP</a>. The sequences, call scripts and DM copy are in <a href="#outreach" onclick="go('outreach')">Outreach</a>.</div>`+
+    (s.allocation ? `<div class="note ok" style="margin-top:10px">${s.allocation.map(a=>badge(a.icp.split(" ")[0]+" "+a.pct, a.cls)).join(" ")}</div>` : "")+
+    `<div class="note warn" style="margin-top:10px"><b>Allocation is still hand-set.</b> It was written before the roster was rebuilt, so it does not reflect how many real accounts each ICP actually has. Re-weight it against the live counts in the Sales Pipeline once the Apollo pull lands.</div>`
   );
 }
-
-/* Days 31–90 horizon — the later arc of DATA.roadmap (phases after the first 30
-   days, which the calendar now covers). Reuses the roadmap:* keys so any checks
-   already made carry over. */
-function rHorizon(){
-  const later=DATA.roadmap.slice(2);
-  return page("horizon",
-    head("④ Days 31-90 · Horizon","Once the 80 MT biochar motion is running, this is the longer arc: scale what converts, formalize the distributor channel, advance Q4 offtake, and open carbon. Every task persists.")+
-    later.map((ph,idx)=>{
-      const pi=idx+2; // original DATA.roadmap index → stable check keys
-      const keys=ph.tasks.map((t,ti)=>`roadmap:${pi}:${ti}`);
-      const defs=ph.tasks.map(t=>!!t.done);
-      const st=checkStats(keys,defs);
-      return `<div class="chk-head"><h3 class="sub" style="margin:0">${esc(ph.phase)}</h3>`+
-        `<span class="chk-progress">${st.done}/${st.total} done</span></div>`+
-        (ph.note?`<p class="lead" style="margin:2px 0 8px">${esc(ph.note)}</p>`:"")+
-        ph.tasks.map((t,ti)=>{
-          const pri=badge(t.pri,t.pri==="P0"?"pri-1":t.pri==="P1"?"pri-2":"pri-3");
-          const label=`${whoBadge(t.o)}${pri} ${esc(t.t)}<span class="del">→ ${esc(t.del)}${t.out?` · <i>${esc(t.out)}</i>`:""}</span>`;
-          return chk(keys[ti],label,t.done);
-        }).join("");
-    }).join("")+
-    `<div class="chk-head"><span></span><span class="chk-reset" onclick="resetChecks('roadmap:')">Reset horizon checkmarks</span></div>`
-  );
-}
-
-
 
 /* --- Segments --- */
 const RANKKEYS=[["speed","Speed to LOI"],["recurring","Recurring"],["margin","Margin"],["carbon","Carbon gen"],["strategic","Strategic"],["freight","Freight fit"],["complexity","Complexity"]];
@@ -516,7 +505,8 @@ function rOnboarding(){
 }
 
 
-/* --- Roadmap owner badge (still used by rHorizon; the 30-day arc now lives in the calendar) --- */
+/* --- Owner badge, colour-codes a task owner by name. The /daniel/i branch is live only
+   while Daniel is still carried as an owner; see the open question on his role. --- */
 function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/daniel/i.test(o)?"daniel":/both|all/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
 
 /* --- Checklist --- */
@@ -729,22 +719,26 @@ function rCollab(){
 
 /* LEAN = daily-driver. BUILD = parked heavy modules (build-later.html). */
 const LEAN_SECTIONS=[
-  // Consolidated IA (v5): 10 → 6 sections.
-  //   daily      = the canonical hub (header → calendar → foundation → launch gates → horizon)
-  //   strategy   = thesis + ICP/segments/personas + campaigns
-  //   product    = product facts + messaging
-  //   outreach   = target accounts + full outreach engine (id kept for gtm CSS hooks)
-  //   playbook   = collateral/samples + discovery playbook
-  //   onboarding = customer onboarding + 60/90 scale
-  ["daily",    [rDaily, G("r30Day"), rChecklist, G("rPrelaunch"), G("rLaunch"), rHorizon]],
-  ["crm",      [PL("rCRM")]],
-  ["strategy", [G("rSummary"), rSegments, rPersonas, G("rCampaigns")]],
+  // IA v6, rebuilt around the campaign launch rather than around a 30-day plan.
+  //   launch     = pre-send gates + offer + allocation, then the readiness checklists
+  //   strategy   = the campaigns themselves, with the ICP and persona targeting behind them
+  //   outreach   = every piece of copy that actually goes out
+  //   crm        = where the Apollo import and the replies land
+  // The 30-day calendar, the 31-90 horizon and the 30/60/90 roadmap that used to lead this
+  // list are deleted. Their dates had run out and they described building the machine that
+  // is now built.
+  //
+  // rChecklist / rPrelaunch / rLaunch are KEPT and moved under Launchpad: they are launch
+  // gates, not a schedule, and a campaign is about to go out against them.
+  ["launch",   [rLaunchpad, rChecklist, G("rPrelaunch"), G("rLaunch")]],
+  ["strategy", [G("rCampaigns"), G("rSummary"), rSegments, rPersonas]],
   ["product",  [rBiochar, rMessaging]],
   // Target accounts deliberately do NOT render here any more. This section used to open with
   // rAccounts, a hardcoded list of invented companies with invented deal sizes sitting in a
   // tool reps actually work from. Real accounts live in the Sales Pipeline section, which
   // reads the roster and HubSpot import.
   ["outreach", [rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
+  ["crm",      [PL("rCRM")]],
   ["playbook", [rCollateral, G("rSample"), rPlaybook]],
   ["onboarding",[rOnboarding, G("rScale")]],
   ["marketing", [rCollab]],

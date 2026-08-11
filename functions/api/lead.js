@@ -45,6 +45,12 @@ import { buildAutoreply, buildInternalLead } from "./_email.js";
    supplied "recipients" array, which is still ignored for the open-relay reason above. */
 const DEFAULT_RECIPIENTS = ["sboone@cs-ops.com", "victor.jehle@cs-ops.com"];
 
+/* Where a prospect's reply goes when they hit Reply on the auto-reply. Deliberately ONE
+   address, not the DEFAULT_RECIPIENTS pair: a reply-to with two addresses makes every
+   prospect reply fork into two threads that neither person can see the other half of.
+   Victor for now; revisit if the volume outgrows one inbox. */
+const REPLY_TO = "victor.jehle@cs-ops.com";
+
 /* Resolve who gets the internal lead. Returns {list} or {error}; never falls back to the
    sales desk when an override was clearly intended but unusable.
 
@@ -181,7 +187,13 @@ export async function onRequest({ request, env }) {
         const r = await send({
           from,
           to: [replyTo],
-          reply_to: "sales@americanbiocarbon.com",
+          /* Where a PROSPECT's reply lands. This is the warmest signal the funnel produces,
+             so it must reach a mailbox somebody demonstrably reads. It used to be
+             sales@americanbiocarbon.com, which contradicted this file's own DEFAULT_RECIPIENTS
+             comment: that address was excluded from internal leads precisely because nobody
+             confirmed it is monitored rather than a catch-all. Routing replies there while
+             refusing to route leads there was the worst of both. Jesse's call, 2026-08-11. */
+          reply_to: REPLY_TO,
           subject: reply.subject,
           text: reply.text,
           html: reply.html,

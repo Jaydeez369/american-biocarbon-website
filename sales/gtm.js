@@ -9,14 +9,6 @@
 (function(){
   if (typeof GTM === "undefined") { console.warn("GTM data missing"); return; }
 
-  /* --- Calendar dating: the 30-day plan starts Fri Jul 17, 2026 (Day 1) and runs
-     consecutive calendar days. Shared by the calendar grid and the day panel. --- */
-  const CAL_START = new Date(2026, 6, 17); // month is 0-indexed: 6 = July
-  const CAL_MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const CAL_DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  const calDate = n => new Date(CAL_START.getFullYear(), CAL_START.getMonth(), CAL_START.getDate() + (n - 1));
-  const calFull = d => `${CAL_DOW[d.getDay()]}, ${CAL_MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
-  const calLeadBlanks = () => (CAL_START.getDay() + 6) % 7; // Mon=0 … Sun=6
 
   /* small local helpers layered on the shared design system */
   const gbadgePri = p => badge(p, p==="P0"?"pri-1":p==="P1"?"pri-2":"pri-3");
@@ -100,56 +92,6 @@
       `<div class="grid" style="grid-template-columns:1fr;gap:14px">${cs.map(card).join("")}</div>`
     );
   }
-
-  /* ---- 4. 30-Day Daily Plan (clickable calendar) ---- */
-  function r30Day(){
-    const weeks=GTM.day30Weeks;
-    const cal=GTM.calendar||[];
-    const wk=w=>`<div class="card"><h4>${esc(w.wk)} — ${esc(w.theme)}</h4>
-      <div style="font-size:12.3px;display:grid;gap:4px">
-        <div><b style="color:var(--green-bright)">Goal:</b> ${esc(w.goal)}</div>
-        <div><b style="color:var(--gold-soft)">Focus:</b> ${esc(w.focus)}</div>
-        <div><b style="color:var(--text)">Outputs:</b> ${esc(w.outputs)}</div>
-      </div></div>`;
-    const dow=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-    const blanks=Array(calLeadBlanks()).fill('<div class="cal-blank"></div>').join("");
-    const cells=cal.map(c=>{
-      const d=calDate(c.d);
-      const wd=d.getDay();
-      const weekend=(wd===0||wd===6)?" weekend":"";
-      return `<div class="cal-day${c.light?" rest":""}${weekend}" data-d="${c.d}" onclick="gtmCalPick(${c.d})">
-      <div class="cal-date">${CAL_MON[d.getMonth()]} ${d.getDate()}</div>
-      <div class="cal-dow2">${CAL_DOW[wd]} · Day ${c.d}</div>
-      <div class="dt">${esc(c.theme)}</div><div class="dwk">Week ${c.wk}</div></div>`;
-    }).join("");
-    const start=calDate(1), end=calDate(cal.length);
-    return page("gtm-30day",
-      head("① The 30-Day Calendar — click a day",`The canonical day-by-day plan, ${calFull(start)} → ${calFull(end)}. Click any day to open the exact tasks for Jesse, Victor &amp; Daniel — check them off as you go, they persist. Jesse = demand &amp; the machine · Victor + Daniel = product, proof, website &amp; fulfillment. Everything is aimed at moving the 80 MT of biochar.`)+
-      sec("","Weekly themes")+`<div class="grid g2">${weeks.map(wk).join("")}</div>`+
-      `<div class="note warn"><b>Quality controls:</b> max ~20→40 sends/inbox/day ramped; bounce <2% or slow down; monitor replies daily; A/B subject lines; BIOCHAR campaigns first; the cold ask is always a free sample (no bulk/LOI pitch cold) — convert the order from the 80 MT after a trial wins; never spam.</div>`+
-      sec("",`Calendar — click a day · starts ${CAL_MON[start.getMonth()]} ${start.getDate()}`)+
-      `<div class="cal">${dow.map(d=>`<div class="cal-dow">${d}</div>`).join("")}${blanks}${cells}</div>`+
-      `<div id="gtmCalPanel"></div>`
-    );
-  }
-  /* Ticking a task re-renders #content (so the mission bar updates), which wipes the open
-     day panel. rerender() reads this to put it back; opts.restore skips the scroll so
-     restoring is invisible. */
-  window.gtmOpenCalDay = null;
-  window.gtmCalPick=function(d, opts={}){
-    const c=(GTM.calendar||[]).find(x=>x.d===d); if(!c) return;
-    window.gtmOpenCalDay = d;
-    // the #sec-gtm-30day half was dead (compose() owns section ids now); .cal-day is the live selector
-    document.querySelectorAll(".cal-day").forEach(el=>el.classList.toggle("sel", +el.dataset.d===d));
-    const lane=(who,arr,cls)=>`<div class="cal-lane ${cls}"><h4>${who}</h4>${arr.map((t,i)=>chk(`cal:${d}:${cls}:${i}`,esc(t))).join("")}</div>`;
-    const html=`<div class="cal-panel">
-      <div class="cal-panel-h"><h3>${calFull(calDate(c.d))} — ${esc(c.theme)}</h3><div class="sub">Day ${c.d} · Week ${c.wk}${c.light?" · lighter / review day":""}</div></div>
-      <div class="cal-lanes">${lane("Jesse — demand & the machine",c.jesse,"j")}${lane("Victor + Daniel — product, proof, website & fulfillment",c.victor,"v")}</div>
-      <div class="cal-meta">Tick each task as done — it stays checked across reloads. Victor + Daniel split this track: certs/spec sheets, company discovery, product photos, testing, website approval, then Shopify install & go-live, and sample fulfillment.</div>
-    </div>`;
-    const panel=document.getElementById("gtmCalPanel");
-    if(panel){ panel.innerHTML=html; if(!opts.restore) panel.scrollIntoView({behavior:"smooth",block:"nearest"}); }
-  };
 
   /* ---- 5. 60/90 Scale ---- */
   function rScale(){
@@ -337,5 +279,5 @@
      strips the wrapper (stripBody) and stacks the inner content under
      the matching consolidated section.
      ================================================================ */
-  window.GTMB = {rSummary,rPrelaunch,rCampaigns,r30Day,rScale,rSequences,rCalling,rScriptLibrary,rLinkedIn,rSocial,rLongTerm,rSample,rLaunch};
+  window.GTMB = {rSummary,rPrelaunch,rCampaigns,rScale,rSequences,rCalling,rScriptLibrary,rLinkedIn,rSocial,rLongTerm,rSample,rLaunch};
 })();
