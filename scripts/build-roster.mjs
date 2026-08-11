@@ -28,7 +28,36 @@ const REPO = join(SITE, "..");
 const SOURCES = [
   join(REPO, "handoff", "roster-organized-WORKING.csv"),
   join(REPO, "handoff", "absorbent-roster-WORKING.csv"),
+  join(REPO, "handoff", "absorbent-roster-DR15.csv"),
 ];
+
+/* Contact details arrive as free text in ContactNotes, e.g.
+     "Odessa branch: 2500 W Murphy St; Tel: 1-866-450-9077; Email: ar@hullsenvironmental.com"
+   Parsed into real fields so the table can show phone and email columns and a rep can dial
+   from the row. The raw string is kept as well: it carries branch addresses and context that
+   no schema anticipated, and throwing it away to keep only what parsed would lose research. */
+function parseContactNotes(s) {
+  const out = { phones: [], emails: [], raw: s || "" };
+  if (!s) return out;
+  for (const m of s.matchAll(/[\w.+-]+@[\w-]+\.[\w.]+/g)) out.emails.push(m[0].replace(/[.;,]$/, ""));
+  /* Phones: tolerate 1-800-, (724) 941-9645, 618-397-1234 and 609.397.0807. Anchored on a
+     10-digit shape so street numbers and zips in the same string are not read as numbers. */
+  for (const m of s.matchAll(/(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}\b/g)) {
+    const p = m[0].trim().replace(/\s+/g, " ");
+    if (!out.phones.includes(p)) out.phones.push(p);
+  }
+  return out;
+}
+
+/* "Raymond P. Crawford Jr. - President - Pittsburgh PA; Ray P. Crawford Sr. - Founder - ..."
+   Free-tier Apollo output: names and titles only, never a revealed email or phone. */
+function parsePeople(s) {
+  if (!s) return [];
+  return s.split(";").map(x => x.trim()).filter(Boolean).map(chunk => {
+    const parts = chunk.split(/\s+-\s+/).map(x => x.trim());
+    return { name: parts[0] || "", title: parts[1] || "", loc: parts[2] || "" };
+  }).filter(p => p.name);
+}
 
 /* RFC4180-ish parser. Hand-rolled because the roster's free-text columns (WhatTheyDo,
    ScoreReason) contain commas, escaped double quotes and newlines inside quoted fields,
@@ -129,13 +158,25 @@ for (const path of SOURCES) {
       iter:   get(r, "AddedIter"),
       dead,
     };
-    // absorbent CSV only: Apollo contact discovery columns
+    /* Absorbent has NO geographic gate. Canon: pellets and crumble ship nationwide, and only
+       biochar is bound by the freight ring out of White Castle. Distance is recorded for
+       sorting and freight math, never as a reason to drop an absorbent account. Flagged here
+       so the UI can render an out-of-ring absorbent as neutral rather than as a red warning
+       that reads "do not call this company". */
+    rec.geoGates = rec.line === "Biochar";
+
+    // absorbent CSVs only: Apollo contact-discovery columns (free tier, no revealed contacts)
     if (idx.ApolloContactCount !== undefined) {
       const n = int(get(r, "ApolloContactCount"));
       if (n !== null) rec.apolloContacts = n;
       const t = get(r, "ContactTitles");       if (t) rec.contactTitles = t;
       const nm = get(r, "ContactNamesFreeTier"); if (nm) rec.contactNames = nm;
       const cn = get(r, "ContactNotes");        if (cn) rec.contactNotes = cn;
+      const people = parsePeople(get(r, "ContactNamesFreeTier"));
+      if (people.length) rec.people = people;
+      const pc = parseContactNotes(get(r, "ContactNotes"));
+      if (pc.phones.length) rec.phones = pc.phones;
+      if (pc.emails.length) rec.emails = pc.emails;
     }
     /* Later file wins on conflict, but only for fields it actually filled. The absorbent
        CSV re-states companies already in the organized roster and adds contact columns; a

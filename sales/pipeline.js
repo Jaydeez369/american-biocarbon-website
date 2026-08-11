@@ -84,29 +84,45 @@
   /* Derive a status from evidence rather than storing one everywhere. A manual override in
      localStorage always wins; otherwise the strongest evidence does. Deriving means a
      company that gets a deal tomorrow is a Customer tomorrow without anyone re-tagging it. */
+  /* Engaged means SOMEONE ACTUALLY TALKED TO THEM. That is the promotion rule into the
+     pipeline, so the bar has to be a real conversation, not a database row.
+
+     This first shipped as "present in HubSpot OR has a contact record" and produced 171
+     engaged accounts, including Yale University, MS State and a produce trade association.
+     Those are list imports: HubSpot holds 178 companies and a contact record only means
+     somebody's email address is known. Neither is evidence of a conversation, and treating
+     them as such would have dumped 171 companies into the pipeline on day one.
+
+     The real signal is a logged communication timeline. hubspot-comms.js carries 55, of which
+     9 say in their own text "no email/call activity, record created from import". Excluding
+     those leaves 46 accounts with genuine two-way history, which is the honest number.
+
+     Manual promotion still exists for everything this cannot see (a call logged nowhere, a
+     conversation at a trade show): set the status on the profile and the override wins. */
+  const NO_ACTIVITY_RE = /no email\/call activity|no activity/i;
+  let ENGAGED_NAMES = null;
+  const engagedNames = () => {
+    if(!ENGAGED_NAMES){
+      ENGAGED_NAMES = new Set();
+      const C = window.HUBSPOT_COMMS || {};
+      for(const k of Object.keys(C)) if(!NO_ACTIVITY_RE.test(C[k]||"")) ENGAGED_NAMES.add(norm(k));
+    }
+    return ENGAGED_NAMES;
+  };
+
   function derivedStatus(name){
     const r = rosterOf(name);
     if(r && r.dead) return "disqualified";
     const ds = liveDeals().filter(d=>norm(d.customer)===norm(name));
-    if(ds.some(d=>d.status==="won")) return "customer";
-    if(ds.length) return "customer";
-    if(hsAccountNames().has(norm(name))) return "engaged";
-    const cs = allContacts().filter(c=>norm(c.account)===norm(name));
-    if(cs.length) return "engaged";
+    if(ds.length) return "customer";                    // open or won, both are a live account
+    if(engagedNames().has(norm(name))) return "engaged"; // a real logged conversation
+    if(acctActivities(name).length) return "engaged";    // or activity logged in this app
     return "new_lead";
   }
   const statusOf = name => statusOverrides()[norm(name)] || derivedStatus(name);
   const stBadgeFor = name => { const s=STATUS[statusOf(name)]||STATUS.new_lead;
     return `<span class="stt ${s.cls}" title="${esc(s.hint)}">${esc(s.label)}</span>`; };
 
-  /* Names already known to HubSpot. Memoized because derivedStatus() runs per row and
-     rebuilding this set inside it would be O(accounts x hubspot) on every render. Lazy for
-     the same temporal-dead-zone reason as rosterIndex(): norm() is declared below this. */
-  let HS_NAMES = null;
-  const hsAccountNames = () => {
-    if(!HS_NAMES) HS_NAMES = new Set(((window.HUBSPOT && window.HUBSPOT.accounts) || []).map(a=>norm(a.name)));
-    return HS_NAMES;
-  };
 
   const liveAccounts=()=>{
     const map=new Map();
@@ -264,19 +280,19 @@
   }
 
   /* ---- tabs ---- */
-  /* Companies leads, because it is the only tab that shows the whole business. Pipeline shows
-     the few dozen companies that already have a deal; Companies shows all 336 researched, with
-     the ICP and score that decide which get worked. "Contacts" is now "People" so the two are
+  /* Prospects leads, because it is the only tab that shows the whole business. Pipeline shows
+     the companies someone has actually spoken to; Prospects shows every company researched,
+     with the ICP and score that decide which get worked next. "Contacts" is now "People" so the two are
      not confused: a company is the unit of work, a person is how you reach it. */
   const TABS = [
-    ["companies","Companies"],["pipeline","Pipeline"],["deals","Deals"],["people","People"],
+    ["prospects","Prospects"],["pipeline","Pipeline"],["deals","Deals"],["people","People"],
     ["leads","Leads"],["offtake","Offtake Pipeline"],["production","Production Plan"],
     ["exec","Executive Dashboard"],["reports","Reports"],
   ];
   const TAB_KEY = "vej_pipe_tab";
-  /* Falls back to companies, and also catches the retired "contacts" id still sitting in the
+  /* Falls back to prospects, and also catches the retired "contacts"/"companies" ids still sitting in the
      localStorage of anyone who used the old build. */
-  const activeTab = () => { const t=lsGet(TAB_KEY,null); return TABS.some(x=>x[0]===t)?t:"companies"; };
+  const activeTab = () => { const t=lsGet(TAB_KEY,null); return TABS.some(x=>x[0]===t)?t:"prospects"; };
   window.pipeTab = id => {
     lsSet(TAB_KEY,id);
     document.querySelectorAll(".pipe-pane").forEach(p=>p.classList.toggle("active",p.dataset.tab===id));
@@ -379,6 +395,38 @@
     <td class="t-num">${money(value(d))}</td><td class="t-num pwt">${money(weighted(d))}</td>
     <td class="t-num">${quarterOf(d)}</td><td class="pnote" title="${esc(d.notes||"")}">${esc(d.notes||"—")}</td>
     <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">✎</span><span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">🗑</span>`:""}</td></tr>`;
+  /* Companies that have crossed from prospecting into the pipeline but have no deal yet.
+     The rule: a prospect enters the pipeline the moment someone actually talks to them, which
+     is exactly what Engaged means. Before that they are research and belong on Prospects.
+
+     They are surfaced as a queue rather than as fake zero-value deals, because inventing a
+     deal record to represent "we had a conversation" is how a pipeline total stops meaning
+     anything. Each row is one click from becoming a real deal. */
+  function promotedNoDeal(){
+    const withDeals = new Set(liveDeals().map(d=>norm(d.customer)));
+    return liveAccounts()
+      .filter(a=>{ const s=statusOf(a.name); return (s==="engaged"||s==="working") && !withDeals.has(norm(a.name)); })
+      .sort((a,b)=>((b.r&&b.r.score)??-1)-((a.r&&a.r.score)??-1));
+  }
+
+  function promotedBanner(){
+    const list = promotedNoDeal();
+    if(!list.length) return "";
+    return `<div class="promo-box">
+      <div class="promo-head">
+        <b>${num(list.length)} engaged, no deal yet</b>
+        <span>Someone has spoken to these, so they have left Prospects. Open one to log a deal.</span>
+      </div>
+      <div class="promo-list">${list.slice(0,12).map(a=>{
+        const r=a.r||rosterOf(a.name);
+        return `<button class="promo-chip" onclick="pipeOpenAccount('${esc(String(a.name).replace(/'/g,"\\'"))}')">
+          ${esc(a.name)}${r&&r.score!=null?`<span class="sc ${scoreCls(r.score)}">${r.score}</span>`:""}
+        </button>`;}).join("")}
+        ${list.length>12?`<span class="pdim">+${num(list.length-12)} more</span>`:""}
+      </div>
+    </div>`;
+  }
+
   function tPipeline(){
     const ds = liveDeals();
     const total = sum(ds,value), wtd = sum(ds,weighted);
@@ -401,6 +449,7 @@
     const quarters=[...new Set(ds.map(quarterOf))].sort(qSort);
     const head=`<thead><tr><th>Customer</th><th>Product</th><th>Sector</th><th>Qty</th><th>Price/Unit</th><th>Order Type</th><th>Close Date</th><th>Stage</th><th>Confidence</th><th>Deal Value</th><th>Weighted Value</th><th>Quarter</th><th>Notes</th><th></th></tr></thead>`;
     return `
+      ${promotedBanner()}
       <div class="grid g6">
         ${kpi("Total Pipeline",money(total))}
         ${kpi("Weighted Pipeline",money(wtd),null,"pk-blue")}
@@ -683,7 +732,7 @@
   const getCustom=()=>lsGet(C_KEY,[]);
   const saveCustom=a=>lsSet(C_KEY,a);
   const chip = t => t?`<span class="pchip">☎ ${esc(t)}</span>`:"";
-  /* ================= COMPANIES =================
+  /* ================= PROSPECTS =================
      The prospecting roster as a working spreadsheet: every company we have researched, with
      the ICP, freight verdict, score and status that decide whether it gets worked today.
 
@@ -740,7 +789,26 @@
   window.pipeCoMore = () => { coShown+=CO_PAGE; remount(); };
 
   const scoreCls = s => s>=9?"sc-hot":s>=7?"sc-warm":s>=5?"sc-mid":"sc-cold";
-  const geoCls = g => /^IN$/i.test(g)?"geo-in":/BORDER/i.test(g)?"geo-edge":"geo-out";
+  /* Freight styling is LINE-AWARE. Only biochar is bound by the ring out of White Castle;
+     pellets and crumble ship nationwide, so an out-of-ring absorbent account is a normal
+     account, not a problem. Painting it red would tell a rep not to call a company we
+     actively want. Distance still shows, because freight cost is still real, but it is
+     rendered neutral when it does not gate anything. */
+  const geoCls = (g,gates=true) => !gates ? "geo-na"
+    : /^IN$/i.test(g)?"geo-in" : /BORDER/i.test(g)?"geo-edge" : "geo-out";
+  const geoTitle = (g,gates=true) => gates
+    ? `Biochar freight ring: ${g||"unknown"}`
+    : `Absorbent ships nationwide, so distance does not gate this account (recorded ${g||"unknown"} for freight cost only)`;
+
+  /* Contact reachability, merged from two places: the roster's parsed phone/email, and any
+     real person-contact already in the CRM for that account. A rep scanning for who to call
+     next needs to see at a glance which rows are actually dialable. */
+  function reachOf(c){
+    const cs = allContacts().filter(x=>norm(x.account)===norm(c.name));
+    const phones = [...new Set([...(c.phones||[]), ...cs.map(x=>x.phone).filter(Boolean), ...cs.map(x=>x.mobile).filter(Boolean)])];
+    const emails = [...new Set([...(c.emails||[]), ...cs.map(x=>x.email).filter(Boolean)])];
+    return { phones, emails, people: cs.length || (c.people||[]).length };
+  }
 
   function tCompanies(){
     const R = window.ROSTER;
@@ -782,7 +850,7 @@
       ${rows.length?"":`<div class="note" style="margin-top:12px">No company matches these filters. <a href="#" onclick="pipeCoReset();return false">Clear them</a>.</div>`}
       ${tblWrap(`<thead><tr>
           <th>Company</th><th>Status</th><th>Line / ICP</th><th>Location</th>
-          <th class="num">Freight</th><th class="num">Score</th><th>Why they fit</th><th>Likely titles</th>
+          <th class="num">Freight</th><th class="num">Score</th><th>Phone</th><th>Email</th><th>Why they fit</th><th>Contacts / titles</th>
         </tr></thead>
         <tbody>${page.map(coRow).join("")}</tbody>`)}
       ${rows.length>coShown?`<div class="co-more"><button class="btn btn-ghost" onclick="pipeCoMore()">Show ${num(Math.min(CO_PAGE,rows.length-coShown))} more (${num(rows.length-coShown)} remaining)</button></div>`:""}
@@ -793,6 +861,7 @@
      table is a way in rather than a dead end. */
   function coRow(c){
     const st = STATUS[statusOf(c.name)]||STATUS.new_lead;
+    const reach = reachOf(c);
     const dist = c.driveMi!=null ? `${num(c.driveMi)} mi` : (c.crowMi!=null?`~${num(c.crowMi)} mi`:"—");
     return `<tr class="${c.dead?"co-dead":""}">
       <td class="co-name">
@@ -805,10 +874,16 @@
             :`<span class="co-line ${c.line==="Biochar"?"ln-bio":"ln-abs"}">${esc(c.line||"—")}</span>
               ${c.icp?`<div class="co-icp" title="${esc(c.icpLabel||"")}">${esc(c.icp)}</div>`:""}`}</td>
       <td>${esc([c.city,c.state].filter(Boolean).join(", ")||"—")}</td>
-      <td class="num"><span class="geo ${geoCls(c.geo)}" title="${esc(c.geo||"")}">${dist}</span></td>
+      <td class="num"><span class="geo ${geoCls(c.geo,c.geoGates)}" title="${esc(geoTitle(c.geo,c.geoGates))}">${dist}</span></td>
       <td class="num">${c.score!=null?`<span class="sc ${scoreCls(c.score)}">${c.score}</span>`:"—"}</td>
+      <td class="co-tel">${reach.phones.length
+        ? `<a href="tel:${esc(reach.phones[0].replace(/[^\d+]/g,""))}">${esc(reach.phones[0])}</a>${reach.phones.length>1?`<span class="co-more-n" title="${esc(reach.phones.slice(1).join(", "))}">+${reach.phones.length-1}</span>`:""}`
+        : `<span class="co-gap" title="No phone on file. Find one before this row can be worked.">needed</span>`}</td>
+      <td class="co-mail">${reach.emails.length
+        ? `<a href="mailto:${esc(reach.emails[0])}">${esc(reach.emails[0])}</a>${reach.emails.length>1?`<span class="co-more-n" title="${esc(reach.emails.slice(1).join(", "))}">+${reach.emails.length-1}</span>`:""}`
+        : `<span class="co-gap" title="No email on file. Apollo enrichment fills this.">needed</span>`}</td>
       <td class="co-why"><div class="clamp3" title="${esc(c.why||c.scoreWhy||"")}">${esc(c.dead?(c.scoreWhy||"No reason recorded"):(c.why||"—"))}</div></td>
-      <td class="co-titles"><div class="clamp2">${esc(c.titles&&c.titles!=="n/a - not a buying account"?c.titles:"—")}</div></td>
+      <td class="co-titles">${reach.people?`<span class="co-ppl" title="Named contacts on file">${reach.people} contact${reach.people>1?"s":""}</span>`:""}<div class="clamp2">${esc(c.titles&&c.titles!=="n/a - not a buying account"?c.titles:"—")}</div></td>
     </tr>`;
   }
 
@@ -817,8 +892,8 @@
   window.pipeCoDebounce = () => { clearTimeout(coTimer); coTimer=setTimeout(()=>window.pipeCoFilter(),180); };
   window.pipeCoQuick = (field,val) => { CO_F[field] = CO_F[field]===val?"":val; coShown=CO_PAGE; remount(); };
   window.pipeCoExport = () => downloadCSV("company-roster.csv",
-    ["Company","Status","Line","ICP","ICP Name","Segment","City","State","DriveMi","Freight","Score","WhyTheyFit","ScoreReason","LikelyTitles","Trigger","Website","Source"],
-    coFiltered().map(c=>[c.name,(STATUS[statusOf(c.name)]||{}).label,c.line,c.icp,c.icpLabel,c.segment,c.city,c.state,c.driveMi,c.geo,c.score,c.why,c.scoreWhy,c.titles,c.trigger,c.website,c.sourceUrl]));
+    ["Company","Status","Line","ICP","ICP Name","Segment","City","State","DriveMi","Freight","FreightGates","Score","Phone","Email","NamedContacts","WhyTheyFit","ScoreReason","LikelyTitles","Trigger","Website","Source"],
+    coFiltered().map(c=>{const r=reachOf(c);return [c.name,(STATUS[statusOf(c.name)]||{}).label,c.line,c.icp,c.icpLabel,c.segment,c.city,c.state,c.driveMi,c.geo,c.geoGates?"yes":"no (nationwide)",c.score,r.phones.join(" / "),r.emails.join(" / "),r.people,c.why,c.scoreWhy,c.titles,c.trigger,c.website,c.sourceUrl];}));
 
   function tContacts(){
     const cs=allContacts();
@@ -836,9 +911,10 @@
         <td title="${esc(c.notes||"")}"><strong>${esc(c.name)}</strong></td><td>${esc(c.title||"—")}</td><td>${c.account?acctLink(c.account):"—"}</td>
         <td>${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a><br>`:""}${chip(c.phone)}${c.mobile?` ${chip(c.mobile)} <span class="pdim" style="font-size:10.5px">(mobile)</span>`:""}</td>
         <td class="pnote">${esc(c.dropOff||"—")}</td>
-        <td class="pact-cell">${c.base?`<span class="pdim" title="From the SIBRA snapshot — edit in pipeline-data.js">—</span>`
-          :`<span class="pc-act" onclick="pipeContactModal(${c.ci})" title="Edit">✎</span>
-            <span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">🗑</span>`}</td></tr>`).join("")}</tbody>`)}`;
+        <td class="pact-cell">${readOnlyContact(c)
+          ? `<span class="pdim" title="${esc(readOnlyWhy(c))}">—</span>`
+          : `<span class="pc-act" onclick="pipeContactModal(${c.ci})" title="Edit">✎</span>
+             <span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">🗑</span>`}</td></tr>`).join("")}</tbody>`)}`;
   }
   window.pipeContactExport=()=>downloadCSV("contacts.csv",["Name","Job Title","Account","Email","Phone","Mobile","Drop-off Address","Notes"],
     allContacts().map(c=>[c.name,c.title,c.account,c.email,c.phone,c.mobile,c.dropOff,c.notes]));
@@ -874,6 +950,25 @@
     });
     document.getElementById("pcFirst").focus();
   };
+  /* A contact is editable only if it lives in the localStorage store, which is the only place
+     this app can write. Two sources are read-only and BOTH must be recognised:
+
+       base     the pipeline-data.js snapshot
+       hubspot  the read-only HubSpot import
+
+     HubSpot contacts used to fall through to the editable branch because they carry neither
+     `base` nor a `ci` index. That produced onclick="pipeContactModal(undefined)", the modal
+     read undefined as "no index", and Save ran the ADD path: editing an imported contact
+     silently created a duplicate instead of changing it. Harmless-looking at 71 rows, and a
+     data-corruption engine at the ~1,000 the Apollo import brings.
+
+     Guarding on `ci` rather than on a source flag is the durable form: any future read-only
+     source is covered without touching this again. */
+  const readOnlyContact = c => c.ci === undefined || c.ci === null;
+  const readOnlyWhy = c => c.hubspot
+    ? "Imported from HubSpot, read-only here. Edit it in HubSpot and re-run the import."
+    : "From the pipeline-data.js snapshot, edit it there.";
+
   window.pipeContactSave=idx=>{
     const first=V("pcFirst"), last=V("pcLast");
     let account=V("pcAccount"); const isNewAcct=account==="__new"; if(isNewAcct) account=V("pcNewAccount");
@@ -882,7 +977,13 @@
     const rec={ name:first+" "+last, first, last, account, title:V("pcTitle"), email:V("pcEmail"),
       phone:V("pcPhone"), mobile:V("pcMobile"), dropOff:V("pcDrop"), notes:V("pcNotes") };
     const arr=getCustom();
-    if(idx>=0) arr[idx]=rec; else arr.push(rec);
+    /* Belt to the readOnlyContact() suspenders. An edit that arrives with an index this store
+       does not contain is a BUG, not a request to create a record: silently pushing was how
+       "edit an imported contact" turned into "duplicate it". Refuse instead of guessing. */
+    if(idx!=null && idx>=0){
+      if(!arr[idx]){ alert("That contact could not be edited here. It comes from an imported source and is read-only."); return; }
+      arr[idx]=rec;
+    } else arr.push(rec);
     saveCustom(arr); pipeModalClose(); rr();
   };
   window.pipeContactDelete=idx=>{
@@ -1181,9 +1282,28 @@
         <button type="button" class="icon-btn" aria-label="SMS ${esc(c.name)}" onclick="pipeAcctComm('sms','${safe}')">${iconSvg("sms")}</button>
       </div>
     </div>`;
+    /* Roster-sourced reachability: the phone, email and named people the research pass found,
+       which are NOT CRM contact records and would otherwise be invisible on the profile. Shown
+       as a distinct block because their provenance differs: these are desk-researched and
+       unverified, and a rep should know that before dialling. Free-tier Apollo output carries
+       names and titles only, never a revealed email or phone, so the two never mix. */
+    const rosterReach = (()=>{
+      const r = acct.r || rosterOf(name);
+      if(!r) return "";
+      const phones=r.phones||[], emails=r.emails||[], people=r.people||[];
+      if(!phones.length && !emails.length && !people.length) return "";
+      return `<div class="rr-box">
+        <div class="rr-head">From research <span title="Desk-researched from public sources, not verified by a call or an enrichment tool.">unverified</span></div>
+        ${phones.length?`<div class="rr-row"><span class="rr-k">Phone</span><span class="rr-v">${phones.map(p=>`<a href="tel:${esc(p.replace(/[^\d+]/g,""))}">${esc(p)}</a>`).join(", ")}</span></div>`:""}
+        ${emails.length?`<div class="rr-row"><span class="rr-k">Email</span><span class="rr-v">${emails.map(e=>`<a href="mailto:${esc(e)}">${esc(e)}</a>`).join(", ")}</span></div>`:""}
+        ${people.length?`<div class="rr-row"><span class="rr-k">People</span><span class="rr-v">${people.map(pp=>`${esc(pp.name)}${pp.title?` <span class="pdim">${esc(pp.title)}</span>`:""}`).join("<br>")}</span></div>`:""}
+        ${r.titles&&!/^n\/a/i.test(r.titles)&&!people.length?`<div class="rr-row"><span class="rr-k">Target titles</span><span class="rr-v">${esc(r.titles)}</span></div>`:""}
+      </div>`;
+    })();
+
     const contactsTile = `<div class="tile">
       <div class="tile-head"><h2>Contacts</h2> <span class="count">${contacts.length}</span></div>
-      <div class="tile-body">${contacts.length?contacts.map(contactCard).join(""):`<div class="av3-empty">No contacts on file. <a class="acct-link" onclick="pipeContactModal()">Add one →</a></div>`}</div>
+      <div class="tile-body">${rosterReach}${contacts.length?contacts.map(contactCard).join(""):`<div class="av3-empty">No contacts on file. <a class="acct-link" onclick="pipeContactModal()">Add one →</a></div>`}</div>
     </div>`;
 
     /* The written research, as prose rather than table cells. Someone about to dial this
@@ -1354,7 +1474,7 @@
   function sectionInner(){
     if(PROFILE) return renderProfile(PROFILE);
     const at=activeTab();
-    const panes=[["companies",tCompanies],["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["leads",tLeads],["offtake",tOfftake],["production",tProduction],["exec",tExec],["reports",tReports]];
+    const panes=[["prospects",tCompanies],["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["leads",tLeads],["offtake",tOfftake],["production",tProduction],["exec",tExec],["reports",tReports]];
     return `<h1 class="pipe-h">Sales Pipeline</h1>
       <div class="pipe-tabs">${TABS.map(([id,t])=>`<span class="pill${id===at?" active":""}" data-tab="${id}" onclick="pipeTab('${id}')">${t}</span>`).join("")}</div>
       ${panes.map(([id,fn])=>`<div class="pipe-pane${id===at?" active":""}" data-tab="${id}">${fn()}</div>`).join("")}`;
