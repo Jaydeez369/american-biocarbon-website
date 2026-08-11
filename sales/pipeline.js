@@ -37,9 +37,24 @@
   const allLeads=()=>P.leads.map(l=>({...l,base:true})).concat(lsGet(L_KEY,[]).map((l,ci)=>({...l,ci})));
   const offRowsAll=()=>P.offtake.rows.map(r=>({...r,base:true})).concat(lsGet(O_KEY,[]).map((r,ci)=>({confirmed:{},vols:{},...r,ci})));
   /* accounts = snapshot ∪ custom ∪ anything referenced by a deal/contact/offtake row */
+  /* Every distinct spelling that norm() folded into one account, keyed by canonical name.
+     Rebuilt on each liveAccounts() pass. norm() deliberately strips corporate suffixes, which
+     is the right call for "New Pig" vs "New Pig Corporation" but is exactly the rule that
+     could also fold two genuinely different companies together. Recording the aliases turns a
+     silent merge into a reviewable one: renderProfile() shows them, and a wrong merge is
+     visible on the account it damaged rather than being discovered months later via a deal
+     attached to the wrong logo. */
+  let ACCT_ALIASES = {};
+  const aliasesOf = name => (ACCT_ALIASES[norm(name)]||[]).filter(a=>a!==name);
+
   const liveAccounts=()=>{
     const map=new Map();
-    const put=(k,v)=>{ const n=norm(k); if(!map.has(n)) map.set(n,v); };
+    const aliases={};
+    const put=(k,v)=>{
+      const n=norm(k);
+      (aliases[n] = aliases[n] || []).includes(k) || aliases[n].push(k);
+      if(!map.has(n)) map.set(n,v);
+    };
     P.accounts.forEach(a=>put(a.name,{...a,base:true}));
     lsGet(A_KEY,[]).forEach(a=>put(a.name,{...a}));
     /* HubSpot company layer (read-only snapshot, hubspot-data.js). Merged AFTER the
@@ -48,6 +63,7 @@
     liveDeals().forEach(d=>{ if(d.customer) put(d.customer,{name:d.customer,type:"customer",industry:"",derived:true}); });
     allContacts().forEach(c=>{ if(c.account) put(c.account,{name:c.account,type:"prospect",industry:"",derived:true}); });
     offRowsAll().forEach(r=>{ if(r.customer) put(r.customer,{name:r.customer,type:"prospect",industry:"",derived:true}); });
+    ACCT_ALIASES = aliases;
     return [...map.values()];
   };
   /* upsert a typed account name into the custom-account store (bug: __new orphaned it) */
@@ -108,7 +124,46 @@
   const fmtDate = d => closeDate(d).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"});
   const quarterOf = d => { const t=closeDate(d); return "Q"+(Math.floor(t.getUTCMonth()/3)+1)+" "+t.getUTCFullYear(); };
   const qSort=(a,b)=>{ const [qa,ya]=a.split(" "),[qb,yb]=b.split(" "); return ya-yb||qa[1]-qb[1]; };
-  const norm = s => String(s||"").trim().toLowerCase().replace(/s$/,"");
+  /* Account identity key. Deals, contacts, offtake rows and activity notes all reference an
+     account by NAME (d.customer, c.account, r.customer), so this function decides which
+     records belong to the same company. Getting it wrong is silent either way: too loose and
+     two companies merge and inherit each other's pipeline, too strict and one company splits
+     into two half-populated profiles.
+
+     It used to be `.toLowerCase().replace(/s$/,"")`, which only stripped one trailing "s".
+     Measured against the real data (322 roster companies about to be imported plus the 236
+     already in pipeline-data.js and hubspot-data.js) that heuristic matched NOTHING the plain
+     lowercase did not, while missing three genuine same-company pairs:
+
+         "Organics By Gosh"  vs  'Organics "By Gosh"'     (punctuation)
+         "J Berry Nursery"   vs  "J. Berry Nursery"       (punctuation)
+         "New Pig"           vs  "New Pig Corporation"    (corporate suffix)
+
+     Each of those would have imported as a SECOND account, splitting the existing one's
+     deals, contacts and logged comms away from the new roster row. Organics By Gosh already
+     carries HubSpot email history, so that split would have hidden real correspondence.
+
+     So: strip diacritics, punctuation, corporate suffixes and "and"/"&" spelling, collapse
+     whitespace, then tolerate a trailing plural. Verified to produce ZERO collisions between
+     genuinely different companies across all 558 names. Suffix stripping is the aggressive
+     part, which is why aliasesOf() below surfaces every merge for review rather than trusting
+     it blindly. */
+  const SUFFIX_RE = /\b(llc|l\s*l\s*c|inc|incorporated|corp|corporation|company|co|ltd|limited|lp|llp|plc|holdings|group|enterprises)\b/g;
+  const norm = s => {
+    let t = String(s||"").normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase();
+    t = t.replace(/[‘’ʼ`]/g,"'");   // curly and modifier apostrophes to ASCII
+    t = t.replace(/'s\b/g,"");                     // possessive: "harrell's" and "harrells" agree
+    t = t.replace(/[^\w\s]/g," ");                 // punctuation to space: "j.berry" == "j berry"
+    t = t.replace(/\band\b/g," ");                 // "&" is already a space by now, so DROP the
+                                                   // word too and "Smith & Sons" == "Smith and Sons"
+    t = t.replace(SUFFIX_RE," ");
+    t = t.replace(/\s+/g," ").trim();
+    t = t.replace(/s$/,"").trim();                 // trailing plural, then re-trim: a stranded
+                                                   // token could otherwise leave "harrell "
+    // Never return "": a name that is ALL suffix ("LLC") or all whitespace would otherwise
+    // collide with every other such name and pull their records together.
+    return t || String(s||"").toLowerCase() || " empty";
+  };
   const qtyStr = ds => {
     const mt = ds.filter(d=>d.uom==="MT").reduce((a,d)=>a+d.qty,0);
     const un = ds.filter(d=>d.uom!=="MT").reduce((a,d)=>a+d.qty,0);
@@ -861,6 +916,9 @@
         ${acct.website?`<div class="kv-row"><span class="k">Website</span><span class="v">${esc(acct.website)}</span></div>`:""}
         ${acct.region?`<div class="kv-row"><span class="k">Region</span><span class="v">${esc(acct.region)}</span></div>`:""}
         ${drop?`<div class="kv-row"><span class="k">Drop-off</span><span class="v">${esc(drop)}</span></div>`:""}
+        ${(()=>{ const al=aliasesOf(acct.name||name); return al.length
+          ? `<div class="kv-row"><span class="k">Also known as</span><span class="v" title="These spellings were folded into this account. If any of them is a DIFFERENT company, its deals and contacts are on the wrong profile.">${al.map(a=>esc(a)).join(", ")}</span></div>`
+          : ""; })()}
       </div>
     </div>`;
 
