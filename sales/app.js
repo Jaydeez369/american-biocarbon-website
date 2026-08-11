@@ -146,8 +146,11 @@ const LAUNCH_STEPS = [
     d:"Account matching folds punctuation, possessives and corporate suffixes, so \"J. Berry Nursery\" lands on the existing \"J Berry Nursery\" rather than creating a twin. Check the Also-known-as row on any account that looks merged." },
   { k:"verify",  t:"Verify the emails, strip catch-alls and role accounts",
     d:"info@ and sales@ addresses burn reputation and never reply. Bounce rate over 2% means stop and re-verify, not send slower." },
+  /* The code list is READ from the roster, never spelled out here. It was hardcoded as the
+     old BC-NURS / AB-SPILL style and went stale the moment the taxonomy was unified to the
+     BC.NUR / AB.ENV form, which is exactly the drift this whole app has been cleaned of. */
   { k:"tag",     t:"Tag every contact to an ICP code",
-    d:"BC-COMP, BC-BLEND, BC-NURS, BC-RANCH, BC-DIST for biochar. AB-SPILL, AB-OG, AB-HDD, AB-LF, AB-DIST, AB-BED for absorbent. Untagged contacts make reply attribution impossible, so you cannot tell which variant won." },
+    d:"Untagged contacts make reply attribution impossible, so you cannot tell which variant won.", icps:true },
   { k:"import",  t:"Import into the Sales Pipeline",
     d:"Replies need somewhere to land. A contact that is only in Instantly is invisible the moment someone answers." },
   { k:"load",    t:"Load the campaigns into Instantly",
@@ -159,6 +162,13 @@ const LAUNCH_STEPS = [
 /* Thousands-separated integer. pipeline.js has its own num() but it lives inside that file's
    IIFE and is not global, so app.js needs its own rather than reaching for one that is not there. */
 const fmtN = v => Number.isFinite(+v) ? Math.round(+v).toLocaleString() : "0";
+
+/* The ICP codes actually present in the roster, read at render time. */
+const icpCodes = () => {
+  const R = window.ROSTER;
+  if(!R || !R.byIcp) return "see Campaigns & ICP";
+  return Object.keys(R.byIcp).sort().join(", ");
+};
 
 function rLaunchpad(){
   const S = (window.PIPELIVE && PIPELIVE.stats) ? PIPELIVE.stats() : null;
@@ -208,7 +218,7 @@ function rLaunchpad(){
        <div class="dm-row"><span class="dm-tag">LAUNCH STEPS</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
        <p class="dm-mission">Each step blocks the one under it. A campaign fired at an unverified list off a cold inbox does not just underperform, it burns the sending domain for every campaign after it.</p>
        <div class="chk-grid" style="margin-top:10px">
-         ${LAUNCH_STEPS.map(s=>chk("lp:"+s.k, `<b>${esc(s.t)}</b><br><span style="color:var(--text-mute);font-size:12.5px">${esc(s.d)}</span>`)).join("")}
+         ${LAUNCH_STEPS.map(s=>chk("lp:"+s.k, `<b>${esc(s.t)}</b><br><span style="color:var(--text-mute);font-size:12.5px">${esc(s.d)}${s.icps?" Live codes: "+esc(icpCodes()):""}</span>`)).join("")}
        </div>
      </div>`+
 
