@@ -1,14 +1,19 @@
 /* ============================================================
-   VEJ SALES OS — single source of truth
-   All strategy, copy, fields, pricing, KPIs live here.
+   SALES OS operating layer. NOT the source of truth.
+
+   This file used to declare itself the single source of truth, which is exactly how it
+   drifted: it accumulated its own copies of prices, sample sizes and claim rules, and each
+   copy aged independently until the app was telling reps not to sell bulk while the site
+   took metric-ton orders with working checkout.
+
+   Precedence, highest first:
+     1. website/data.js                          wins on SKUs, availability and list price
+     2. sales-playbook/03-proof-and-claim-discipline.md   wins on claim wording
+     3. 00-index.md                              wins on branding and the live blocker
+   This file layers the daily operating motion on top of those. When it disagrees with any
+   of them, it is wrong.
    ============================================================ */
 const DATA = {
-
-  meta: {
-    company: "VEJ · Progreaux LLC · American BioCarbon",
-    location: "White Castle, LA (co-located w/ Cora Texas Sugar Mill)",
-    beachhead: "Louisiana → Gulf South → SE / Sunbelt; national only for large offtakes",
-  },
 
   /* -------- Proof hierarchy (claim discipline) -------- */
   proofTiers: [
@@ -17,50 +22,6 @@ const DATA = {
     { t:3, k:"proof-3", name:"Field-research supported", ex:"Published USDA-ARS research on LA sugarcane bagasse biochar (third-party, not our product)" },
     { t:4, k:"proof-4", name:"Customer-reported (anecdotal)", ex:"Charley's Chicks litter/mortality observations" },
     { t:5, k:"proof-5", name:"Hypothesis / needs validation", ex:"$/ton CDR revenue, yield lift %, feed claims" },
-  ],
-
-  /* -------- KPI strip on overview -------- */
-  overviewKpis: [
-    { l:"Live products (sample-ready)", v:"2", d:"Absorbent Pellets (1 lb) · 100% Biochar (8 oz)" },
-    { l:"Month-1 first win", v:"Free samples", d:"Samples in buyers' hands — the ONLY ask in outreach" },
-    { l:"Bulk selling / LOI talk now?", v:"No", d:"No bulk yet; LOIs are a quiet 1:1 step after a trial wins" },
-    { l:"Month-1 target", v:"15–25 samples", d:"Free samples shipped + trials started across both products" },
-  ],
-
-  /* ============ 1. EXECUTIVE SUMMARY ============ */
-  exec: {
-    thesis: "BIOCHAR IS NOW PRIORITY #1 and is BULK-CAPABLE: we hold 80 metric tons of finished biochar ready to ship, so winning biochar trials can convert straight to paid orders against inventory on hand. Absorbent Pellets and Absorbent Crumble are ALSO sellable by the metric ton now — $275/MT in 1,650 lb super sacks, live checkout. What still waits for Q4 is TRUCKLOAD supply on every line, since ongoing capacity (~400 MT/mo) isn't committed to TL tonnage yet. Across all three live products the door-opener is the same: get free performance samples (100% Biochar ½ lb, Absorbent Pellets 1 lb, Absorbent Crumble 1 lb) into buyers' hands — that is the first win we optimize the entire machine for. Outreach never mentions LOIs, contracts, or commitments; the only ask is 'test a free sample against what you use now.' The engine follows the ReRoofGen / Instantly playbook: 1,000+ verified contacts, warmed multi-inbox domains, many short hyper-targeted-to-ICP campaigns, and heavy A/B testing. Metric-ton orders, truckload LOIs, reorders, and the CDR/carbon layer are all quiet later steps that only happen 1:1 after a sample wins a trial.",
-    wedge: "BIOCHAR IS PRIORITY #1. We now hold 80 metric tons of finished 100% biochar ready to ship — real, sellable tonnage, not a future promise. Biochar into ag distributors, compost/soil blenders, nurseries, ranchers, and growers is both the highest-leverage channel (one distributor represents many acres) AND, uniquely, bulk-capable today: samples open the door and winning trials convert straight into paid orders against inventory on hand. Absorbent Pellets and Crumble into oil & gas, spill-response, landfill, and industrial EHS buyers are the SECONDARY track — a fast free-sample yes with recurring demand, also sellable by the metric ton ($275/MT), run in parallel but never ahead of biochar on margin ($450/MT). Biochar-Infused Soil and Multipurpose Fiber show as 'Coming Q4', as does truckload supply on every line.",
-    reinforce: [
-      "Free sample in hand IS the Month-1 conversion event. Nothing is asked for beyond a test — no PO, no LOI, no commitment.",
-      "Run it like ReRoofGen: many parallel hyper-ICP-targeted email campaigns + calls + DMs, A/B tested on subject line, opener, and angle. Same free-sample offer, packaging tuned per segment.",
-      "LOIs are internal and later — they only surface 1:1 after a trial wins, and never in a cold touch. Winning trials aggregate into committed volume that de-risks the raise.",
-      "No bulk delivery is promised before Q4. Get the product in hands now; the commercial back-half follows the win.",
-      "Rebrand note: American BioCarbon → new brand (name TBD) (~Aug 17). Keep cold outreach brand-light; fold the rebrand into site + collateral in days 31–60 without blocking today's launch.",
-    ],
-    fastRevenue: "Free sample (Pellets 1 lb / Biochar 8 oz, 4–7 biz days from LA) → test against current material → capture the trial result. Absorbent buyers test fastest; seed biochar distributors in parallel. Founder/consultant-led, high-volume outbound, no ads. Reorders/LOIs handled 1:1 off winning trials.",
-    fastRecurring: "Convert winning sample trials into reorders and, 1:1 and later, LOIs that reserve Q4 supply, locked pricing, and territory; the distributor channel carries the most future volume.",
-    fastOfftake: "Aggregate winning trials + signed LOIs into a committed-volume book for the raise; advance the largest toward binding Q4 offtake as capacity firms up. CDR/carbon conversations open in days 61–90.",
-  },
-
-  /* ============ 2. ASSUMPTIONS + MISSING INPUTS ============ */
-  assumptions: [
-    { a:"Capacity is constrained (~400 MT/mo) — enough for metric-ton super-sack orders now, NOT enough to commit truckload tonnage; TL supply comes online Q4", why:"Governs what we can promise: MT orders yes, TL contracts no, LOIs lock future Q4 truckload supply", conf:"High", verify:"Confirm Q4 capacity ramp timing & tons/month by product with ops" },
-    { a:"Delivered product margin survives freight inside ~300 mi", why:"Bulk low-density product; freight can erase margin", conf:"Med", verify:"Real LTL/TL rates by zone from 2–3 carriers" },
-    { a:"CDR credits are monetizable per deployed ton via Puro.earth pathway", why:"Second revenue layer underpins pricing", conf:"Med", verify:"MRV cost, $/tCO2e, buyer/broker, issuance lag" },
-    { a:"20/40lb + 1MT bags + bulk are all currently packable", why:"Determines which segments we can serve now", conf:"Med", verify:"Confirm live packaging formats & lead times" },
-    { a:"Founder-led sales for first 90 days", why:"No team yet; sets capacity of the plan", conf:"High", verify:"n/a" },
-  ],
-  missingInputs: [
-    { i:"Production capacity / month by product", who:"Ops / plant", impact:"Caps promiseable volume & offtake scope", tmp:"Assume pallet–TL served; offtake staged" },
-    { i:"Inventory on hand by SKU", who:"Ops", impact:"Sample & first-order fulfillment speed", tmp:"Assume sample + pallet available" },
-    { i:"Price floors & COGS by product", who:"Finance/founder", impact:"Every quote & margin gate", tmp:"Placeholder model in Pricing tab" },
-    { i:"Freight rates by zone", who:"Logistics", impact:"Delivered margin, national viability", tmp:"Zone A/B/C placeholders" },
-    { i:"CDR $/tCO2e + tCO2e per ton biochar", who:"Carbon partner", impact:"Blended margin, pricing aggressiveness", tmp:"Marked ESTIMATE, excluded from committed margin" },
-    { i:"MRV requirements & cost", who:"Carbon partner", impact:"Which deals are credit-eligible", tmp:"Require application/GPS + weight docs" },
-    { i:"Official claim language / cert status", who:"Founder/legal", impact:"Legal exposure on collateral", tmp:"Proof hierarchy enforced" },
-    { i:"Payment terms & MOQ", who:"Founder", impact:"Distributor & procurement fit", tmp:"Net-15 pilot / Net-30 established" },
-    { i:"Distributor margin target & exclusivity rules", who:"Founder", impact:"Reseller economics & conflicts", tmp:"25–35% margin, no exclusivity yr 1" },
   ],
 
   /* ============ 3. ICP SEGMENTS ============ */
@@ -249,7 +210,7 @@ const DATA = {
       lang:"'installs', 'contractors', 'retail bag', 'season'",
       hates:"Bulk-only when he needs bagged, no merch support",
       disc:["What premium amendments move for you now?","Where do installs fail on water?","Bag or bulk for your traffic?"],
-      open:"OMRI-listed biochar in retail bags that cuts watering on installs — want samples for the yard?",
+      open:"OMRI Listed biochar in retail bags that cuts watering on installs — want samples for the yard?",
       cta:"Place retail bags + sample" },
     { id:"procurement", name:"Industrial Procurement Manager", seg:"Remediation/oilfield",
       cares:"Cost-per-job, performance, SDS/approvals, reliable supply",
@@ -299,9 +260,9 @@ const DATA = {
         id:"biochar", product:"100% Biochar",
         audience:"MULTIPLE avatars — Distributors/Co-ops · Row-Crop & Specialty Farmers · Ranchers/Livestock · Poultry/Chicken farms · Compost/Soil Blenders · Nurseries/Greenhouses",
         avatar:"Biochar is the DYNAMIC product — one material, many different buyers, each with a different pain and a different lead benefit. Do NOT use a generic biochar pitch: pull the ONE benefit that matters to the buyer in front of you (water-holding for farmers, ammonia/odor for poultry & ranchers, cycle-time for composters, margin/differentiation for distributors, media performance for nurseries). Full per-avatar messaging, specs, benefit-by-mechanism, and industry comparisons live in the → Biochar Specs & Avatars tab. Common ground: they think in yards/blends/water-holding/OMRI/sell-through — NOT spills, SDS, or oilfield.",
-        positioning:"For ag distributors, soil/compost blenders, and growers, American BioCarbon 100% Biochar is an OMRI-listed, independently lab-tested sugarcane-bagasse biochar whose ordered honeycomb pore structure holds ~3–3.5× its weight in water and carries inherent nutrients (~0.6-0.2-0.7 NPK + Ca/Mg) — a differentiated, carbon-negative SKU that improves water/nutrient retention and, per research, can shorten compost cycles ~10–30%.",
-        oneLiner:"OMRI-listed sugarcane biochar that holds ~3–3.5× its weight in water and can shorten compost cycles ~10–30% — a differentiated, margin-accretive line.",
-        pitch30:"Commodity amendments compete on price alone. Ours is an OMRI-listed, independently lab-tested bagasse biochar with an ordered honeycomb pore structure that holds ~3–3.5× its weight in water and carries inherent nutrients — so it firms up water-holding in sandy and premium blends and, per peer-reviewed research, can shorten compost cycles ~10–30%. Differentiated line, real supply story. Want a free sample to trial in one blend or windrow?",
+        positioning:"For ag distributors, soil/compost blenders, and growers, American BioCarbon 100% Biochar is an OMRI Listed, independently lab-tested sugarcane-bagasse biochar whose ordered honeycomb pore structure holds ~3–3.5× its weight in water and carries inherent nutrients (~0.6-0.2-0.7 NPK + Ca/Mg) — a differentiated, carbon-negative SKU that improves water/nutrient retention and, per research, can shorten compost cycles ~10–30%.",
+        oneLiner:"OMRI Listed sugarcane biochar that holds ~3–3.5× its weight in water and can shorten compost cycles ~10–30% — a differentiated, margin-accretive line.",
+        pitch30:"Commodity amendments compete on price alone. Ours is an OMRI Listed, independently lab-tested bagasse biochar with an ordered honeycomb pore structure that holds ~3–3.5× its weight in water and carries inherent nutrients — so it firms up water-holding in sandy and premium blends and, per peer-reviewed research, can shorten compost cycles ~10–30%. Differentiated line, real supply story. Want a free sample to trial in one blend or windrow?",
         pitch90:"American BioCarbon makes a 100% sugarcane-bagasse biochar at the Cora Texas mill in White Castle, LA. Unlike most wood biochar, bagasse has a naturally ordered honeycomb pore structure that holds roughly 3–3.5× its weight in water, retains nutrients, and gives soil microbes protected habitat — and it carries inherent nutrients (~0.6-0.2-0.7 NPK plus Ca/Mg). It's OMRI Listed and independently lab-tested against the IBI test panel, measuring below IBI and EPA Class A heavy-metal thresholds. Published USDA-ARS research on sugarcane bagasse biochar supports the category (independent work, not a study of our product). For blenders it firms up moisture performance in sandy and premium mixes; for composters, peer-reviewed research shows biochar can shorten the cycle ~10–30% — more batches per year on the same pad. Best way to prove it is in your own operation: a free sample to run in one blend or a side-by-side windrow.",
         proof:["OMRI Listed · IBI tested","Holds ~3–3.5× its weight in water (technical report)","Inherent NPK ~0.6-0.2-0.7 + Ca/Mg","Published USDA-ARS bagasse field research (third-party)","Compost cycle ~10–30% shorter (peer-reviewed — validate in own windrow)","Heavy metals well below IBI / EPA Class A"],
         neverSay:["spill / cleanup","absorbent / sorbent / 5:1","SDS for disposal","oilfield / leachate / remediation","bags per spill"]
@@ -310,7 +271,7 @@ const DATA = {
     productPos:[
       { p:"Agricultural biochar", m:"Honeycomb bagasse structure → ~3–3.5x water-holding, inherent NPK + Ca/Mg, OMRI listed and IBI tested. A conditioner AND a nutrient-bearing matrix, not just black carbon." },
       { p:"Biochar-infused soil", m:"Ready-to-use blend — water retention, nutrient-holding, aeration with zero mixing. Drops into beds, pots, installs from the first watering." },
-      { p:"Absorbent pellets", m:"5:1 absorption vs ~2.5:1 for wood — fewer bags per spill, lower disposal volume, plant-based & carbon-neutral. Spill, leachate, oilfield fluid, disaster." },
+      { p:"Absorbent pellets", m:"5:1 absorption vs ~2.5:1 for wood — fewer bags per spill, lower disposal volume, plant-based and renewable. Spill, leachate, oilfield fluid, disaster." },
       { p:"Absorbent crumble", m:"Coarser form for fast, broad coverage on large-area / high-volume spills. Same 100% bagasse, spreads faster. Sellable now; oil-side and large-area fit; ~150-200mi freight ring." },
       { p:"Carbon removal credits", m:"Durable removal (H/C < 0.7), Puro-certified, generated by deploying the product. Sold as a layer on top of product movement — supply is our tons deployed." },
     ],
@@ -318,7 +279,7 @@ const DATA = {
       { vs:"vs Wood biochar", win:"Ordered honeycomb pores → higher water-holding & nutrient retention; inherent nutrients; no trees cut" },
       { vs:"vs Synthetic fertilizer alone", win:"Reduces leaching, improves nutrient-use efficiency & water retention; complements — not replaces — fertility program" },
       { vs:"vs Compost alone", win:"Stable recalcitrant carbon (decades+), consistent lab-verified spec, adds durable structure compost can't" },
-      { vs:"vs Wood/clay absorbents", win:"5:1 vs 2.5:1 absorbency; plant-based, carbon-neutral; lower disposal volume per gallon captured" },
+      { vs:"vs Wood/clay absorbents", win:"5:1 vs 2.5:1 absorbency; plant-based and renewable bagasse feedstock; lower disposal volume per gallon captured" },
       { vs:"vs Doing nothing", win:"Water/fertilizer efficiency, compliance & ESG story, differentiated resale SKU" },
       { vs:"vs Buying carbon credits w/o product", win:"Real deployed tons + MRV trail = defensible, durable removal — not paper offsets" },
     ],
@@ -335,189 +296,13 @@ const DATA = {
     ],
   },
 
-  /* ============ 6. TAM/SAM/SOM ============ */
-  // Sourced from the transport-aware deep-research model (2026-07-13). Parent-market inputs are
-  // cited public anchors (USGS, USDA-AMS, IFEEDER/NARA, Grand View, Puro/CDR.fyi); [A] = stated assumption.
-  market: {
-    note:"HEADLINE: freight — not demand — caps our addressable market, and it caps each product differently by $/ton. Trucking from S. Louisiana runs ~$3.49/loaded-mi at 200mi and ~$4.23 at 100mi (USDA 25-MT benchmark) ≈ $0.14–$0.17/ton-mi. That radius works far for a $700–$800/ton biochar but not for a $200/ton absorbent. Rail linehaul is ~$0.03–0.05/ton-mi but transload+dray add ~$25–40/ton fixed overhead, so rail only pays when the product has enough value/ton, committed volume, or a carbon layer. NET: rail is a real SAM unlock for AG BIOCHAR and especially POULTRY IN-FEED biochar, and only marginal for absorbent pellets. Pellet+crumble TAMs OVERLAP (don't sum). CDR is a revenue LAYER, not an additive physical market. Numbers are a defensible model, not fact.",
-    som:[
-      { m:"Absorbent pellets ($200/ton ref)", tam:"1.86M t / $373M (US fuller's-earth absorbent proxy: 2.3M t × 81%; broader US industrial-absorbent mkt $1.07B '25)", sam:"186k t / $37M [A] ~10% of TAM, Gulf-South truck catchment", som:"600 / 1,200 / 2,400 t → $120k / $240k / $480k", note:"Local truck / TL, ~300mi. Cost-per-gal absorbed ~$0.15 vs $2.88 cellulose / $7.31 clay — chemically great, but low ticket/ton keeps it regional. Rail = marginal." },
-      { m:"Absorbent crumble", tam:"1.86M t / $373M — OVERLAPS pellets, do NOT sum (two forms, one demand pool)", sam:"112k t / $22M [A] ~6% of TAM", som:"300 / 750 / 1,500 t → $60k / $150k / $300k", note:"Local truck / TL, ~150–200mi. Cubes out before weight; used on large-area/low-value cleanup → more freight-sensitive. Rail not material." },
-      { m:"Agricultural biochar ($700/ton [A])", tam:"25k–51k t / $18M–$36M (current US ag-biochar mkt: US biochar ~$99M '26 × 72.7% ag; USBI 35k–70k t production)", sam:"~15k t / ~$10.5M [A] TL to Gulf/TX/SE + selective rail (Dallas/Memphis/Atlanta/FL)", som:"500 / 1,500 / 3,000 t → $350k / $1.05M / $2.1M", note:"TL to ~500mi; rail = MATERIAL unlock. Low density (80–320 kg/m³) → TL discipline, 1-MT bags. + CDR layer if eligible." },
-      { m:"Biochar-infused soil / blends ($350/ton [A])", tam:"tons NQ / $1.5B parent (US lawn-&-garden growing media, Freedonia '26)", sam:"NQ / ~$75M [A] 5% of parent, Zone A + inner B", som:"250 / 750 / 1,500 t → $88k / $263k / $525k", note:"Local truck, ~150–200mi. Shipping finished soil far = paying freight on moisture/filler. Smarter: ship concentrate, blend locally." },
-      { m:"Poultry IN-FEED biochar ($800/ton [A]) — biggest economic prize", tam:"383k–765k t / $306M–$612M (US broiler 57M t + layer 15M t feed × 0.5–1.0% inclusion [A])", sam:"210k–420k t / $168M–$336M post-approval [A] ~55% reachable via TL + rail", som:"1,000 / 2,500 / 5,000 t → $0.8M / $2.0M / $4.0M", note:"⚠ REGULATORY-GATED: new feed ingredients gated by AAFCO/FDA-CVM/GRAS; state GRAS acceptance patchy. Economically huge, commercially gated. Concentrated buyers (integrators, feed mills, premix). Rail = STRONG unlock." },
-      { m:"Cattle + swine in-feed (secondary)", tam:"344k–688k t / $275M–$550M (beef 76.7M t + hog 60.9M t feed × 0.25–0.5% [A])", sam:"Not separately sized — same regulatory gate as poultry", som:"Follows poultry pathway", note:"Real secondary in-feed TAM; same AAFCO/FDA-CVM gate. Size after poultry pathway clears." },
-      { m:"CDR revenue LAYER (not additive physical)", tam:"US biochar CDR mkt $181.5M '24 (up from $33.9M '23, CDR.fyi)", sam:"Coextensive with eligible biochar tons sold", som:"Adds $238–$312 / eligible biochar ton (1.9 tCO2e/t [A] × $125–$164/tCO2e)", note:"AMPLIFIES rail economics most: $238/t carbon ≈ offsets ~1,200 truck-mi @ $0.20/ton-mi. Verify absorbent end-use CDR eligibility vs Puro methodology." },
-    ],
-    modeVerdict:[
-      { p:"Absorbent pellets", truck:"~300 mi", rail:"Marginal unlock", why:"TL manageable to ~300mi, but rail transload overhead is too big a share of a $200/ton product unless volumes are very large." },
-      { p:"Absorbent crumble", truck:"~150–200 mi", rail:"Not material", why:"Cubes out before weight; lower-value bulk cleanup motions want nearby stock." },
-      { p:"Agricultural biochar", truck:"~500 mi (TL)", rail:"Material unlock", why:"Higher $/ton supports TL farther; rail opens Dallas/Memphis/Atlanta/FL + national distributor lanes." },
-      { p:"Biochar-infused soil / blends", truck:"~150–200 mi", rail:"Usually no", why:"Finished blends too local & bulky; ship concentrate and blend locally." },
-      { p:"Poultry in-feed biochar", truck:"~500 mi (TL)", rail:"Strong unlock", why:"Concentrated buyers, higher value/ton, bulk/silo compatibility, carbon-revenue support — rail compelling post-approval." },
-      { p:"CDR layer", truck:"n/a", rail:"Amplifies rail economics", why:"Adds ~$238–$312 per eligible biochar ton at base-case issuance/pricing." },
-    ],
-    transport:[
-      "Truck (USDA S. Central, 25-MT benchmark): $5.68/mi @25mi · $4.23 @100mi · $3.49 @200mi → ≈$0.17/ton-mi @100mi, $0.14 @200mi (higher if low-density product cubes out first).",
-      "Rail linehaul ~$0.03–0.05/ton-mi (≈half of truck), BUT transload + dray add ~$25–40/ton [A] fixed overhead → rail only beats truck ~250–400mi, and only when the receiver is rail-served.",
-      "White Castle sits on the UNION PACIFIC network. Nearest public transload = USA Rail Baton Rouge / Port Allen (UP-served, dry+liquid bulk, unit-train + manifest). ~25–35 road-mi origin dray [A] ≈ $5.68/ton at 25mi — dray is not the killer; the fixed transload touches are.",
-      "Direct on-site rail spur at the Cora Texas Sugar Mill is UNVERIFIED in public sources — must confirm before assuming direct rail loading.",
-      "Capacity reality: ~400 MT/mo ≈ only 4.5–5 railcars/mo (85–90 MT/car). A unit train (50–100 cars) = 4,250–9,000 MT — unrealistic now. The real rail play is repeat CARLOAD lanes into a few distributor/integrator nodes, not unit trains.",
-      "Destination transload exists (Commtrex/TRANSFLO): Dallas, Memphis, Atlanta, Jacksonville. Physical network is not the bottleneck — product value & order size are.",
-      "Handling: 1-MT FIBC super sacks ~$5.70–$26.95 each (~$6–27/ton) — fine for biochar/feed, painful vs a $200/ton absorbent. Pneumatic dry-bulk (no bag cost) suits in-feed/silo-fed systems, not spill-response pellets.",
-    ],
-    priceRefs:[
-      { p:"Absorbent pellets / crumble", price:"$200/ton (company ref)", note:"Ex-plant bulk benchmark; USGS fuller's-earth ex-works ~$95/t; retail clay/cellulose far higher per gal." },
-      { p:"Agricultural biochar", price:"$700/ton [A]", note:"Conservative — wholesale $600–$2,778/t, modal ~$1,600; CA avg $600–$1,300 (20–40% bulk discounts)." },
-      { p:"Biochar-infused soil / blends", price:"$350/ton [A]", note:"Blended-product working price." },
-      { p:"Poultry in-feed biochar", price:"$800/ton [A]", note:"Feed-grade working price; concentrated integrator/mill/premix buyers." },
-      { p:"CDR credit", price:"$125–$164/tCO2e", note:"Nasdaq/Puro ~$125–145; independent avg ~$164 (2025). Yield 1.5–2.5 tCO2e/t biochar, 1.9 base [A]." },
-    ],
-    accountCriteria:[
-      { f:"Geography", v:"LA / Gulf South / SE first; pellets ~≤300 mi, ag biochar ~500 mi via TL, in-feed potentially national via TL + selective rail" },
-      { f:"Freight logic", v:"Zone A ≤150mi (LTL ok), B 150–300mi (TL), C 300–500mi (TL + higher-value biochar/feed only), D 500mi+ (rail / bulk / carbon-subsidized only)" },
-      { f:"Rail logic", v:"White Castle on UP; transload via Port Allen (~25–35mi dray). Play = repeat CARLOAD lanes (85–90 MT/car), NOT unit trains, into ag-biochar & in-feed nodes. On-site spur unverified." },
-      { f:"Min account size", v:"Free sample first; then a path to TL-scale recurring volume (or rail carload for far zones) — LTL only inside Zone A" },
-      { f:"Product fit", v:"Handles bulk/bagged/silo; real absorbency / water-holding / feed / organic use case" },
-      { f:"Strategic value", v:"Reseller reach, reference logo, in-feed integrator channel, or offtake potential (higher-value/ton products earn wider freight radius)" },
-    ],
-    assumptions:[
-      "Prices [A]: pellets/crumble $200/t (ref), ag biochar $700/t, blends $350/t, feed-grade $800/t — intentionally conservative vs current specialty listings.",
-      "Truck payloads [A]: pellets ~22t, crumble ~15t, ag biochar ~16t, heavy blends ~22t, in-feed ~18t (informed by USDA 25-MT truck + 80–320 kg/m³ biochar density; field-verify).",
-      "Rail overhead $25–40/ton [A] (origin dray + transload + destination handling) is the SINGLE LARGEST logistics variable — replace with live lane quotes.",
-      "Poultry in-feed 0.5–1.0% inclusion is the commercial base case (literature positive in that band; mixed/worse at higher doses); 3% is an experimental ceiling, not the plan.",
-    ],
-    gaps:[
-      "No public proof of an active rail spur AT the Cora Texas mill — treat direct rail loading as unverified.",
-      "No free public source cleanly isolates the US plant-based loose-granular absorbent subsegment (vs clay/synthetic pads/booms).",
-      "No public free tonnage source for biochar-infused soil blends as a distinct US category (dollar parent only).",
-      "AAFCO Official Publication not fully open in free text → whether a claim-ready generic biochar FEED ingredient definition exists is a MUST-VERIFY compliance item.",
-    ],
-    verifyFirst:[
-      "Live TL freight quotes by lane & equipment type",
-      "Origin/destination transload + dray quotes (the biggest variable)",
-      "Actual product bulk density + truck-payload tests (bag/trailer/moisture/stackability)",
-      "Regulatory counsel on the poultry-feed ingredient pathway (AAFCO/FDA-CVM/GRAS)",
-      "Commercial validation: 2–3 SE feed mills / premix houses + 2 Gulf industrial-absorbent distributors",
-    ],
-    sourcing:[
-      "Google Maps: 'soil supplier', 'landscape supply', 'compost', 'topsoil' + LA/Gulf cities",
-      "NAICS: 424910 (Farm Supplies Merchant Wholesalers), 424690, 325314, 562219, 213112 (oilfield), 562212 (landfill), 311119 (feed mfg)",
-      "Poultry in-feed: USPOULTRY top broiler/egg producer lists, WATT/Egg Industry company listings, AFIA (~5,650 US feed facilities), premix majors (Cargill, DSM-Firmenich, ADM, Purina Animal Nutrition, BASF)",
-      "LinkedIn Sales Nav: title=Purchasing/Category/Ops/Nutritionist + industry=Farming/Environmental Services/Animal Feed + geo=Gulf South & SE",
-      "Trade assocs: American Sugar Cane League, LA Nursery & Landscape Assoc, US Biochar Initiative, regional ag co-op directories",
-      "Oilfield/enviro: ISN/Avetta supplier lists, spill-response contractor directories, state DEQ contractor lists",
-      "Rail/transload: Commtrex (Dallas/Memphis/Atlanta/Jacksonville), TRANSFLO, USA Rail Port Allen; Enrichment: Apollo.io (connected) + Clay waterfall",
-    ],
-  },
-
-  /* ============ 6B. BARGE / WATERBORNE COST ANALYSIS ============ */
-  barge:{
-    headline:"Barge is NOT for the local Gulf-South beachhead — the fixed dock-handling premium (~$24/ton, both ends) buries the tiny linehaul savings on a 30-mi White Castle→Baton Rouge hop, where a truck wins outright. Barge is the UNLOCK for FAR lanes (Zone D, 500 mi+): it beats truck past ~180 river-mi and beats rail past ~350–400 mi, converting a regional producer into an upriver-Midwest and Gulf-EXPORT supplier — IF a full-barge volume commitment exists. All figures are a defensible model, not fact; [A] = stated assumption.",
-    geography:[
-      "White Castle, LA (Cora Texas Sugar Mill) sits in Iberville Parish on the WEST BANK of the Lower Mississippi River, ~AHP mile ~168, inside the Baton Rouge–New Orleans deep-draft industrial corridor. This is the busiest inland-barge reach in North America.",
-      "Sugar mills in this corridor routinely ship RAW SUGAR & MOLASSES by barge — a mill-adjacent or shared bulk dock likely exists within a short dray. CONFIRM whether Cora Texas has an active loading dock / fleeting area before assuming on-site barge loading. [A]",
-      "Downriver reach: White Castle → Baton Rouge ~30 river-mi; → New Orleans / Gulf export elevators & deep-draft ~130 mi; → Gulf (blue-water export transfer) ~230 mi.",
-      "Upriver reach (the real prize): → Memphis ~680 mi; → St. Louis ~1,050 mi; → the entire Upper Mississippi, Ohio, Illinois, Missouri & Arkansas river ag belt; plus the Gulf Intracoastal Waterway (GIWW) east to Mobile/FL and west to TX.",
-      "Any inland river or GIWW-served receiver becomes reachable at ~$0.015/ton-mi linehaul — roughly 1/10th of truck and ~1/3rd of rail linehaul.",
-    ],
-    modeCompare:[
-      { mode:"Truck (TL)", linehaul:"$0.14–0.17 / ton-mi", fixed:"~$0 fixed (dock-to-dock N/A)", cap:"~16–22 t / load", note:"Door-to-door, no handling premium — unbeatable SHORT-haul; falls apart past ~300–500 mi." },
-      { mode:"Rail (carload)", linehaul:"$0.03–0.05 / ton-mi", fixed:"~$25–40 / ton transload + dray [A]", cap:"85–90 t / car", note:"Mid-range unlock 250–400 mi+; needs rail-served receiver." },
-      { mode:"Barge (covered hopper)", linehaul:"$0.01–0.02 / ton-mi ($0.015 base [A])", fixed:"~$24 / ton handling (≈$12 load + $12 unload, wharfage/stevedore/transload) [A] + dray each end", cap:"~1,400–1,750 t / barge", note:"Fixed handling premium is brutal short-haul; linehaul crushes everyone LONG-haul & for EXPORT." },
-    ],
-    lanes:[
-      { dest:"Baton Rouge, LA", mi:"~30", barge:"~$24.45", truck:"~$4.50", rail:"~$33", verdict:"TRUCK WINS", cls:"badge-gold", note:"Too short — barge pays full ~$24 handling for a $0.45 linehaul. Never barge this hop." },
-      { dest:"New Orleans / Gulf export", mi:"~130", barge:"~$25.95", truck:"~$19.50", rail:"~$38", verdict:"TRUCK (barge only for EXPORT transfer)", cls:"badge-gold", note:"Barge still trails truck on cost, BUT if the freight is continuing to blue-water EXPORT, barge-direct-to-elevator avoids a truck-to-barge rehandle → barge wins the EXPORT motion specifically." },
-      { dest:"Memphis, TN (upriver ag)", mi:"~680", barge:"~$34.20", truck:"~$73", rail:"~$52", verdict:"BARGE WINS", cls:"badge-green", note:"Past break-even. Barge undercuts rail by ~$18/ton and truck by ~$39/ton into Mid-South ag-biochar & soil markets." },
-      { dest:"St. Louis / Midwest belt", mi:"~1,050", barge:"~$39.75", truck:"~$140", rail:"~$60", verdict:"BARGE WINS BIG", cls:"badge-green", note:"Barge is ~1/3rd of rail and <1/3rd of truck. This is the lane that turns a LA producer into a national ag-biochar supplier." },
-      { dest:"Gulf blue-water EXPORT", mi:"~230 to transfer", barge:"~$27.45 + export transfer", truck:"n/a at scale", rail:"n/a", verdict:"BARGE ONLY", cls:"badge-green", note:"Containerized/bulk export (LatAm, EU CDR-linked biochar demand) is physically a barge/vessel motion — trucking to a Gulf port then rehandling is strictly worse." },
-    ],
-    breakeven:[
-      "Barge vs TRUCK break-even ≈ ~180 river-mi: handling premium $24 ÷ per-mile savings ($0.15 − $0.015 = $0.135) ≈ 178 mi. Past ~180 mi, barge is cheaper than truck. [A]",
-      "Barge vs RAIL break-even ≈ ~350–400 mi: both carry fixed handling; barge's ~$0.025/ton-mi linehaul edge overtakes rail once distance is long enough to matter. [A]",
-      "NET zones: <180 mi = TRUCK. 180–400 mi = case-by-case (barge if receiver is on the water, else truck/rail). 400 mi+ or EXPORT = BARGE, decisively.",
-      "Value/ton barely matters for barge (unlike rail): a $200/ton absorbent AND a $700/ton biochar both ride at the same ~$/ton — so barge can even carry LOW-value product profitably to far markets, which rail cannot.",
-    ],
-    capacity:[
-      "Capacity reality check: current output ~400 MT/mo. ONE covered hopper barge ≈ 1,400–1,750 t = ~3.5–4.4 MONTHS of production. You cannot fill a barge monthly today.",
-      "Two honest paths: (1) STOCKPILE & batch — accumulate ~1,400 t, ship one full barge per quarter to a committed far/export buyer; or (2) SHARED/partial barge — co-load with the sugar mill's own molasses/sugar barges or a 3rd-party consolidator to avoid paying for empty deck.",
-      "Do NOT model unit tows (15-barge × 1,500 t = 22,500 t) — that is 4½ YEARS of current output. Barge is a FUTURE-STATE / export lever, not a day-1 beachhead tool.",
-      "Barge becomes routine only after capacity scales to ≥1 full barge/mo (~1,500 MT/mo, ~3.7× today) OR a single export/Midwest offtake justifies quarterly full-barge shipments.",
-    ],
-    assumptions:[
-      "Barge linehaul $0.015/ton-mi base ($0.01–0.02 range) — inland dry-bulk covered-hopper proxy; USDA-AMS Grain Transportation Report & USACE modal benchmarks. Field-quote for actual biochar (low density may cube-out before weight → rate could rise). [A]",
-      "Handling $12/ton each end ($24 round) — wharfage + stevedoring + transload for a light, dusty, low-density bulk. Biochar's low bulk density (80–320 kg/m³) may push per-ton handling HIGHER (cubes out); verify with a terminal quote. [A]",
-      "Origin dray $0 assumed IF Cora Texas has an on/adjacent dock; add ~$3–6/ton if a 5–15 mi dray to a public dock (Port of Greater Baton Rouge / Port Allen area) is required. [A]",
-      "Truck comps at $0.15/ton-mi, rail at $0.04/ton-mi linehaul + $32/ton transload — carried over from the TAM/SAM/SOM transport model for apples-to-apples.",
-      "River miles ≠ road miles: barge distances follow the channel and run LONGER than the highway equivalent, which is already reflected in the lane figures.",
-    ],
-    verifyFirst:[
-      "Confirm Cora Texas Sugar Mill dock/fleeting status — on-site loading vs. nearest public bulk dock + dray distance (Port of Greater Baton Rouge, Port Allen, or a St. James/Iberville terminal).",
-      "Get a REAL covered-hopper freight quote for 2–3 target lanes (Memphis, St. Louis, a Gulf export elevator) from a barge line / broker (e.g. Ingram, ACBL, SCF, or a regional consolidator).",
-      "Quote terminal handling for LOW-DENSITY dusty bulk specifically — biochar may be charged by volume, not weight; get $/ton AND $/cf.",
-      "Test whether co-loading with the mill's sugar/molasses barge program is possible (shared fixed cost = the single biggest lever).",
-      "Confirm receiver-side unload/dray at each far node before quoting a delivered price — barge only pays if the RECEIVER is also on the water or a short dray from it.",
-      "For EXPORT: identify the Gulf transfer point & incoterm (FOB dock vs CIF) — export CDR-linked biochar demand (EU/LatAm) may subsidize the whole lane.",
-    ],
-  },
-
-  /* ============ 7. PIPELINE ============ */
-  objectModel:[
-    { o:"Account", key:"Company, segment, freight zone, status" },
-    { o:"Contact", key:"Persona, title, role (econ/tech/user)" },
-    { o:"Deal / Opportunity", key:"Deal type, stage, value, margin, carbon fields" },
-    { o:"Sample Request", key:"Product, size, qual gate, ship date, follow-up" },
-    { o:"LOI (Letter of Intent)", key:"Committed Q4 volume, locked price band, territory, status" },
-    { o:"Order (live)", key:"SKU, tons, packaging, delivery, invoice — metric-ton now, truckload post-Q4" },
-    { o:"Fulfillment Handoff", key:"Logistics, application guidance, MRV docs" },
-    { o:"Carbon / MRV Record", key:"tCO2e est, MRV status, issuance, buyer" },
-    { o:"Activity / Task", key:"Type, owner, due, outcome" },
-    { o:"Collateral Sent", key:"Asset, date, engagement" },
-    { o:"Objection", key:"Type, response used, resolved?" },
-    { o:"Distributor Agreement", key:"Margin, terms, exclusivity, volume commit" },
-    { o:"Offtake Agreement", key:"Annual volume, price, term, MRV" },
-  ],
-  dealTypes:["Free sample / trial","Paid biochar order (against the 80 MT on hand)","LOI — reserve Q4 supply","Distributor LOI (territory + volume)","Q4 offtake / supply agreement (post-capacity)","Carbon credit / CDR transaction (days 61–90)"],
-  pipelines:{
-    midmarket:[
-      { s:"Prospect", def:"Fits ICP + freight zone, not yet contacted", prob:5, fields:["segment","freight zone","est. volume"], exit:"Verified fit + contact found", next:"First touch", risk:"Outside zone w/ low volume", auto:"Assign owner + sequence", noAdv:"Don't advance without a real named contact" },
-      { s:"Contacted / Engaged", def:"Two-way conversation started", prob:15, fields:["persona","pain","current alt"], exit:"Discovery booked or interest confirmed", next:"Book discovery", risk:"Single-threaded", auto:"Log activity", noAdv:"No advance without a reply/conversation" },
-      { s:"Discovery / Qualified", def:"Use case, volume, freight, decision path confirmed", prob:30, fields:["decision maker","timeline","est. tons","competitor"], exit:"Meets qual bar + sample agreed", next:"Ship sample", risk:"No urgency/trigger", auto:"Create sample request", noAdv:"No advance without qualified use case + buyer" },
-      { s:"Sample / Trial", def:"Sample shipped, trial running", prob:45, fields:["SKU","sample success criteria","trial start"], exit:"Trial success confirmed by buyer", next:"Trial check-in", risk:"No defined success metric", auto:"Schedule follow-up", noAdv:"No advance without agreed success criteria" },
-      { s:"LOI Presented", def:"Short LOI delivered — committed Q4 volume, locked price band, territory", prob:60, fields:["committed volume","locked price band","territory","terms"], exit:"Buyer reviewing / verbal intent", next:"LOI review call", risk:"No close plan", auto:"Set follow-up reminder", noAdv:"No LOI without a positive sample result" },
-      { s:"LOI Negotiation", def:"Volume, price band, territory being finalized", prob:80, fields:["volume","price band","sign date"], exit:"LOI signed", next:"Confirm signature", risk:"Decision-maker stall", auto:"Close plan tasks", noAdv:"No commit without decision maker aligned" },
-      { s:"LOI Signed → Q4 Supply", def:"LOI executed; committed volume booked for the Q4 ramp", prob:100, fields:["committed volume","price band","Q4 delivery window"], exit:"Committed volume logged for the raise", next:"Nurture to Q4 offtake", risk:"Capacity mismatch", auto:"Add to committed-volume book", noAdv:"Log committed volume as the funding metric" },
-    ],
-    offtake:[
-      { s:"Target Identified", def:"Strategic large account mapped", prob:5, fields:["annual volume potential","strategic value"], exit:"Exec contact identified", next:"Warm intro path", risk:"Wrong entry point", auto:"Account plan", noAdv:"—" },
-      { s:"Exec Engaged", def:"Senior stakeholder in dialogue", prob:15, fields:["stakeholders","initiative driver"], exit:"Discovery workshop set", next:"Discovery workshop", risk:"Single-threaded", auto:"Multi-thread tasks", noAdv:"Map ≥2 stakeholders" },
-      { s:"Scoping / Pilot", def:"Pilot volume + success terms defined", prob:35, fields:["pilot volume","success terms","MRV scope"], exit:"Pilot agreed", next:"Run pilot", risk:"No success definition", auto:"Pilot tracker", noAdv:"No pilot without written success criteria" },
-      { s:"Pilot Running", def:"Trial volume deployed & measured", prob:50, fields:["pilot results","carbon eligibility"], exit:"Pilot success", next:"Results review", risk:"Data gaps", auto:"MRV capture", noAdv:"—" },
-      { s:"Contract / Term Sheet", def:"Annual supply / offtake terms drafted", prob:70, fields:["annual volume","price","term","CDR terms"], exit:"Term sheet agreed", next:"Legal review", risk:"Capacity mismatch", auto:"Legal + capacity check", noAdv:"Confirm production capacity" },
-      { s:"Signed Offtake", def:"Executed annual supply / offtake", prob:100, fields:["contract","MRV plan","delivery schedule"], exit:"Deliveries scheduled", next:"Delivery + MRV ops", risk:"—", auto:"Recurring fulfillment + MRV", noAdv:"—" },
-    ],
-    carbon:[
-      { s:"Deployment Supply Mapped", def:"Deployed/committed tons = credit supply quantified", prob:10, fields:["deployed tons","est tCO2e","MRV status"], exit:"Supply forecast built", next:"Package supply", risk:"MRV incomplete", auto:"Link to won deals", noAdv:"Only count deployed/committed tons" },
-      { s:"Buyer / Broker Engaged", def:"CDR buyer or broker in dialogue", prob:25, fields:["buyer","required standard","volume"], exit:"Requirements confirmed", next:"Share MRV package", risk:"Standard mismatch", auto:"Match to registry", noAdv:"Confirm buyer's durability/standard" },
-      { s:"Diligence / MRV Review", def:"Buyer validating permanence & MRV", prob:50, fields:["MRV docs","permanence data"], exit:"Diligence passed", next:"Term sheet", risk:"Data gaps", auto:"MRV checklist", noAdv:"No advance with open MRV items" },
-      { s:"Forward Purchase / Term Sheet", def:"Price & volume tied to deployment pipeline", prob:70, fields:["price/tCO2e","volume","delivery schedule"], exit:"Terms agreed", next:"Contract", risk:"Over-commit vs supply", auto:"Supply reconciliation", noAdv:"Never sell more credits than deployable tons" },
-      { s:"Credits Contracted", def:"Executed CDR purchase / offtake", prob:100, fields:["contract","issuance schedule"], exit:"Issuance tracked", next:"Issue + deliver", risk:"—", auto:"Issuance tracking", noAdv:"—" },
-    ],
-  },
-  crmFields:{
-    sales:["account name","segment","buyer persona","location","distance/freight zone","contact info","product interest","expected order format","estimated volume","timeline","decision maker","buying process","pain point","current alternative","competitor / status quo","next step","close date","deal value","gross margin estimate"],
-    economics:["product type","wet tons","dry tons equivalent","bulk density","packaging type","est. product revenue","est. COGS","est. freight","delivered margin","carbon-credit eligibility","est. tCO2e generated","est. CDR revenue","CDR revenue confidence","MRV docs required","MRV status","credit issuance status","total deal value (product + carbon)","product margin only","blended margin (incl. carbon)","carbon credit buyer / channel","carbon revenue recognition timing"],
-  },
-  dashboards:["Founder dashboard","Sales manager dashboard","Account list","Pipeline kanban","Sample tracker","Quotes / proposals","Target account map/list","Carbon-credit generation","Fulfillment handoff queue","Distributor pipeline","Offtake pipeline","Activity leaderboard","30/60/90 roadmap tracker"],
-
   /* ============ 8. OUTREACH ============ */
   outreach:[
     { seg:"Soil Blenders", persona:"Ops Manager",
       steps:[
         { t:"Email 1 — Day 0", b:"Subject: bagasse biochar for your blends\n\nHi {First} — we make a 100% sugarcane bagasse biochar out of White Castle. It screens clean into soil blends and holds ~3x its weight in water, so it firms up moisture performance in sandy mixes. OMRI Listed, independently lab-tested.\n\nWorth a free sample bag to run in your premium blend? I'll include the spec + a quick blend guide.\n\n— {Me}, VEJ" },
-        { t:"Call opener", b:"Hey {First}, {Me} with VEJ down in White Castle — we turn sugarcane bagasse into biochar for soil blenders. Quick reason I called: folks running sandy or premium mixes use it to hold moisture and carry nutrients. What are you blending right now?" },
-        { t:"Voicemail", b:"{First}, it's {Me} with VEJ, 555-xxx. We make bagasse biochar for soil blends — holds about 3x its weight in water, screens clean. I'll send a spec by email; if it fits I'll drop you a free sample. Talk soon." },
+        { t:"Call opener", b:"Hey {First}, {Me} with American BioCarbon down in White Castle — we turn sugarcane bagasse into biochar for soil blenders. Quick reason I called: folks running sandy or premium mixes use it to hold moisture and carry nutrients. What are you blending right now?" },
+        { t:"Voicemail", b:"{First}, it's {Me} with American BioCarbon, {phone}. We make bagasse biochar for soil blends — holds about 3x its weight in water, screens clean. I'll send a spec by email; if it fits I'll drop you a free sample. Talk soon." },
         { t:"LinkedIn note", b:"Hi {First} — we make Louisiana bagasse biochar for soil blenders (OMRI Listed, independently lab-tested). Would love to send you a sample to trial in a blend. Open to it?" },
         { t:"Email 2 — Day 4 (value)", b:"Subject: the water-holding number\n\n{First} — quick proof: our bagasse biochar's honeycomb pore structure holds ~3–3.5x its weight in water (technical report attached), vs ~2x for typical wood biochar. That's the difference blenders feel in sandy mixes.\n\nWant a sample to test? Just need your best ship-to." },
         { t:"Email 3 — Day 9 (sample CTA)", b:"Subject: sample bag\n\n{First} — happy to ship a free qualified sample so you can run it in your own blend. If it performs, we scale to pallet then standing LTL. What blend would you test it in first?" },
@@ -526,9 +311,9 @@ const DATA = {
       nurture:"Monthly: seasonal blend tips, a customer proof point, or a new cert/data drop. No hard sell." },
     { seg:"Ag Distributors", persona:"Category Manager",
       steps:[
-        { t:"Email 1 — Day 0", b:"Subject: carbon-negative organic SKU for your line\n\nHi {First} — VEJ makes a Louisiana bagasse biochar (OMRI Listed, independently lab-tested, with published USDA-ARS field research behind the category). Distributors use it as a differentiated organic/regenerative SKU with a water + carbon story growers are asking for.\n\nCan I send the distributor margin model + grower ROI calc?" },
-        { t:"Call opener", b:"Hi {First}, {Me} with VEJ. We supply a carbon-negative bagasse biochar and I'm talking to distributors building out organic/regenerative lines. Are your growers asking about water efficiency or carbon yet?" },
-        { t:"Voicemail", b:"{First}, {Me} with VEJ, 555-xxx. Louisiana biochar, OMRI listed and independently lab-tested, with a distributor program and grower ROI model. Sending details by email — would value 15 minutes." },
+        { t:"Email 1 — Day 0", b:"Subject: carbon-negative organic SKU for your line\n\nHi {First} — American BioCarbon makes a Louisiana bagasse biochar (OMRI Listed, independently lab-tested, with published USDA-ARS field research behind the category). Distributors use it as a differentiated organic/regenerative SKU with a water + carbon story growers are asking for.\n\nCan I send the distributor margin model + grower ROI calc?" },
+        { t:"Call opener", b:"Hi {First}, {Me} with American BioCarbon. We supply a bagasse biochar and I'm talking to distributors building out organic/regenerative lines. Are your growers asking about water efficiency or carbon yet?" },
+        { t:"Voicemail", b:"{First}, {Me} with American BioCarbon, {phone}. Louisiana biochar, OMRI listed and independently lab-tested, with a distributor program and grower ROI model. Sending details by email — would value 15 minutes." },
         { t:"LinkedIn note", b:"Hi {First} — building a distributor program for our Louisiana bagasse biochar (OMRI listed, lab-tested, carbon-negative). Think it could differentiate your organic line. Open to a quick look at the margin model?" },
         { t:"Email 2 — Day 4", b:"Subject: the demand + margin question\n\n{First} — two things distributors ask: will it pull through, and what's the margin. On pull-through: it's OMRI-listed, with published USDA-ARS field research on bagasse biochar and a grower water/fertilizer-efficiency story. On margin: attached model shows a stocking pilot at [placeholder] with volume rebates. Worth a call?" },
         { t:"Email 3 — Day 9", b:"Subject: co-branded grower trial\n\n{First} — best way to de-risk: a stocking pilot plus a co-branded grower trial so your reps have a local proof point. I'll supply samples + trial docs. Which branches would you start with?" },
@@ -537,9 +322,9 @@ const DATA = {
       nurture:"Monthly: grower proof points, program economics, regional trial results, cost-share/grant angles." },
     { seg:"Remediation / Oilfield", persona:"Procurement Manager",
       steps:[
-        { t:"Email 1 — Day 0", b:"Subject: 5:1 absorbent, fewer bags per job\n\nHi {First} — VEJ makes a plant-based bagasse absorbent that soaks up ~5:1 vs ~2.5:1 for wood pellets. Fewer bags per spill, lower disposal volume, carbon-neutral. Full spec sheet available.\n\nWant a head-to-head absorbency demo or a trial pallet on your next job?" },
-        { t:"Call opener", b:"Hi {First}, {Me} with VEJ. We make a bagasse absorbent that outperforms wood 2-to-1 on soak-up. Reason I called — crews use fewer bags per spill and pay less on disposal. What absorbent are you running now?" },
-        { t:"Voicemail", b:"{First}, {Me} with VEJ, 555-xxx. Plant-based absorbent, 5:1 soak vs 2.5:1 for wood. I'll email the spec — happy to do a demo or trial pallet on your next job." },
+        { t:"Email 1 — Day 0", b:"Subject: 5:1 absorbent, fewer bags per job\n\nHi {First} — American BioCarbon makes a plant-based bagasse absorbent that soaks up ~5:1 vs ~2.5:1 for wood pellets. Fewer bags per spill, lower disposal volume, carbon-neutral. Full spec sheet available.\n\nWant a head-to-head absorbency demo or a trial pallet on your next job?" },
+        { t:"Call opener", b:"Hi {First}, {Me} with American BioCarbon. We make a bagasse absorbent that outperforms wood 2-to-1 on soak-up. Reason I called — crews use fewer bags per spill and pay less on disposal. What absorbent are you running now?" },
+        { t:"Voicemail", b:"{First}, {Me} with American BioCarbon, {phone}. Plant-based absorbent, 5:1 soak vs 2.5:1 for wood. I'll email the spec — happy to do a demo or trial pallet on your next job." },
         { t:"LinkedIn note", b:"Hi {First} — we make a 5:1 bagasse absorbent (vs 2.5:1 wood) for spill/fluid remediation. Can I send the spec sheet + set up a quick demo?" },
         { t:"Email 2 — Day 3", b:"Subject: cost per gallon captured\n\n{First} — the number that matters: at ~5:1, you capture the same spill with far fewer bags than wood or clay, so cost-per-gallon and disposal volume both drop. Attached: the spec sheet + a cost-per-gallon comparison. Want a trial pallet staged for the next job?" },
         { t:"Email 3 — Day 8", b:"Subject: trial pallet\n\n{First} — easiest path: we stage a trial pallet, your crew runs it head-to-head on the next spill, and you see the bag count difference live. What site should we ship to?" },
@@ -548,9 +333,9 @@ const DATA = {
       nurture:"Monthly: disposal-cost angles, ESG/HSE reporting value, disaster-season readiness." },
     { seg:"Landfill / Public Works", persona:"Ops / EHS Director",
       steps:[
-        { t:"Email 1 — Day 0", b:"Subject: leachate & spill absorbent — pilot for next cycle\n\nHi {First} — VEJ makes a plant-based bagasse absorbent (5:1) for leachate control and spill response, with full specs and certifications. Several ops teams pilot it to cut moisture-handling cost and strengthen sustainability reporting.\n\nCan I scope a pilot aligned to your budget cycle?" },
-        { t:"Call opener", b:"Hi {First}, {Me} with VEJ. We supply a plant-based absorbent for leachate and spill control with full specs. I'm reaching out to scope pilots for the next budget cycle — where does moisture or leachate cost you most right now?" },
-        { t:"Voicemail", b:"{First}, {Me} with VEJ, 555-xxx. Plant-based absorbent for leachate/spill, pilot-friendly. Emailing details — would like to understand your procurement timeline." },
+        { t:"Email 1 — Day 0", b:"Subject: leachate & spill absorbent — pilot for next cycle\n\nHi {First} — American BioCarbon makes a plant-based bagasse absorbent (5:1) for leachate control and spill response, with full specs and certifications. Several ops teams pilot it to cut moisture-handling cost and strengthen sustainability reporting.\n\nCan I scope a pilot aligned to your budget cycle?" },
+        { t:"Call opener", b:"Hi {First}, {Me} with American BioCarbon. We supply a plant-based absorbent for leachate and spill control with full specs. I'm reaching out to scope pilots for the next budget cycle — where does moisture or leachate cost you most right now?" },
+        { t:"Voicemail", b:"{First}, {Me} with American BioCarbon, {phone}. Plant-based absorbent for leachate/spill, pilot-friendly. Emailing details — would like to understand your procurement timeline." },
         { t:"LinkedIn note", b:"Hi {First} — plant-based absorbent for leachate/spill control (specs, certs). Would like to scope a pilot for your next budget cycle. Open to a short call?" },
         { t:"Email 2 — Day 5", b:"Subject: what a pilot would show\n\n{First} — a clean pilot would measure absorbent volume used, moisture handled, and disposal impact vs your current material. I'll bring specs, certs, and a simple success scorecard. What's your RFP/budget timeline?" },
         { t:"Email 3 — Day 11", b:"Subject: RFP-ready kit\n\n{First} — if it's easier to route through procurement, I can send an RFP-ready kit (specs, certs, references). Who should receive it?" },
@@ -559,9 +344,9 @@ const DATA = {
       nurture:"Quarterly: compliance updates, sustainability-reporting value, references." },
     { seg:"Animal Bedding", persona:"Buyer / Barn Manager",
       steps:[
-        { t:"Email 1 — Day 0", b:"Subject: drier litter, fewer bags\n\nHi {First} — VEJ makes a bagasse-based absorbent used for animal bedding. It soaks up several times its weight in moisture, which helps keep litter drier. Plant-based and renewable.\n\n(Bedding performance only — we don't make feed or health claims.) Want a house trial?" },
-        { t:"Call opener", b:"Hi {First}, {Me} with VEJ. We make a bagasse absorbent used as bedding — helps hold litter moisture. Where are you seeing wet-litter issues right now?" },
-        { t:"Voicemail", b:"{First}, {Me} with VEJ, 555-xxx. Bagasse-based bedding absorbent, holds moisture well, plant-based. I'll email details — open to a house trial." },
+        { t:"Email 1 — Day 0", b:"Subject: drier litter, fewer bags\n\nHi {First} — American BioCarbon makes a bagasse-based absorbent used for animal bedding. It soaks up several times its weight in moisture, which helps keep litter drier. Plant-based and renewable.\n\n(Bedding performance only — we don't make feed or health claims.) Want a house trial?" },
+        { t:"Call opener", b:"Hi {First}, {Me} with American BioCarbon. We make a bagasse absorbent used as bedding — helps hold litter moisture. Where are you seeing wet-litter issues right now?" },
+        { t:"Voicemail", b:"{First}, {Me} with American BioCarbon, {phone}. Bagasse-based bedding absorbent, holds moisture well, plant-based. I'll email details — open to a house trial." },
         { t:"LinkedIn note", b:"Hi {First} — bagasse-based bedding absorbent that holds litter moisture well. Can I send specs and set up a house trial?" },
         { t:"Email 2 — Day 5", b:"Subject: house trial\n\n{First} — simplest proof is a trial in one house: compare litter moisture and bag usage vs your current bedding. I'll ship a trial quantity. Which operation would you test first?" },
         { t:"Breakup — Day 12", b:"Subject: last note\n\n{First} — I'll stop here. If wet litter or bedding cost comes up, we're ready with specs and a trial." },
@@ -570,8 +355,8 @@ const DATA = {
     { seg:"CDR / ESG Buyers", persona:"Sustainability / Carbon Buyer",
       steps:[
         { t:"Email 1 — Day 0", b:"Subject: Puro-certified biochar removal, deployment-backed\n\nHi {First} — VEJ produces durable carbon removal via bagasse biochar (H/C < 0.7), Puro.earth certified, generated by real deployed tons in Louisiana ag/industrial use — with deployment-level MRV records.\n\nWould you be open to discussing a forward purchase tied to our deployment pipeline?" },
-        { t:"Call opener", b:"Hi {First}, {Me} with VEJ. We generate Puro-certified biochar carbon removal from deployed sugarcane bagasse biochar. What's your durability threshold and standard for removals this year?" },
-        { t:"Voicemail", b:"{First}, {Me} with VEJ, 555-xxx. Durable, Puro-certified biochar removal backed by real deployment and MRV. Sending details — would value a conversation on a forward purchase." },
+        { t:"Call opener", b:"Hi {First}, {Me} with American BioCarbon. We generate Puro-certified biochar carbon removal from deployed sugarcane bagasse biochar. What's your durability threshold and standard for removals this year?" },
+        { t:"Voicemail", b:"{First}, {Me} with American BioCarbon, {phone}. Durable, Puro-certified biochar removal backed by real deployment and MRV. Sending details — would value a conversation on a forward purchase." },
         { t:"LinkedIn note", b:"Hi {First} — durable Puro-certified biochar removal, deployment + MRV backed. Open to discussing a forward purchase tied to our pipeline?" },
         { t:"Email 2 — Day 5", b:"Subject: why deployment-backed matters\n\n{First} — the differentiator: our credits come from physical tons actually deployed and documented, not paper offsets. That gives you defensible additionality + durability. I can share our MRV approach and deployment forecast. Useful?" },
         { t:"Email 3 — Day 12", b:"Subject: term sheet outline\n\n{First} — if there's fit, I'll send a forward-purchase outline sized to our conservative deployment pipeline (we never sell more credits than deployable tons). What volume and delivery window fits your program?" },
@@ -582,7 +367,7 @@ const DATA = {
 
   /* ============ 9. COLLATERAL ============ */
   deck:[
-    { s:"Title", p:"Frame identity fast", b:["VEJ — carbon-negative biochar & absorbents from Louisiana sugarcane bagasse","Co-located at Cora Texas Sugar Mill, White Castle, LA"], cta:"—" },
+    { s:"Title", p:"Frame identity fast", b:["American BioCarbon, biochar and absorbents from Louisiana sugarcane bagasse","Co-located at Cora Texas Sugar Mill, White Castle, LA"], cta:"—" },
     { s:"The waste-to-value story", p:"Origin + credibility", b:["Sugarcane bagasse: renewable ag byproduct, no trees cut","Oxygen-limited pyrolysis >500°C → stable biochar"], cta:"—" },
     { s:"Why bagasse beats wood", p:"Core differentiation", b:["Ordered honeycomb pore structure","~3–3.5x water-holding vs ~2x wood","Inherent NPK + Ca/Mg; 5:1 absorbency vs 2.5:1"], cta:"—" },
     { s:"Product family", p:"Show the range", b:["Bulk/bagged biochar","Biochar-infused soil","Absorbent pellets & crumble","Carbon removal credits"], cta:"—" },
@@ -665,41 +450,9 @@ const DATA = {
     { o:"New supplier is risky", mean:"Reliability fear", resp:"Start small (sample→pallet), show consistency via lab batch data, scale on proof.", proof:"Batch lab consistency", next:"Start with a low-risk pallet?", disq:"—" },
   ],
 
-  /* ============ 10. PRICING ============ */
-  pricing:{
-    note:"MONTH 1 = NO BULK SELLING. We do not quote or sell bulk yet (capacity scales in Q4). This pricing architecture is internal Q4 REFERENCE — its purpose is to set the locked price band an LOI reserves for the fall. Costs are placeholders: fill floors/COGS/freight before any Q4 quote. Never present these as live prices now.",
-    logic:[
-      { f:"Floor price", v:"COGS + freight + min margin % (never below); set per SKU" },
-      { f:"Target margin", v:"Product gross margin target [e.g. 35–50%]; blended (incl. carbon) higher" },
-      { f:"Freight", v:"Zone A/B/C; FOB White Castle vs delivered; TL amortizes best" },
-      { f:"MOQ", v:"Sample → pallet → LTL → TL; distributor MOQ higher w/ rebate" },
-      { f:"Distributor margin", v:"25–35% target; volume rebate tiers; no yr-1 exclusivity" },
-      { f:"Terms", v:"Net-15 pilot → Net-30 established; deposit on offtake" },
-      { f:"Carbon upside", v:"CDR revenue can subsidize product price to win share — model separately, don't commit unverified $" },
-    ],
-    tiers:[
-      { p:"Bulk biochar", unit:"/ ton (FOB)", note:"Best for TL + offtake; lowest handling" },
-      { p:"1MT bulk bag", unit:"/ bag", note:"Distributor / large grower" },
-      { p:"20/40 lb retail", unit:"/ bag", note:"Landscape/nursery/retail; highest $/lb" },
-      { p:"Biochar-infused soil", unit:"/ yd³ or / bag", note:"Value-added blend margin" },
-      { p:"Absorbent pellets", unit:"/ lb or / pallet", note:"Industrial recurring (bulk Q4)" },
-      { p:"Absorbent crumble", unit:"/ lb or / pallet", note:"Large-area coverage; sellable now" },
-    ],
-    dealEval:["product revenue","product gross margin","freight","expected CDR revenue (EST)","MRV cost","blended gross margin","strategic value","expansion value"],
-    sampleDeal:[
-      { line:"Product revenue", v:"$X  (tons × price/ton)" },
-      { line:"− COGS", v:"$X  (placeholder)" },
-      { line:"− Freight (zone)", v:"$X  (placeholder)" },
-      { line:"= Product gross margin", v:"$X  →  committed number" },
-      { line:"+ Est. CDR revenue", v:"$X  (tons × tCO2e/ton × $/tCO2e) — ESTIMATE" },
-      { line:"− MRV cost", v:"$X  (placeholder)" },
-      { line:"= Blended gross margin", v:"$X  →  upside view, not committed" },
-    ],
-  },
-
   /* ============ 11. PLAYBOOK ============ */
   playbook:{
-    principles:["Sample first, sign LOIs — no bulk selling until Q4 capacity is online","The LOI (committed Q4 volume) is the Month-1 win, not a PO — it's what funds the buildout","Never advance a stage without its exit criteria","Every trial has a written success metric before it ships","Claim discipline: match every claim to its proof tier","Multi-thread any account worth a meaningful LOI","Carbon is a days-61–90 layer, not the Month-1 pitch","Log it in the app or it didn't happen"],
+    principles:["Sample first, then convert a winning trial to a PAID metric-ton order at the published site price","A PO against the roughly 80 MT on hand is the Month-1 win. The LOI sits on top of it to reserve Q4 TRUCKLOAD volume","Never advance a stage without its exit criteria","Every trial has a written success metric before it ships","Claim discipline: match every claim to its proof tier","Multi-thread any account worth a meaningful recurring order","Carbon is a days-61–90 layer, not the Month-1 pitch","Log it in the app or it didn't happen"],
     qual:{ framework:"MEDDIC-A (adapted): Metrics, Economic buyer, Decision criteria, Decision process, Identify pain, Champion + Application/Carbon fit",
       criteria:["Real, specific use case","Order potential ≥ pallet w/ recurring path","Freight fit (zone A/B or volume justifies C)","Named decision-maker engaged","Urgency / trigger present","Proof requirements known","Sample success criteria agreed","Carbon-credit eligibility assessed","Operational complexity acceptable"] },
     discovery:{
@@ -799,25 +552,9 @@ const DATA = {
     ],
   },
 
-  /* ============ 12. KPIS ============ */
-  kpis:{
-    leading:["New accounts added","Contacts found","Emails sent","Calls made","LinkedIn touches","Conversations started","Discovery/technical calls booked","Samples requested","Samples shipped","Sample follow-ups done","LOIs presented","Site visits scheduled"],
-    lagging:["LOIs signed","Committed future volume (Q4)","Distributor LOIs","Case-study-safe wins","(Q4+) Closed orders","(Q4+) Revenue","(Q4+) Reorder rate","(days 61–90) Carbon-eligible tons","(days 61–90) Est. CDR revenue"],
-    conversion:["Account → meeting","Meeting → sample","Sample → LOI presented","LOI presented → signed","Segment → committed volume","Distributor LOI → territory reserved"],
-    coverage:["Coverage by deal type (3–4x pipeline/target)","Monthly target model","Activity target model","Volume (tons) target model","Pipeline value w/ and w/o CDR"],
-    cards:[
-      { c:"Samples shipped (MTD)", def:"Free samples in buyers' hands this month", formula:"Σ samples where shipped", filter:"Segment, product", src:"Sample", warn:"< monthly target pace", owner:"Consultant" },
-      { c:"LOIs signed + committed volume", def:"Signed LOIs and the Q4 volume they commit — the funding metric", formula:"Σ LOIs signed; Σ committed volume", filter:"Segment, product", src:"LOI", warn:"0 by day 25", owner:"Victor" },
-      { c:"Sample → LOI rate", def:"Samples that convert to a signed LOI", formula:"LOIs signed / samples shipped", filter:"Segment", src:"Sample, LOI", warn:"< 10%", owner:"Consultant" },
-      { c:"LOI presented → signed", def:"Presented LOIs that get signed", formula:"signed / presented", filter:"Segment", src:"LOI", warn:"< 40%", owner:"Victor" },
-      { c:"Carbon-eligible tons", def:"Deployed tons w/ MRV path", formula:"Σ tons where eligible & MRV≠blocked", filter:"—", src:"Carbon record", warn:"MRV backlog", owner:"Carbon lead" },
-      { c:"Activity index", def:"Weekly outbound volume", formula:"emails+calls+LI+visits", filter:"Owner, week", src:"Activity", warn:"< weekly target", owner:"Sales mgr" },
-    ],
-  },
-
   /* ============ 12b. DAILY ACTION PLAN (top-of-app focus) ============ */
   daily:{
-    mission:"Move the 80 MT of biochar. Get free samples into ag, soil, and grower buyers' hands, then convert winning trials to paid orders against inventory on hand. Absorbent crumble is sellable now and converts a trial win to a paid order. Absorbent pellets are the secondary track: samples first, LOIs after a win. Cold outreach always leads with a free sample, never a bulk pitch.",
+    mission:"Move the 80 MT of biochar. Get free samples into ag, soil, and grower buyers' hands, then convert winning trials to paid orders against inventory on hand. All three live lines sell by the metric ton today (Biochar $450/MT, Absorbent Pellets and Crumble $275/MT), so a trial win on any of them converts to a paid order. Absorbent is the secondary track by effort, not by availability. Only truckload volume waits on the Q4 ramp. Cold outreach always leads with a free sample, never a bulk pitch.",
     target:"By end of Week 2: 15-25 biochar samples shipped, first reorders and POs against the 80 MT, both tracks live.",
     sectors:[
       {k:"bizdev",   t:"Business Development", c:"#5b9bd5", d:"Lists, accounts, calls, LOI conversations"},
@@ -1023,7 +760,7 @@ const DATA = {
     build:["CRM objects + fields (Account/Contact/Deal/Sample/LOI/Activity)","Sample→LOI funnel: statuses + sample tracker","Dashboards (samples shipped, sample→LOI, committed volume)","Target account list view (both tracks, freight-zoned)"],
     collateral:["Absorbent 1-pager (industrial — single-product)","Biochar 1-pager (ag — single-product)","Sample-kit insert + test protocol","Spec sheets + SDS (from Victor)","Comparison: pellets vs wood/clay · biochar vs wood biochar","Product photos (real close-ups + facility)"],
     lists:["150–200 accounts across BOTH product ICPs (Gulf South + freight-viable)","Contacts + verified emails (Apollo)","ICP-tagged + freight-zoned; shared with Victor"],
-    firstActions:["Free-sample outreach ONLY (no bulk talk in cold touch — sample is the door-opener)","BIOCHAR track (PRIORITY): distributor/blender/composter/grower emails + calls","Absorbent track (secondary): EHS/spill/oilfield emails + calls","Ship free samples within 48h of qualification (biochar first)","Convert winning biochar trials → POs against the 80 MT on hand","Book discovery/technical calls (Victor takes technical)"],
+    firstActions:["Free-sample outreach ONLY in the cold touch (the sample is the door-opener; the order comes after a trial win)","BIOCHAR track (PRIORITY): distributor/blender/composter/grower emails + calls","Absorbent track (secondary): EHS/spill/oilfield emails + calls","Ship free samples within 48h of qualification (biochar first)","Convert winning trials on any line to paid metric-ton POs (biochar ships against the 80 MT on hand)","Book discovery/technical calls (Victor takes technical)"],
   },
 
   /* ============ 14. BIOCHAR — SPECS, DATA & AVATARS ============
@@ -1085,7 +822,8 @@ const DATA = {
         ["Commercial base case","0.5–1.0%","Cleanest market-sizing band (mixed results higher)"],
       ]},
       { h:"Market / cost positioning ($/ton)", cols:["","American BioCarbon bulk","Market"], rows:[
-        ["Working price","$700/ton [assumption]","Wholesale $600–$2,778; modal ~$1,600"],
+        ["List price","$450 / metric ton (live on the site, working checkout)","Wholesale $600 to $2,778; modal ~$1,600"],
+        ["Quoting status","BLOCKED: freight and COGS unverified, so no firm biochar price goes out beyond the published $450/MT. The older $700/ton figure was an internal modeling placeholder and is superseded.",""],
         ["CA study","—","$600–$1,300 avg (20–40% bulk discounts)"],
         ["Angle","Enter low, undercut premium retail","Carbon layer can further subsidize price"],
       ]},

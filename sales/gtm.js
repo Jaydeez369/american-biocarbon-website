@@ -29,7 +29,7 @@
   function rSummary(){
     const s=GTM.summary;
     return page("gtm-summary",
-      head("GTM Executive Summary","The Month-1 thesis: SAMPLES-FIRST. The one goal is free samples of the two live products (Pellets, Biochar) in buyers' hands — that's the first win. No LOI talk in outreach, no bulk selling yet. LOIs are a quiet later step off winning trials.")+
+      head("GTM Executive Summary","The Month-1 thesis: SAMPLE-LED. Three live lines (Biochar, Absorbent Pellets, Absorbent Crumble) all sell by the metric ton today. The cold ask is still a free sample in a buyer's hands, but a winning trial now converts to a PAID order, not just an LOI. Truckload supply is the Q4 ramp, reserved by LOI.")+
       `<div class="note ok" style="font-size:13.5px"><b>Position:</b> ${esc(s.position)}</div>`+
       sec("G1","Why oil & gas / remediation first")+
       `<div class="grid g2">${s.wedgeWhy.map(w=>`<div class="card"><p style="color:var(--text-dim)">→ ${esc(w)}</p></div>`).join("")}</div>`+
@@ -176,7 +176,7 @@
     </div>`).join("");
     return page("gtm-sequences",
       head("Outbound Sequences","Human, short, specific, credible — email 1–4, breakup, call opener, voicemail, and three LinkedIn steps per segment. BIOCHAR segments lead; absorbent runs second. Copy any block. Replace {First}/{Me}/{phone} before sending.")+
-      `<div class="note ok"><b>Primary biochar angle:</b> OMRI-listed sugarcane-bagasse biochar with an ordered honeycomb pore structure — holds ~3–3.5× its weight in water and can shorten compost cycles ~10–30% (per research). We have 80 MT ready to ship, so a winning free-sample trial converts straight to an order. The cold ask is always the free sample — never a bulk/LOI pitch. <b>Secondary absorbent angle:</b> plant-based bagasse absorbent, ~5× its weight (est.) → fewer bags + lighter disposal vs wood/clay. Always tag ratio claims as estimates.</div>`+
+      `<div class="note ok"><b>Primary biochar angle:</b> OMRI Listed sugarcane-bagasse biochar with an ordered honeycomb pore structure — holds ~3–3.5× its weight in water and can shorten compost cycles ~10–30% (per research). We have 80 MT ready to ship, so a winning free-sample trial converts straight to an order. The cold ask is always the free sample — never a bulk/LOI pitch. <b>Secondary absorbent angle:</b> plant-based bagasse absorbent, ~5× its weight (est.) → fewer bags + lighter disposal vs wood/clay. Always tag ratio claims as estimates.</div>`+
       filters+blocks
     );
   }
@@ -219,7 +219,7 @@
       <div class="grid g2">${s.voicemails.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
     </div>`;
     return page("gtm-scripts",
-      head("Phone Script Library (A/B)","A deep bank of call openers, gatekeeper lines, objection turns, and voicemails per segment — every one built to earn a yes to a FREE SAMPLE. No LOIs, no bulk on a cold call. Copy any block; swap {First}/{Me}/{Company}/{phone}.")+
+      head("Phone Script Library (A/B)","A deep bank of call openers, gatekeeper lines, objection turns, and voicemails per segment, every one built to earn a yes to a FREE SAMPLE. No bulk quote and no LOI on a cold call: that comes after a trial wins. Copy any block; swap {First}/{Me}/{Company}/{phone}.")+
       `<div class="note ok"><b>The whole point:</b> ${esc(L.intro)}</div>`+
       sec("","A/B testing rules")+`<div class="card">${ul(L.abRules)}</div>`+
       filters+segs.map(block).join("")
@@ -289,54 +289,10 @@
     );
   }
 
-  /* ---- 10. Campaign ↔ Landing Map ---- */
-  function rLanding(){
-    const m=GTM.landingMap;
-    return page("gtm-landing",
-      head("Campaign ↔ Landing Page Coordination","Every campaign points to the right page with the right CTA, form, sequence, tag, and sales next step. No message-market mismatches.")+
-      table(["ICP","Campaign","Outbound CTA","Landing page","Required section","Form","Sequence","Tag","Sales next step"],
-        m.map(r=>[`<strong>${esc(r.icp)}</strong>`,esc(r.cmp),`<span style="color:var(--green-bright)">${esc(r.cta)}</span>`,
-          `<span class="t-num">${esc(r.lp)}</span>`,esc(r.section),esc(r.form),badge(r.seq,"badge-blue"),badge(r.tag,"badge-muted"),esc(r.next)]))+
-      sec("","Coordination rules (guardrails)")+
-      `<div class="card">${GTM.landingRules.map(r=>`<div class="note warn" style="margin:6px 0">${esc(r)}</div>`).join("")}</div>`
-    );
-  }
-
-  /* ---- 11. CRM / App Tracking ---- */
-  function rCRM(){
-    const objs=GTM.crmObjects;
-    const objBlock=o=>sec("",o.obj+" object")+
-      table(["Field","Type","Req","Options","Description","Dashboard use"],o.fields.map(f=>[
-        `<strong>${esc(f.n)}</strong>`,`<span class="t-num">${esc(f.t)}</span>`,
-        badge(f.r,f.r==="Req"?"badge-green":f.r==="Auto"?"badge-blue":"badge-muted"),esc(f.o),esc(f.d),esc(f.dash)]));
-    return page("gtm-crm",
-      head("CRM & App Tracking Spec","Objects, fields, lead scoring, and the status workflow to build into the app. Aligns with the Pipeline schema in the main Sales OS.")+
-      objs.map(objBlock).join("")+
-      sec("","Lead scoring model")+
-      table(["Factor","Weight","How it's scored","Note"],GTM.scoring.map(s=>[`<strong>${esc(s.f)}</strong>`,
-        `<span class="t-num">${esc(s.w)}</span>`,esc(s.how),`<em>${esc(s.note)}</em>`]))+
-      sec("","Status workflow")+
-      `<div class="filters">${GTM.statuses.map((st,i)=>`<span class="pill" style="cursor:default">${i+1}. ${esc(st)}</span>`).join("")}</div>`+
-      `<div class="note ok"><b>Flow:</b> New Target → Researched → Contact Found → Sequenced → Replied → Call Booked → Sample Requested → Sample Sent → Trial Active → Result: Positive → LOI Presented → LOI Signed → Offtake (Q4). Off-ramps: Nurture / Disqualified.</div>`
-    );
-  }
-
-  /* ---- 12. Dashboard ---- */
-  function rDashboard(){
-    return page("gtm-dashboard",
-      head("GTM Dashboard Spec","Every card with its formula, data source, target, warning threshold, and owner — daily activity through closed revenue and carbon optionality.")+
-      table(["Card","Formula","Data source","Target","Warning threshold","Owner"],
-        GTM.dashboard.map(c=>[`<strong>${esc(c.m)}</strong>`,`<span class="t-num">${esc(c.f)}</span>`,esc(c.src),
-          `<span style="color:var(--green-bright)">${esc(c.tgt)}</span>`,`<span style="color:var(--red-soft)">${esc(c.warn)}</span>`,esc(c.o)]))+
-      `<div class="note warn"><b>Carbon guardrail on the dashboard:</b> estimated carbon-credit value is always flagged (EST) and can never exceed deployable tons. It is optionality, never committed revenue.</div>`
-    );
-  }
-
-  /* ---- 13. Sample / Quote Workflow ---- */
   function rSample(){
     const f=GTM.sampleFlow;
     return page("gtm-sample",
-      head("Sample → LOI Workflow","From outreach to free sample to signed LOI — with qualification, approval, shipping SLA, follow-up timing, and the O&G procurement-grade standard. No bulk selling in Month 1.")+
+      head("Sample to Order Workflow","From outreach to free sample to a paid metric-ton order, with qualification, approval, shipping SLA, follow-up timing, and the O&G procurement-grade standard. The LOI is the second ask and reserves Q4 truckload volume.")+
       `<div class="grid g2">
         <div class="card"><h4>🧪 When to offer a SAMPLE</h4><p>${esc(f.whenSample)}</p></div>
         <div class="card"><h4>📝 When to present an LOI</h4><p>${esc(f.whenLOI)}</p></div>
@@ -381,5 +337,5 @@
      strips the wrapper (stripBody) and stacks the inner content under
      the matching consolidated section.
      ================================================================ */
-  window.GTMB = {rSummary,rPrelaunch,rCampaigns,r30Day,rScale,rSequences,rCalling,rScriptLibrary,rLinkedIn,rSocial,rLongTerm,rLanding,rCRM,rDashboard,rSample,rLaunch};
+  window.GTMB = {rSummary,rPrelaunch,rCampaigns,r30Day,rScale,rSequences,rCalling,rScriptLibrary,rLinkedIn,rSocial,rLongTerm,rSample,rLaunch};
 })();

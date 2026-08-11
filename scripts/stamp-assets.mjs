@@ -22,7 +22,7 @@ const CHECK = process.argv.includes("--check");
 // HTML entry points whose asset references get stamped. Every shipping page belongs here:
 // a page left off this list gets no stamping AND no missing-asset check, which is exactly
 // how sales/build-later.html shipped without tokens.css.
-const PAGES = ["index.html", "sales/index.html", "sales/build-later.html", "sales/brandkit.html"];
+const PAGES = ["index.html", "sales/index.html", "sales/brandkit.html"];
 
 // href/src="<local path>?v=<token>" -> capture path and token.
 const REF = /(\s(?:href|src)=")([^"?#:]+\.(?:css|js))\?v=([^"#]*)"/g;

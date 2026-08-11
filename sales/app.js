@@ -19,7 +19,6 @@ function rerender(){
   const id = (location.hash || "#" + NAV[0].items[0].id).slice(1);
   render();
   go(id, { keepScroll:true });   // restore the active section without jumping to top
-  recalc();                       // #content was rebuilt, so the calculators need repopulating
   // an open calendar day lives inside #content, so put it back or ticking a task inside it
   // would close the panel out from under the user
   if(window.gtmOpenCalDay != null && typeof window.gtmCalPick === "function"){
@@ -54,10 +53,12 @@ function script(label,body){
 }
 
 /* ================= NAV ================= */
-/* ===== Consolidated IA (v3) — enterprise-audited split =====
-   LEAN = the daily-driver sales tool (index.html).
-   BUILD = parked heavy build/strategy modules (build-later.html),
-           selected via window.OS_VIEW==='build'. Same code, two entry pages. */
+/* One view: the daily-driver sales tool. There used to be a second "BUILD" view holding
+   parked strategy modules (TAM/SAM/SOM, barge economics, a CRM schema spec, a metrics
+   dashboard) behind build-later.html. It was deleted, not parked: every section in it was
+   anchored to a $700/ton biochar price that the live $450/MT site price superseded, so it
+   was actively misleading rather than merely idle. The playbook owns the market model now.
+   Recoverable from git history if it is ever wanted back, re-derived at live prices. */
 const LEAN_NAV=[
   {group:"Focus",items:[
     {id:"daily",ic:"◎",t:"Daily Plan"},
@@ -80,15 +81,7 @@ const LEAN_NAV=[
     {id:"marketing",ic:"⇄",t:"Sales × Marketing"},
   ]},
 ];
-const BUILD_NAV=[
-  {group:"Build Later · parked",items:[
-    {id:"b-overview",ic:"◆",t:"Architecture & Assumptions"},
-    {id:"b-market",ic:"▤",t:"Market & Economics"},
-    {id:"b-crm",ic:"▦",t:"CRM & Pipeline Spec"},
-    {id:"b-dashboard",ic:"▲",t:"Metrics & Dashboard"},
-  ]},
-];
-const NAV = (window.OS_VIEW==="build") ? BUILD_NAV : LEAN_NAV;
+const NAV = LEAN_NAV;
 
 function buildNav(){
   $("#nav").innerHTML = NAV.map(g=>`<div class="nav-group">${g.group}</div>`+
@@ -129,7 +122,13 @@ function rDaily(){
   return page("today",
     head("Daily Plan","One page to run the day. Every checkbox persists across reloads.")+
     `<div class="note ok" style="border-left:4px solid var(--green-bright);font-size:14px;margin-bottom:14px">
-       <b style="color:var(--green-bright)">🔥 TOP PRIORITY: SELL THE BIOCHAR.</b> ${BIOCHAR_INVENTORY_LINE} Every task below moves this inventory. Absorbent pellets run second.
+       <b style="color:var(--green-bright)">🔥 TOP PRIORITY: SELL THE BIOCHAR.</b> ${BIOCHAR_INVENTORY_LINE} Every task below moves this inventory. Absorbent runs second by effort, not by availability: pellets and crumble both have live $275/MT SKUs today.
+     </div>`+
+    /* The one blocker that gates every deal, sourced from 00-index.md. It sits above the
+       mission on purpose: every freight radius, margin figure and quote in this app is
+       downstream of it, and a rep who does not know that will quote a number that is not real. */
+    `<div class="note warn" style="border-left:4px solid var(--gold-soft);font-size:13.5px;margin-bottom:14px">
+       <b>⛔ BLOCKER: freight and COGS are unverified.</b> No firm biochar price goes out beyond the published $450/MT site price. Every freight radius and margin figure in this app is provisional until Finance confirms cost per ton and zone freight rates. The old $700/ton figure was an internal placeholder and is superseded.
      </div>`+
     `<div class="daily-mission card pad-lg">
        <div class="dm-row"><span class="dm-tag">THE MISSION</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}% of calendar tasks</span></div>
@@ -165,43 +164,7 @@ function rHorizon(){
   );
 }
 
-/* --- Overview --- */
-function rOverview(){
-  const e=DATA.exec;
-  return page("overview",
-    head("Executive Sales Architecture","The highest-leverage path from zero to first revenue, recurring accounts, and carbon-monetized offtake.")+
-    `<div class="grid g4">${DATA.overviewKpis.map(k=>`<div class="card kpi"><div class="l">${k.l}</div><div class="v">${k.v}</div><div class="d">${esc(k.d)}</div></div>`).join("")}</div>`+
-    sec("1","Strategic Thesis")+
-    `<div class="card pad-lg"><p style="color:var(--text);font-size:14.5px;line-height:1.65">${esc(e.thesis)}</p></div>`+
-    `<div class="grid g3" style="margin-top:14px">
-      <div class="card"><h4>🥇 First wedge</h4><p>${esc(e.wedge)}</p></div>
-      <div class="card"><h4>⚡ Fastest first revenue</h4><p>${esc(e.fastRevenue)}</p></div>
-      <div class="card"><h4>🔁 Fastest recurring</h4><p>${esc(e.fastRecurring)}</p></div>
-    </div>`+
-    sec("","How product & carbon revenue reinforce each other")+
-    `<div class="note ok"><b>The molecule does double duty.</b> ${esc(DATA.messaging.dualStory)}</div>`+
-    `<div class="grid g3">${e.reinforce.map(r=>`<div class="card"><p>${esc(r)}</p></div>`).join("")}</div>`+
-    `<div class="note" style="margin-top:14px"><b>Fastest path to large offtake:</b> ${esc(e.fastOfftake)}</div>`+
-    sec("","Claim discipline — proof hierarchy")+
-    `<p class="lead">Every claim in this system is tagged to a tier. Never present a lower-tier claim as a higher one.</p>`+
-    table(["Tier","Classification","Examples"],DATA.proofTiers.map(p=>[tier(p.t),`<strong>${esc(p.name)}</strong>`,esc(p.ex)]))
-  );
-}
 
-/* --- Assumptions --- */
-function rAssumptions(){
-  return page("assumptions",
-    head("Strategic Assumptions & Missing Inputs","What we're assuming to move fast, and the critical unknowns to close. Nothing here is treated as fact until verified.")+
-    sec("2A","Assumptions")+
-    table(["Assumption","Why it matters","Confidence","Verify"],DATA.assumptions.map(a=>[
-      `<strong>${esc(a.a)}</strong>`,esc(a.why),
-      badge(a.conf, a.conf==="High"?"badge-green":a.conf==="Med"?"badge-gold":"badge-red"),esc(a.verify)]))+
-    sec("2B","Missing Inputs")+
-    table(["Input needed","Owner","Impact if unknown","Temporary assumption"],DATA.missingInputs.map(m=>[
-      `<strong>${esc(m.i)}</strong>`,esc(m.who),esc(m.impact),`<em style="color:var(--gold-soft)">${esc(m.tmp)}</em>`]))+
-    `<div class="note warn">These inputs gate real quoting and any committed carbon revenue. The plan runs on placeholders until Finance/Ops/Carbon confirm them.</div>`
-  );
-}
 
 /* --- Segments --- */
 const RANKKEYS=[["speed","Speed to LOI"],["recurring","Recurring"],["margin","Margin"],["carbon","Carbon gen"],["strategic","Strategic"],["freight","Freight fit"],["complexity","Complexity"]];
@@ -352,156 +315,9 @@ function rBiochar(){
   );
 }
 
-/* --- Market --- */
-function rMarket(){
-  const mk=DATA.market;
-  return page("market",
-    head("TAM / SAM / SOM & Beachhead Strategy","A transport-aware model built from cited public anchors (USGS, USDA-AMS, IFEEDER/NARA, Grand View, Puro/CDR.fyi). [A] = stated assumption. Freight — not demand — caps the addressable market, differently per product by $/ton.")+
-    `<div class="note warn">${esc(mk.note)}</div>`+
-    sec("6","Market model — TAM / SAM / SOM (low / base / high)")+
-    table(["Market","TAM (tons / $)","SAM (freight-viable)","SOM year 1 (low / base / high)","Mode & note"],mk.som.map(x=>[
-      `<strong>${esc(x.m)}</strong>`,esc(x.tam),esc(x.sam),`<span style="color:var(--green-bright)">${esc(x.som)}</span>`,esc(x.note)]))+
-    (mk.modeVerdict?sec("","Transport mode verdict by product")+
-      table(["Product","Best truck radius","Rail verdict","Primary reason"],mk.modeVerdict.map(m=>[
-        `<strong>${esc(m.p)}</strong>`,`<span class="t-num">${esc(m.truck)}</span>`,badge(m.rail,/Strong|Material/.test(m.rail)?"badge-green":/Marginal|Amplifies/.test(m.rail)?"badge-gold":"badge-muted"),esc(m.why)])):"")+
-    (mk.transport?sec("","Transport & rail model")+
-      `<div class="card"><ul>${mk.transport.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`:"")+
-    (mk.priceRefs?sec("","Reference prices used")+
-      table(["Product","Price","Basis"],mk.priceRefs.map(p=>[`<strong>${esc(p.p)}</strong>`,`<span class="t-num">${esc(p.price)}</span>`,esc(p.note)])):"")+
-    sec("","Target account criteria")+
-    table(["Filter","Rule"],mk.accountCriteria.map(c=>[`<strong>${esc(c.f)}</strong>`,esc(c.v)]))+
-    (mk.assumptions?sec("","Key assumptions [A]")+
-      `<div class="card"><ul>${mk.assumptions.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:"")+
-    (mk.gaps?sec("","Open gaps — treat as unverified")+
-      `<div class="note warn"><ul>${mk.gaps.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`:"")+
-    (mk.verifyFirst?sec("","Verify-first (before any investor/lender deck)")+
-      `<div class="card"><ul>${mk.verifyFirst.map(v=>`<li>${esc(v)}</li>`).join("")}</ul></div>`:"")+
-    sec("","Sourcing workflow — build the first 100")+
-    `<div class="card"><ul>${mk.sourcing.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`+
-    `<div class="note"><b>Enrichment:</b> Apollo.io is connected to this workspace — use it to find contacts, verify emails, and push accounts into the app.</div>`
-  );
-}
 
-/* --- Barge / Waterborne Cost Analysis (separate deep-dive, below TAM/SAM/SOM) --- */
-function rBarge(){
-  const b=DATA.barge;
-  return page("barge",
-    head("Barge & Waterborne Cost Analysis","A standalone freight deep-dive: can the Mississippi at White Castle move product cheaper than truck or rail? Full cost-per-ton model by lane, with break-even math and a capacity reality check. [A] = stated assumption; figures are a defensible model, not fact.")+
-    `<div class="note warn">${esc(b.headline)}</div>`+
-    sec("6B·1","White Castle waterway geography")+
-    `<div class="card"><ul>${b.geography.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`+
-    sec("6B·2","Mode comparison — the cost structure")+
-    table(["Mode","Linehaul","Fixed / handling","Payload","Note"],b.modeCompare.map(m=>[
-      `<strong>${esc(m.mode)}</strong>`,`<span class="t-num">${esc(m.linehaul)}</span>`,esc(m.fixed),`<span class="t-num">${esc(m.cap)}</span>`,esc(m.note)]))+
-    sec("6B·3","Delivered cost/ton by lane — barge vs truck vs rail")+
-    table(["Destination","River-mi","Barge $/ton","Truck $/ton","Rail $/ton","Verdict","Why"],b.lanes.map(x=>[
-      `<strong>${esc(x.dest)}</strong>`,`<span class="t-num">${esc(x.mi)}</span>`,`<span class="t-num" style="color:var(--green-bright)">${esc(x.barge)}</span>`,`<span class="t-num">${esc(x.truck)}</span>`,`<span class="t-num">${esc(x.rail)}</span>`,badge(x.verdict,x.cls),esc(x.note)]))+
-    sec("6B·4","Break-even logic — when barge starts to pay")+
-    `<div class="card"><ul>${b.breakeven.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
-    sec("6B·5","Capacity reality check")+
-    `<div class="note warn"><ul>${b.capacity.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
-    sec("6B·6","Key assumptions [A]")+
-    `<div class="card"><ul>${b.assumptions.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
-    sec("6B·7","Verify-first — before quoting any barge lane")+
-    `<div class="card"><ul>${b.verifyFirst.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`
-  );
-}
 
-/* --- Pipeline --- */
-function rPipeline(){
-  const pl=DATA.pipelines;
-  const kanban=(name,stages)=>`<h3 class="sub">${name}</h3><div class="kanban">${stages.map(s=>`
-    <div class="kcol"><div class="kcol-h"><strong>${esc(s.s)}</strong><span class="prob">${s.prob}%</span></div>
-    <div class="kcol-b">${esc(s.def)}
-      <div class="crit"><b>Exit:</b> ${esc(s.exit)}</div>
-      <div class="crit"><b>Fields:</b> ${s.fields.map(f=>badge(f,"badge-muted")).join(" ")}</div>
-      <div class="crit"><b>Next:</b> ${esc(s.next)}</div>
-      <div class="crit" style="color:var(--red-soft)"><b>Don't advance:</b> ${esc(s.noAdv)}</div>
-    </div></div>`).join("")}</div>`;
-  return page("pipeline",
-    head("Sales Pipeline Design — for your Replit app","Object model, deal types, and three connected pipelines with stage exit criteria and the exact CRM fields to add. This is the build spec for your app's sales section.")+
-    sec("7A","Object model")+
-    table(["Object","Key fields"],DATA.objectModel.map(o=>[`<strong>${esc(o.o)}</strong>`,esc(o.key)]))+
-    sec("7B","Deal types")+`<div class="filters">${DATA.dealTypes.map(d=>`<span class="pill active" style="cursor:default">${esc(d)}</span>`).join("")}</div>`+
-    sec("7C","Pipeline 1 — Mid-market recurring")+kanban("",pl.midmarket)+
-    sec("","Pipeline 2 — Bulk offtake / supply")+kanban("",pl.offtake)+
-    sec("","Pipeline 3 — Carbon-credit buyer")+kanban("",pl.carbon)+
-    `<div class="note warn"><b>Carbon guardrail:</b> never contract more credits than deployable tons. Carbon supply = deployed + committed product tons only.</div>`+
-    sec("7D","Required CRM fields")+
-    `<div class="grid g2">
-      <div class="card"><h4>Core sales fields</h4><ul>${DATA.crmFields.sales.map(f=>`<li>${esc(f)}</li>`).join("")}</ul></div>
-      <div class="card"><h4>Product + carbon economics fields</h4><ul>${DATA.crmFields.economics.map(f=>`<li>${esc(f)}</li>`).join("")}</ul></div>
-    </div>`+
-    sec("7E","Dashboard views to build")+
-    `<div class="filters">${DATA.dashboards.map(d=>`<span class="pill" style="cursor:default">${esc(d)}</span>`).join("")}</div>`+
-    sec("7F","Schema (TypeScript-style)")+schemaBlock()
-  );
-}
-function schemaBlock(){
-  const code=`interface Account {
-  id: string; name: string; segment: Segment; freightZone: "A"|"B"|"C";
-  location: string; website?: string; status: DealStage; priorityScore: number;
-}
-interface Deal {
-  id: string; accountId: string; dealType: DealType; stage: DealStage;
-  productType: string; wetTons: number; dryTonsEq: number; packaging: string;
-  productRevenue: number; cogs: number; freight: number; deliveredMargin: number;
-  carbonEligible: boolean; estTCO2e: number; cdrRevenueEst: number; cdrConfidence: "low"|"med"|"high";
-  mrvStatus: "none"|"pending"|"complete"; blendedMargin: number; carbonBuyer?: string;
-  closeDate: string; nextStep: string;
-}
-interface SampleRequest {
-  id: string; accountId: string; sku: string; size: string; useCase: string;
-  successCriteria: string; shipDate?: string; followUpDate?: string; outcome?: string;
-}
-interface CarbonRecord {
-  id: string; dealId: string; deployedTons: number; estTCO2e: number;
-  mrvDocs: string[]; issuanceStatus: "none"|"pending"|"issued"; buyer?: string;
-}`;
-  const id="schema1";
-  return `<div class="script"><button class="copy" onclick="copyEl('${id}')">Copy</button><span id="${id}" data-raw="${esc(code)}" style="font-family:var(--mono);font-size:12px">${nl(code)}</span></div>`;
-}
 
-/* --- Accounts (interactive demo table) --- */
-const SAMPLE_ACCOUNTS=[
-  ["Bayou Soil & Mulch","Soil blenders","Gornzalez, LA","A",320,4,"Prospect"],
-  ["Gulf Coast Ag Supply","Ag distribution","Baton Rouge, LA","A",900,5,"Contacted"],
-  ["Delta Landscape Supply","Landscape","Lafayette, LA","A",260,3,"Discovery"],
-  ["Cajun Environmental Svcs","Remediation","Houma, LA","A",540,4,"Sample"],
-  ["Pelican Oilfield Services","Oil & gas","Broussard, LA","A",1200,5,"Contacted"],
-  ["Magnolia Compost Co","Soil blenders","Hammond, LA","A",300,4,"Prospect"],
-  ["Southern Waste Partners","Landfill","Slidell, LA","A",700,3,"Prospect"],
-  ["Piney Woods Bedding","Animal bedding","Alexandria, LA","B",380,3,"Prospect"],
-  ["Coastal Remediation LLC","Remediation","Lake Charles, LA","B",460,4,"Prospect"],
-  ["Sunbelt Organics Dist.","Ag distribution","Jackson, MS","B",820,4,"Contacted"],
-  ["Gulf Nursery Supply","Landscape","Mobile, AL","B",340,3,"Prospect"],
-  ["EcoCarbon Buyers Co.","Carbon/ESG","Remote","C",0,4,"Prospect"],
-];
-function rAccounts(){
-  const segs=[...new Set(SAMPLE_ACCOUNTS.map(a=>a[1]))];
-  const rows=SAMPLE_ACCOUNTS.map((a,i)=>accRow(a,i)).join("");
-  return page("accounts",
-    head("Target Accounts","A working account list — filter by segment, sort by priority. Seeded sample data; replace with your sourced Gulf South list.")+
-    `<div class="filters"><span class="pill active" onclick="accFilter(this,'all')">All segments</span>${segs.map(s=>`<span class="pill" onclick="accFilter(this,'${esc(s)}')">${esc(s)}</span>`).join("")}</div>`+
-    `<div class="tbl-wrap"><table id="accTbl"><thead><tr>
-      <th>Account</th><th>Segment</th><th>Location</th><th>Freight zone</th><th>Est. tons/yr</th><th>Priority</th><th>Status</th><th>Next action</th>
-    </tr></thead><tbody>${rows}</tbody></table></div>`+
-    `<div class="note">Priority score = fit × volume × freight, minus complexity. Zone C only clears the bar with high volume or strong carbon value. Wire this table to your app's <code>Account</code> object.</div>`
-  );
-}
-function accRow(a,i){
-  const [name,seg,loc,zone,tons,pri,status]=a;
-  const priCls=pri>=5?"pri-1":pri>=4?"pri-2":"pri-3";
-  const zc=zone==="A"?"badge-green":zone==="B"?"badge-gold":"badge-red";
-  const next={Prospect:"First touch",Contacted:"Book discovery",Discovery:"Ship sample",Sample:"Trial check-in"}[status]||"Advance";
-  return `<tr data-seg="${esc(seg)}"><td><strong>${esc(name)}</strong></td><td>${esc(seg)}</td><td>${esc(loc)}</td>
-    <td>${badge("Zone "+zone,zc)}</td><td class="t-num">${tons?tons.toLocaleString():"—"}</td>
-    <td>${badge("P"+pri,priCls)}</td><td>${badge(status,"badge-blue")}</td><td>${esc(next)}</td></tr>`;
-}
-window.accFilter=(el,s)=>{
-  el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
-  document.querySelectorAll("#accTbl tbody tr").forEach(r=>r.style.display=(s==="all"||r.dataset.seg===s)?"":"none");
-};
 
 /* --- Outreach --- */
 function rOutreach(){
@@ -628,71 +444,6 @@ function rCollateral(){
 }
 window.accToggle=i=>{const b=document.getElementById("acc-"+i);const h=b.previousElementSibling;b.classList.toggle("open");h.classList.toggle("open-h");};
 
-/* --- Pricing + live calculators --- */
-function rPricing(){
-  const p=DATA.pricing;
-  return page("pricing",
-    head("Pricing & Deal Economics","A placeholder pricing architecture (not real prices) plus two live calculators. Fill floors/COGS/freight before quoting anyone.")+
-    `<div class="note warn">${esc(p.note)}</div>`+
-    sec("10","Pricing logic")+
-    table(["Lever","Rule"],p.logic.map(x=>[`<strong>${esc(x.f)}</strong>`,esc(x.v)]))+
-    sec("","Price tiers by product")+
-    table(["Product","Unit","Note"],p.tiers.map(x=>[`<strong>${esc(x.p)}</strong>`,`<span class="t-num">${esc(x.unit)}</span>`,esc(x.note)]))+
-    sec("","Sample deal economics (placeholder)")+
-    table(["Line","Value"],p.sampleDeal.map(x=>[`<strong>${esc(x.line)}</strong>`,`<span class="t-num">${esc(x.v)}</span>`]))+
-    `<div class="note"><b>Deal evaluation stack:</b> ${p.dealEval.map(d=>badge(d,"badge-muted")).join(" ")}</div>`+
-    sec("","Live calculator — Freight-aware delivered margin")+calcFreight()+
-    sec("","Live calculator — Product + Carbon blended value")+calcBlended()+
-    sec("","Live calculator — Absorbent cost-per-gallon")+calcAbsorbent()
-  );
-}
-function field(id,label,val,step="any"){return `<div class="field"><label>${label}</label><input type="number" id="${id}" value="${val}" step="${step}" oninput="recalc()"></div>`;}
-function out(id,label,hero=false){return `<div class="o${hero?" hero":""}"><div class="ol">${label}</div><div class="ov" id="${id}">—</div></div>`;}
-function calcFreight(){
-  return `<div class="calc"><div class="calc-grid">
-    ${field("f_rev","Product revenue ($)",12000)}
-    ${field("f_cogs","COGS ($)",5000)}
-    ${field("f_freight","Freight cost ($)",2500)}
-  </div><div class="calc-out">
-    ${out("f_margin","Delivered margin",true)}${out("f_pct","Margin %")}
-  </div></div>`;
-}
-function calcBlended(){
-  return `<div class="calc">
-    <div class="note" style="margin:0 0 12px"><b>Carbon figures are ESTIMATES</b> — excluded from committed margin until verified.</div>
-    <div class="calc-grid">
-    ${field("b_tons","Tons",100)}
-    ${field("b_pmargin","Product margin / ton ($)",70)}
-    ${field("b_tco2e","tCO₂e per ton (EST)",2.5)}
-    ${field("b_price","CDR $ / tCO₂e (EST)",120)}
-  </div><div class="calc-out">
-    ${out("b_prod","Product margin")}${out("b_carbon","Carbon upside (EST)")}${out("b_blended","Blended value",true)}
-  </div></div>`;
-}
-function calcAbsorbent(){
-  return `<div class="calc"><div class="calc-grid">
-    ${field("a_gal","Spill volume (gal)",500)}
-    ${field("a_price","Absorbent price ($/lb)",0.9)}
-    ${field("a_ratio","Our absorption ratio (X:1)",5)}
-  </div><div class="calc-out">
-    ${out("a_ours","Cost @ our ratio",true)}${out("a_wood","Cost @ wood 2.5:1")}${out("a_save","You save")}
-  </div></div>`;
-}
-const money=n=>isFinite(n)?"$"+Math.round(n).toLocaleString():"—";
-function recalc(){
-  // freight
-  const rev=+val("f_rev"),cogs=+val("f_cogs"),fr=+val("f_freight");
-  const dm=rev-cogs-fr; set("f_margin",money(dm)); set("f_pct",rev?Math.round(dm/rev*100)+"%":"—");
-  // blended
-  const tons=+val("b_tons"),pm=+val("b_pmargin"),tco=+val("b_tco2e"),pr=+val("b_price");
-  const prod=tons*pm, carbon=tons*tco*pr; set("b_prod",money(prod)); set("b_carbon",money(carbon)); set("b_blended",money(prod+carbon));
-  // absorbent — water ~8.34 lb/gal
-  const gal=+val("a_gal"),price=+val("a_price"),ratio=+val("a_ratio");
-  const lb=gal*8.34; const ours=(lb/ratio)*price, wood=(lb/2.5)*price;
-  set("a_ours",money(ours)); set("a_wood",money(wood)); set("a_save",money(wood-ours));
-}
-const val=id=>{const e=document.getElementById(id);return e?e.value:0;};
-const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
 
 /* --- Playbook --- */
 function rPlaybook(){
@@ -764,21 +515,6 @@ function rOnboarding(){
   );
 }
 
-/* --- KPIs --- */
-function rKpis(){
-  const k=DATA.kpis;
-  const list=(t,arr,cls)=>`<div class="card"><h4>${t}</h4>${arr.map(x=>`<span class="badge ${cls}" style="margin:2px 3px 2px 0">${esc(x)}</span>`).join("")}</div>`;
-  return page("kpis",
-    head("Metrics & KPIs","Leading and lagging indicators, conversion funnel, pipeline coverage, and dashboard-card specs for your app.")+
-    sec("12","Indicators")+
-    `<div class="grid g2">${list("Leading indicators",k.leading,"badge-green")}${list("Lagging indicators",k.lagging,"badge-gold")}</div>`+
-    `<div class="grid g2" style="margin-top:14px">${list("Conversion metrics",k.conversion,"badge-blue")}${list("Pipeline coverage",k.coverage,"badge-muted")}</div>`+
-    sec("","Dashboard card specs")+
-    table(["Card","Definition","Formula","Filters","Source","Warn threshold","Owner"],k.cards.map(c=>[
-      `<strong>${esc(c.c)}</strong>`,esc(c.def),`<span class="t-num">${esc(c.formula)}</span>`,esc(c.filter),esc(c.src),
-      `<span style="color:var(--red-soft)">${esc(c.warn)}</span>`,esc(c.owner)]))
-  );
-}
 
 /* --- Roadmap owner badge (still used by rHorizon; the 30-day arc now lives in the calendar) --- */
 function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/daniel/i.test(o)?"daniel":/both|all/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
@@ -1004,20 +740,17 @@ const LEAN_SECTIONS=[
   ["crm",      [PL("rCRM")]],
   ["strategy", [G("rSummary"), rSegments, rPersonas, G("rCampaigns")]],
   ["product",  [rBiochar, rMessaging]],
-  ["outreach", [rAccounts, rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
+  // Target accounts deliberately do NOT render here any more. This section used to open with
+  // rAccounts, a hardcoded list of invented companies with invented deal sizes sitting in a
+  // tool reps actually work from. Real accounts live in the Sales Pipeline section, which
+  // reads the roster and HubSpot import.
+  ["outreach", [rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
   ["playbook", [rCollateral, G("rSample"), rPlaybook]],
   ["onboarding",[rOnboarding, G("rScale")]],
   ["marketing", [rCollab]],
 ];
-const BUILD_SECTIONS=[
-  ["b-overview",  [rOverview, rAssumptions]],
-  ["b-market",    [rMarket, rBarge, rPricing]],
-  ["b-crm",       [rPipeline, G("rCRM"), G("rLanding")]],
-  ["b-dashboard", [rKpis, G("rDashboard")]],
-];
 function render(){
-  const SECTIONS = (window.OS_VIEW==="build") ? BUILD_SECTIONS : LEAN_SECTIONS;
-  $("#content").innerHTML = SECTIONS.map(([id,thunks])=>compose(id,thunks)).join("");
+  $("#content").innerHTML = LEAN_SECTIONS.map(([id,thunks])=>compose(id,thunks)).join("");
 }
 buildNav();
 render();
@@ -1034,7 +767,6 @@ const defaultId = NAV[0].items[0].id;
 const isNavId = id => NAV.flatMap(g=>g.items).some(i=>i.id===id);
 const start=(location.hash||"").slice(1);
 go(isNavId(start)?start:defaultId);
-recalc();
 /* go() writes location.hash on every nav, so without this Back/Forward changes the URL and
    nothing else. Re-setting the hash to its current value does not re-fire hashchange, so
    calling go() from here cannot loop. */
