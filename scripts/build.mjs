@@ -3,10 +3,12 @@
  * Deploy build. Static site, so this is verification + stamping, not bundling.
  * Point the Cloudflare Pages build command at this file: `node scripts/build.mjs`
  *
- *   1. check-dashes      - brand kit gate (fails the deploy on em/en dashes)
- *   2. build-spec-sheets - same gate, applied to the text inside the shipped PDFs
- *   3. stamp-assets      - rewrite ?v= tokens to content hashes
- *   4. prerender         - write per-route static metadata snapshots for crawlers
+ *   1. check-dashes           - brand kit gate (fails the deploy on em/en dashes)
+ *   2. check-outreach-dashes  - stricter gate on Sales OS cold copy (no dash at all)
+ *   2b. check-sales-canon     - ICP taxonomy, roster freshness, prices, derived counts
+ *   3. build-spec-sheets      - same gate, applied to the text inside the shipped PDFs
+ *   4. stamp-assets           - rewrite ?v= tokens to content hashes
+ *   5. prerender              - write per-route static metadata snapshots for crawlers
  *
  * Order matters: stamping hashes the files check-dashes may have rejected, so the
  * gate runs first and a failed gate stops the deploy before anything is rewritten;
@@ -24,6 +26,8 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 
 const STEPS = [
   ["check-dashes.mjs"],
+  ["check-outreach-dashes.mjs"],
+  ["check-sales-canon.mjs"],
   ["build-spec-sheets.mjs", "--check"],
   ["stamp-assets.mjs"],
   ["prerender.mjs"],

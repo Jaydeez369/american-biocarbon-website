@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="tokens.css?v=65742628" />
   <link rel="stylesheet" href="styles.css?v=751d58ba" />
   <link rel="stylesheet" href="gtm-command-center.css?v=8796ece6" />
-  <link rel="stylesheet" href="collab.css?v=1ac50dce" />
-  <link rel="stylesheet" href="pipeline.css?v=fb32258d" />
+  <link rel="stylesheet" href="outreach.css?v=fe21c364" />
+  <link rel="stylesheet" href="pipeline.css?v=bfe1dff1" />
 </head>
 <body>
   <div class="app">
@@ -44,15 +44,17 @@
 
   <div class="toast" id="toast">Copied to clipboard</div>
 
-  <!-- LEAN daily-driver view. load order: data → gtm-data → gtm (exposes window.GTMB) → pipeline (exposes window.PIPELIVE) → app -->
-  <script src="data.js?v=a6d7cb5e"></script>
-  <script src="gtm-data.js?v=c75e026a"></script>
-  <script src="gtm.js?v=0f189b6c"></script>
+  <!-- LEAN daily-driver view. load order: data → gtm-data → gtm (exposes window.GTMB) → pipeline (exposes window.PIPELIVE) → outreach (exposes window.OUTREACH_UI) → app -->
+  <script src="data.js?v=f67d7711"></script>
+  <script src="gtm-data.js?v=fd109cb9"></script>
+  <script src="gtm.js?v=24092995"></script>
   <script src="pipeline-data.js?v=df2cecfa"></script>
-  <script src="roster-data.js?v=2a3a894b"></script>
+  <script src="roster-data.js?v=530419ca"></script>
   <script src="hubspot-data.js?v=2b77b695"></script>
   <script src="hubspot-comms.js?v=c969930f"></script>
-  <script src="pipeline.js?v=b6385ec1"></script>
-  <script src="app.js?v=70ec5f2e"></script>
+  <script src="pipeline.js?v=83c57bbb"></script>
+  <script src="outreach-data.js?v=7ae6d852"></script>
+  <script src="outreach.js?v=8175fce2"></script>
+  <script src="app.js?v=2a4fac21"></script>
 </body>
 </html>

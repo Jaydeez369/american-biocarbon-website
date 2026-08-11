@@ -535,3 +535,80 @@ tr.co-dead:hover{opacity:.85}
 .rr-k{flex:0 0 78px;color:var(--text-mute);font-size:11px}
 .rr-v{flex:1;min-width:0;color:var(--text);overflow-wrap:anywhere}
 .rr-v a{font-family:var(--mono);font-size:11.5px}
+
+/* ============================================================
+   COMPANY ROSTER - movable, customizable columns
+   The header is a drag handle and a sort button at once, so the
+   grip is drawn inside the button rather than beside it.
+   ============================================================ */
+.co-th{padding:0!important;position:relative;user-select:none;cursor:grab;white-space:nowrap}
+.co-th:active{cursor:grabbing}
+.co-th-b{width:100%;display:flex;align-items:center;gap:6px;background:none;border:0;cursor:pointer;
+  font:inherit;font-weight:700;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-mute);font-family:var(--mono);padding:11px 14px;text-align:left}
+.co-th.num .co-th-b{justify-content:flex-end}
+.co-th-b:hover{color:var(--navy-800);background:rgba(var(--brand-rgb),.05)}
+.co-th.sorted .co-th-b{color:var(--brand)}
+.co-th-ar{font-size:11px;opacity:.9}
+/* Six dot grip. Only shows on hover so the header stays quiet at rest. */
+.co-th-grip{width:7px;height:12px;flex:none;opacity:0;transition:opacity .14s;
+  background-image:radial-gradient(currentColor 1px,transparent 1px);
+  background-size:3.5px 3.5px;background-position:0 1px}
+.co-th:hover .co-th-grip{opacity:.4}
+.co-th.dragging{opacity:.45}
+.co-th.drop-into{box-shadow:inset 3px 0 0 var(--accent)}
+
+/* ---- column picker ---- */
+.colp-wrap{position:relative;display:inline-block}
+.colp{display:none;position:absolute;z-index:60;top:calc(100% + 6px);right:0;width:290px;
+  background:var(--white);border:1px solid var(--line-2);border-radius:var(--radius);
+  box-shadow:var(--sh-3);padding:12px 13px}
+.colp.open{display:block}
+.colp-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.colp-h b{font-size:12.5px;color:var(--navy-800)}
+.colp-acts{display:flex;gap:9px}
+.colp-acts a{font-size:11px;font-weight:700;color:var(--brand);cursor:pointer}
+.colp-acts a:hover{color:var(--accent)}
+.colp-hint{font-size:11px;color:var(--text-mute);line-height:1.45;margin-bottom:9px}
+.colp-list{max-height:340px;overflow-y:auto;display:grid;gap:1px}
+.colp-row{display:flex;align-items:center;gap:7px;padding:5px 4px;border-radius:var(--radius-xs);cursor:grab}
+.colp-row:hover{background:var(--paper-2)}
+.colp-row.dragging{opacity:.45}
+.colp-row.drop-into{box-shadow:inset 0 2px 0 var(--accent)}
+.colp-grip{width:7px;height:12px;flex:none;opacity:.3;
+  background-image:radial-gradient(currentColor 1px,transparent 1px);
+  background-size:3.5px 3.5px;background-position:0 1px}
+.colp-lbl{display:flex;align-items:center;gap:7px;flex:1;font-size:12.3px;color:var(--text);cursor:pointer;min-width:0}
+.colp-lbl.locked{color:var(--text-mute)}
+.colp-lbl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.colp-lock{font-size:9.5px;font-family:var(--mono);color:var(--text-mute);
+  background:var(--paper-2);border-radius:var(--r-xs);padding:1px 5px;flex:none}
+.colp-nudge{display:flex;gap:2px;flex:none}
+.colp-nudge button{width:20px;height:20px;border:1px solid var(--line);background:var(--white);
+  color:var(--text-dim);border-radius:var(--r-xs);cursor:pointer;font-size:10px;line-height:1;padding:0}
+.colp-nudge button:hover:not(:disabled){background:var(--navy-700);color:#fff;border-color:var(--navy-700)}
+.colp-nudge button:disabled{opacity:.3;cursor:default}
+
+/* ---- verification + origin badges ---- */
+.vfy,.orig{display:inline-block;font-size:10px;font-weight:700;font-family:var(--mono);
+  letter-spacing:.03em;padding:2px 7px;border-radius:var(--r-xs);white-space:nowrap}
+.vfy-ok{background:rgba(var(--green-rgb),.13);color:var(--green-deep)}
+.vfy-rev{background:rgba(var(--purple-rgb),.13);color:var(--purple)}
+.vfy-part{background:rgba(var(--gold-rgb),.16);color:var(--gold-soft)}
+.vfy-no{background:rgba(var(--red-rgb),.09);color:var(--red-soft)}
+.vfy-dead{background:var(--paper-2);color:var(--text-mute)}
+.or-desk{background:rgba(var(--brand-rgb),.10);color:var(--brand)}
+.or-hs{background:rgba(var(--accent-rgb),.10);color:var(--crimson-600);margin-left:4px}
+.or-sh{background:var(--paper-2);color:var(--text-dim)}
+
+/* ---- gaps and missing-field chips ---- */
+.co-icp-gap{color:var(--red-soft)!important;opacity:.85}
+.ln-none{background:var(--paper-2);color:var(--text-mute)}
+.co-needs{max-width:210px}
+.need{display:inline-block;font-size:9.5px;font-family:var(--mono);background:rgba(var(--red-rgb),.08);
+  color:var(--red-soft);border-radius:var(--r-xs);padding:1px 5px;margin:1px 3px 1px 0;white-space:nowrap}
+.need-ok{font-size:10px;font-family:var(--mono);color:var(--green-deep)}
+.co-total-link{background:none;border:0;padding:0;font:inherit;font-weight:700;cursor:pointer;
+  color:var(--red-soft);border-bottom:1px dashed rgba(var(--red-rgb),.45)}
+.co-total-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.or-ld{background:rgba(var(--purple-rgb),.12);color:var(--purple)}

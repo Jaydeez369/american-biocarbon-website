@@ -27,8 +27,12 @@ window.resetChecks = pfx => { const c=getChecks(); Object.keys(c).forEach(k=>{ i
 /* ---- toast + copy ---- */
 function toast(msg="Copied to clipboard"){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1400);}
 function copyText(txt){navigator.clipboard?.writeText(txt).then(()=>toast()).catch(()=>toast("Copy failed"));}
-/* Live sellable inventory — biochar is Priority #1 (finished tonnage ready to ship now). */
-const BIOCHAR_INVENTORY_TONS = 80;
+/* Product facts come from OUTREACH.facts, the single canonical block, rather than being
+   restated here. This constant used to be the fourth independent declaration of the
+   tonnage. Guarded with a literal fallback so the Launchpad still renders if outreach-data.js
+   is missing from a partial deployment. */
+const F = (typeof OUTREACH !== "undefined" && OUTREACH.facts) || {};
+const BIOCHAR_INVENTORY_TONS = F.inventoryMt ?? 80;
 const BIOCHAR_INVENTORY_LINE = `${BIOCHAR_INVENTORY_TONS} metric tons of finished 100% biochar, ready to sell right now. Biochar is bulk-capable today: samples open the door, this tonnage moves now.`;
 window.copyEl = id => { const e=document.getElementById(id); if(e) copyText(e.dataset.raw||e.textContent); };
 
@@ -66,11 +70,15 @@ const LEAN_NAV=[
     {id:"outreach",ic:"✦",t:"Outreach Engine"},
     {id:"crm",ic:"◉",t:"Sales Pipeline"},
   ]},
+  /* Onboarding & Scale and Sales × Marketing used to sit here. Both are deleted.
+     Onboarding described an accounting handoff for accounts we do not have yet, and
+     the 60/90 scale plan was a build plan for a machine that is now built. Sales ×
+     Marketing was a working agreement with a marketing team that does not exist as a
+     counterparty today, anchored to a "Progreaux" rebrand name that the July 17 call
+     retired. Both are recoverable from git history if a real need comes back. */
   {group:"Reference",items:[
     {id:"product",ic:"❝",t:"Product & Messaging"},
     {id:"playbook",ic:"▷",t:"Assets & Playbook"},
-    {id:"onboarding",ic:"✍",t:"Onboarding & Scale"},
-    {id:"marketing",ic:"⇄",t:"Sales × Marketing"},
   ]},
 ];
 const NAV = LEAN_NAV;
@@ -109,26 +117,24 @@ function sec(num,t){return `<h2 class="sec"><span class="num">${num}</span>${t}<
 
    So this version states as little as possible in prose and reads as much as possible from
    the data that is actually loaded. Roster size comes from PIPELIVE.stats(), campaign count
-   from GTM.campaigns, prices and sample sizes from the facts block. If the roster doubles
+   from the canonical ICP list, prices and sample sizes from the facts block. If the roster doubles
    tonight, this page says so tomorrow morning without anyone editing it.
 
    The rule for adding anything here: if it cannot be derived from live data OR checked off
    by the person doing it, it does not belong on this page. Put it in the playbook. */
 
-/* The handful of facts an operator needs in front of them before a send. Single definition,
-   read by both the status strip and the copy blocks below, so a price change is one edit.
-   Everything here must agree with website/data.js, which is the source of truth for SKUs. */
+/* Projection of OUTREACH.facts under the names the Launchpad renderers already use. The
+   values live in exactly one place now; this is a rename, not a second source. */
 const LIVE = {
-  biocharMt: 450,
-  absorbentMt: 275,
+  biocharMt: F.biocharMt,
+  absorbentMt: F.absorbentMt,
   inventoryMt: BIOCHAR_INVENTORY_TONS,
-  samples: "Biochar 1/2 lb (8 oz) · Pellets 1 lb · Crumble 1 lb",
-  sampleEta: "4 to 7 business days",
-  bulkEta: "7 to 10 business days",
-  replyTo: "victor.jehle@cs-ops.com",
-  geo: "500 mi of White Castle, LA (biochar). Absorbent is nationwide.",
+  samples: F.samples,
+  sampleEta: F.sampleEta,
+  bulkEta: F.bulkEta,
+  replyTo: F.replyTo,
+  geo: F.geo,
 };
-
 /* The critical path from a raw list to a sent campaign. Ordered because each step genuinely
    blocks the next: you cannot verify a list you have not pulled, and you must not send to a
    list you have not verified. Each is a checkbox, not a date, because dates are what killed
@@ -156,8 +162,11 @@ const fmtN = v => Number.isFinite(+v) ? Math.round(+v).toLocaleString() : "0";
 
 function rLaunchpad(){
   const S = (window.PIPELIVE && PIPELIVE.stats) ? PIPELIVE.stats() : null;
-  const camps = (typeof GTM !== "undefined" && GTM.campaigns) || [];
-  const bioCamps = camps.filter(c => c.primary || c.bioPriority).length;
+  /* Campaign counts come from the canonical ICP list, the same one the Campaigns and
+     Outreach Engine sections render. Add a thirteenth ICP and this tile follows. */
+  const oTracks = (typeof OUTREACH !== "undefined" && OUTREACH.tracks) || [];
+  const camps = oTracks.flatMap(t => t.icps || []);
+  const bioCamps = (oTracks.find(t => t.key === "biochar")?.icps || []).length;
 
   const keys = LAUNCH_STEPS.map(s => "lp:" + s.k);
   const st = checkStats(keys, keys.map(()=>false));
@@ -223,87 +232,20 @@ function rLaunchpad(){
     sec("5","Where to go next")+
     `<div class="grid g3">
       <div class="card"><h4><a href="#strategy" onclick="go('strategy')">Campaigns &amp; ICP →</a></h4><p>Who each campaign targets, the proof to use, and the disqualifiers.</p></div>
-      <div class="card"><h4><a href="#outreach" onclick="go('outreach')">Outreach Engine →</a></h4><p>Every sequence, call script, voicemail and DM, ready to copy.</p></div>
+      <div class="card"><h4><a href="#outreach" onclick="go('outreach')">Outreach Engine →</a></h4><p>Both tracks side by side. Subject pools, message variants and call openers, ready to copy.</p></div>
       <div class="card"><h4><a href="#crm" onclick="go('crm')">Sales Pipeline →</a></h4><p>Accounts, contacts and deals. Where replies land and get worked.</p></div>
     </div>`
   );
 }
 
-/* --- Segments --- */
-const RANKKEYS=[["speed","Speed to LOI"],["recurring","Recurring"],["margin","Margin"],["carbon","Carbon gen"],["strategic","Strategic"],["freight","Freight fit"],["complexity","Complexity"]];
-function rSegments(){
-  const groups=[...new Set(DATA.segments.map(s=>s.group))];
-  // Month-1 beachhead score: BIOCHAR IS PRIORITY #1 (we have 80 MT to sell now), so Ag/Hort (biochar) buyers
-  // get a +6 priority bonus — they're now the fastest path to actual revenue, not just to LOIs. Carbon is parked
-  // (shown as a column, excluded from the score). Absorbent/Industrial segments run as the secondary track.
-  const bioBonus=s=>s.group==="Ag / Hort"?6:0;
-  const ranked=[...DATA.segments].map(s=>({s,score:s.rank.speed*3+s.rank.recurring+s.rank.margin+s.rank.strategic+s.rank.freight-s.rank.complexity+bioBonus(s)})).sort((a,b)=>b.score-a.score);
-  const top3=ranked.slice(0,3).map(r=>r.s.name);
-  const filters=`<div class="filters"><span class="pill active" onclick="segFilter(this,'all')">All</span>${groups.map(g=>`<span class="pill" onclick="segFilter(this,'${esc(g)}')">${esc(g)}</span>`).join("")}</div>`;
-  const cards=DATA.segments.map(s=>segCard(s)).join("");
-  return page("segments",
-    head("ICP Definition & Segmentation","Tight profiles for every buyer type. BIOCHAR (Ag / Hort) buyers are Priority #1 — we have 80 MT to move now, so they carry a priority weighting in the beachhead score. Industrial/absorbent buyers run as the secondary track; carbon is parked to days 61–90 (shown as a column, excluded from the score).")+
-    `<div class="note ok"><b>🔥 Recommended beachhead (top 3 — biochar-led):</b> ${top3.map(t=>badge(t,"badge-green")).join(" ")}</div>`+
-    sec("3","Segment ranking")+
-    table(["Segment","Group","Speed","Recurring","Margin","Carbon","Strategic","Freight","Composite"],
-      ranked.map(r=>[`<strong>${esc(r.s.name)}</strong>`,esc(r.s.group),
-      ...RANKKEYS.slice(0,6).map(k=>rankbar(r.s.rank[k[0]])),`<strong class="t-num">${r.score}</strong>`]))+
-    sec("","Segment cards")+filters+
-    `<div class="grid g2" id="segCards">${cards}</div>`
-  );
-}
-function rankbar(n){return `<div class="rank-bar"><span style="width:${n*20}%"></span></div>`;}
-function segCard(s){
-  return `<div class="card seg-card" data-group="${esc(s.group)}">
-    <h4>${esc(s.name)} ${s.tag?badge(s.tag,s.tag.includes("#1")?"badge-green":s.tag.includes("Monetization")?"badge-gold":"badge-blue"):""}</h4>
-    <p style="margin-bottom:8px">${esc(s.summary)}</p>
-    ${s.coreProblem?`<div class="note warn" style="margin:8px 0"><b>Core problem we solve:</b> ${esc(s.coreProblem)}</div>`:""}
-    ${s.valueProp?`<div class="note ok" style="margin:8px 0"><b>Our value:</b> ${esc(s.valueProp)}</div>`:""}
-    <div style="font-size:12px;color:var(--text-mute);margin-bottom:8px"><strong style="color:var(--text-dim)">Firmographics:</strong> ${esc(s.firmo)}</div>
-    <div class="grid g2" style="gap:8px">
-      <div><b style="font-size:11.5px;color:var(--gold-soft)">Titles</b><ul>${s.titles.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-      <div><b style="font-size:11.5px;color:var(--gold-soft)">Pains</b><ul>${s.pains.slice(0,4).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-      <div><b style="font-size:11.5px;color:var(--gold-soft)">Buying triggers</b><ul>${s.triggers.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-      <div><b style="font-size:11.5px;color:var(--gold-soft)">Disqualifiers</b><ul>${s.disq.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
-    </div>
-    <div class="hr" style="margin:12px 0"></div>
-    <div style="font-size:12px;display:grid;gap:4px">
-      <div><b style="color:var(--text)">Econ buyer:</b> ${esc(s.econ)} · <b style="color:var(--text)">Tech:</b> ${esc(s.tech)} · <b style="color:var(--text)">User:</b> ${esc(s.user)}</div>
-      <div><b style="color:var(--text)">Order:</b> ${esc(s.order)} · <b style="color:var(--text)">Cycle:</b> ${esc(s.cycle)}</div>
-      <div><b style="color:var(--text)">First offer:</b> ${esc(s.offer)}</div>
-      <div><b style="color:var(--text)">Channel:</b> ${esc(s.channel)}</div>
-      <div><b style="color:var(--text)">Proof to lead with:</b> ${s.proof.map(p=>badge(p,"badge-blue")).join(" ")}</div>
-      <div style="margin-top:4px">${s.tags.map(t=>`<span class="badge badge-muted" style="font-size:10px">${esc(t)}</span>`).join(" ")}</div>
-    </div>
-  </div>`;
-}
-window.segFilter=(el,g)=>{
-  el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
-  document.querySelectorAll("#segCards .seg-card").forEach(c=>c.style.display=(g==="all"||c.dataset.group===g)?"":"none");
-};
+/* rSegments, segCard, rankbar and rPersonas lived here and are deleted.
 
-/* --- Personas --- */
-function rPersonas(){
-  return page("personas",
-    head("Buyer Personas","What each buyer cares about, fears, and needs — with the discovery questions, opener, and CTA that land.")+
-    `<div class="grid g2">${DATA.personas.map(p=>`
-      <div class="card pad-lg">
-        <h4>${esc(p.name)} ${badge(p.seg,"badge-blue")}</h4>
-        <div style="display:grid;gap:6px;font-size:12.5px;margin-top:6px">
-          <div><b style="color:var(--green-bright)">Cares about:</b> ${esc(p.cares)}</div>
-          <div><b style="color:var(--red-soft)">Fears:</b> ${esc(p.fears)}</div>
-          <div><b style="color:var(--gold-soft)">Needs (proof):</b> ${esc(p.needs)}</div>
-          <div><b style="color:var(--text)">Their language:</b> ${esc(p.lang)}</div>
-          <div><b style="color:var(--text)">Hates hearing:</b> ${esc(p.hates)}</div>
-        </div>
-        <div class="hr" style="margin:10px 0"></div>
-        <b style="font-size:11.5px;color:var(--gold-soft)">Discovery questions</b>
-        <ul>${p.disc.map(d=>`<li>${esc(d)}</li>`).join("")}</ul>
-        ${script("Opening pitch",p.open)}
-        <div style="margin-top:6px;font-size:12.5px"><b style="color:var(--green-bright)">CTA:</b> ${esc(p.cta)}</div>
-      </div>`).join("")}</div>`
-  );
-}
+   They ran on a parallel taxonomy: nine DATA.segments scored by a composite rank, and
+   six DATA.personas keyed to segment names. Neither lined up with the ICP list the
+   Aug 10 call settled on, so the tool described three different customer lists at once
+   and a rep had to work out which one was current. The canonical ICPs now carry their own
+   firmographics, triggers, disqualifiers and persona block in outreach-data.js, and
+   Campaigns & ICP renders from that. One list, one set of tags. */
 
 /* --- Messaging --- */
 function rMessaging(){
@@ -382,24 +324,8 @@ function rBiochar(){
 
 
 
-/* --- Outreach --- */
-function rOutreach(){
-  const filters=`<div class="filters"><span class="pill active" onclick="outFilter(this,'all')">All segments</span>${DATA.outreach.map((o,i)=>`<span class="pill" onclick="outFilter(this,'${i}')">${esc(o.seg)}</span>`).join("")}</div>`;
-  const blocks=DATA.outreach.map((o,i)=>`
-    <div class="out-block" data-idx="${i}">
-      <h3 class="sub">${esc(o.seg)} — ${esc(o.persona)}</h3>
-      ${o.steps.map(s=>script(s.t,s.b)).join("")}
-      <div class="note"><b>Nurture:</b> ${esc(o.nurture)}</div>
-    </div>`).join("");
-  return page("outreach",
-    head("Outreach Engine","Human, direct, credible sequences per segment — email, call, voicemail, LinkedIn, breakup, and nurture. BIOCHAR segments (Soil Blenders, Ag Distributors) lead; absorbent runs as the secondary track. The cold ask is always a free sample — a winning biochar trial converts to an order against the 80 MT. Every block has a copy button. Replace {First}/{Me}/phone before sending.")+
-    filters+blocks
-  );
-}
-window.outFilter=(el,i)=>{
-  el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
-  document.querySelectorAll(".out-block").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");
-};
+/* The Outreach Engine renderer moved to outreach.js. It reads outreach-data.js, which is
+   now the only place cold copy lives. DATA.outreach was deleted with it. */
 
 /* --- Windrow trial protocol (composter closing asset) --- */
 function rWindrow(){
@@ -535,54 +461,6 @@ function rPlaybook(){
   );
 }
 
-/* --- Customer Onboarding (accounts) --- */
-function rOnboarding(){
-  const o=DATA.onboarding;
-  const ownIc=who=>whoBadge(who);
-  const chkBlock=(gid,arr)=>{
-    const keys=arr.map((x,i)=>`onb:${gid}:${i}`);
-    const defs=arr.map(x=>/\|done$/.test(x));
-    const st=checkStats(keys,defs);
-    return {st,html:arr.map((x,i)=>{ const done=/\|done$/.test(x); const txt=x.replace(/\|done$/,""); return chk(keys[i],esc(txt),done); }).join("")};
-  };
-  const setup=chkBlock("setup",o.setup);
-  const per=chkBlock("per",o.perAccount);
-  const docRow=d=>[`<strong>${esc(d.doc)}</strong>${d.req?` <span class="badge ${/Required/i.test(d.req)?"badge-green":"badge-muted"}" style="margin-left:4px">${esc(d.req)}</span>`:""}`,esc(d.what),esc(d.when),ownIc(d.owner)];
-  return page("onboarding",
-    head("Customer Onboarding — accounts","Turn a won trial into a paying account on the books. The sales motion rides on an admin/accounting spine: the moment a trial wins, stand the customer up BEFORE the first invoice ships.")+
-    `<div class="note ok" style="font-size:13.5px"><b>Owner split:</b> ${esc(o.ownerNote)}</div>`+
-    `<div class="card pad-lg" style="margin-top:12px"><p style="color:var(--text);font-size:14px;line-height:1.6">${esc(o.intro)}</p></div>`+
-    sec("A","The account journey — sample to recurring")+
-    `<p class="lead">Each stage has an owner and the administrative action behind it. Step 5 is the accounting gate — nothing invoices until it clears.</p>`+
-    table(["Stage","Trigger","Owner","Administrative action","Exit criteria"],o.journey.map(j=>[
-      `<strong>${esc(j.stage)}</strong>`,esc(j.trigger),ownIc(j.owner),esc(j.admin),`<span style="color:var(--green-bright)">${esc(j.exit)}</span>`]))+
-    sec("B","Document flows — two directions, don't confuse them")+
-    `<div class="grid g2">
-      <div class="card"><h4>→ What WE send the customer <span class="badge badge-blue">we're the vendor</span></h4>
-        ${table(["Doc","What / why","When","Owner"],o.docsOut.map(docRow))}</div>
-      <div class="card"><h4>← What WE collect before invoicing <span class="badge badge-gold">gate</span></h4>
-        ${table(["Doc","What / why","When","Owner"],o.docsIn.map(docRow))}</div>
-    </div>`+
-    sec("C","Accounting & administrative rules")+
-    `<div class="grid g2">${o.accounting.map(a=>`<div class="card"><p style="color:var(--text)">→ ${esc(a)}</p></div>`).join("")}</div>`+
-    sec("D","Set up the onboarding packet once")+
-    `<div class="chk-head" style="margin:0 0 6px"><h4 style="margin:0">Build the reusable packet</h4><span class="chk-progress">${setup.st.done}/${setup.st.total}</span></div>`+
-    `<div class="card">${setup.html}</div>`+
-    `<div class="chk-head"><span></span><span class="chk-reset" onclick="resetChecks('onb:setup:')">Reset</span></div>`+
-    sec("E","Per-account onboarding checklist (run each new account)")+
-    `<div class="chk-head" style="margin:0 0 6px"><h4 style="margin:0">Accounting runs this every time a trial wins</h4><span class="chk-progress">${per.st.done}/${per.st.total}</span></div>`+
-    `<div class="card">${per.html}</div>`+
-    `<div class="chk-head"><span class="note warn" style="margin:0;flex:1"><b>Tip:</b> reset this block when you start a new account.</span><span class="chk-reset" onclick="resetChecks('onb:per:')">Reset for new account</span></div>`+
-    sec("F","FAQ — the questions that trip people up")+
-    `<div class="grid g2">${o.faq.map(f=>`<div class="card"><h4>${esc(f.q)}</h4><p>${esc(f.a)}</p></div>`).join("")}</div>`
-  );
-}
-
-
-/* --- Owner badge, colour-codes a task owner by name. The /daniel/i branch is live only
-   while Daniel is still carried as an owner; see the open question on his role. --- */
-function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/daniel/i.test(o)?"daniel":/both|all/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
-
 function stripBody(fn){
   let h="";
   try{ h=fn()||""; }catch(e){ console.error("renderer failed:",e&&e.message,e); return ""; }
@@ -591,177 +469,12 @@ function stripBody(fn){
 const G = k => (window.GTMB && GTMB[k]) ? GTMB[k] : (()=> "");
 /* Live SIBRA pipeline module (pipeline.js, loads before app.js) */
 const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
+/* Canonical outreach module (outreach-data.js + outreach.js, both load before app.js) */
+const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
 /* newId → ordered list of renderer thunks it composes */
 function compose(id, thunks){
   return page(id, thunks.map(stripBody).join(mergeDiv));
-}
-
-/* --- Sales × Marketing collaboration (working agreement) ---
-   Built for the standing marketing sync: two owned lanes, one shared middle,
-   and the handoffs written down so ownership is explicit rather than assumed. */
-const COLLAB = {
-  /* The two-brand split is the frame for everything below: sales sells what
-     American BioCarbon has today; marketing builds Progreaux for what's next. */
-  brands:[
-    ["sales","American BioCarbon","What we sell today","Product sales site launches next week",[
-      "The brand we sell under today, and through the transition to Progreaux.",
-      "Everything is ready to sell now: current inventory, product facts, and the proof behind them.",
-      "The <b>product sales site launches next week</b>, enough to make outbound credible and take orders.",
-      "Steady by design. It carries the revenue while Progreaux comes together, and the two move as one plan.",
-    ]],
-    ["mktg","Progreaux","What we're building next","Launching in August",[
-      "Progreaux is the <b>rebrand of American BioCarbon</b>: same team, same product, same mill, new name.",
-      "Marketing leads the brand build; sales feeds in what's landing with buyers. We shape it together.",
-      "For our <b>current and former vendors</b>, this is a transition, not a new company. The relationship and the supply carry straight over.",
-      "Target window: on or around <b>Aug 17</b>. We firm the date together as launch gets close.",
-    ]],
-  ],
-  sales:{ who:"Jesse · Victor · Daniel", own:[
-    ["Owns outright",[
-      "<b>Outbound & pipeline</b> — target account list, sequences, calls, LinkedIn touches.",
-      "<b>Discovery & qualification</b> — fit, volume, timeline, decision path.",
-      "<b>Sample-to-LOI motion</b> — sample requests through signed LOI.",
-      "<b>Pricing & terms conversations</b> — quotes, freight, negotiation.",
-      "<b>Account relationships</b> — the named buyer, from first touch to reorder.",
-      "<b>Selling American BioCarbon</b> today: the current brand and inventory.",
-      "<b>Sales data & CRM hygiene</b> — pipeline records, outcomes, and reasons live with sales.",
-    ]],
-    ["Decides",[
-      "Which accounts and segments we chase this month.",
-      "Whether a lead is worked, nurtured, or disqualified.",
-      "What gets said on a live call.",
-      "What the ABC backdrop needs to be credible for outreach.",
-    ]],
-  ]},
-  mktg:{ who:"Marketing team", own:[
-    ["Owns outright",[
-      "<b>Progreaux rebrand</b>. Narrative, identity, launch, timing. Marketing leads the build, with sales in the loop.",
-      "<b>Brand & voice</b> — how we look and sound everywhere, both brands.",
-      "<b>Website & digital presence</b> — site, SEO, landing pages, analytics.",
-      "<b>Demand generation</b> — paid, organic, social, email nurture.",
-      "<b>Content production</b> — one-pagers, deck design, case studies, photo/video.",
-      "<b>Inbound lead generation</b> — creating the demand that becomes sales' inbound.",
-    ]],
-    ["Decides",[
-      "The Progreaux brand: what it is, what it says, when it launches.",
-      "Brand system: palette, typography, logo usage, template standards.",
-      "Channel mix and campaign calendar.",
-      "Final creative execution on anything public-facing.",
-    ]],
-  ]},
-  seams:[
-    ["to-sales","→","<b>Inbound leads</b> — handed off to sales with source, campaign, and context attached."],
-    ["to-mktg","←","<b>Outbound leads</b> — what sales is generating and hearing in-market, fed back so campaigns aim better."],
-    ["to-sales","→","<b>Collateral</b> — decks, one-pagers, sample sheets, on brand."],
-    ["to-mktg","←","<b>Asset requests</b> — one queue, with the deal reason attached."],
-    ["to-sales","→","<b>Site & landing pages</b> that outbound can point to."],
-    ["to-mktg","←","<b>Outcome data</b> — what closed, what stalled, and why. Sales owns the data and reports it out."],
-  ],
-  shared:[
-    ["Jointly owned — neither side moves alone",[
-      "<b>ICP & positioning</b> — same definition of who we sell to and why we win.",
-      "<b>Sales messaging & claims</b> — what sales says on calls and in sequences. Marketing shapes the voice, sales pressure-tests it live. Built together, not handed down.",
-      "<b>Product facts</b> — one source of truth for specs, certs, capacity, and lead times.",
-      "<b>Events & PR</b> — trade shows, press, industry presence. Marketing runs the presence, sales works the room; both plan it.",
-      "<b>Pipeline reporting</b> — see below. One number, one definition, both teams quote it identically.",
-    ]],
-  ],
-  /* Pipeline reporting gets its own block — it's the number both teams get
-     measured on, so the split between who owns the data and who reads it
-     needs to be unambiguous. */
-  reporting:[
-    ["Sales owns the data","sales","Every record, outcome, and reason code. If it's in the pipeline, sales put it there and sales stands behind it."],
-    ["Marketing owns the source","mktg","Which campaign, channel, or event produced the lead — tagged before it ever reaches a seller."],
-    ["One number, both mouths","both","Sourced pipeline, conversion by source, and closed volume. Same figure, same definition, whether it's quoted in a sales review or a marketing readout."],
-    ["Reported monthly, together","both","Sales brings outcomes; marketing brings sources. The two get reconciled in the room — not in two separate decks that disagree."],
-    ["What it's actually for","both","Marketing can only sharpen what it can see. Outcome data going back is what turns spend into better leads next month."],
-  ],
-  flow:[
-    ["01","Lead arrives","Form, event, campaign, or referral — captured with source and campaign attached.","mktg","Marketing"],
-    ["02","Handoff to sales","Routed to a named seller with full context. Acknowledged same business day.","mktg","Marketing → Sales"],
-    ["03","Qualify","Sales scores it against the shared ICP: work it, nurture it, or disqualify it.","sales","Sales"],
-    ["04","Work the account","Discovery, sample, quote, LOI. Sales owns every touch from here.","sales","Sales"],
-    ["05","Report back","Outcome + reason logged, so campaigns get sharper instead of guessing.","sales","Sales → Marketing"],
-  ],
-  /* [workflow, owner, consulted, how it runs, worked example] */
-  cadence:[
-    ["Weekly sync","30 min","Both","Lead flow, asset queue, what's blocked this week."],
-    ["Outbound readout","Bi-weekly","Sales → Marketing","What sales is generating, objections heard, language that landed, competitor mentions."],
-    ["Campaign preview","Before launch","Marketing → Sales","Sales sees the message before a prospect does."],
-    ["Rebrand checkpoint","Until launch","Marketing → Sales","Marketing's build, marketing's timeline — sales just needs the date and the story kept current."],
-    ["Monthly review","60 min","Both","Sourced pipeline, conversion by source, next month's priorities."],
-  ],
-  agreements:[
-    ["Sales sells American BioCarbon as-is; the ABC backdrop is maintained, not grown.",true],
-    ["The move to Progreaux is one shared transition: marketing leads the brand, sales feeds the field in.",false],
-    ["Sales gets the rebrand date and story before any customer does.",false],
-    ["One intake queue for asset requests — with the deal reason attached.",false],
-    ["One canonical product-facts sheet; both teams cite it, neither improvises.",false],
-    ["Every inbound handoff acknowledged same business day, by a named person.",false],
-    ["Every worked lead gets an outcome + reason back to marketing.",false],
-    ["No public claim ships without a sales accuracy check.",false],
-    ["No campaign launches without sales seeing the message first.",false],
-    ["Sales messaging gets built together — field data in, brand voice out.",false],
-    ["One pipeline number, one dashboard, both teams quote it identically.",false],
-  ],
-};
-function rCollab(){
-  const C=COLLAB;
-  const laneList=(blocks)=>blocks.map(([h,items])=>
-    `<div class="lane-sub">${esc(h)}</div><ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`).join("");
-  const keys=C.agreements.map((_,i)=>`collab:agree:${i}`);
-  const st=checkStats(keys,C.agreements.map(a=>a[1]));
-  return page("marketing",
-    head("Sales × Marketing","How the two teams mesh: what each side owns, what we own together, and how work crosses the line between us. A working agreement to review together, not a scorecard.")+
-    `<div class="note info"><b>Frame for the meeting:</b> both teams pull toward the same number. Make the seams explicit (domains, handoffs, turnaround) so nothing falls between us and nothing gets done twice.</div>`+
-    sec("1","The rollout: two brands, two jobs")+
-    `<p class="lead">Everything below only makes sense against this split. Sales is running one brand to keep revenue moving; marketing is building the next one. Neither team is doing the other's job.</p>`+
-    `<div class="brands">${C.brands.map(([side,name,role,tag,pts])=>
-      `<div class="brand-card brand-${side}">
-         <div class="brand-top"><div><div class="brand-role">${esc(role)}</div><h3>${esc(name)}</h3></div>
-         <span class="brand-tag tag-${side}">${esc(tag)}</span></div>
-         <ul>${pts.map(p=>`<li>${p}</li>`).join("")}</ul>
-       </div>`).join("")}</div>`+
-    `<div class="note"><b>Said plainly:</b> we sell American BioCarbon today and move to Progreaux together. Same team, same product, same mill. For our current and former vendors it's a name change and a step up, not a new company, and the relationship and supply carry straight over. The one thing to keep in sync is timing: everyone hears the launch date and the story before a customer does.</div>`+
-    sec("2","Who owns what")+
-    `<div class="lanes">
-       <div class="lane lane-sales">
-         <div class="lane-hd"><div class="lane-mark">S</div><h3>Sales</h3></div>
-         <div class="lane-who">${esc(C.sales.who)}</div>
-         ${laneList(C.sales.own)}
-       </div>
-       <div class="lane lane-shared">
-         <div class="lane-hd"><div class="lane-mark">∩</div><h3>Together</h3></div>
-         <div class="lane-who">The intersection</div>
-         ${laneList(C.shared)}
-         <div class="lane-sub">What crosses the line</div>
-         ${C.seams.map(([cls,dir,txt])=>`<div class="seam ${cls}"><span class="dir">${dir}</span><span>${txt}</span></div>`).join("")}
-       </div>
-       <div class="lane lane-mktg">
-         <div class="lane-hd"><div class="lane-mark">M</div><h3>Marketing</h3></div>
-         <div class="lane-who">${esc(C.mktg.who)}</div>
-         ${laneList(C.mktg.own)}
-       </div>
-     </div>`+
-    `<div class="note">Read the middle column first. The outer lanes are where each team moves without asking; the middle is where we move together, and where most misfires between two good teams start.</div>`+
-    sec("3","The inbound handoff, end to end")+
-    `<div class="flow">${C.flow.map(([n,t,d,o,lbl])=>
-      `<div class="flow-step"><div class="n">${n}</div><div class="t">${esc(t)}</div><div class="d">${esc(d)}</div>
-       <span class="owner owner-${o}">${esc(lbl)}</span></div>`).join("")}</div>`+
-    `<div class="note ok"><b>Step 05 is not optional.</b> Marketing can only sharpen what it sees. If outcomes never come back, sales inherits weaker leads next quarter.</div>`+
-    sec("4","Pipeline reporting")+
-    `<div class="grid g2">${C.reporting.map(([t,side,d])=>
-      `<div class="card rep-card rep-${side}"><h4>${esc(t)} <span class="owner owner-${side}">${side==="sales"?"Sales":side==="mktg"?"Marketing":"Both"}</span></h4>
-       <p>${esc(d)}</p></div>`).join("")}</div>`+
-    `<div class="note ok"><b>One number, one definition.</b> Two different pipeline figures and every agreement on this page gets re-litigated monthly.</div>`+
-    sec("5","Cadence")+
-    table(["Ritual","Length","Direction","Purpose"],C.cadence.map(r=>[
-      `<strong>${esc(r[0])}</strong>`,esc(r[1]),esc(r[2]),esc(r[3])]))+
-    sec("6","Working agreements")+
-    `<p class="lead">Things both teams should be able to say out loud without hesitating. Check them off as we land them. <b style="color:var(--navy-800)">${st.done}/${st.total} agreed</b></p>`+
-    C.agreements.map((a,i)=>chk(`collab:agree:${i}`,a[0],a[1])).join("")
-  );
 }
 
 /* LEAN = daily-driver. BUILD = parked heavy modules (build-later.html). */
@@ -782,17 +495,22 @@ const LEAN_SECTIONS=[
   // thesis that biochar-priority replaced. A checklist that reports finished work as unstarted
   // trains people to ignore checklists. The seven launch steps on the Launchpad replace them.
   ["launch",   [rLaunchpad]],
-  ["strategy", [G("rCampaigns"), G("rSummary"), rSegments, rPersonas]],
+  ["strategy", [OUT("rCampaigns")]],
   ["product",  [rBiochar, rMessaging]],
   // Target accounts deliberately do NOT render here any more. This section used to open with
   // rAccounts, a hardcoded list of invented companies with invented deal sizes sitting in a
   // tool reps actually work from. Real accounts live in the Sales Pipeline section, which
   // reads the roster and HubSpot import.
-  ["outreach", [rOutreach, G("rSequences"), G("rCalling"), G("rScriptLibrary"), G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
+  // outreach is now ONE canonical module (outreach.js + outreach-data.js), not a stack of
+  // seven renderers. The old stack was three overlapping banks of copy: DATA.outreach,
+  // GTM.sequences and GTM.scriptLibrary all held a "soil blenders" pitch and they disagreed
+  // with each other. The Aug 10 VDJ call rewrote the messaging from scratch with Victor and
+  // Daniel in the room, so the engine is now a single source with two tracks. LinkedIn,
+  // social and the long-term channel plan moved down to the playbook: they are reference
+  // material, not the cold send.
+  ["outreach", [OUT("rOutreach")]],
   ["crm",      [PL("rCRM")]],
-  ["playbook", [rCollateral, G("rSample"), rPlaybook]],
-  ["onboarding",[rOnboarding, G("rScale")]],
-  ["marketing", [rCollab]],
+  ["playbook", [rCollateral, G("rSample"), rPlaybook, G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
 ];
 function render(){
   $("#content").innerHTML = LEAN_SECTIONS.map(([id,thunks])=>compose(id,thunks)).join("");

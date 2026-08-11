@@ -17,142 +17,12 @@
   const chips = arr => arr.map(pill).join(" ");
   const ul = arr => `<ul>${arr.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
 
-  /* ---- 1. Executive Summary ---- */
-  function rSummary(){
-    const s=GTM.summary;
-    return page("gtm-summary",
-      head("GTM Executive Summary","The Month-1 thesis: SAMPLE-LED. Three live lines (Biochar, Absorbent Pellets, Absorbent Crumble) all sell by the metric ton today. The cold ask is still a free sample in a buyer's hands, but a winning trial now converts to a PAID order, not just an LOI. Truckload supply is the Q4 ramp, reserved by LOI.")+
-      `<div class="note ok" style="font-size:13.5px"><b>Position:</b> ${esc(s.position)}</div>`+
-      sec("G1","Why oil & gas / remediation first")+
-      `<div class="grid g2">${s.wedgeWhy.map(w=>`<div class="card"><p style="color:var(--text-dim)">→ ${esc(w)}</p></div>`).join("")}</div>`+
-      `<div class="note" style="margin-top:12px">${esc(s.wedgeNote)}</div>`+
-      sec("G2","Campaign allocation by ICP")+
-      table(["ICP","Effort","Why"],s.allocation.map(a=>[`<strong>${esc(a.icp)}</strong>`,badge(a.pct,a.cls),esc(a.why)]))+
-      `<div class="note"><b>Allocation logic:</b> ${esc(s.allocationNote)}</div>`+
-      sec("G3","Primary offer & CTA paths")+
-      `<div class="card pad-lg"><p style="color:var(--text)">${esc(s.offer)}</p></div>`+
-      `<div class="grid g2" style="margin-top:12px">${s.ctaPaths.map(c=>`<div class="card"><p style="color:var(--text-dim)">✅ ${esc(c)}</p></div>`).join("")}</div>`+
-      sec("G4","30 / 60 / 90-day goals")+
-      `<div class="grid g3">
-        <div class="card"><h4>🎯 30-day</h4><p>${esc(s.goals.d30)}</p></div>
-        <div class="card"><h4>📈 60-day</h4><p>${esc(s.goals.d60)}</p></div>
-        <div class="card"><h4>🚀 90-day</h4><p>${esc(s.goals.d90)}</p></div>
-      </div>`+
-      sec("G5","KPIs that matter")+`<div class="card">${ul(s.kpis)}</div>`
-    );
-  }
+  /* rSummary and rCampaigns lived here and are deleted with their data. Campaigns and
+     ICP is now rendered by outreach.js from the canonical ICP list. */
 
-
-  /* ---- 3. ICP Campaigns ---- */
-  function rCampaigns(){
-    // BIOCHAR IS PRIORITY #1 — sort biochar campaigns (primary/bioPriority) to the top, absorbent secondary after.
-    const rank=c=>c.primary?0:c.bioPriority?1:c.secondaryTrack?2:c.tag==="CMP-CDR"?4:3;
-    const cs=[...GTM.campaigns].sort((a,b)=>rank(a)-rank(b));
-    const card=c=>`<div class="card pad-lg gtm-cmp">
-      <h4>${esc(c.name)} ${c.primary?badge("PRIMARY · BIOCHAR","badge-green"):c.bioPriority?badge("BIOCHAR","badge-green"):c.secondaryTrack?badge("SECONDARY","badge-muted"):""} ${badge(c.alloc,"badge-gold")} ${badge(c.tag,"badge-blue")}</h4>
-      ${c.guardrail?`<div class="note warn" style="margin:8px 0"><b>⚠ Guardrail:</b> ${esc(c.guardrail)}</div>`:""}
-      <div class="note warn" style="margin:8px 0"><b>Pain:</b> ${esc(c.pain)}</div>
-      <div class="note ok" style="margin:8px 0"><b>Offer:</b> ${esc(c.offer)}</div>
-      <div style="font-size:12.5px;display:grid;gap:5px">
-        <div><b style="color:var(--gold-soft)">Angle:</b> ${esc(c.angle)}</div>
-        <div><b style="color:var(--green-bright)">Primary CTA:</b> ${esc(c.cta)}</div>
-        <div><b style="color:var(--text)">Secondary CTA:</b> ${esc(c.cta2)}</div>
-        <div><b style="color:var(--text)">Lead magnet:</b> ${esc(c.magnet)}</div>
-        <div><b style="color:var(--text)">Landing:</b> <span class="t-num">${esc(c.landing)}</span></div>
-      </div>
-      <div class="hr" style="margin:10px 0"></div>
-      <div class="grid g2" style="gap:8px">
-        <div><b style="font-size:11px;color:var(--gold-soft)">Target titles</b>${ul(c.titles)}</div>
-        <div><b style="font-size:11px;color:var(--gold-soft)">Company types</b>${ul(c.companies)}</div>
-        <div><b style="font-size:11px;color:var(--gold-soft)">Proof to use</b>${ul(c.proof)}</div>
-        <div><b style="font-size:11px;color:var(--red-soft)">Disqualifiers</b>${ul(c.disq)}</div>
-      </div>
-      <div class="hr" style="margin:10px 0"></div>
-      <div style="font-size:12px"><b style="color:var(--text)">Success metric:</b> ${esc(c.metric)}</div>
-    </div>`;
-    return page("gtm-campaigns",
-      head("ICP Campaign Strategy","Nine coordinated campaigns — BIOCHAR-LED (we have 80 MT to move now). Biochar campaigns carry ~65% of effort and run first; absorbent is the secondary track. Each has one specific CTA, its own proof, and a dedicated landing destination.")+
-      `<div class="note ok"><b>Effort weighting:</b> ${GTM.summary.allocation.map(a=>badge(a.icp.split(" ")[0]+" "+a.pct, a.cls)).join(" ")}</div>`+
-      `<div class="grid" style="grid-template-columns:1fr;gap:14px">${cs.map(card).join("")}</div>`
-    );
-  }
-
-  /* ---- 5. 60/90 Scale ---- */
-  function rScale(){
-    const s=GTM.scale;
-    const phase=p=>sec("",esc(p.title))+
-      `<div class="note ok"><b>Goal:</b> ${esc(p.goal)}</div>`+
-      table(["Week","Goal","Activity targets","Campaign adjustment","Hiring/support","Automation","Pipeline milestone"],
-        p.weeks.map(w=>[`<strong>${esc(w.wk)}</strong>`,`<strong>${esc(w.g)}</strong>`,esc(w.act),esc(w.adj),esc(w.need),esc(w.auto),`<span style="color:var(--green-bright)">${esc(w.mile)}</span>`]));
-    return page("gtm-scale",
-      head("60 / 90-Day Scale Plan","Days 31–60 double down and convert; days 61–90 systematize, formalize channels, integrate carbon, and prep the first hire.")+
-      phase(s.d60)+phase(s.d90)
-    );
-  }
-
-  /* ---- 6. Outbound Sequences ---- */
-  // BIOCHAR IS PRIORITY #1 — sort biochar segments (AGD/SOIL/NUR) first, CDR last.
-  const bioSeqRank=t=>/AGD|SOIL|NUR/.test(t)?0:t==="CMP-CDR"?3:2;
-  function rSequences(){
-    const seqs=[...GTM.sequences].sort((a,b)=>bioSeqRank(a.tag)-bioSeqRank(b.tag));
-    const filters=`<div class="filters"><span class="pill active" onclick="gtmSeqFilter(this,'all')">All</span>${seqs.map((o,i)=>`<span class="pill" onclick="gtmSeqFilter(this,'${i}')">${esc(o.tag)}</span>`).join("")}</div>`;
-    const blocks=seqs.map((o,i)=>`<div class="gtm-seq" data-idx="${i}">
-      <h3 class="sub">${esc(o.seg)} — ${esc(o.persona)} ${badge(o.tag,"badge-blue")}${/AGD|SOIL|NUR/.test(o.tag)?" "+badge("BIOCHAR","badge-green"):""}</h3>
-      ${o.steps.map(st=>script(st.t,st.b)).join("")}
-    </div>`).join("");
-    return page("gtm-sequences",
-      head("Outbound Sequences","Human, short, specific, credible — email 1–4, breakup, call opener, voicemail, and three LinkedIn steps per segment. BIOCHAR segments lead; absorbent runs second. Copy any block. Replace {First}/{Me}/{phone} before sending.")+
-      `<div class="note ok"><b>Primary biochar angle:</b> OMRI Listed sugarcane-bagasse biochar with an ordered honeycomb pore structure — holds ~3–3.5× its weight in water and can shorten compost cycles ~10–30% (per research). We have 80 MT ready to ship, so a winning free-sample trial converts straight to an order. The cold ask is always the free sample — never a bulk/LOI pitch. <b>Secondary absorbent angle:</b> plant-based bagasse absorbent, ~5× its weight (est.) → fewer bags + lighter disposal vs wood/clay. Always tag ratio claims as estimates.</div>`+
-      filters+blocks
-    );
-  }
-  window.gtmSeqFilter=(el,i)=>{el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
-    document.querySelectorAll(".gtm-seq").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
-
-  /* ---- 7. Calling Plan ---- */
-  function rCalling(){
-    const c=GTM.calling;
-    return page("gtm-calling",
-      head("Calling Plan","Who to call first, when, at what volume, with natural scripts per buyer type and every follow-up scenario.")+
-      `<div class="grid g2">
-        <div class="card"><h4>📞 Who to call first</h4>${ul(c.order)}</div>
-        <div class="card"><h4>⏰ When to call</h4>${ul(c.when)}</div>
-        <div class="card"><h4>📊 Daily volume ramp</h4>${ul(c.volume)}</div>
-        <div class="card"><h4>📮 Voicemail strategy</h4><p style="color:var(--text-dim)">${esc(c.vmStrategy)}</p></div>
-      </div>`+
-      sec("","Call scripts")+
-      `<div class="grid g2">${c.scripts.map(s=>`<div class="card">${script(s.t,s.b)}</div>`).join("")}</div>`+
-      sec("","Follow-up scripts")+
-      `<div class="grid g2">${c.followups.map(s=>`<div class="card">${script(s.t,s.b)}</div>`).join("")}</div>`
-    );
-  }
-
-  /* ---- 7b. Phone Script Library (A/B) ---- */
-  function rScriptLibrary(){
-    const L=GTM.scriptLibrary;
-    const segs=[...L.segments].sort((a,b)=>bioSeqRank(a.tag)-bioSeqRank(b.tag));
-    const filters=`<div class="filters"><span class="pill active" onclick="gtmScrFilter(this,'all')">All</span>${segs.map((s,i)=>`<span class="pill" onclick="gtmScrFilter(this,'${i}')">${esc(s.tag)}</span>`).join("")}</div>`;
-    const block=(s,i)=>`<div class="gtm-scr" data-idx="${i}">
-      <h3 class="sub">${esc(s.seg)} ${badge(s.tag,"badge-blue")}${/AGD|SOIL|NUR/.test(s.tag)?" "+badge("BIOCHAR","badge-green"):""} ${s.claimCaution?badge("CLAIM-CONTROLLED","badge-gold"):""}</h3>
-      ${s.claimCaution?`<div class="note warn" style="margin:8px 0"><b>⚠ Claim control:</b> absorbent / moisture-management framing only — no animal-health, feed, or veterinary claims.</div>`:""}
-      <h4 style="margin-top:10px;color:var(--gold-soft)">Openers — A/B these (${s.openers.length} variants)</h4>
-      <div class="grid g2">${s.openers.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
-      <h4 style="margin-top:12px;color:var(--gold-soft)">Gatekeeper</h4>
-      <div class="grid g2">${s.gatekeeper.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
-      <h4 style="margin-top:12px;color:var(--gold-soft)">Objection turns → back to the free sample</h4>
-      <div class="grid g2">${s.objections.map(o=>`<div class="card">${script("“"+o.o+"”",o.b)}</div>`).join("")}</div>
-      <h4 style="margin-top:12px;color:var(--gold-soft)">Voicemails</h4>
-      <div class="grid g2">${s.voicemails.map(o=>`<div class="card">${script(o.style,o.b)}</div>`).join("")}</div>
-    </div>`;
-    return page("gtm-scripts",
-      head("Phone Script Library (A/B)","A deep bank of call openers, gatekeeper lines, objection turns, and voicemails per segment, every one built to earn a yes to a FREE SAMPLE. No bulk quote and no LOI on a cold call: that comes after a trial wins. Copy any block; swap {First}/{Me}/{Company}/{phone}.")+
-      `<div class="note ok"><b>The whole point:</b> ${esc(L.intro)}</div>`+
-      sec("","A/B testing rules")+`<div class="card">${ul(L.abRules)}</div>`+
-      filters+segs.map(block).join("")
-    );
-  }
-  window.gtmScrFilter=(el,i)=>{el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
-    document.querySelectorAll(".gtm-scr").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
+  /* rScale, rSequences, rCalling and rScriptLibrary lived here and are deleted along
+     with their data. The scale plan described building a machine that now exists; the
+     three copy banks were replaced by outreach-data.js. bioSeqRank went with them. */
 
   /* ---- 9b. Long-Term / Compounding Channels ---- */
   function rLongTerm(){
@@ -246,5 +116,5 @@
      strips the wrapper (stripBody) and stacks the inner content under
      the matching consolidated section.
      ================================================================ */
-  window.GTMB = {rSummary,rCampaigns,rScale,rSequences,rCalling,rScriptLibrary,rLinkedIn,rSocial,rLongTerm,rSample};
+  window.GTMB = {rLinkedIn,rSocial,rLongTerm,rSample};
 })();

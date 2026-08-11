@@ -1,0 +1,269 @@
+/* ============================================================
+   VEJ Sales OS - Outreach Engine
+   Two track split view. Biochar left, absorbent right.
+   Consumes the semantic aliases declared in styles.css :root
+   (navy brand, crimson accent, paper surfaces). No raw hex here
+   except the two track spine tints, which are alpha washes over
+   existing brand primitives.
+   ============================================================ */
+
+/* ---------- header stats ---------- */
+.oe-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0 0 18px}
+.oe-stat{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+  padding:13px 15px;display:flex;flex-direction:column;gap:2px;box-shadow:var(--sh-1)}
+.oe-stat-v{font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--navy-800);
+  font-variant-numeric:tabular-nums;line-height:1.1}
+.oe-stat-l{font-size:10px;font-family:var(--mono);font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--text-mute)}
+
+/* ---------- rules + guardrails ---------- */
+.oe-meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.oe-meta-card{background:var(--white);border:1px solid var(--line);border-left:3px solid var(--brand);
+  border-radius:0 var(--radius) var(--radius) 0;padding:16px 18px;box-shadow:var(--sh-1)}
+.oe-meta-card.oe-meta-warn{border-left-color:var(--red)}
+.oe-meta-card h4{font-size:12.5px;font-family:var(--mono);font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--navy-800);margin-bottom:8px}
+.oe-meta-warn h4{color:var(--red-soft)}
+
+.oe-ul{list-style:none;display:grid;gap:5px}
+.oe-ul li{position:relative;padding:3px 0 3px 16px;font-size:12.6px;line-height:1.55;color:var(--text-dim)}
+.oe-ul li:before{content:"";position:absolute;left:2px;top:10px;width:5px;height:5px;border-radius:2px;background:var(--accent)}
+.oe-meta-warn .oe-ul li:before{background:var(--red)}
+
+/* ---------- provenance strip + tokens ---------- */
+.oe-provenance{display:grid;gap:6px;background:var(--paper-2);border:1px solid var(--line);
+  border-radius:var(--radius);padding:13px 16px;font-size:12.2px;color:var(--text-dim);line-height:1.55}
+.oe-provenance b{color:var(--navy-800)}
+.oe-tokens{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 26px}
+.oe-token{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--text-mute);
+  background:var(--white);border:1px solid var(--line);border-radius:var(--r-pill);padding:4px 12px 4px 5px}
+.oe-token code{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--brand);
+  background:rgba(var(--brand-rgb),.08);border-radius:var(--r-xs);padding:2px 7px}
+
+/* ---------- the two track columns ---------- */
+.oe-tracks{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.oe-track{min-width:0;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--sh-1);overflow:hidden}
+
+/* Track identity is a spine at the top of the column, tinted from brand primitives.
+   Biochar is the navy brand spine, absorbent is crimson. This is the only place the
+   two tracks are colour separated, and it is deliberate: everything below reads the
+   same so a rep is comparing copy, not decoding a palette. */
+.oe-track .oe-th{padding:18px 20px 16px;border-bottom:1px solid var(--line);position:relative}
+.oe-track .oe-th:before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.oe-biochar .oe-th:before{background:linear-gradient(90deg,var(--navy-600),var(--navy-400))}
+.oe-absorbent .oe-th:before{background:linear-gradient(90deg,var(--crimson-500),var(--crimson-300))}
+.oe-biochar .oe-th{background:linear-gradient(180deg,rgba(var(--navy-600-rgb),.05),transparent)}
+.oe-absorbent .oe-th{background:linear-gradient(180deg,rgba(var(--crimson-500-rgb),.045),transparent)}
+
+.oe-th-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.oe-th-mark{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.oe-biochar .oe-th-mark{background:var(--navy-600)}
+.oe-absorbent .oe-th-mark{background:var(--crimson-500)}
+.oe-th h2{font-family:var(--serif);font-weight:400;font-size:24px;letter-spacing:-.3px;color:var(--navy-800)}
+.oe-th-count{margin-left:auto;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--text-mute)}
+.oe-th-sub{font-size:12.5px;font-weight:700;color:var(--text-dim);margin-top:4px}
+.oe-th-prod{font-size:12.4px;color:var(--text-dim);line-height:1.6;margin-top:8px}
+
+.oe-facts{display:grid;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)}
+.oe-facts>div{display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:baseline}
+.oe-facts dt{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--text-mute)}
+.oe-facts dd{font-size:12.3px;color:var(--text);line-height:1.5}
+.oe-th-why{margin-top:12px;font-size:12px;font-style:italic;color:var(--text-mute);line-height:1.55}
+
+/* ---------- per track filter row ---------- */
+.oe-filters{display:flex;flex-wrap:wrap;gap:6px;padding:13px 20px 0}
+.oe-pill{background:var(--white);border:1px solid var(--line);color:var(--text-dim);font-size:11.5px;
+  font-weight:600;padding:5px 12px;border-radius:var(--r-pill);cursor:pointer;white-space:nowrap;
+  transition:background .14s,color .14s,border-color .14s}
+.oe-pill:hover{color:var(--navy-800);border-color:var(--line-2);background:var(--paper-2)}
+.oe-biochar .oe-pill.active{background:var(--navy-700);color:#fff;border-color:var(--navy-700)}
+.oe-absorbent .oe-pill.active{background:var(--crimson-600);color:#fff;border-color:var(--crimson-600)}
+
+.oe-tools{display:flex;gap:7px;padding:11px 20px 0}
+
+/* ---------- ICP disclosure ---------- */
+.oe-list{padding:14px 20px 20px;display:grid;gap:9px}
+.oe-icp{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--white);
+  transition:border-color .14s,box-shadow .14s}
+.oe-icp:hover{border-color:var(--line-2)}
+.oe-icp[open]{box-shadow:var(--sh-1)}
+.oe-biochar .oe-icp[open]{border-color:rgba(var(--navy-600-rgb),.35)}
+.oe-absorbent .oe-icp[open]{border-color:rgba(var(--crimson-500-rgb),.3)}
+
+.oe-sum{list-style:none;cursor:pointer;padding:12px 14px;display:grid;
+  grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center}
+.oe-sum::-webkit-details-marker{display:none}
+.oe-tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.06em;padding:3px 7px;
+  border-radius:var(--r-xs);white-space:nowrap}
+.oe-biochar .oe-tag{background:rgba(var(--navy-600-rgb),.10);color:var(--brand)}
+.oe-absorbent .oe-tag{background:rgba(var(--crimson-500-rgb),.10);color:var(--crimson-600)}
+.oe-name{font-size:13.4px;font-weight:700;color:var(--navy-800);letter-spacing:-.1px;line-height:1.35}
+.oe-sum-n{grid-column:2;font-family:var(--mono);font-size:10px;color:var(--text-mute);letter-spacing:.04em}
+
+.oe-caret{grid-column:3;grid-row:1/span 2;width:16px;height:16px;position:relative;opacity:.45;justify-self:end}
+.oe-caret:before{content:"";position:absolute;left:3px;top:5px;width:7px;height:7px;
+  border-right:1.8px solid currentColor;border-bottom:1.8px solid currentColor;
+  transform:rotate(45deg);transition:transform .18s}
+details[open]>summary .oe-caret{opacity:.8}
+details[open]>summary .oe-caret:before{transform:rotate(225deg);top:7px}
+
+.oe-body{padding:2px 14px 14px;border-top:1px solid var(--line-soft)}
+.oe-who{font-size:12.4px;color:var(--text-dim);line-height:1.6;margin:11px 0 9px}
+.oe-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.oe-chip{font-size:10.5px;font-weight:600;color:var(--text-dim);background:var(--paper-2);
+  border:1px solid var(--line);border-radius:var(--r-pill);padding:2px 9px}
+
+/* ---------- nested group disclosures ---------- */
+.oe-grp{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);margin-bottom:7px}
+.oe-grp>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px}
+.oe-grp>summary::-webkit-details-marker{display:none}
+.oe-grp-t{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--navy-800)}
+.oe-grp-n{font-size:10px;font-weight:700;font-family:var(--mono);color:var(--text-mute);
+  background:var(--white);border:1px solid var(--line);border-radius:var(--r-pill);padding:0 6px}
+.oe-grp>summary .oe-caret{margin-left:auto}
+.oe-grp-b{padding:2px 12px 12px}
+
+/* Copy blocks inherit .script from styles.css; tighten them inside the dense column.
+   .lbl goes block here: the shared helper relies on a literal newline plus white-space
+   pre-wrap to break the label off its body, which also produces a leading indent on the
+   first line. copyBlock emits no whitespace, so the break comes from the display mode. */
+.oe-grp-b .script{margin:8px 0;padding:11px 13px 11px;font-size:12.3px;background:var(--white)}
+.oe-block .lbl{display:block;max-width:calc(100% - 62px);margin-bottom:6px;line-height:1.45;white-space:normal}
+
+/* ---------- message variants ---------- */
+.oe-var{margin-bottom:4px}
+.oe-var-h{display:flex;align-items:center;gap:8px;margin-top:10px}
+.oe-var-id{width:20px;height:20px;border-radius:var(--r-xs);display:grid;place-items:center;
+  font-family:var(--mono);font-size:11px;font-weight:700;color:#fff}
+.oe-biochar .oe-var-id{background:var(--navy-700)}
+.oe-absorbent .oe-var-id{background:var(--crimson-600)}
+.oe-var-angle{font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--text-dim)}
+
+/* ---------- subject line pool ---------- */
+.oe-subjects{display:grid;gap:5px;margin-top:9px}
+.oe-subj-row{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:center}
+.oe-subj-n{font-family:var(--mono);font-size:10px;color:var(--text-mute);text-align:right}
+.oe-subj{text-align:left;font-family:inherit;font-size:12.4px;font-weight:600;color:var(--text);
+  background:var(--white);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 var(--radius-xs) var(--radius-xs) 0;padding:8px 11px;cursor:pointer;width:100%;
+  transition:background .14s,border-color .14s}
+.oe-subj:hover{background:var(--paper-2);border-color:var(--line-2);border-left-color:var(--accent)}
+.oe-subj:active{transform:scale(.995)}
+.oe-subj-all{display:flex;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}
+.oe-hint{font-size:11px;color:var(--text-mute)}
+
+.oe-btn{font-family:inherit;font-size:11.5px;font-weight:700;color:var(--text-dim);background:var(--white);
+  border:1px solid var(--line-2);border-radius:var(--radius-xs);padding:6px 12px;cursor:pointer;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .14s,color .14s}
+.oe-btn:hover{background:var(--navy-700);color:#fff;border-color:var(--navy-700)}
+.oe-btn-sm{font-size:11px;padding:5px 10px}
+.oe-subj-all .oe-btn{max-width:190px}
+.oe-subj-all .oe-btn span{display:block;overflow:hidden;text-overflow:ellipsis}
+
+/* ---------- why it works ---------- */
+.oe-why{background:var(--white);border:1px solid var(--line);border-left:3px solid var(--gold);
+  border-radius:0 var(--radius-xs) var(--radius-xs) 0;padding:11px 13px;margin-top:9px}
+.oe-why p{font-size:12.3px;color:var(--text-dim);line-height:1.65}
+.oe-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:11px}
+.oe-h5{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-mute);margin-bottom:3px}
+
+/* ---------- guardrail footer ---------- */
+.oe-guard{margin-top:10px;background:rgba(var(--red-rgb),.05);border:1px solid rgba(var(--red-rgb),.22);
+  border-left:3px solid var(--red);border-radius:0 var(--radius-xs) var(--radius-xs) 0;
+  padding:10px 13px;font-size:12px;color:var(--text-dim);line-height:1.6}
+.oe-guard b{color:var(--red-soft)}
+
+/* ============================================================
+   CAMPAIGNS AND ICP
+   Shares the track, pill, disclosure and group styling above.
+   Only the pieces unique to the campaign card live down here.
+   ============================================================ */
+
+.oe-meta-card.oe-meta-ok{border-left-color:var(--green)}
+.oe-meta-ok h4{color:var(--green-deep)}
+.oe-meta-ok .oe-ul li:before{background:var(--green)}
+.oe-p{font-size:12.4px;color:var(--text-dim);line-height:1.6}
+.oe-ok{color:var(--green-deep);font-weight:700}
+.oe-bad{color:var(--red-soft);font-weight:700}
+
+/* allocation bars in the track header */
+.oe-alloc{display:grid;gap:5px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)}
+.oe-alloc-row{display:grid;grid-template-columns:96px 1fr 34px;gap:9px;align-items:center}
+.oe-alloc-n{font-size:11.5px;font-weight:600;color:var(--text-dim);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.oe-alloc-bar{height:7px;border-radius:var(--r-pill);background:var(--paper-2);overflow:hidden}
+.oe-alloc-bar i{display:block;height:100%;border-radius:var(--r-pill)}
+.oe-biochar .oe-alloc-bar i{background:linear-gradient(90deg,var(--navy-600),var(--navy-400))}
+.oe-absorbent .oe-alloc-bar i{background:linear-gradient(90deg,var(--crimson-500),var(--crimson-300))}
+.oe-alloc-v{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--navy-800);
+  text-align:right;font-variant-numeric:tabular-nums}
+
+/* effort readout in the card summary */
+.oe-cmp .oe-sum-n{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.oe-eff{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text-mute)}
+.oe-eff-bar{width:48px;height:5px;border-radius:var(--r-pill);background:var(--paper-2);overflow:hidden}
+.oe-eff-bar i{display:block;height:100%;border-radius:var(--r-pill)}
+.oe-biochar .oe-eff-bar i{background:var(--navy-500)}
+.oe-absorbent .oe-eff-bar i{background:var(--crimson-400)}
+
+/* offer + the two asks */
+.oe-offer{background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.24);
+  border-left:3px solid var(--green);border-radius:0 var(--radius-xs) var(--radius-xs) 0;
+  padding:10px 13px;font-size:12.4px;color:var(--text-dim);line-height:1.6;margin-bottom:10px}
+.oe-offer b{color:var(--green-deep)}
+.oe-ctas{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.oe-ctas>div{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-xs);padding:9px 12px}
+.oe-ctas p{font-size:12.3px;color:var(--text);line-height:1.5;margin-top:3px}
+
+.oe-disq .oe-ul li:before{background:var(--red)}
+
+.oe-cmp-foot{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;
+  padding-top:11px;border-top:1px solid var(--line-soft)}
+.oe-cmp-foot p{font-size:12.3px;color:var(--text-dim);line-height:1.5;margin-top:2px}
+
+.oe-jump{display:inline-block;margin-top:11px;font-size:11.5px;font-weight:700;
+  color:var(--brand);border-bottom:1px solid rgba(var(--brand-rgb),.3);padding-bottom:1px;cursor:pointer}
+.oe-jump:hover{color:var(--accent);border-bottom-color:rgba(var(--accent-rgb),.4)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  .oe-tracks{grid-template-columns:1fr}
+  .oe-stats{grid-template-columns:repeat(3,1fr)}
+  .oe-meta{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .oe-stats{grid-template-columns:repeat(2,1fr)}
+  .oe-split,.oe-ctas,.oe-cmp-foot{grid-template-columns:1fr}
+  .oe-facts>div{grid-template-columns:1fr;gap:2px}
+  .oe-sum{grid-template-columns:1fr auto}
+  .oe-tag{justify-self:start}
+  .oe-sum-n{grid-column:1}
+  .oe-caret{grid-row:1/span 3}
+}
+
+/* Print: a rep printing the engine wants the copy, not the chrome. */
+@media print{
+  .oe-tracks{grid-template-columns:1fr}
+  .oe-filters,.oe-tools{display:none}
+  .oe-icp,.oe-grp{break-inside:avoid}
+  .oe-body,.oe-grp-b{display:block !important}
+}
+
+/* Live roster count on a campaign card. The zero state is loud on purpose: a campaign with
+   no list is the failure this reconciliation exists to make visible. */
+.oe-listn{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;
+  font-weight:700;padding:1px 7px;border-radius:var(--r-pill);
+  background:rgba(var(--brand-rgb),.09);color:var(--brand)}
+.oe-listn-0{background:rgba(var(--red-rgb),.09);color:var(--red-soft)}
+.oe-empty-warn{background:rgba(var(--red-rgb),.05);border:1px solid rgba(var(--red-rgb),.24);
+  border-left:3px solid var(--red);border-radius:0 var(--radius) var(--radius) 0;
+  padding:12px 15px;margin-bottom:14px;font-size:12.5px;color:var(--text-dim);line-height:1.6}
+.oe-empty-warn b{color:var(--red-soft)}
+.oe-empty-warn code{font-family:var(--mono);font-size:11px;background:rgba(var(--red-rgb),.09);
+  color:var(--red-soft);border-radius:var(--r-xs);padding:1px 6px}
+.oe-cmp-foot{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important}

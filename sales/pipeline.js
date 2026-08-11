@@ -741,7 +741,7 @@
      them. Filtering is done in JS over the data array and then re-rendered, NOT by walking
      the DOM and toggling display on every row, because at 336 rows (soon 500+) a per-row
      textContent read per keystroke is thousands of layout reads per character typed. */
-  const CO_F = { q:"", line:"", icp:"", status:"", geo:"", minScore:"", sort:"score" };
+  const CO_F = { q:"", line:"", icp:"", status:"", geo:"", minScore:"", verify:"", origin:"", sort:"score", dir:"asc" };
   const CO_PAGE = 100;
   let coShown = CO_PAGE;
 
@@ -759,6 +759,275 @@
     return b;
   };
 
+  /* ================= ROSTER COLUMNS =================
+     The company table used to be a fixed ten column <thead> with a matching hand written
+     <tr>. Every column the roster gained afterwards (verification state, CRM owner, last
+     contact) had nowhere to go, and a rep working the phone had to scroll past research
+     prose to reach the number.
+
+     Columns are a registry now. Each one knows how to render itself, how to export itself,
+     and how to sort itself. Order and visibility are the user's, dragged on the header and
+     persisted per browser. Adding a column is one entry here and it shows up in the table,
+     the picker, the sort menu and the CSV at once.
+
+     `key` is stable and stored, so renaming a label never breaks a saved layout. */
+  const CO_COLS = [
+    { key:"company", label:"Company", always:true,
+      hint:"Company name, website link and what they do",
+      sort:(a,b)=>a.name.localeCompare(b.name),
+      csv:c=>c.name,
+      cell:c=>`<td class="co-name">
+        ${acctLink(c.name)}
+        ${c.website?`<a class="co-web" href="https://${esc(c.website.replace(/^https?:\/\//,""))}" target="_blank" rel="noopener" title="${esc(c.website)}">↗</a>`:""}
+        ${c.segment?`<div class="co-seg clamp2">${esc(c.segment)}</div>`:""}
+      </td>` },
+
+    { key:"status", label:"Status",
+      hint:"Where this company sits with us",
+      sort:(a,b)=>(STATUS[statusOf(b.name)]||STATUS.new_lead).rank-(STATUS[statusOf(a.name)]||STATUS.new_lead).rank,
+      csv:c=>(STATUS[statusOf(c.name)]||{}).label||"",
+      cell:c=>`<td>${stBadgeFor(c.name)}</td>` },
+
+    /* Verification is its own column because the roster is now a mix of desk research and
+       CRM import, and those are not the same thing. A rep must be able to see at a glance
+       that a row has never been scored before they treat it as qualified. */
+    { key:"verify", label:"Verified",
+      hint:"Desk verification state. Verified means real website, ICP, freight verdict and score. It does not mean anyone has phoned them.",
+      sort:(a,b)=>(VERIFY[b.verify]||VERIFY.unverified).rank-(VERIFY[a.verify]||VERIFY.unverified).rank,
+      csv:c=>(VERIFY[c.verify]||{}).label||c.verify||"",
+      cell:c=>{ const v=VERIFY[c.verify]||VERIFY.unverified;
+        const need=(c.needs||[]).length?`Still needs: ${(c.needs||[]).join(", ")}`:"Nothing missing";
+        return `<td><span class="vfy ${v.cls}" title="${esc(v.hint+" · "+need)}">${esc(v.label)}</span></td>`; } },
+
+    { key:"origin", label:"Source",
+      hint:"Which system this company came from",
+      sort:(a,b)=>String(a.origin||"").localeCompare(String(b.origin||"")),
+      csv:c=>ORIGIN[c.origin]?ORIGIN[c.origin].label:(c.origin||""),
+      cell:c=>{ const o=ORIGIN[c.origin]||ORIGIN.desk;
+        return `<td><span class="orig ${o.cls}" title="${esc(o.hint)}">${esc(o.label)}</span>${c.hubspot&&c.origin!=="hubspot"?`<span class="orig or-hs" title="Also in HubSpot">+CRM</span>`:""}</td>`; } },
+
+    { key:"line", label:"Line / ICP",
+      hint:"Product line and the ICP campaign this company belongs to",
+      blank:c=>!c.icp,
+      sort:(a,b)=>String(a.icp||"").localeCompare(String(b.icp||"")),
+      csv:c=>`${c.line||""}${c.icp?" / "+c.icp:""}`,
+      cell:c=>`<td>${c.dead?`<span class="pdim">Disqualified</span>`
+            :`<span class="co-line ${c.line==="Biochar"?"ln-bio":c.line==="Absorbent"?"ln-abs":"ln-none"}">${esc(c.line||"unset")}</span>
+              ${c.icp?`<div class="co-icp" title="${esc(c.icpLabel||"")}">${esc(c.icp)}</div>`
+                     :`<div class="co-icp co-icp-gap" title="No ICP assigned yet. It cannot join a campaign until it has one.">no ICP</div>`}`}</td>` },
+
+    { key:"location", label:"Location",
+      hint:"City and state",
+      blank:c=>!c.city && !c.state,
+      sort:(a,b)=>((a.state||"")+(a.city||"")).localeCompare((b.state||"")+(b.city||"")),
+      csv:c=>[c.city,c.state].filter(Boolean).join(", "),
+      cell:c=>`<td>${esc([c.city,c.state].filter(Boolean).join(", ")||"—")}</td>` },
+
+    { key:"freight", label:"Freight", num:true,
+      hint:"Driving distance from White Castle. Gates biochar only, absorbent ships nationwide.",
+      blank:c=>c.driveMi==null && c.crowMi==null,
+      sort:(a,b)=>(a.driveMi??a.crowMi??0)-(b.driveMi??b.crowMi??0),
+      csv:c=>c.driveMi??"",
+      cell:c=>{ const dist=c.driveMi!=null?`${num(c.driveMi)} mi`:(c.crowMi!=null?`~${num(c.crowMi)} mi`:"—");
+        return `<td class="num"><span class="geo ${geoCls(c.geo,c.geoGates)}" title="${esc(geoTitle(c.geo,c.geoGates))}">${dist}</span></td>`; } },
+
+    { key:"score", label:"Score", num:true,
+      hint:"Desk score, 1 to 10",
+      blank:c=>c.score==null,
+      sort:(a,b)=>(b.score??0)-(a.score??0),
+      csv:c=>c.score??"",
+      cell:c=>`<td class="num">${c.score!=null?`<span class="sc ${scoreCls(c.score)}">${c.score}</span>`:`<span class="co-gap" title="Never scored. Score it before it goes in a campaign.">unscored</span>`}</td>` },
+
+    { key:"phone", label:"Phone",
+      hint:"Best phone on file, from the roster or from a CRM contact",
+      blank:c=>!reachOf(c).phones.length,
+      sort:(a,b)=>reachOf(b).phones.length-reachOf(a).phones.length,
+      csv:c=>reachOf(c).phones.join(" / "),
+      cell:c=>{ const reach=reachOf(c);
+        return `<td class="co-tel">${reach.phones.length
+        ? `<a href="tel:${esc(reach.phones[0].replace(/[^\d+]/g,""))}">${esc(reach.phones[0])}</a>${reach.phones.length>1?`<span class="co-more-n" title="${esc(reach.phones.slice(1).join(", "))}">+${reach.phones.length-1}</span>`:""}`
+        : `<span class="co-gap" title="No phone on file. Find one before this row can be worked.">needed</span>`}</td>`; } },
+
+    { key:"email", label:"Email",
+      hint:"Best email on file, from the roster or from a CRM contact",
+      blank:c=>!reachOf(c).emails.length,
+      sort:(a,b)=>reachOf(b).emails.length-reachOf(a).emails.length,
+      csv:c=>reachOf(c).emails.join(" / "),
+      cell:c=>{ const reach=reachOf(c);
+        return `<td class="co-mail">${reach.emails.length
+        ? `<a href="mailto:${esc(reach.emails[0])}">${esc(reach.emails[0])}</a>${reach.emails.length>1?`<span class="co-more-n" title="${esc(reach.emails.slice(1).join(", "))}">+${reach.emails.length-1}</span>`:""}`
+        : `<span class="co-gap" title="No email on file. Apollo enrichment fills this.">needed</span>`}</td>`; } },
+
+    { key:"why", label:"Why they fit",
+      hint:"The written reason this company is on the list",
+      blank:c=>!(c.why||c.scoreWhy),
+      sort:(a,b)=>String(a.why||"").localeCompare(String(b.why||"")),
+      csv:c=>c.dead?(c.scoreWhy||""):(c.why||""),
+      cell:c=>`<td class="co-why"><div class="clamp3" title="${esc(c.why||c.scoreWhy||"")}">${esc(c.dead?(c.scoreWhy||"No reason recorded"):(c.why||"—"))}</div></td>` },
+
+    { key:"contacts", label:"Contacts / titles",
+      hint:"Named contacts on file and the titles worth asking for",
+      blank:c=>!reachOf(c).people && !c.titles,
+      sort:(a,b)=>reachOf(b).people-reachOf(a).people,
+      csv:c=>c.titles||"",
+      cell:c=>{ const reach=reachOf(c);
+        return `<td class="co-titles">${reach.people?`<span class="co-ppl" title="Named contacts on file">${reach.people} contact${reach.people>1?"s":""}</span>`:""}<div class="clamp2">${esc(c.titles&&c.titles!=="n/a - not a buying account"?c.titles:"—")}</div></td>`; } },
+
+    /* Off by default. Real data, but only some rows have it, so it earns its space only for
+       someone actually working the CRM overlap. */
+    { key:"owner", label:"CRM owner", off:true,
+      hint:"Who owns the relationship in HubSpot",
+      blank:c=>!c.owner,
+      sort:(a,b)=>String(a.owner||"").localeCompare(String(b.owner||"")),
+      csv:c=>c.owner||"",
+      cell:c=>`<td>${c.owner?esc(c.owner):`<span class="pdim">—</span>`}</td>` },
+
+    { key:"lastContacted", label:"Last contacted", off:true,
+      hint:"Most recent logged contact in HubSpot. Blank means never.",
+      blank:c=>!c.lastContacted,
+      sort:(a,b)=>String(b.lastContacted||"").localeCompare(String(a.lastContacted||"")),
+      csv:c=>c.lastContacted||"",
+      cell:c=>`<td>${c.lastContacted?`<span class="t-num">${esc(String(c.lastContacted).split("T")[0])}</span>`:`<span class="pdim">never</span>`}</td>` },
+
+    { key:"needs", label:"Missing", off:true,
+      hint:"Exactly what this row is missing before it can be worked",
+      sort:(a,b)=>(b.needs||[]).length-(a.needs||[]).length,
+      csv:c=>(c.needs||[]).join("; "),
+      cell:c=>`<td class="co-needs">${(c.needs||[]).length
+        ? (c.needs||[]).map(n=>`<span class="need">${esc(n)}</span>`).join("")
+        : `<span class="need-ok">complete</span>`}</td>` },
+
+    { key:"trigger", label:"Trigger", off:true,
+      hint:"The opening angle recorded during research",
+      blank:c=>!c.trigger,
+      sort:(a,b)=>String(a.trigger||"").localeCompare(String(b.trigger||"")),
+      csv:c=>c.trigger||"",
+      cell:c=>`<td class="co-why"><div class="clamp2" title="${esc(c.trigger||"")}">${esc(c.trigger||"—")}</div></td>` },
+  ];
+  const COL_BY = Object.fromEntries(CO_COLS.map(c=>[c.key,c]));
+
+  /* Verification vocabulary. Ranked so sorting runs worst to best and the rows that need
+     work surface together. */
+  const VERIFY = {
+    verified:   { label:"Verified",   cls:"vfy-ok",   rank:5, hint:"Desk verified: real website, an ICP, a freight verdict and a score." },
+    review:     { label:"Review",     cls:"vfy-rev",  rank:4, hint:"Real, but an institution or nonprofit that buys on grant and procurement cycles. Decide how to work it." },
+    partial:    { label:"Partial",    cls:"vfy-part", rank:3, hint:"Some desk research done, one or two core fields still missing." },
+    unverified: { label:"Unverified", cls:"vfy-no",   rank:2, hint:"Imported, never desk researched. Needs an ICP, freight verdict and score before it is called." },
+    killed:     { label:"Killed",     cls:"vfy-dead", rank:1, hint:"Disqualified during research, with a written reason on the profile." },
+    rejected:   { label:"Rejected",   cls:"vfy-dead", rank:0, hint:"Not a business that buys what we sell. Kept visible so it is not re-added on the next scrape." },
+  };
+  const ORIGIN = {
+    desk:     { label:"Research", cls:"or-desk", hint:"Desk research pass. Triaged, geo checked and scored by hand." },
+    hubspot:  { label:"HubSpot",  cls:"or-hs",   hint:"Came from the CRM. A real relationship, but never desk scored." },
+    sheet:    { label:"Sheet",    cls:"or-sh",   hint:"Carried over from the original target spreadsheet and never merged into the research roster." },
+    geoaudit: { label:"Geo audit",cls:"or-sh",   hint:"Surfaced by the 500 mile geo audit and never merged into the research roster." },
+    ldeq:     { label:"LDEQ",     cls:"or-ld",   hint:"Louisiana DEQ register of permitted solid waste facilities. An authoritative permit record, not a qualified lead: no website, no contact and no score until someone researches it." },
+  };
+
+  /* ---- column layout preferences (per browser) ---- */
+  const COL_KEY = "vej_pipe_co_cols_v1";
+  const defaultLayout = () => ({ order: CO_COLS.map(c=>c.key), hidden: CO_COLS.filter(c=>c.off).map(c=>c.key) });
+  function colLayout(){
+    const saved = lsGet(COL_KEY, null);
+    const def = defaultLayout();
+    if(!saved) return def;
+    /* Reconcile against the registry every read. A saved layout from before a column existed
+       must not hide the new column, and a saved key for a deleted column must not crash the
+       header. Unknown keys are dropped, new keys are appended in registry order. */
+    const known = new Set(CO_COLS.map(c=>c.key));
+    const order = (saved.order||[]).filter(k=>known.has(k));
+    for(const c of CO_COLS) if(!order.includes(c.key)) order.push(c.key);
+    const hidden = (saved.hidden||[]).filter(k=>known.has(k) && !COL_BY[k].always);
+    return { order, hidden };
+  }
+  const visibleCols = () => { const L=colLayout(); return L.order.map(k=>COL_BY[k]).filter(c=>c && !L.hidden.includes(c.key)); };
+  const saveLayout = L => { lsSet(COL_KEY, L); remount(); };
+
+  window.pipeColToggle = key => {
+    const L = colLayout();
+    if(COL_BY[key] && COL_BY[key].always) return;      // Company is the row's identity
+    L.hidden = L.hidden.includes(key) ? L.hidden.filter(k=>k!==key) : [...L.hidden, key];
+    saveLayout(L);
+  };
+  window.pipeColReset = () => { lsSet(COL_KEY, null); try{ localStorage.removeItem(COL_KEY); }catch(e){} remount(); };
+  window.pipeColAll = show => { const L=colLayout(); L.hidden = show?[]:CO_COLS.filter(c=>!c.always).map(c=>c.key); saveLayout(L); };
+  window.pipeColMove = (key, dir) => {
+    const L = colLayout();
+    const i = L.order.indexOf(key); const j = i + dir;
+    if(i<0 || j<0 || j>=L.order.length) return;
+    [L.order[i], L.order[j]] = [L.order[j], L.order[i]];
+    saveLayout(L);
+  };
+  /* Drop `src` immediately before `dst` in the saved order. Used by both the header drag and
+     the picker drag, so the two stay consistent. */
+  window.pipeColDrop = (src, dst) => {
+    if(!src || src===dst) return;
+    const L = colLayout();
+    const from = L.order.indexOf(src); if(from<0) return;
+    L.order.splice(from,1);
+    const to = dst ? L.order.indexOf(dst) : L.order.length;
+    L.order.splice(to<0?L.order.length:to, 0, src);
+    saveLayout(L);
+  };
+  window.pipeColPicker = () => {
+    const el = document.getElementById("coColPop");
+    if(el) el.classList.toggle("open");
+  };
+  /* Bound once on document, not per render: remount() replaces the whole section markup on
+     every filter change, so a listener attached to the popover itself would be re-added
+     each time and leak. The guard keeps that true even if this file is evaluated twice. */
+  if(!window.__coColPopBound){
+    window.__coColPopBound = true;
+    document.addEventListener("click", ev => {
+      const pop = document.getElementById("coColPop");
+      if(!pop || !pop.classList.contains("open")) return;
+      if(ev.target.closest(".colp-wrap")) return;   // inside the picker or its own button
+      pop.classList.remove("open");
+    });
+    document.addEventListener("keydown", ev => {
+      if(ev.key !== "Escape") return;
+      const pop = document.getElementById("coColPop");
+      if(pop) pop.classList.remove("open");
+    });
+  }
+
+  /* Header drag. HTML5 DnD rather than pointer maths: it is a list reorder, the browser
+     handles the drag image and the escape key, and it degrades to the arrow buttons in the
+     picker for anyone who cannot drag. */
+  window.pipeColDragStart = (ev, key) => {
+    ev.dataTransfer.effectAllowed = "move";
+    try{ ev.dataTransfer.setData("text/plain", key); }catch(e){}
+    COL_DRAG = key;
+    ev.currentTarget.classList.add("dragging");
+  };
+  window.pipeColDragOver = (ev, key) => {
+    if(!COL_DRAG || COL_DRAG===key) return;
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = "move";
+    ev.currentTarget.classList.add("drop-into");
+  };
+  window.pipeColDragLeave = ev => ev.currentTarget.classList.remove("drop-into");
+  window.pipeColDragEnd = () => {
+    COL_DRAG = null;
+    document.querySelectorAll(".co-th.dragging,.co-th.drop-into,.colp-row.dragging,.colp-row.drop-into")
+      .forEach(e=>e.classList.remove("dragging","drop-into"));
+  };
+  window.pipeColDragDrop = (ev, key) => {
+    ev.preventDefault();
+    const src = COL_DRAG || (()=>{ try{ return ev.dataTransfer.getData("text/plain"); }catch(e){ return ""; } })();
+    window.pipeColDragEnd();
+    window.pipeColDrop(src, key);
+  };
+  let COL_DRAG = null;
+
+  /* Clicking a header sorts by that column, second click reverses. Kept in the same state
+     object as the sort dropdown so the two never disagree. */
+  window.pipeColSort = key => {
+    if(!COL_BY[key] || !COL_BY[key].sort) return;
+    CO_F.dir = (CO_F.sort===key && CO_F.dir!=="desc") ? "desc" : "asc";
+    CO_F.sort = key; coShown=CO_PAGE; remount();
+  };
+
   function coFiltered(){
     const f=CO_F;
     let out = rosterList().filter(c=>{
@@ -767,15 +1036,29 @@
       if(f.geo && c.geo!==f.geo) return false;
       if(f.minScore!=="" && (c.score??-1) < +f.minScore) return false;
       if(f.status && statusOf(c.name)!==f.status) return false;
+      if(f.verify && c.verify!==f.verify) return false;
+      if(f.origin && (c.origin||"desk")!==f.origin) return false;
       if(f.q && !coBlob(c).includes(f.q)) return false;
       return true;
     });
-    const rank = n => (STATUS[statusOf(n)]||STATUS.new_lead).rank;
-    if(f.sort==="score")      out.sort((a,b)=>(b.score??-1)-(a.score??-1)||a.name.localeCompare(b.name));
-    else if(f.sort==="name")  out.sort((a,b)=>a.name.localeCompare(b.name));
-    else if(f.sort==="dist")  out.sort((a,b)=>(a.driveMi??1e9)-(b.driveMi??1e9)||a.name.localeCompare(b.name));
-    else if(f.sort==="status")out.sort((a,b)=>rank(b.name)-rank(a.name)||(b.score??-1)-(a.score??-1));
-    else if(f.sort==="icp")   out.sort((a,b)=>(a.icp||"~").localeCompare(b.icp||"~")||(b.score??-1)-(a.score??-1));
+    /* Sorting is the column's own comparator, so a column added to the registry is
+       sortable without touching this function. Name is always the tie break, which keeps
+       the order stable across re-renders instead of shuffling equal rows. */
+    const col = COL_BY[f.sort] || COL_BY.score;
+    const cmp = col.sort || COL_BY.score.sort;
+    const blank = col.blank || (()=>false);
+    const sign = f.dir === "desc" ? -1 : 1;
+    /* Rows with nothing in the sorted column always sink, in BOTH directions. Now that the
+       roster is 40 percent CRM import, ascending by location or score would otherwise open
+       on a wall of blanks, which is the least useful thing the table can show. Reversing the
+       sort should flip the rows that have data, not promote the ones that do not.
+       The sentinel-character trick this replaced did not even work: localeCompare collates
+       punctuation BEFORE letters, so "~" sorted to the top rather than the bottom. */
+    out.sort((a,b)=>{
+      const ba = blank(a), bb = blank(b);
+      if(ba !== bb) return ba ? 1 : -1;
+      return sign*cmp(a,b) || a.name.localeCompare(b.name);
+    });
     return out;
   }
 
@@ -783,9 +1066,10 @@
     CO_F.q=(V("coQ")||"").trim().toLowerCase();
     CO_F.line=V("coLine"); CO_F.icp=V("coIcp"); CO_F.status=V("coStatus");
     CO_F.geo=V("coGeo"); CO_F.minScore=V("coScore"); CO_F.sort=V("coSort")||"score";
+    CO_F.verify=V("coVerify"); CO_F.origin=V("coOrigin");
     coShown=CO_PAGE; remount();
   };
-  window.pipeCoReset = () => { Object.assign(CO_F,{q:"",line:"",icp:"",status:"",geo:"",minScore:"",sort:"score"}); coShown=CO_PAGE; remount(); };
+  window.pipeCoReset = () => { Object.assign(CO_F,{q:"",line:"",icp:"",status:"",geo:"",minScore:"",verify:"",origin:"",sort:"score",dir:"asc"}); coShown=CO_PAGE; remount(); };
   window.pipeCoMore = () => { coShown+=CO_PAGE; remount(); };
 
   const scoreCls = s => s>=9?"sc-hot":s>=7?"sc-warm":s>=5?"sc-mid":"sc-cold";
@@ -810,6 +1094,49 @@
     return { phones, emails, people: cs.length || (c.people||[]).length };
   }
 
+  /* Column picker. Show/hide with a checkbox, reorder by dragging a row or nudging it with
+     the arrows. The arrows are not decoration: drag and drop is unusable with a keyboard or
+     a screen reader, and this is the control that decides what a rep can see. */
+  function colPicker(){
+    const L = colLayout();
+    const shown = CO_COLS.length - L.hidden.length;
+    return `<div class="colp-wrap">
+      <button class="btn btn-ghost" onclick="pipeColPicker()" title="Choose which columns appear and what order they go in">Columns (${shown}/${CO_COLS.length})</button>
+      <div class="colp" id="coColPop">
+        <div class="colp-h">
+          <b>Table columns</b>
+          <span class="colp-acts">
+            <a onclick="pipeColAll(true)">All</a>
+            <a onclick="pipeColAll(false)">None</a>
+            <a onclick="pipeColReset()">Reset</a>
+          </span>
+        </div>
+        <p class="colp-hint">Drag a row to reorder, or drag the header on the table itself. Click a header to sort by it.</p>
+        <div class="colp-list">
+          ${L.order.map((k,i)=>{ const col=COL_BY[k]; if(!col) return "";
+            const on = !L.hidden.includes(k);
+            return `<div class="colp-row" draggable="true"
+                ondragstart="pipeColDragStart(event,'${k}')"
+                ondragover="pipeColDragOver(event,'${k}')"
+                ondragleave="pipeColDragLeave(event)"
+                ondrop="pipeColDragDrop(event,'${k}')"
+                ondragend="pipeColDragEnd()">
+              <span class="colp-grip" aria-hidden="true"></span>
+              <label class="colp-lbl${col.always?" locked":""}" title="${esc(col.hint)}">
+                <input type="checkbox" ${on?"checked":""} ${col.always?"disabled":""} onchange="pipeColToggle('${k}')">
+                <span>${esc(col.label)}</span>
+                ${col.always?`<span class="colp-lock" title="The company name identifies the row and cannot be hidden">locked</span>`:""}
+              </label>
+              <span class="colp-nudge">
+                <button type="button" onclick="pipeColMove('${k}',-1)" ${i===0?"disabled":""} aria-label="Move ${esc(col.label)} left">↑</button>
+                <button type="button" onclick="pipeColMove('${k}',1)" ${i===L.order.length-1?"disabled":""} aria-label="Move ${esc(col.label)} right">↓</button>
+              </span>
+            </div>`; }).join("")}
+        </div>
+      </div>
+    </div>`;
+  }
+
   function tCompanies(){
     const R = window.ROSTER;
     if(!R) return `<div class="note warn"><b>Roster not loaded.</b> roster-data.js is missing from this deployment. Run <code>node scripts/build-roster.mjs</code> and redeploy.</div>`;
@@ -823,8 +1150,13 @@
     /* Counts per status across the WHOLE roster, not the filtered set: these double as the
        headline "where does the roster stand" numbers, and they must not move when someone
        types in the search box. */
-    const tally = {};
-    for(const c of rosterList()){ const s=statusOf(c.name); tally[s]=(tally[s]||0)+1; }
+    const tally = {}, vTally = {}, oTally = {};
+    for(const c of rosterList()){
+      const s=statusOf(c.name); tally[s]=(tally[s]||0)+1;
+      vTally[c.verify]=(vTally[c.verify]||0)+1;
+      oTally[c.origin||"desk"]=(oTally[c.origin||"desk"]||0)+1;
+    }
+    const cols = visibleCols();
 
     return `
       <div class="co-head">
@@ -832,7 +1164,7 @@
           ${Object.entries(STATUS).sort((a,b)=>b[1].rank-a[1].rank).map(([k,s])=>
             `<button class="co-stat ${s.cls}${CO_F.status===k?" on":""}" onclick="pipeCoQuick('status','${k}')" title="${esc(s.hint)}">
                <span class="n">${num(tally[k]||0)}</span><span class="l">${esc(s.label)}</span></button>`).join("")}
-          <span class="co-total"><b>${num(R.count)}</b> companies researched · <b>${num(R.live)}</b> live</span>
+          <span class="co-total"><b>${num(R.count)}</b> companies · <b>${num(R.live)}</b> live · <b>${num(vTally.verified||0)}</b> desk verified${R.needsWork?` · <button class="co-total-link" onclick="pipeCoQuick('verify','unverified')" title="Live rows imported or carried over that have never been desk scored. Click to see them.">${num(R.needsWork)} still need work</button>`:""}</span>
         </div>
       </div>
       <div class="co-bar">
@@ -842,58 +1174,56 @@
         ${sel("coStatus","Status",[["","Any status"],...Object.entries(STATUS).map(([k,s])=>[k,s.label])],CO_F.status)}
         ${sel("coGeo","Freight",[["","Any freight"],["IN","In zone"],["BORDERLINE","Borderline"],["OUT","Out of zone"]],CO_F.geo)}
         ${sel("coScore","Min score",[["","Any score"],["9","9+ (best)"],["8","8+"],["7","7+"],["5","5+"]],CO_F.minScore)}
-        ${sel("coSort","Sort",[["score","Sort: score"],["status","Sort: status"],["dist","Sort: distance"],["name","Sort: name"],["icp","Sort: ICP"]],CO_F.sort)}
+        ${sel("coVerify","Verification",[["","Any verification"],...Object.entries(VERIFY).sort((a,b)=>b[1].rank-a[1].rank).map(([k,v])=>[k,`${v.label} (${vTally[k]||0})`])],CO_F.verify)}
+        ${sel("coOrigin","Source",[["","Any source"],...Object.entries(ORIGIN).map(([k,o])=>[k,`${o.label} (${oTally[k]||0})`]).filter(x=>oTally[x[0].replace(/ .*/,"")]!==undefined||true)],CO_F.origin)}
+        ${sel("coSort","Sort",CO_COLS.filter(c=>c.sort).map(c=>[c.key,`Sort: ${c.label}`]),CO_F.sort)}
         <button class="btn btn-ghost" onclick="pipeCoReset()">Reset</button>
-        <button class="btn btn-ghost" onclick="pipeCoExport()">Export CSV</button>
+        ${colPicker()}
+        <button class="btn btn-ghost" onclick="pipeCoExport()" title="Exports exactly the columns you can see, in the order you put them in">Export view</button>
+        <button class="btn btn-ghost" onclick="pipeCoExportAll()" title="Every field we hold, regardless of which columns are shown">Export all fields</button>
         <span class="pcount-lbl">${num(rows.length)} shown</span>
       </div>
       ${rows.length?"":`<div class="note" style="margin-top:12px">No company matches these filters. <a href="#" onclick="pipeCoReset();return false">Clear them</a>.</div>`}
-      ${tblWrap(`<thead><tr>
-          <th>Company</th><th>Status</th><th>Line / ICP</th><th>Location</th>
-          <th class="num">Freight</th><th class="num">Score</th><th>Phone</th><th>Email</th><th>Why they fit</th><th>Contacts / titles</th>
-        </tr></thead>
-        <tbody>${page.map(coRow).join("")}</tbody>`)}
+      ${tblWrap(`<thead><tr>${cols.map(col=>{
+          const active = CO_F.sort===col.key;
+          const arrow = active ? (CO_F.dir==="desc"?"↓":"↑") : "";
+          return `<th class="co-th${col.num?" num":""}${active?" sorted":""}"
+            draggable="true"
+            ondragstart="pipeColDragStart(event,'${col.key}')"
+            ondragover="pipeColDragOver(event,'${col.key}')"
+            ondragleave="pipeColDragLeave(event)"
+            ondrop="pipeColDragDrop(event,'${col.key}')"
+            ondragend="pipeColDragEnd()"
+            title="${esc(col.hint)} · Drag to reorder, click to sort">
+            <button type="button" class="co-th-b" onclick="pipeColSort('${col.key}')">
+              <span class="co-th-grip" aria-hidden="true"></span>${esc(col.label)}<span class="co-th-ar">${arrow}</span>
+            </button></th>`;
+        }).join("")}</tr></thead>
+        <tbody>${page.map(c=>`<tr class="${c.dead?"co-dead":""}">${cols.map(col=>col.cell(c)).join("")}</tr>`).join("")}</tbody>`)}
       ${rows.length>coShown?`<div class="co-more"><button class="btn btn-ghost" onclick="pipeCoMore()">Show ${num(Math.min(CO_PAGE,rows.length-coShown))} more (${num(rows.length-coShown)} remaining)</button></div>`:""}
     `;
   }
 
-  /* One roster row. Everything that identifies the company links into its profile, so the
-     table is a way in rather than a dead end. */
-  function coRow(c){
-    const st = STATUS[statusOf(c.name)]||STATUS.new_lead;
-    const reach = reachOf(c);
-    const dist = c.driveMi!=null ? `${num(c.driveMi)} mi` : (c.crowMi!=null?`~${num(c.crowMi)} mi`:"—");
-    return `<tr class="${c.dead?"co-dead":""}">
-      <td class="co-name">
-        ${acctLink(c.name)}
-        ${c.website?`<a class="co-web" href="https://${esc(c.website.replace(/^https?:\/\//,""))}" target="_blank" rel="noopener" title="${esc(c.website)}">↗</a>`:""}
-        ${c.segment?`<div class="co-seg clamp2">${esc(c.segment)}</div>`:""}
-      </td>
-      <td>${stBadgeFor(c.name)}</td>
-      <td>${c.dead?`<span class="pdim">Disqualified</span>`
-            :`<span class="co-line ${c.line==="Biochar"?"ln-bio":"ln-abs"}">${esc(c.line||"—")}</span>
-              ${c.icp?`<div class="co-icp" title="${esc(c.icpLabel||"")}">${esc(c.icp)}</div>`:""}`}</td>
-      <td>${esc([c.city,c.state].filter(Boolean).join(", ")||"—")}</td>
-      <td class="num"><span class="geo ${geoCls(c.geo,c.geoGates)}" title="${esc(geoTitle(c.geo,c.geoGates))}">${dist}</span></td>
-      <td class="num">${c.score!=null?`<span class="sc ${scoreCls(c.score)}">${c.score}</span>`:"—"}</td>
-      <td class="co-tel">${reach.phones.length
-        ? `<a href="tel:${esc(reach.phones[0].replace(/[^\d+]/g,""))}">${esc(reach.phones[0])}</a>${reach.phones.length>1?`<span class="co-more-n" title="${esc(reach.phones.slice(1).join(", "))}">+${reach.phones.length-1}</span>`:""}`
-        : `<span class="co-gap" title="No phone on file. Find one before this row can be worked.">needed</span>`}</td>
-      <td class="co-mail">${reach.emails.length
-        ? `<a href="mailto:${esc(reach.emails[0])}">${esc(reach.emails[0])}</a>${reach.emails.length>1?`<span class="co-more-n" title="${esc(reach.emails.slice(1).join(", "))}">+${reach.emails.length-1}</span>`:""}`
-        : `<span class="co-gap" title="No email on file. Apollo enrichment fills this.">needed</span>`}</td>
-      <td class="co-why"><div class="clamp3" title="${esc(c.why||c.scoreWhy||"")}">${esc(c.dead?(c.scoreWhy||"No reason recorded"):(c.why||"—"))}</div></td>
-      <td class="co-titles">${reach.people?`<span class="co-ppl" title="Named contacts on file">${reach.people} contact${reach.people>1?"s":""}</span>`:""}<div class="clamp2">${esc(c.titles&&c.titles!=="n/a - not a buying account"?c.titles:"—")}</div></td>
-    </tr>`;
-  }
+  /* coRow is gone. A row is now cols.map(col => col.cell(c)), so a column's markup lives
+     with its label, its sort and its CSV mapping in CO_COLS rather than in a parallel
+     function that had to be edited in lockstep. */
 
   /* Debounced so a fast typist does not trigger a full re-render per keystroke. */
   let coTimer=null;
   window.pipeCoDebounce = () => { clearTimeout(coTimer); coTimer=setTimeout(()=>window.pipeCoFilter(),180); };
   window.pipeCoQuick = (field,val) => { CO_F[field] = CO_F[field]===val?"":val; coShown=CO_PAGE; remount(); };
-  window.pipeCoExport = () => downloadCSV("company-roster.csv",
-    ["Company","Status","Line","ICP","ICP Name","Segment","City","State","DriveMi","Freight","FreightGates","Score","Phone","Email","NamedContacts","WhyTheyFit","ScoreReason","LikelyTitles","Trigger","Website","Source"],
-    coFiltered().map(c=>{const r=reachOf(c);return [c.name,(STATUS[statusOf(c.name)]||{}).label,c.line,c.icp,c.icpLabel,c.segment,c.city,c.state,c.driveMi,c.geo,c.geoGates?"yes":"no (nationwide)",c.score,r.phones.join(" / "),r.emails.join(" / "),r.people,c.why,c.scoreWhy,c.titles,c.trigger,c.website,c.sourceUrl];}));
+  /* Export mirrors what is on screen: the visible columns, in the order they were dragged
+     into, filtered the same way. Someone who has arranged the table to answer a question
+     should get that same arrangement in the file rather than a fixed 21 column dump. */
+  window.pipeCoExport = () => {
+    const cols = visibleCols();
+    downloadCSV("company-roster.csv", cols.map(c=>c.label), coFiltered().map(c=>cols.map(col=>col.csv(c))));
+  };
+  /* The everything export stays available, because the on screen set is deliberately a
+     subset and an Apollo or Instantly upload wants every field we hold. */
+  window.pipeCoExportAll = () => downloadCSV("company-roster-full.csv",
+    ["Company","Status","Verified","Missing","Origin","Line","ICP","ICP Name","Segment","City","State","DriveMi","Freight","FreightGates","Score","Phone","Email","NamedContacts","WhyTheyFit","ScoreReason","LikelyTitles","Trigger","Website","Source","CRMOwner","LastContacted","HubSpotDeals"],
+    coFiltered().map(c=>{const r=reachOf(c);return [c.name,(STATUS[statusOf(c.name)]||{}).label,(VERIFY[c.verify]||{}).label||"",(c.needs||[]).join("; "),(ORIGIN[c.origin]||{}).label||"",c.line,c.icp,c.icpLabel,c.segment,c.city,c.state,c.driveMi,c.geo,c.geoGates?"yes":"no (nationwide)",c.score,r.phones.join(" / "),r.emails.join(" / "),r.people,c.why,c.scoreWhy,c.titles,c.trigger,c.website,c.sourceUrl,c.owner||"",c.lastContacted||"",c.hsDeals||0];}));
 
   function tContacts(){
     const cs=allContacts();
