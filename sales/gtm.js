@@ -42,22 +42,6 @@
     );
   }
 
-  /* ---- 2. Pre-Launch Checklist ---- */
-  function rPrelaunch(){
-    const cats=GTM.prelaunch;
-    const filters=`<div class="filters"><span class="pill active" onclick="gtmPreFilter(this,'all')">All</span>${cats.map((c,i)=>`<span class="pill" onclick="gtmPreFilter(this,'${i}')">${esc(c.cat)}</span>`).join("")}</div>`;
-    const blocks=cats.map((c,i)=>`<div class="gtm-pre-block" data-idx="${i}">`+
-      sec("",esc(c.cat))+
-      table(["Item","Pri","Owner","Status","Why it matters","Acceptance criteria"],c.items.map(it=>[
-        `<strong>${esc(it.i)}</strong>`,gbadgePri(it.p),esc(it.o),gstatus(it.s),esc(it.why),`<span style="color:var(--green-bright)">${esc(it.ac)}</span>`]))+
-      `</div>`).join("");
-    return page("gtm-prelaunch",
-      head("③ Launch gate — pre-launch checklist","Everything that must be true before outbound begins. Nothing ships until the P0 rows are green.")+
-      filters+blocks
-    );
-  }
-  window.gtmPreFilter=(el,i)=>{el.closest(".filters").querySelectorAll(".pill").forEach(p=>p.classList.remove("active"));el.classList.add("active");
-    document.querySelectorAll(".gtm-pre-block").forEach(b=>b.style.display=(i==="all"||b.dataset.idx===i)?"":"none");};
 
   /* ---- 3. ICP Campaigns ---- */
   function rCampaigns(){
@@ -253,23 +237,6 @@
     );
   }
 
-  /* ---- 14. Final Execution Checklist ---- */
-  function rLaunch(){
-    const l=GTM.launch;
-    return page("gtm-launch",
-      head("③ Launch gate: first 48 hours","Clear the gate, then run the first 48 hours. Week-one outputs and iteration rules below.")+
-      sec("","Before outreach (gate)")+`<div class="card">${l.before.map((x,i)=>chk("gate:before:"+i,esc(x))).join("")}</div>`+
-      sec("","First 48 hours")+
-      `<div class="card">${l.first48.map((t,i)=>chk("gate:f48:"+i,`<b>${esc(t.t)}</b> · ${esc(t.d)}`)).join("")}</div>`+
-      sec("","First week")+
-      `<div class="grid g3">
-        <div class="card"><h4>Expected outputs</h4>${ul(l.firstWeek.outputs)}</div>
-        <div class="card"><h4>Review checkpoints</h4>${ul(l.firstWeek.checkpoints)}</div>
-        <div class="card"><h4>Iteration rules</h4>${ul(l.firstWeek.iteration)}</div>
-      </div>`+
-      `<div class="note ok"><b>Launch sequence:</b> pass the pre-launch gate → verify infra & pages (48h) → launch CMP-AGD (biochar) Email 1 to top 30 ag distributors/blenders → dial for new-product decision-makers → ship first biochar sample kits → convert a winning trial to a paid order against the 80 MT → document a claim-safe win → expand into compost/nursery biochar, then layer the absorbent secondary track (O&G/ENV/landfill), then carbon (days 61–90).</div>`
-    );
-  }
 
   /* ================= EXPORT BUILDERS =================
      Consolidated Sales OS (v2): GTM no longer owns its own nav or
@@ -279,5 +246,5 @@
      strips the wrapper (stripBody) and stacks the inner content under
      the matching consolidated section.
      ================================================================ */
-  window.GTMB = {rSummary,rPrelaunch,rCampaigns,rScale,rSequences,rCalling,rScriptLibrary,rLinkedIn,rSocial,rLongTerm,rSample,rLaunch};
+  window.GTMB = {rSummary,rCampaigns,rScale,rSequences,rCalling,rScriptLibrary,rLinkedIn,rSocial,rLongTerm,rSample};
 })();

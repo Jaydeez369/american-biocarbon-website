@@ -150,8 +150,8 @@
      it blindly. */
   const SUFFIX_RE = /\b(llc|l\s*l\s*c|inc|incorporated|corp|corporation|company|co|ltd|limited|lp|llp|plc|holdings|group|enterprises)\b/g;
   const norm = s => {
-    let t = String(s||"").normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase();
-    t = t.replace(/[‘’ʼ`]/g,"'");   // curly and modifier apostrophes to ASCII
+    let t = String(s||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+    t = t.replace(/[\u2018\u2019\u02bc`]/g,"'");   // curly and modifier apostrophes to ASCII
     t = t.replace(/'s\b/g,"");                     // possessive: "harrell's" and "harrells" agree
     t = t.replace(/[^\w\s]/g," ");                 // punctuation to space: "j.berry" == "j berry"
     t = t.replace(/\band\b/g," ");                 // "&" is already a space by now, so DROP the
@@ -162,7 +162,7 @@
                                                    // token could otherwise leave "harrell "
     // Never return "": a name that is ALL suffix ("LLC") or all whitespace would otherwise
     // collide with every other such name and pull their records together.
-    return t || String(s||"").toLowerCase() || " empty";
+    return t || String(s||"").toLowerCase() || "__unnamed_account__";
   };
   const qtyStr = ds => {
     const mt = ds.filter(d=>d.uom==="MT").reduce((a,d)=>a+d.qty,0);
@@ -1095,5 +1095,33 @@
   }
   function rCRM(){ return `<section class="section" id="sec-crm">${sectionInner()}</section>`; }
 
-  window.PIPELIVE = { rCRM };
+  /* Live counts for the Launchpad. Exposed as a function, not a snapshot, so the numbers are
+     computed at render time from whatever is actually loaded. This is the whole reason the
+     Launchpad can state a roster size at all: the previous version of that page hardcoded
+     "150-200 accounts" and was wrong the moment the roster changed. Nothing here is a target
+     or a plan, only what is currently in the system. */
+  function stats(){
+    const accts = liveAccounts();
+    const cons  = allContacts();
+    const deals = liveDeals();
+    const open  = deals.filter(d=>d.status==="open");
+    const withEmail = cons.filter(c=>c.email && /@/.test(c.email));
+    return {
+      accounts:      accts.length,
+      accountsHs:    accts.filter(a=>a.hubspot).length,
+      accountsDerived: accts.filter(a=>a.derived).length,
+      contacts:      cons.length,
+      contactsEmail: withEmail.length,
+      contactsNamed: cons.filter(c=>String(c.name||"").trim()).length,
+      deals:         deals.length,
+      dealsOpen:     open.length,
+      openValue:     sum(open,value),
+      hsSynced:      (window.HUBSPOT && window.HUBSPOT.synced) || "",
+      /* Aliases folded by norm(). Surfaced here so a bad merge is visible from the Launchpad
+         and not only from the profile of the account it damaged. */
+      merged: Object.entries(ACCT_ALIASES).filter(([,v])=>v.length>1).map(([,v])=>v),
+    };
+  }
+
+  window.PIPELIVE = { rCRM, stats };
 })();

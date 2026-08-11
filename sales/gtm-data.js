@@ -49,69 +49,6 @@ summary:{
 },
 
 /* ---------------------------------------------------------- 2. PRE-LAUNCH CHECKLIST */
-prelaunch:[
-  {cat:"Website / Landing Pages",items:[
-    {i:"Homepage hero aligned to O&G / remediation",p:"P0",o:"Founder+Web",s:"Todo",why:"Traffic from the primary wedge must land on wedge messaging, not generic biochar.",ac:"Hero states absorbent value prop + primary CTA above the fold; loads <2s."},
-    {i:"Absorbent pellet page",p:"P0",o:"Web",s:"Todo",why:"Core product for the wedge; destination for O&G/spill CTAs.",ac:"Spec table, absorption ratio (EST-tagged), sample + quote CTA, comparison block."},
-    {i:"Absorbent crumble page",p:"P1",o:"Web",s:"Todo",why:"Second SKU; different form-factor for different spill types.",ac:"Use-case, spec, CTA present."},
-    {i:"Industrial remediation page",p:"P0",o:"Web",s:"Todo",why:"Category page for the whole wedge; anchors outbound links.",ac:"Use-cases, handling/disposal note, proof, quote CTA."},
-    {i:"Oil & gas use-case page",p:"P0",o:"Web",s:"Todo",why:"O&G buyers need their exact scenario mirrored back.",ac:"Wellpad/tank/pit language, sample CTA, sourcing-contact ask."},
-    {i:"Landfill / leachate page",p:"P1",o:"Web",s:"Todo",why:"Adjacent recurring buyer with distinct pain (leachate absorption).",ac:"Leachate/odor framing, free-sample CTA (LOI follow-on)."},
-    {i:"Agriculture page",p:"P2",o:"Web",s:"Todo",why:"Separate track so ag buyers never see oilfield messaging.",ac:"Soil/biochar benefits, distributor CTA, spec sheet."},
-    {i:"Carbon removal / CDR page",p:"P2",o:"Web",s:"Todo",why:"Carbon buyers need MRV/proof context, not product pitch.",ac:"CDR pathway explainer, MRV status, 'talk to us' CTA (no volume claims)."},
-    {i:"Request Sample page + form",p:"P0",o:"Web",s:"Todo",why:"The #1 conversion action of the whole GTM.",ac:"Qualifies use-case/volume/timeline; writes to CRM Sample object."},
-    {i:"LOI / reserve-supply page + form",p:"P0",o:"Web",s:"Todo",why:"Month-1 conversion action for warm buyers — lock Q4 supply, not a bulk order.",ac:"Captures product, future volume, territory, ship-to zip; routes to Victor + Jesse + Daniel."},
-    {i:"Contact page",p:"P1",o:"Web",s:"Todo",why:"Trust + routing.",ac:"Phone, email, facility, reply-routing works."}
-  ]},
-  {cat:"Collateral",items:[
-    {i:"Absorbent pellet one-pager",p:"P0",o:"Founder",s:"Todo",why:"Leave-behind + email attach for the wedge.",ac:"PDF: spec, ratio (EST), use-cases, CTA, contact."},
-    {i:"Crumble one-pager",p:"P1",o:"Founder",s:"Todo",why:"Second SKU collateral.",ac:"PDF ready."},
-    {i:"Industrial spec sheet",p:"P0",o:"Founder+Ops",s:"Todo",why:"Procurement buyers require specs before samples.",ac:"Bulk density, particle size, absorption (EST), packaging, handling."},
-    {i:"Comparison sheet vs wood pellets / clay",p:"P0",o:"Founder",s:"Todo",why:"The wedge IS the comparison; buyers switch on cost-per-gallon absorbed.",ac:"Side-by-side; savings shown as illustrative/EST, not guaranteed."},
-    {i:"Biochar ag spec sheet",p:"P2",o:"Founder",s:"Todo",why:"Ag/distributor track collateral.",ac:"PDF ready with claim-safe language."},
-    {i:"Certification / proof sheet",p:"P1",o:"Founder",s:"Todo",why:"Serious B2B buyers want lab/spec proof.",ac:"Only verified certs/lab results; each tagged to proof tier."},
-    {i:"Sample kit PDF",p:"P0",o:"Founder",s:"Todo",why:"Makes the kit feel procurement-grade, not a freebie.",ac:"What's inside, test protocol, success criteria, next step."},
-    {i:"Distributor program one-pager",p:"P2",o:"Founder",s:"Todo",why:"Channel leverage for days 31–90.",ac:"Margins, MOQ, territory, support."},
-    {i:"Carbon removal overview",p:"P2",o:"Founder",s:"Todo",why:"Grounds CDR conversations in MRV reality.",ac:"Pathway, MRV, no committed-volume claims."},
-    {i:"Objection battlecard",p:"P1",o:"Founder",s:"Todo",why:"Consistent, credible answers on calls.",ac:"Top 8 objections with response + proof + next question."}
-  ]},
-  {cat:"CRM / Internal App",items:[
-    {i:"Account object fields (+ ICP tag, freight zone)",p:"P0",o:"Founder",s:"Todo",why:"Everything routes off the account.",ac:"See CRM spec; fields exist + filterable."},
-    {i:"Contact fields (role, sourcing-owner flag)",p:"P0",o:"Founder",s:"Todo",why:"Multi-thread accounts.",ac:"Role + reply status captured."},
-    {i:"Deal fields (SKU, tons, delivered margin, carbon EST)",p:"P0",o:"Founder",s:"Todo",why:"Pipeline + economics.",ac:"Matches schema in main app Pipeline tab."},
-    {i:"Campaign object + campaign tags",p:"P0",o:"Founder",s:"Todo",why:"Attribute every reply/sample to a campaign.",ac:"Campaign id on every activity."},
-    {i:"Activity log fields (channel, outcome)",p:"P0",o:"Founder",s:"Todo",why:"Measure the machine.",ac:"Email/call/LI logged with outcome enum."},
-    {i:"Sample Request fields",p:"P0",o:"Founder",s:"Todo",why:"Core conversion object.",ac:"Qual, ship, follow-up, outcome fields."},
-    {i:"Quote Request fields",p:"P0",o:"Founder",s:"Todo",why:"Money object.",ac:"SKU, tons, freight zone, delivered price."},
-    {i:"Carbon Value Estimate fields",p:"P1",o:"Founder",s:"Todo",why:"Track optionality without overcommitting.",ac:"tCO2e EST, confidence, MRV status — flagged as estimate."},
-    {i:"Lead source + ICP tag tracking",p:"P0",o:"Founder",s:"Todo",why:"Attribution + allocation control.",ac:"Every record has source + ICP."}
-  ]},
-  {cat:"Outbound Infrastructure",items:[
-    {i:"Secondary sending domain(s) + inboxes",p:"P0",o:"Founder",s:"Todo",why:"Protect the primary domain reputation.",ac:"1–2 lookalike domains, 2 inboxes each, SPF/DKIM/DMARC set."},
-    {i:"Domain warm-up plan",p:"P0",o:"Founder",s:"Todo",why:"Cold volume from a cold domain = spam folder.",ac:"2-week ramp; start ≤20/inbox/day; grow only if bounce<2%."},
-    {i:"Email signatures (all inboxes)",p:"P1",o:"Founder",s:"Todo",why:"Credibility + reply routing.",ac:"Name, title, phone, site, physical address."},
-    {i:"Phone number(s) + call tracking",p:"P0",o:"Founder",s:"Todo",why:"Calling is core to the motion; must log.",ac:"Dedicated line; calls log to CRM activity."},
-    {i:"LinkedIn profile(s) optimized",p:"P0",o:"Founder",s:"Todo",why:"DMs + social proof surface here first.",ac:"See LinkedIn tab checklist complete."},
-    {i:"Company social pages",p:"P1",o:"Founder",s:"Todo",why:"Buyers verify you exist.",ac:"LinkedIn company page live; FB optional."},
-    {i:"Reply routing + unsubscribe/compliance",p:"P0",o:"Founder",s:"Todo",why:"CAN-SPAM compliance + no lost replies.",ac:"Physical address + opt-out in every cold email; replies route to one inbox."}
-  ]},
-  {cat:"Social Proof / Credibility",items:[
-    {i:"Prior sales history summarized (claim-safe)",p:"P0",o:"Founder",s:"Todo",why:"Our biggest credibility asset.",ac:"Volumes/customers described without unverifiable specifics or NDA breaches."},
-    {i:"Product photos",p:"P0",o:"Founder",s:"Todo",why:"Industrial buyers want to see the material.",ac:"Pellet, crumble, packaging, in-hand scale shots."},
-    {i:"Facility photos + Cora Texas co-location story",p:"P1",o:"Founder",s:"Todo",why:"Sugar-mill co-location = feedstock credibility + supply story.",ac:"Photos + 2-line explanation of bagasse→product at source."},
-    {i:"Certificate + lab/spec docs",p:"P1",o:"Founder",s:"Todo",why:"Proof for serious buyers.",ac:"Only verified docs, tier-tagged."},
-    {i:"Founder / company story",p:"P1",o:"Founder",s:"Todo",why:"People buy from people, especially founder-led.",ac:"150-word origin: bagasse, mission, why now."}
-  ]},
-  {cat:"Analytics",items:[
-    {i:"Form + CTA tracking",p:"P0",o:"Web",s:"Todo",why:"Know which CTA converts.",ac:"Each form submit + CTA click fires an event."},
-    {i:"Page analytics",p:"P1",o:"Web",s:"Todo",why:"Landing-page conversion optimization.",ac:"Per-page views + conversion visible."},
-    {i:"Email reply + open/bounce tracking",p:"P0",o:"Founder",s:"Todo",why:"Deliverability + message iteration.",ac:"Reply/bounce/positive-reply visible per campaign."},
-    {i:"Lead-source attribution",p:"P0",o:"Founder",s:"Todo",why:"Allocation control.",ac:"Source stamped on every lead."},
-    {i:"Campaign dashboard",p:"P1",o:"Founder",s:"Todo",why:"Single pane for daily review.",ac:"See Dashboard tab spec live."}
-  ]}
-],
-
-/* ---------------------------------------------------------- 3. ICP CAMPAIGNS */
 campaigns:[
   {name:"Operation Wellpad — O&G / Industrial Remediation",tag:"CMP-OG",alloc:"~18%",secondaryTrack:true,
    titles:["HSE Manager","Procurement / Sourcing Manager","Operations Manager","Facility / Yard Manager","Environmental Compliance Lead"],
@@ -572,22 +509,4 @@ sampleFlow:{
   ogNote:"For O&G, the sample + LOI must feel PROCUREMENT-READY: labeled, spec-carded, with a written test protocol, success criteria, and a clean one-page LOI — not a consumer freebie. It should look like something a buyer can put in front of HSE and procurement without embarrassment."
 },
 
-/* ---------------------------------------------------------- 15. FINAL EXECUTION CHECKLIST */
-launch:{
-  before:["Website: hero + O&G + industrial-remediation + free-sample + LOI/reserve-supply pages live (Victor-approved)","Forms: every website form routes server-side to sboone@cs-ops.com and victor.jehle@cs-ops.com. The recipient list is hardcoded in website/functions/api/lead.js and the client-supplied recipients array is deliberately ignored, so the form cannot be used as an open relay. DONE and tested end-to-end.","Sample SKUs: 3 live (Biochar 1/2 lb, Absorbent Pellets 1 lb, Absorbent Crumble 1 lb), plus 3 live metric-ton SKUs. Variant IDs already wired into website/data.js. DONE.","Certs: SDS / OMRI listing / IBI-panel lab reports / Puro gathered by Victor; carbon + certification language reviewed for overstatement","CRM: Account/Contact/Deal/Campaign/Activity/Sample/LOI fields + ICP/campaign tags live","Collateral: spec sheet + comparison sheet + sample-kit insert + LOI one-pager ready","Target list: 150–200 accounts across BOTH products sourced, verified, tagged; shared with Victor","Sending: 1–2 secondary domains warmed, SPF/DKIM/DMARC passing, opt-out + address in template","Calls: scripts + phone line + CRM logging ready","Sample workflow: qualification + 48h ship SLA + LOI one-pager in every box","Dashboard: daily activity + sample→LOI funnel cards live","Social: LinkedIn profile + company page live","Analytics: form/CTA/reply/bounce tracking installed"],
-  first48:[
-    {t:"Verify infra",d:"Send 5 test emails to yourself across inboxes; confirm inbox placement + tracking; submit sample form as a test → confirm CRM record."},
-    {t:"Load the list",d:"Confirm 100 CMP-OG accounts tagged; rank top 30 by priority score."},
-    {t:"Launch CMP-OG Email 1",d:"Send 40–50 Email 1 (Operation Wellpad) to top accounts; log to campaign."},
-    {t:"First 20 dials",d:"Call to find/confirm the sourcing contact on top accounts; use gatekeeper + ops scripts."},
-    {t:"10 LinkedIn connects",d:"Personalized notes to HSE/procurement at top accounts."},
-    {t:"First posts live",d:"Publish product-proof + absorption-demo posts."},
-    {t:"Verify pages",d:"Confirm /oil-gas, /industrial-remediation, /request-sample, /request-quote render + convert."}
-  ],
-  firstWeek:{
-    outputs:["100 accounts live + top-30 ranked","~250–350 emails sent (ramping)","~100+ dials","50+ LinkedIn touches","First positive replies + 2+ sample requests","3+ discovery calls booked"],
-    checkpoints:["Daily 5pm: bounce% < 2%? positive replies? ship any requested kits same-week","Day 3: which subject line/angle wins? cut the loser","Day 7: reply→sample rate; scale, hold, or fix deliverability"],
-    iteration:["Only increase volume if bounce <2% AND positive-reply quality holds","Kill any angle/segment below 0.5% positive reply after 100 sends","Double down on the subsegment producing samples","Manually review + multi-thread every top-20 account"]
-  }
-}
 };

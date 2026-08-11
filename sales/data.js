@@ -552,21 +552,6 @@ const DATA = {
     ],
   },
 
-  /* ============ 15. FINAL CHECKLIST ============ */
-  checklist:{
-    biochar:["Confirm the 80 MT of finished biochar is packaged, QC'd & ship-ready","Set biochar bulk price + minimum order qty by freight zone (internal)","Get freight/LTL quotes from White Castle for the top biochar zones","Stand up a biochar bulk-order / PO path (Shopify or manual invoice)","Sample→order SOP: on a winning trial, quote from the 80 MT within 24h","Track MT sold vs 80 MT on the dashboard"],
-    website:["✅ Temporary website build-out complete (localhost + combined-site)|done","Victor reviews & approves site copy + both product tracks","Create 2 sample SKUs in Shopify (Pellets 1 lb, Biochar 8 oz)","Wire Shopify variant IDs into the site sample forms","Publish certs/spec sheets to the site (SDS / OMRI listing / IBI-panel lab reports / Puro)","Install/stage approved site in Shopify → publish over current site","Sample + reserve-supply forms route to Jesse + Victor + Daniel (tested end-to-end)"],
-    build:["CRM objects + fields (Account/Contact/Deal/Sample/LOI/Activity)","Sample→LOI funnel: statuses + sample tracker","Dashboards (samples shipped, sample→LOI, committed volume)","Target account list view (both tracks, freight-zoned)"],
-    collateral:["Absorbent 1-pager (industrial — single-product)","Biochar 1-pager (ag — single-product)","Sample-kit insert + test protocol","Spec sheets + SDS (from Victor)","Comparison: pellets vs wood/clay · biochar vs wood biochar","Product photos (real close-ups + facility)"],
-    lists:["150–200 accounts across BOTH product ICPs (Gulf South + freight-viable)","Contacts + verified emails (Apollo)","ICP-tagged + freight-zoned; shared with Victor"],
-    firstActions:["Free-sample outreach ONLY in the cold touch (the sample is the door-opener; the order comes after a trial win)","BIOCHAR track (PRIORITY): distributor/blender/composter/grower emails + calls","Absorbent track (secondary): EHS/spill/oilfield emails + calls","Ship free samples within 48h of qualification (biochar first)","Convert winning trials on any line to paid metric-ton POs (biochar ships against the 80 MT on hand)","Book discovery/technical calls (Victor takes technical)"],
-  },
-
-  /* ============ 14. BIOCHAR — SPECS, DATA & AVATARS ============
-     Biochar is the DYNAMIC product: one material, many buyers. Absorbent pellets & crumble = one industrial avatar;
-     biochar sells across ag distribution, row-crop farmers, ranchers/livestock, poultry (bedding + in-feed),
-     compost/blenders, and nursery/greenhouse — each with a different benefit that matters to THEM.
-     Pull the spec + the ONE comparison + the ONE benefit that fits the avatar in front of you. */
   biochar:{
     intro:"100% sugarcane-bagasse biochar from the Cora Texas mill (White Castle, LA). Oxygen-limited pyrolysis >500°C turns a renewable ag byproduct — no trees cut — into a stable, nutrient-bearing carbon. Its defining edge vs most biochar is the bagasse feedstock's naturally ordered honeycomb pore structure, which drives higher water-holding, nutrient retention, and microbial habitat than random-pore wood char.",
     spec:[

@@ -99,59 +99,133 @@ function page(id,inner){return `<section class="section" id="sec-${id}">${inner}
 function head(t,sub){return `<h1 class="page-h">${t}</h1><p class="page-sub">${sub}</p>`;}
 function sec(num,t){return `<h2 class="sec"><span class="num">${num}</span>${t}</h2>`;}
 
-/* --- Launchpad: the top-of-app focus --- */
-/* This used to be a "Daily Plan" built around a clickable 30-day calendar (184 dated
-   checkboxes running Jul 17 to Aug 15) plus a 31-90 horizon and a 30/60/90 roadmap. All
-   of it is gone. The dates had already run out, the plan described standing up a machine
-   that is now standing, and a rep opening the tool was met with a stale to-do list instead
-   of the thing they are actually about to do.
+/* ================= LAUNCHPAD =================
+   The one page that answers "where are we right now".
 
-   What replaces it is the live motion: pull the Apollo list, load the campaigns into
-   Instantly, send. Everything here is either a number the operator needs before sending or
-   a link into the section that does the work. */
+   Two previous versions of this page rotted, and both rotted the same way: they stated a
+   plan instead of a state. The first was a 30-day calendar of 184 dated checkboxes whose
+   dates ran out. The second was a generic pre-send checklist that never knew whether any
+   of it had happened.
+
+   So this version states as little as possible in prose and reads as much as possible from
+   the data that is actually loaded. Roster size comes from PIPELIVE.stats(), campaign count
+   from GTM.campaigns, prices and sample sizes from the facts block. If the roster doubles
+   tonight, this page says so tomorrow morning without anyone editing it.
+
+   The rule for adding anything here: if it cannot be derived from live data OR checked off
+   by the person doing it, it does not belong on this page. Put it in the playbook. */
+
+/* The handful of facts an operator needs in front of them before a send. Single definition,
+   read by both the status strip and the copy blocks below, so a price change is one edit.
+   Everything here must agree with website/data.js, which is the source of truth for SKUs. */
+const LIVE = {
+  biocharMt: 450,
+  absorbentMt: 275,
+  inventoryMt: BIOCHAR_INVENTORY_TONS,
+  samples: "Biochar 1/2 lb (8 oz) · Pellets 1 lb · Crumble 1 lb",
+  sampleEta: "4 to 7 business days",
+  bulkEta: "7 to 10 business days",
+  replyTo: "victor.jehle@cs-ops.com",
+  geo: "500 mi of White Castle, LA (biochar). Absorbent is nationwide.",
+};
+
+/* The critical path from a raw list to a sent campaign. Ordered because each step genuinely
+   blocks the next: you cannot verify a list you have not pulled, and you must not send to a
+   list you have not verified. Each is a checkbox, not a date, because dates are what killed
+   the last two versions of this page. */
+const LAUNCH_STEPS = [
+  { k:"pull",    t:"Pull the Apollo list",
+    d:"Target is 1,000+ contacts across the funded ICPs. Filters are in sales-department/APOLLO-PROSPECTING-FILTERS.md." },
+  { k:"dedupe",  t:"Dedupe against the roster already in the pipeline",
+    d:"Account matching folds punctuation, possessives and corporate suffixes, so \"J. Berry Nursery\" lands on the existing \"J Berry Nursery\" rather than creating a twin. Check the Also-known-as row on any account that looks merged." },
+  { k:"verify",  t:"Verify the emails, strip catch-alls and role accounts",
+    d:"info@ and sales@ addresses burn reputation and never reply. Bounce rate over 2% means stop and re-verify, not send slower." },
+  { k:"tag",     t:"Tag every contact to an ICP code",
+    d:"BC-COMP, BC-BLEND, BC-NURS, BC-RANCH, BC-DIST for biochar. AB-SPILL, AB-OG, AB-HDD, AB-LF, AB-DIST, AB-BED for absorbent. Untagged contacts make reply attribution impossible, so you cannot tell which variant won." },
+  { k:"import",  t:"Import into the Sales Pipeline",
+    d:"Replies need somewhere to land. A contact that is only in Instantly is invisible the moment someone answers." },
+  { k:"load",    t:"Load the campaigns into Instantly",
+    d:"25 first-email variants, 5 per biochar ICP, sharing a 2-step follow-up so the A/B stays clean on email 1." },
+  { k:"send",    t:"Send",
+    d:"Ramp sending volume per inbox rather than opening at full rate. Reply rate is the metric; open rate is noise since Apple MPP." },
+];
+
+/* Thousands-separated integer. pipeline.js has its own num() but it lives inside that file's
+   IIFE and is not global, so app.js needs its own rather than reaching for one that is not there. */
+const fmtN = v => Number.isFinite(+v) ? Math.round(+v).toLocaleString() : "0";
+
 function rLaunchpad(){
-  const s = (typeof GTM !== "undefined" && GTM.summary) || {};
+  const S = (window.PIPELIVE && PIPELIVE.stats) ? PIPELIVE.stats() : null;
   const camps = (typeof GTM !== "undefined" && GTM.campaigns) || [];
-  const bio = camps.filter(c => c.primary || c.bioPriority).length;
+  const bioCamps = camps.filter(c => c.primary || c.bioPriority).length;
 
-  /* Pre-send gates. These are the things that make a send either land or burn the domain,
-     so they are checkboxes rather than prose. Keys are launch:* and persist like every
-     other checklist in the app. */
-  const gates = [
-    ["list",   "Apollo list pulled and deduped against the existing roster"],
-    ["verify", "Emails verified, catch-alls and role accounts stripped"],
-    ["icp",    "Every contact tagged to an ICP code so replies attribute to a campaign"],
-    ["inbox",  "Sending inboxes warmed, SPF / DKIM / DMARC passing"],
-    ["copy",   "Campaign copy loaded, claim guardrails checked against the playbook"],
-    ["optout", "Opt-out link and physical address in every template"],
-    ["crm",    "Contacts imported into the Sales Pipeline so replies have somewhere to land"],
-  ];
-  const gk = gates.map(([k]) => "launch:" + k);
-  const st = checkStats(gk, gk.map(() => false));
-  const pct = st.total ? Math.round(st.done / st.total * 100) : 0;
+  const keys = LAUNCH_STEPS.map(s => "lp:" + s.k);
+  const st = checkStats(keys, keys.map(()=>false));
+  const pct = st.total ? Math.round(st.done/st.total*100) : 0;
+  const nextStep = LAUNCH_STEPS.find(s => !getChecks()["lp:"+s.k]);
+
+  /* Live counts. Rendered as "not loaded" rather than 0 when the pipeline layer is missing,
+     because a confident 0 next to the word "contacts" reads as a real, alarming number. */
+  const n = v => (S ? fmtN(v) : "not loaded");
+  const tile = (label, val, sub) =>
+    `<div class="card kpi"><div class="l">${esc(label)}</div><div class="v">${val}</div><div class="d">${esc(sub||"")}</div></div>`;
 
   return page("launch",
-    head("Launchpad","Pull the list, load the campaigns, send. Everything else in this app supports one of those three.")+
-    `<div class="note ok" style="border-left:4px solid var(--green-bright);font-size:14px;margin-bottom:14px">
-       <b style="color:var(--green-bright)">🔥 TOP PRIORITY: SELL THE BIOCHAR.</b> ${BIOCHAR_INVENTORY_LINE} Absorbent runs second by effort, not by availability: pellets and crumble both have live $275/MT SKUs today.
-     </div>`+
-    /* The one blocker that gates every deal, sourced from 00-index.md. It sits high on
-       purpose: every freight radius, margin figure and quote in this app is downstream of
-       it, and a rep who does not know that will quote a number that is not real. */
+    head("Launchpad", nextStep
+      ? `Next: ${esc(nextStep.t)}.`
+      : "Every launch step is checked off. Working replies is the job now.")+
+
+    /* Blocker first. Every price and freight radius in this app is downstream of it. */
     `<div class="note warn" style="border-left:4px solid var(--gold-soft);font-size:13.5px;margin-bottom:14px">
-       <b>⛔ BLOCKER: freight and COGS are unverified.</b> No firm biochar price goes out beyond the published $450/MT site price. Every freight radius and margin figure in this app is provisional until Finance confirms cost per ton and zone freight rates.
+       <b>⛔ Freight and COGS are unverified.</b> No firm biochar price goes out beyond the published $${LIVE.biocharMt}/MT. Every freight radius and margin figure in this app is provisional until Finance confirms cost per ton and zone rates. Quote the published price or quote nothing.
      </div>`+
+
+    sec("1","Where we are")+
+    `<div class="grid g4">
+      ${tile("Accounts in pipeline", n(S&&S.accounts), S?`${fmtN(S.accountsHs)} from HubSpot, synced ${esc(S.hsSynced||"unknown")}`:"pipeline layer not loaded")}
+      ${tile("Contacts", n(S&&S.contacts), S?`${fmtN(S.contactsEmail)} with an email address`:"")}
+      ${tile("Campaigns ready", fmtN(camps.length), `${bioCamps} biochar-led`)}
+      ${tile("Biochar on hand", LIVE.inventoryMt+" MT", "finished, ready to ship")}
+    </div>`+
+    (S && S.contacts && S.contactsNamed < S.contacts
+      ? `<div class="note warn" style="margin-top:10px"><b>${fmtN(S.contacts-S.contactsNamed)} contacts have no name.</b> They render blank and one of them can become an account's primary contact. Fix on import rather than after.</div>`
+      : "")+
+    (S && S.merged && S.merged.length
+      ? `<div class="note" style="margin-top:10px"><b>${fmtN(S.merged.length)} account name group(s) were folded together:</b> ${S.merged.map(g=>esc(g.join(" = "))).join(" · ")}. If any of those is a different company, its records are on the wrong profile.</div>`
+      : "")+
+
+    sec("2","The path to sent")+
     `<div class="daily-mission card pad-lg">
-       <div class="dm-row"><span class="dm-tag">PRE-SEND GATES</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
-       <p class="dm-mission">Nothing sends until these are green. A cold campaign fired at an unverified list off a cold inbox does not just underperform, it burns the sending domain for every campaign after it.</p>
-       <div class="chk-grid" style="margin-top:10px">${gates.map(([k,label]) => chk("launch:"+k, esc(label))).join("")}</div>
+       <div class="dm-row"><span class="dm-tag">LAUNCH STEPS</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
+       <p class="dm-mission">Each step blocks the one under it. A campaign fired at an unverified list off a cold inbox does not just underperform, it burns the sending domain for every campaign after it.</p>
+       <div class="chk-grid" style="margin-top:10px">
+         ${LAUNCH_STEPS.map(s=>chk("lp:"+s.k, `<b>${esc(s.t)}</b><br><span style="color:var(--text-mute);font-size:12.5px">${esc(s.d)}</span>`)).join("")}
+       </div>
      </div>`+
-    sec("1","The offer")+
-    `<div class="card pad-lg"><p style="color:var(--text);font-size:14.5px;line-height:1.65">${esc(s.offer||"")}</p></div>`+
-    sec("2","Where the effort goes")+
-    `<div class="note"><b>${camps.length} campaigns, ${bio} of them biochar-led.</b> Full targeting, proof and disqualifiers per campaign are in <a href="#strategy" onclick="go('strategy')">Strategy &amp; ICP</a>. The sequences, call scripts and DM copy are in <a href="#outreach" onclick="go('outreach')">Outreach</a>.</div>`+
-    (s.allocation ? `<div class="note ok" style="margin-top:10px">${s.allocation.map(a=>badge(a.icp.split(" ")[0]+" "+a.pct, a.cls)).join(" ")}</div>` : "")+
-    `<div class="note warn" style="margin-top:10px"><b>Allocation is still hand-set.</b> It was written before the roster was rebuilt, so it does not reflect how many real accounts each ICP actually has. Re-weight it against the live counts in the Sales Pipeline once the Apollo pull lands.</div>`
+
+    sec("3","What we are selling, at what price")+
+    table(["Line","Live price","Free sample"],[
+      [`<strong>100% Biochar</strong> ${badge("PRIORITY","badge-green")}`, `$${LIVE.biocharMt} / MT`, "1/2 lb (8 oz)"],
+      ["<strong>Absorbent Pellets</strong>", `$${LIVE.absorbentMt} / MT`, "1 lb"],
+      ["<strong>Absorbent Crumble</strong>", `$${LIVE.absorbentMt} / MT`, "1 lb"],
+    ])+
+    `<div class="note ok" style="margin-top:10px">All three sell by the metric ton today with working checkout, so a winning trial converts to a <b>paid order</b>, not just an LOI. Truckload volume is the only thing still waiting on the Q4 ramp, and that is what the LOI reserves. Samples ship in ${esc(LIVE.sampleEta)}; FOB bulk bags in ${esc(LIVE.bulkEta)}.</div>`+
+    `<div class="note" style="margin-top:8px"><b>Geography:</b> ${esc(LIVE.geo)} <b>Replies route to:</b> ${esc(LIVE.replyTo)}.</div>`+
+
+    sec("4","Rules that do not bend")+
+    `<div class="grid g2">
+      <div class="card"><h4>Claim discipline</h4><p>OMRI <b>Listed</b>, never Certified. IBI <b>tested</b>, never Certified, we have never held it. Never USDA Organic in any form, including "compatible" or "pending". Puro.earth certified is real. Full table in Product &amp; Messaging.</p></div>
+      <div class="card"><h4>The cold ask</h4><p>A free sample. Never a bulk quote, never an LOI, never a contract in a first touch. The order is the close after a trial wins; the LOI reserves Q4 truckload after that.</p></div>
+      <div class="card"><h4>Poultry and livestock</h4><p>Bedding, moisture and manure or compost use only. No feed claims and no animal-health claims, in any channel, ever.</p></div>
+      <div class="card"><h4>Brand</h4><p>Customer-facing name is <b>American BioCarbon</b> today. The rebrand name is not decided, so keep cold copy brand-light and lead with the product. ProGreaux LLC is the legal entity for contracts only.</p></div>
+    </div>`+
+
+    sec("5","Where to go next")+
+    `<div class="grid g3">
+      <div class="card"><h4><a href="#strategy" onclick="go('strategy')">Campaigns &amp; ICP →</a></h4><p>Who each campaign targets, the proof to use, and the disqualifiers.</p></div>
+      <div class="card"><h4><a href="#outreach" onclick="go('outreach')">Outreach Engine →</a></h4><p>Every sequence, call script, voicemail and DM, ready to copy.</p></div>
+      <div class="card"><h4><a href="#crm" onclick="go('crm')">Sales Pipeline →</a></h4><p>Accounts, contacts and deals. Where replies land and get worked.</p></div>
+    </div>`
   );
 }
 
@@ -509,33 +583,6 @@ function rOnboarding(){
    while Daniel is still carried as an owner; see the open question on his role. --- */
 function whoBadge(o){ const c=/jesse/i.test(o)?"jesse":/victor/i.test(o)?"victor":/daniel/i.test(o)?"daniel":/both|all/i.test(o)?"both":""; return `<span class="who ${c}">${esc(o)}</span>`; }
 
-/* --- Checklist --- */
-function rChecklist(){
-  const c=DATA.checklist;
-  const block=(gid,title,arr)=>{
-    const keys=arr.map((x,i)=>`launch:${gid}:${i}`);
-    const defs=arr.map(x=>/\|done$/.test(x));
-    const st=checkStats(keys,defs);
-    return `<div class="card"><div class="chk-head" style="margin:0 0 6px"><h4 style="margin:0">${title}</h4><span class="chk-progress">${st.done}/${st.total}</span></div>`+
-      arr.map((x,i)=>{ const done=/\|done$/.test(x); const txt=x.replace(/\|done$/,""); return chk(keys[i],esc(txt),done); }).join("")+`</div>`;
-  };
-  return page("checklist",
-    head("② Foundation checklist — what must be true to sell","The concrete setup behind the calendar: get the 80 MT sellable, then website & product, app build, collateral, lists, and first outbound. Every item persists across reloads.")+
-    `<div class="grid g2">
-      ${block("bio","⓪ Biochar inventory → revenue (80 MT)",c.biochar)}
-      ${block("web","① Website & product launch",c.website)}
-      ${block("build","② Build in the app",c.build)}
-      ${block("coll","③ Collateral (single-product each)",c.collateral)}
-      ${block("lists","④ Lists to build first",c.lists)}
-      ${block("first","⑤ First outbound actions (sample-first)",c.firstActions)}
-    </div>`+
-    `<div class="chk-head"><span class="note ok" style="margin:0;flex:1"><b>Sequence:</b> get 80 MT ship-ready + priced → publish site + sample SKUs → build app fields → source biochar-weighted accounts → produce single-product kits → launch biochar-first outbound → ship free samples → convert wins to POs against the 80 MT → present Q4 LOIs on top.</span><span class="chk-reset" onclick="resetChecks('launch:')">Reset</span></div>`
-  );
-}
-
-/* ================= BOOT ================= */
-/* Strip the outer <section…>…</section> wrapper that page() adds, so
-   several renderers can be stacked inside ONE consolidated section. */
 function stripBody(fn){
   let h="";
   try{ h=fn()||""; }catch(e){ console.error("renderer failed:",e&&e.message,e); return ""; }
@@ -728,9 +775,13 @@ const LEAN_SECTIONS=[
   // list are deleted. Their dates had run out and they described building the machine that
   // is now built.
   //
-  // rChecklist / rPrelaunch / rLaunch are KEPT and moved under Launchpad: they are launch
-  // gates, not a schedule, and a campaign is about to go out against them.
-  ["launch",   [rLaunchpad, rChecklist, G("rPrelaunch"), G("rLaunch")]],
+  // rChecklist / rPrelaunch / rLaunch used to sit under Launchpad as "launch gates". They are
+  // gone too. They were not gates, they were a stale build-out plan: they listed the homepage,
+  // the sample form, the spec sheets and analytics as P0 "Todo" when all of them have been
+  // live since the apex cutover, and they still framed the hero around an oil-and-gas-first
+  // thesis that biochar-priority replaced. A checklist that reports finished work as unstarted
+  // trains people to ignore checklists. The seven launch steps on the Launchpad replace them.
+  ["launch",   [rLaunchpad]],
   ["strategy", [G("rCampaigns"), G("rSummary"), rSegments, rPersonas]],
   ["product",  [rBiochar, rMessaging]],
   // Target accounts deliberately do NOT render here any more. This section used to open with
