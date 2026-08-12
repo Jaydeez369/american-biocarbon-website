@@ -2,6 +2,18 @@
    VEJ Sales OS — GTM Command Center DATA
    Loaded after data.js. Consumed by gtm.js.
    All figures marked (EST) are estimates, not verified claims.
+
+   ------------------------------------------------------------
+   LEGACY FOR OUTREACH — annotated 2026-08-12
+   ------------------------------------------------------------
+   The social and DM blocks below still say "soaks ~5x its weight"
+   and "~5x its weight (est.)". Both are wrong: the claim is
+   "up to about 5 to 1 on NON-VISCOUS liquids" with the ceiling
+   word and the qualifier attached, every time.
+
+   NOTHING IS SENT FROM THIS FILE. Canonical cold copy is
+   sales-department/campaigns/INSTANTLY-PASTE.md; canonical reply
+   handling is sales-department/campaigns/REPLY-PLAYBOOK.md.
    ============================================================ */
 const GTM = {
 

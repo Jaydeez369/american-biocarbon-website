@@ -1,0 +1,40 @@
+/* ============================================================
+   VEJ Sales OS - Engine module styles
+   ------------------------------------------------------------
+   Scoped to the two sections engine.js renders: Instantly Logic
+   and Future Funnels. Follows the same one file per module
+   pattern as outreach.css and pipeline.css.
+
+   Everything else on those pages reuses the shared design system
+   in styles.css (card, kpi, note, badge, grid, tbl-wrap). Only
+   the three things below did not already exist.
+   ============================================================ */
+
+/* A KPI tile that is reporting a problem rather than a number.
+   The base .kpi accent bar is brand green, which reads as "good"
+   next to a zero, and a confident green 0 beside the word
+   "sendable" is exactly the wrong signal. */
+#sec-instantly .kpi-warn:before,
+#sec-funnels   .kpi-warn:before{ background:var(--red); }
+#sec-instantly .kpi-warn .v,
+#sec-funnels   .kpi-warn .v{ color:var(--red-soft); }
+#sec-instantly .kpi-warn .d,
+#sec-funnels   .kpi-warn .d{ color:var(--red-soft); }
+
+/* Inline file paths and variable names. Both pages point at repo
+   files constantly, and an unstyled <code> is indistinguishable
+   from body copy in this typeface. */
+#sec-instantly code,
+#sec-funnels   code{
+  font-family:var(--mono); font-size:11.5px;
+  background:var(--paper-2); color:var(--text);
+  border:1px solid var(--line); border-radius:var(--r-xs);
+  padding:1px 6px; white-space:nowrap;
+}
+
+/* The funnel cards carry a two column key/value table with no
+   header row. The shared table style reserves space for a thead
+   that is empty here, which leaves a floating rule at the top. */
+#sec-funnels .card .tbl-wrap thead{ display:none; }
+#sec-funnels .card .tbl-wrap table{ margin-top:0; }
+#sec-funnels .card .tbl-wrap td:last-child{ text-align:right; white-space:nowrap; }

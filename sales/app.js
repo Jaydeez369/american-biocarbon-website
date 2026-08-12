@@ -66,9 +66,20 @@ const LEAN_NAV=[
     {id:"launch",ic:"◎",t:"Launchpad"},
     {id:"strategy",ic:"◆",t:"Campaigns & ICP"},
   ]},
+  /* Instantly Logic sits between the copy and the pipeline because that is where it sits
+     in the work: you read the words in Outreach Engine, you understand why the campaign is
+     shaped that way here, and replies land in Sales Pipeline. It answers "why three variants
+     on nurseries and one on blenders" and "why is nothing sending yet", which are the two
+     questions the Outreach Engine cannot answer because it only holds copy. */
   {group:"Execute",items:[
     {id:"outreach",ic:"✦",t:"Outreach Engine"},
+    {id:"instantly",ic:"⚙",t:"Instantly Logic"},
     {id:"crm",ic:"◉",t:"Sales Pipeline"},
+  ]},
+  /* Everything that is not the cold email send. Priced, with a confidence badge on every
+     number, so a channel cannot get approved on a figure nobody has actually invoiced. */
+  {group:"Grow",items:[
+    {id:"funnels",ic:"⇢",t:"Future Funnels"},
   ]},
   /* Onboarding & Scale and Sales × Marketing used to sit here. Both are deleted.
      Onboarding described an accounting handoff for accounts we do not have yet, and
@@ -481,6 +492,8 @@ const G = k => (window.GTMB && GTMB[k]) ? GTMB[k] : (()=> "");
 const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
 /* Canonical outreach module (outreach-data.js + outreach.js, both load before app.js) */
 const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
+/* Engine module (engine-data.js + engine.js): campaign architecture and the funnel costing */
+const ENG = k => (window.ENGINE_UI && ENGINE_UI[k]) ? ENGINE_UI[k] : (()=> "");
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
 /* newId → ordered list of renderer thunks it composes */
 function compose(id, thunks){
@@ -519,6 +532,10 @@ const LEAN_SECTIONS=[
   // social and the long-term channel plan moved down to the playbook: they are reference
   // material, not the cold send.
   ["outreach", [OUT("rOutreach")]],
+  // Instantly Logic and Future Funnels each render as a single self contained module, the
+  // same way crm and strategy do. Both read engine-data.js and type no numbers of their own.
+  ["instantly",[ENG("rInstantly")]],
+  ["funnels",  [ENG("rFunnels")]],
   ["crm",      [PL("rCRM")]],
   ["playbook", [rCollateral, G("rSample"), rPlaybook, G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
 ];
