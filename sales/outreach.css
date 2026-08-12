@@ -21,6 +21,8 @@
 .oe-meta-card{background:var(--white);border:1px solid var(--line);border-left:3px solid var(--brand);
   border-radius:0 var(--radius) var(--radius) 0;padding:16px 18px;box-shadow:var(--sh-1)}
 .oe-meta-card.oe-meta-warn{border-left-color:var(--red)}
+/* Third card in a 2 column grid: full width rather than a half width orphan in row 2. */
+.oe-meta-card.oe-sig{grid-column:1 / -1}
 .oe-meta-card h4{font-size:12.5px;font-family:var(--mono);font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;color:var(--navy-800);margin-bottom:8px}
 .oe-meta-warn h4{color:var(--red-soft)}

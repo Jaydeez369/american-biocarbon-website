@@ -174,12 +174,18 @@
           <h4>Claim guardrails</h4>
           ${bullets(M.guardrails)}
         </div>
+        <div class="oe-meta-card oe-sig">
+          <h4>Signature</h4>
+          ${copyBlock("Paste into every step", M.signature)}
+          ${bullets([M.signatureNote])}
+        </div>
       </div>`+
 
       `<div class="oe-provenance">
         <span><b>Source.</b> ${esc(M.source)}</span>
         <span><b>Stack.</b> ${esc(M.channel)}</span>
         <span><b>Replies land at.</b> ${esc(M.reply)}</span>
+        <span><b>Calls land at.</b> ${esc(M.phone)}</span>
         <span><b>Cork.</b> ${esc(M.corkNote)}</span>
       </div>`+
 
