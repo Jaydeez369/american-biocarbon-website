@@ -1191,6 +1191,15 @@ const LEGAL_UPDATED = "August 14, 2026";
 const LEGAL_ENTITY  = "American BioCarbon CT, LLC";
 const LEGAL_EMAIL   = "victor@americanbiocarbon.com";
 
+/* Cloudflare's Email Address Obfuscation rewrites any mailto: in the HTML into a
+   "[email protected]" span that only resolves once its script runs. On a marketing page that
+   is a fair anti-scraper trade. On these two it is not: the whole point of the snapshot is
+   that a non-JS fetch (an automated carrier vetting check) can read the policy, and a
+   published privacy contact it cannot read is a policy defect. <!--email_off--> is
+   Cloudflare's own opt-out for exactly this, and it is a comment everywhere else. */
+function mailLink(addr){
+  return `<!--email_off--><a href="mailto:${addr}">${raw(addr)}</a><!--/email_off-->`;
+}
 function legalPage(o){
   return `
   <section class="phead"><div class="wrap"><div style="max-width:760px">
@@ -1205,7 +1214,7 @@ function legalPage(o){
     <h2 id="contact">Contact us</h2>
     <p>${raw(LEGAL_ENTITY)}<br>${raw(BRAND.address)}<br>
       Phone: <a href="${BRAND.phoneHref}">${raw(BRAND.phone)}</a><br>
-      Email: <a href="mailto:${o.email}">${raw(o.email)}</a></p>
+      Email: ${mailLink(o.email)}</p>
   </div></div></section>`;
 }
 
@@ -1237,7 +1246,7 @@ function smsDisclosure(){
     message confirming that you have been unsubscribed, and we will send no further
     texts to that number unless you opt in again. Reply HELP for help, or contact us
     at <a href="${BRAND.phoneHref}">${raw(BRAND.phone)}</a> or
-    <a href="mailto:${LEGAL_EMAIL}">${raw(LEGAL_EMAIL)}</a>.</p>
+    ${mailLink(LEGAL_EMAIL)}.</p>
   <h3>How we treat your mobile information</h3>
   <p><b>No mobile information will be sold, rented, or shared with third parties or
     affiliates for marketing or promotional purposes.</b> Text messaging originator
@@ -1315,7 +1324,7 @@ function renderPrivacy(){
           <li>Ask us to stop using your information for marketing.</li>
           <li>Residents of states with comprehensive privacy laws, including California, may also request the categories of information collected and disclosed, and may appeal a decision we make on a request. We do not sell or share personal information as those terms are defined in the California Consumer Privacy Act.</li>
         </ul>
-        <p>To exercise any of these, email <a href="mailto:${LEGAL_EMAIL}">${raw(LEGAL_EMAIL)}</a>
+        <p>To exercise any of these, email ${mailLink(LEGAL_EMAIL)}
           or call <a href="${BRAND.phoneHref}">${raw(BRAND.phone)}</a>. We will verify your
           request and respond within the time the applicable law allows. We will not
           discriminate against you for exercising a privacy right.</p>` },
