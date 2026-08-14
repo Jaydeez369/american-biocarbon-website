@@ -48,19 +48,63 @@ function loadData() {
     navigator: {}, location: { pathname: "/", search: "" }, console,
     __CAP: (o) => { captured = o; },
   };
-  const epilogue = `\n;__CAP({HOME:typeof HOME!=="undefined"?HOME:null,PRODUCTS:typeof PRODUCTS!=="undefined"?PRODUCTS:null,INDUSTRIES:typeof INDUSTRIES!=="undefined"?INDUSTRIES:null,ENV_REMEDIATION:typeof ENV_REMEDIATION!=="undefined"?ENV_REMEDIATION:null,RESELLERS_INDUSTRIES:typeof RESELLERS_INDUSTRIES!=="undefined"?RESELLERS_INDUSTRIES:null,RESELLERS_AGRICULTURE:typeof RESELLERS_AGRICULTURE!=="undefined"?RESELLERS_AGRICULTURE:null,PRODUCT_CATEGORY:typeof PRODUCT_CATEGORY!=="undefined"?PRODUCT_CATEGORY:null});`;
+  const epilogue = `\n;__CAP({BRAND:typeof BRAND!=="undefined"?BRAND:null,HOME:typeof HOME!=="undefined"?HOME:null,PRODUCTS:typeof PRODUCTS!=="undefined"?PRODUCTS:null,INDUSTRIES:typeof INDUSTRIES!=="undefined"?INDUSTRIES:null,ENV_REMEDIATION:typeof ENV_REMEDIATION!=="undefined"?ENV_REMEDIATION:null,RESELLERS_INDUSTRIES:typeof RESELLERS_INDUSTRIES!=="undefined"?RESELLERS_INDUSTRIES:null,RESELLERS_AGRICULTURE:typeof RESELLERS_AGRICULTURE!=="undefined"?RESELLERS_AGRICULTURE:null,PRODUCT_CATEGORY:typeof PRODUCT_CATEGORY!=="undefined"?PRODUCT_CATEGORY:null});`;
   vm.runInNewContext(src + epilogue, sandbox, { filename: "data.js" });
   return captured;
 }
 
 const D = loadData();
-if (!D.HOME || !D.PRODUCTS || !D.INDUSTRIES || !D.PRODUCT_CATEGORY) {
-  console.error("✗ Prerender: could not extract HOME/PRODUCTS/INDUSTRIES/PRODUCT_CATEGORY from data.js.");
+if (!D.HOME || !D.PRODUCTS || !D.INDUSTRIES || !D.PRODUCT_CATEGORY || !D.BRAND) {
+  console.error("✗ Prerender: could not extract BRAND/HOME/PRODUCTS/INDUSTRIES/PRODUCT_CATEGORY from data.js.");
   process.exit(1);
 }
 
 const escAttr = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const escText = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// ---- Static body for the legal routes ------------------------------------------------
+/* Head metadata is enough for a social scraper, which only wants a card. It is NOT enough
+ * for A2P 10DLC vetting: part of that review is automated, and an automated check fetches
+ * /privacy and looks for the required mobile-information sentences as TEXT. A client
+ * rendered page hands it an empty <main> and the campaign gets rejected for a policy that
+ * is, to a human with a browser, plainly right there.
+ *
+ * So the two legal routes ship their real copy inside the snapshot. Rather than duplicate
+ * the wording here (two copies of a legal page WILL drift, and the drift is invisible),
+ * evaluate the LEGAL section of app.js directly. It is deliberately written to be pure:
+ * string in, HTML string out, with setMeta the only DOM call, which is stubbed below.
+ * The client still hydrates over it on load, so the SPA is unchanged.
+ */
+const LEGAL_BEGIN = "/* ================= LEGAL =================";
+const LEGAL_END = "/* ---- helpers ---- */";
+function legalBodies() {
+  const src = readFileSync(join(ROOT, "app.js"), "utf8");
+  const from = src.indexOf(LEGAL_BEGIN), to = src.indexOf(LEGAL_END);
+  if (from < 0 || to < 0 || to < from) {
+    console.error("✗ Prerender: could not find the LEGAL section markers in app.js. The legal snapshots would ship empty, which fails carrier review. Restore the markers or update this script.");
+    process.exit(1);
+  }
+  const sandbox = {
+    BRAND: D.BRAND,
+    setMeta: () => {},
+    raw: (s) => String(s ?? ""),
+    crumbs: (items) => `<nav class="crumb" aria-label="Breadcrumb"><ol>${items
+      .map((it, i) => `<li>${it.href && i < items.length - 1 ? `<a href="${it.href}">${it.label}</a>` : `<span aria-current="page">${it.label}</span>`}</li>`)
+      .join("")}</ol></nav>`,
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(src.slice(from, to), sandbox, { filename: "app.js (LEGAL section)" });
+  const out = { "/privacy": vm.runInContext("renderPrivacy()", sandbox), "/terms": vm.runInContext("renderTerms()", sandbox) };
+  for (const [path, html] of Object.entries(out)) {
+    // The one sentence a rejected campaign is rejected over. Assert it survived the trip.
+    if (!/No mobile information will be sold, rented, or shared/.test(html)) {
+      console.error(`✗ Prerender: ${path} rendered without the required mobile-information disclosure.`);
+      process.exit(1);
+    }
+  }
+  return out;
+}
+const LEGAL_BODY = legalBodies();
 
 // ---- Route table (mirrors the indexable set in app.js + sitemap.xml) ------------------
 const routes = [];
@@ -131,6 +175,15 @@ function render(route) {
   h = h.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escAttr(desc)}$2`);
   h = h.replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${escAttr(title)}$2`);
   h = h.replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${escAttr(desc)}$2`);
+  const body = LEGAL_BODY[route.path];
+  if (body) {
+    const before = h;
+    h = h.replace(/(<main id="app"[^>]*>)<!-- injected -->(<\/main>)/, `$1${body.replace(/\$/g, "$$$$")}$2`);
+    if (h === before) {
+      console.error(`✗ Prerender: could not find the <main id="app"> mount in index.html, so ${route.path} would ship with no readable policy text.`);
+      process.exit(1);
+    }
+  }
   if (route.ld) {
     const graph = route.ld.length === 1 ? route.ld[0] : { "@context": "https://schema.org", "@graph": route.ld };
     const tag = `  <script type="application/ld+json" id="ld-route">\n  ${JSON.stringify(graph)}\n  </script>\n</head>`;
