@@ -32,7 +32,7 @@ meta:{
   built:"August 11, 2026",
   source:"VDJ call, August 10, 2026. Jesse, Victor and Daniel worked the hooks live, segment by segment. This replaces the prior outreach copy in full.",
   channel:"Instantly for email. Aloe for the power dialer and the voicemail agent once 10 DLC clears. Apollo is the list source.",
-  revised:"August 12, 2026. The architecture behind this copy was rebuilt: account level waterfall, variant counts set by list size, CTA matched to buyer type, and reputation gated sending. See the Instantly Logic section, or sales-department/campaigns/MONTH-1-EMAIL-PLAN.md.",
+  revised:"August 14, 2026. Merge variable glossary corrected to camelCase, water holding reconciled to 3 to 3.5x, variant count rule reconciled to the arrays, and the banned follow up openers replaced. Architecture rebuilt August 12: account level waterfall, variant counts set by list size, CTA matched to buyer type, and reputation gated sending. See the Instantly Logic section, or the Month 1 email plan in the campaigns folder.",
   /* Replies land in the Instantly unibox on their own. The cs-ops address is where a
      forwarded thread goes internally; it is NOT a signature line and not a reply-to.
      Putting a third domain in the footer of a cold send is a mismatch a filter notices. */
@@ -51,7 +51,8 @@ meta:{
   rules:[
     "The unit of work is the ACCOUNT, not the contact. One best fit buyer gets email 1. A second contact opens 3 to 5 business days later only if the first stayed silent. A third only on accounts scoring 8 or higher.",
     "A positive reply suppresses the whole account, both product lines, every wave. Company level block, not contact level.",
-    "Variant count is set by list size, not by how many angles somebody wrote. Nurseries run 3, farms and distributors 2, blenders and composters 1. Absorbent runs 2 on the five large lists and 1 on the three small ones.",
+    "Variant count is set by list size, not by how many angles somebody wrote. What actually ships is the variants array on each ICP below, never this sentence: biochar farms run 5, nurseries and distributors and blenders and composters and ranchers run 3, and the farm published inbox lane runs 1. Corrected August 14 2026, when this rule was found to disagree with the arrays on four of six biochar ICPs. If the two ever disagree again, the array wins and this line is the thing that is stale.",
+    "THIS FILE IS THE COPY LIBRARY. The Instantly paste sheet in the campaigns folder IS THE SHIP LIST. When the two disagree on how many variants a segment runs, PASTE.md wins, because it is committed to git, it is what gets pasted into Instantly, and this directory is gitignored with no history to diff. A segment carrying 3 variants here and 1 there is not a defect: the library holds every approved angle, and the ship list deploys only as many as the list size can resolve. A segment where the BODY TEXT disagrees IS a defect and gets reconciled to PASTE.md.",
     "One variable at a time, and the A/B is on email 1 only. Follow ups are shared across versions so the comparison stays clean.",
     "No links in any step, including the video. The first send has one job, which is to earn a reply, and a link on a warming domain is the fastest way into spam.",
     "The CTA matches the buyer. Bench trial for a nursery, strip trial for a farm, spec and freight for a distributor, technical packet for public sector, video or spill test for industrial. Asking every buyer for a shipping address was wrong.",
@@ -82,19 +83,25 @@ meta:{
   ],
 
   /* Placeholders. The {Curly} tokens below are what a human swaps when working a message
-     by hand out of this screen. The {{snake_case}} ones are the Instantly merge variables,
-     and they are spelled the way the import CSV spells its columns, which is the whole
-     point: the old spec used {{firstName}}, that column does not exist, and every send
-     would have merged an empty greeting. */
+     by hand out of this screen. The doubled ones are Instantly merge variables.
+
+     CORRECTED August 14 2026. This block previously said the merge variables were spelled
+     the way the import CSV spells its columns, and that the camelCase spelling referred to
+     a column that does not exist. That was backwards, and following it broke two live
+     campaigns. Instantly maps the standard fields onto its OWN schema at import time and
+     that schema is camelCase, so firstName and companyName are correct no matter what the
+     CSV header said. Only a CUSTOM variable, one Instantly has no standard field for, keeps
+     the literal column name. Writing a standard field in snake_case merges EMPTY and ships
+     a message that opens Hi comma. Verified against the live workspace on August 14 2026. */
   tokens:[
     ["{First}","Contact first name, when working a message by hand"],
     ["{Company}","Their company name, by hand"],
     ["{Me}","Sender name, by hand"],
     ["{phone}","Sales desk line. Always (225) 398 9286 until a sender has their own DID."],
-    ["{{first_name}}","Instantly merge variable. Matches the first_name column"],
-    ["{{company_name}}","Instantly merge variable. Matches the company_name column"],
-    ["{{city}}","Instantly merge variable. Used in subjects such as Loxley media"],
-    ["{{observation}}","Instantly merge variable. The desk research, cleaned into a send ready first sentence by handoff/enrichment/assign-waves.mjs. It IS the opening line, not a prefix"],
+    ["{{firstName}}","Instantly merge variable, standard field. Imported from the first_name column. NEVER write first_name in copy."],
+    ["{{companyName}}","Instantly merge variable, standard field. Imported from the company_name column. NEVER write company_name in copy."],
+    ["{{lastName}}","Instantly merge variable, standard field. Imported from the last_name column."],
+    ["{{city}}","Instantly merge variable, standard field. Used in subjects such as Loxley media"],
   ],
 },
 
@@ -188,7 +195,7 @@ tracks:[
   key:"biochar",
   name:"Biochar",
   sub:"Primary track. Finished tonnage on the ground today.",
-  product:"100 percent sugarcane bagasse biochar, made at White Castle, Louisiana. 65 percent organic carbon. Holds roughly 3 times its weight in water. OMRI Listed, independently lab tested against the IBI panel, Puro.earth certified carbon removal.",
+  product:"100 percent sugarcane bagasse biochar, made at White Castle, Louisiana. 65 percent organic carbon. Holds roughly 3 to 3.5 times its weight in water. OMRI Listed, independently lab tested against the IBI panel, Puro.earth certified carbon removal.",
   geo:"Within 500 miles of White Castle, Louisiana. Past that, port distance and carbon credit economics stop working, so the list is geofenced on purpose.",
   price:"$450 per metric ton",
   inventory:"80 metric tons finished, ready to ship now",
@@ -215,7 +222,7 @@ tracks:[
       "Published research: 10 to 30 percent shorter cycles, category evidence, not our trial data",
       "65 percent organic carbon going into the finished product",
       "OMRI Listed",
-      "Holds roughly 3 times its weight in water",
+      "Holds roughly 3 to 3.5 times its weight in water",
     ],
     guardrail:"The compost number is PUBLISHED RESEARCH ON THE CATEGORY, 10 to 30 percent shorter cycles. It is not our trial data. Attribute it every time and hand the proof back with a windrow trial. It must never appear as a subject line or as a number we underwrite, which is why the old Reduce your composting time by 20% subject is gone.",
     campaign:{
@@ -252,7 +259,7 @@ tracks:[
         body:"Hi {First},\n\nWe make a sugarcane bagasse biochar in White Castle, Louisiana that composters use as a bulking agent. It opens up air pockets through the pile so the microbes work the middle at the same rate as the edges, which is where the faster turn rate comes from. Published research on biochar amended windrows reports cycle times running 10 to 30 percent shorter. That is category research and not our trial data, so the number that counts is the one off your own pad.\n\nIt also holds nitrogen and traps the ammonia and odor instead of letting it walk off.\n\nHappy to send you a free sample to run on one windrow. Just reply with a good ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"Your piles are drying out in the middle",
-        body:"Hi {First},\n\nTwo things kill a windrow: it compacts and goes anaerobic, or it dries out and the biology dies. Both cost you turn time you cannot sell.\n\nWe make a bagasse biochar that fixes the physical side of that. It bulks the pile so air moves through it, and it holds roughly 3 times its weight in water so the pile stays wet enough for the microbes to finish evenly. The compost tea nutrients stay in the pile instead of running out the bottom.\n\nWant a free sample to test against a control row? Send me a ship to address and it goes out this week.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nTwo things kill a windrow: it compacts and goes anaerobic, or it dries out and the biology dies. Both cost you turn time you cannot sell.\n\nWe make a bagasse biochar that fixes the physical side of that. It bulks the pile so air moves through it, and it holds roughly 3 to 3.5 times its weight in water so the pile stays wet enough for the microbes to finish evenly. The compost tea nutrients stay in the pile instead of running out the bottom.\n\nWant a free sample to test against a control row? Send me a ship to address and it goes out this week.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"C", angle:"Short and curious",
         subject:"Free biochar sample for your next windrow",
         body:"Hi {First},\n\nWe make biochar out of sugarcane bagasse in Louisiana. Composters use it to bulk the pile so air moves through it. Published research on the category reports cycles running 10 to 30 percent shorter.\n\nCan I send you a free sample to run against a control row? Nothing to buy.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
@@ -293,7 +300,7 @@ tracks:[
     mechanism:"Victor: nurseries came to us asking for lower bulk density so their plants weigh less when they package and ship. On top of that you get water and nutrient retention, and more porosity for root growth. Jesse added the timing angle: there is a real drought across the southeast right now, so maximizing the water they already have is the live pain. That messaging has a shelf life. If the winter comes in wet, switch the lead to peat replacement and fertilizer cost.",
     proof:[
       "Lower bulk density than a peat and perlite heavy mix",
-      "Holds roughly 3 times its weight in water",
+      "Holds roughly 3 to 3.5 times its weight in water",
       "OMRI Listed",
       "Made in Louisiana, so it is a local alternative to Canadian peat",
     ],
@@ -329,17 +336,17 @@ tracks:[
     variants:[
       { id:"A", angle:"Direct value",
         subject:"Lighten your potting mix and make freight work for you",
-        body:"Hi {First},\n\nWe make a sugarcane bagasse biochar in Louisiana that nurseries blend into their media. Two reasons they use it. It drops the bulk density, so the plant weighs less when it ships. And it holds roughly 3 times its weight in water, so the container holds moisture and nutrients between irrigations instead of flushing them.\n\nIt is OMRI Listed and it comes from a mill four hours away rather than a truck out of Canada.\n\nCan I send you a free sample to trial in a mix? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nWe make a sugarcane bagasse biochar in Louisiana that nurseries blend into their media. Two reasons they use it. It drops the bulk density, so the plant weighs less when it ships. And it holds roughly 3 to 3.5 times its weight in water, so the container holds moisture and nutrients between irrigations instead of flushing them.\n\nIt is OMRI Listed and it comes from a mill four hours away rather than a truck out of Canada.\n\nCan I send you a free sample to trial in a mix? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"Reduce your summer watering frequency",
-        body:"Hi {First},\n\nWith how dry it has been across the southeast, most growers I talk to are trying to get more out of every irrigation pass and stop watching fertilizer run out the bottom of the pot.\n\nOur biochar is made from sugarcane bagasse and holds about 3 times its weight in water. Blended into your mix it keeps moisture and nutrients in the root zone longer, adds porosity for root growth, and lightens the container at the same time.\n\nWorth a free sample to test in one mix? Reply with a ship to address and it goes out.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nWith how dry it has been across the southeast, most growers I talk to are trying to get more out of every irrigation pass and stop watching fertilizer run out the bottom of the pot.\n\nOur biochar is made from sugarcane bagasse and holds about 3 to 3.5 times its weight in water. Blended into your mix it keeps moisture and nutrients in the root zone longer, adds porosity for root growth, and lightens the container at the same time.\n\nWorth a free sample to test in one mix? Reply with a ship to address and it goes out.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"C", angle:"Short and curious",
         subject:"Still trucking in peat moss?",
         body:"Hi {First},\n\nIf peat and perlite are still the backbone of your mix, worth a look at this.\n\nWe make an OMRI Listed biochar from sugarcane bagasse in Louisiana. Lighter mix, better water and nutrient holding, and it does not come off a truck from Canada.\n\nSend me a ship to address and I will get a free sample out to you.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
     ],
     followups:[
       { t:"Follow up 1, day 3",
-        b:"Hi {First},\n\nBumping this once. The pitch in one line: lighter media, better water and nutrient retention, made locally instead of imported.\n\nWant the free sample? A ship to address is all I need.\n\n{Me}\n{phone}" },
+        b:"Hi {First},\n\nThe pitch in one line: lighter media, better water and nutrient retention, made locally instead of imported.\n\nWant the free sample? A ship to address is all I need.\n\n{Me}\n{phone}" },
       { t:"Follow up 2, day 7",
         b:"Hi {First},\n\nAm I aimed at the right person for media and inputs, or is that someone else over there? Happy to be redirected.\n\n{Me}\n{phone}" },
       { t:"Breakup, day 12",
@@ -374,7 +381,7 @@ tracks:[
       "65 percent organic carbon",
       "Inherent NPK already in the material",
       "Uniform granulation, mixes like black sand",
-      "Holds roughly 3 times its weight in water, so the bag stays alive",
+      "Holds roughly 3 to 3.5 times its weight in water, so the bag stays alive",
       "OMRI Listed",
     ],
     guardrail:"Do not claim a dust reduction percentage. Say it helps bind ultrafine particles during turning.",
@@ -409,10 +416,10 @@ tracks:[
     variants:[
       { id:"A", angle:"Direct value",
         subject:"65% organic carbon, granulated to blend clean",
-        body:"Hi {First},\n\nWe produce a sugarcane bagasse biochar in White Castle, Louisiana and supply it as a blend input. Three things blenders care about: it granulates uniformly and mixes in like black sand, it carries 65 percent organic carbon plus inherent NPK, and it holds about 3 times its weight in water so a bagged mix stays alive on the pallet.\n\nOMRI Listed and independently lab tested.\n\nCan I send a free sample to run in your premium blend? Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nWe produce a sugarcane bagasse biochar in White Castle, Louisiana and supply it as a blend input. Three things blenders care about: it granulates uniformly and mixes in like black sand, it carries 65 percent organic carbon plus inherent NPK, and it holds about 3 to 3.5 times its weight in water so a bagged mix stays alive on the pallet.\n\nOMRI Listed and independently lab tested.\n\nCan I send a free sample to run in your premium blend? Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"The dried out bag problem",
-        body:"Hi {First},\n\nEverybody in this business knows the bag that has sat too long, dried out, gone hydrophobic and will not take water when the customer finally opens it. That bag is a complaint and a returned pallet.\n\nOur biochar holds roughly 3 times its weight in water, so it keeps moisture in the mix. It also granulates uniformly so it blends clean, and the moisture in it binds ultrafine particles during turning, which quiets the dust.\n\nFree sample to run in one batch? Send me a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nEverybody in this business knows the bag that has sat too long, dried out, gone hydrophobic and will not take water when the customer finally opens it. That bag is a complaint and a returned pallet.\n\nOur biochar holds roughly 3 to 3.5 times its weight in water, so it keeps moisture in the mix. It also granulates uniformly so it blends clean, and the moisture in it binds ultrafine particles during turning, which quiets the dust.\n\nFree sample to run in one batch? Send me a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"C", angle:"Short and curious",
         subject:"Are your customers asking for a premium bagged mix?",
         body:"Hi {First},\n\nIf your customers are asking for a premium mix, biochar is the easiest way to put something real behind the word.\n\nOurs is OMRI Listed, 65 percent organic carbon, granulated to blend uniformly. Made in Louisiana with our own mill behind the supply.\n\nWant a free sample to run in a batch? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
@@ -453,7 +460,7 @@ tracks:[
     mechanism:"Victor: a lot of these operations already compost. They have manure they need to move, so they mix it with bulking agents and spread it on their hay and alfalfa fields to grow the feed that goes back to the cattle. It is cyclical. Biochar goes into that blend. On the ground itself it gives porosity, so in packed clay you actually get root growth, plus inherent NPK, moisture retention and less nutrient leaching. His picture for the leaching pain: you just sprayed fertilizer on your field and then it rained, and there goes 70 percent of your nutrients.",
     proof:[
       "Inherent NPK in the material",
-      "Holds roughly 3 times its weight in water",
+      "Holds roughly 3 to 3.5 times its weight in water",
       "Adds porosity to compacted clay ground",
       "OMRI Listed",
     ],
@@ -489,10 +496,10 @@ tracks:[
     variants:[
       { id:"A", angle:"Direct value",
         subject:"Turn your manure pile into a better field input",
-        body:"Hi {First},\n\nIf you are already composting manure and putting it back on your hay ground, biochar belongs in that blend. We make it from sugarcane bagasse in White Castle, Louisiana.\n\nIt bulks the pile so it breaks down evenly, holds the nitrogen instead of letting it gas off, and once it goes on the field it holds about 3 times its weight in water and keeps nutrients from washing off after a rain.\n\nHappy to send a free sample. Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nIf you are already composting manure and putting it back on your hay ground, biochar belongs in that blend. We make it from sugarcane bagasse in White Castle, Louisiana.\n\nIt bulks the pile so it breaks down evenly, holds the nitrogen instead of letting it gas off, and once it goes on the field it holds about 3 to 3.5 times its weight in water and keeps nutrients from washing off after a rain.\n\nHappy to send a free sample. Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"You fertilized and then it rained",
-        body:"Hi {First},\n\nYou spread fertilizer, it rains that night, and most of what you paid for is gone. Same story on packed clay ground where the roots never really get going.\n\nOur biochar helps on both. It holds nutrients and about 3 times its weight in water in the root zone, and it opens up porosity in compacted ground so roots can move. It also works as a bulking agent in your manure compost.\n\nWant a free sample to try on a section? Send me a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nYou spread fertilizer, it rains that night, and most of what you paid for is gone. Same story on packed clay ground where the roots never really get going.\n\nOur biochar helps on both. It holds nutrients and about 3 to 3.5 times its weight in water in the root zone, and it opens up porosity in compacted ground so roots can move. It also works as a bulking agent in your manure compost.\n\nWant a free sample to try on a section? Send me a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"C", angle:"Short and curious",
         subject:"More out of the same hay ground",
         body:"Hi {First},\n\nWe make biochar out of sugarcane bagasse down in White Castle.\n\nRanchers mix it with manure and spread it, and it holds water and nutrients in the ground instead of letting them wash off. OMRI Listed.\n\nCan I mail you a free sample to try? Nothing to buy.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
@@ -531,7 +538,7 @@ tracks:[
     ],
     mechanism:"Jesse framed the timing on the call: there is a severe drought across the southeast right now and biochar is directly useful for stretching the water a grower already has. He also flagged the expiration date on that hook. If a wet winter shows up, lead with nutrient retention and input cost instead of water.",
     proof:[
-      "Holds roughly 3 times its weight in water",
+      "Holds roughly 3 to 3.5 times its weight in water",
       "Inherent NPK plus 65 percent organic carbon",
       "Reduces nutrient leaching out of the root zone",
       "OMRI Listed",
@@ -568,24 +575,39 @@ tracks:[
     variants:[
       { id:"A", angle:"Direct value",
         subject:"Get more out of every irrigation pass",
-        body:"Hi {First},\n\nWe make a sugarcane bagasse biochar in White Castle, Louisiana. Growers work it in for one reason above the rest: it holds about 3 times its weight in water, so the root zone stays wet longer between passes.\n\nSame structure holds nutrients, so less of what you apply washes past the roots after a rain. It carries 65 percent organic carbon and inherent NPK on its own.\n\nCan I send a free sample to try on a test strip? Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nWe make a sugarcane bagasse biochar in White Castle, Louisiana. Growers work it in for one reason above the rest: it holds about 3 to 3.5 times its weight in water, so the root zone stays wet longer between passes.\n\nSame structure holds nutrients, so less of what you apply washes past the roots after a rain. It carries 65 percent organic carbon and inherent NPK on its own.\n\nCan I send a free sample to try on a test strip? Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"Keep the fertilizer you already paid for",
-        body:"Hi {First},\n\nThe frustrating version of this season: you put fertilizer down, weather does what it does, and a big share of it is gone before the crop ever sees it. Then you are irrigating on top of that.\n\nOur biochar addresses both. It holds roughly 3 times its weight in water and keeps nutrients in the root zone instead of letting them leach past it. OMRI Listed, made in Louisiana.\n\nWant a free sample for a test strip? Send me a ship to address and it goes out this week.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nThe frustrating version of this season: you put fertilizer down, weather does what it does, and a big share of it is gone before the crop ever sees it. Then you are irrigating on top of that.\n\nOur biochar addresses both. It holds roughly 3 to 3.5 times its weight in water and keeps nutrients in the root zone instead of letting them leach past it. OMRI Listed, made in Louisiana.\n\nWant a free sample for a test strip? Send me a ship to address and it goes out this week.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"C", angle:"Short and curious",
         subject:"Dry crops this time of year?",
-        body:"Hi {First},\n\nShort note. We make biochar from sugarcane bagasse a few hours from you in White Castle.\n\nIt holds about 3 times its weight in water and keeps nutrients in the root zone. Dry as it has been, that is worth a look.\n\nFree sample if you want one. Just reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nShort note. We make biochar from sugarcane bagasse a few hours from you in White Castle.\n\nIt holds about 3 to 3.5 times its weight in water and keeps nutrients in the root zone. Dry as it has been, that is worth a look.\n\nFree sample if you want one. Just reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+      /* D and E added Aug 13 2026. The farm block had 3 variants against a 5 subject
+         bank, so two approved subject lines were carrying nothing. D is the soil
+         structure angle, which existed only in INSTANTLY-PASTE section 6 version B and
+         appeared nowhere in this file. E is local supply, which was a subject line with
+         no body behind it. Every one of the 5 subjects now drives a variant. */
+      { id:"D", angle:"Structure, not rate",
+        subject:"Free biochar sample, no cost and no obligation",
+        body:"Hi {First},\n\nFertilizer does not fix structure. Tight or worked out ground limits where roots go, and no rate change on the spreader moves that.\n\nBiochar adds porosity, so the ground holds air and water instead of sealing off, and it carries inherent nutrients of its own. OMRI Listed.\n\nI can send a free half pound to put in your hand first, no cost and nothing owed. Want one?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+      { id:"E", angle:"Local supply and speed",
+        subject:"A soil amendment made four hours from your gate",
+        body:"Hi {First},\n\nWe are in White Castle, Louisiana, close enough that freight does not decide whether this is worth trying.\n\n100 percent sugarcane bagasse biochar, OMRI Listed, holding roughly 3 to 3.5 times its weight in water and keeping nutrients in the root zone. We hold finished inventory rather than running to order, so if it ever earns a real acre it does not wait on a production run.\n\nWorth one strip against your normal program?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
     ],
     followups:[
+      /* Opened "Circling back once" until Aug 13 2026. That construction is on the
+         banned list in campaigns/biochar/README.md and the rebuild audit stripped it
+         from the Instantly copy, but it survived here. A follow up earns its place by
+         adding something, not by announcing that it is a follow up. */
       { t:"Follow up 1, day 3",
-        b:"Hi {First},\n\nCircling back once. Holds water in the root zone, holds nutrients through a rain, 65 percent organic carbon. Made locally.\n\nFree sample is yours if you send a ship to address.\n\n{Me}\n{phone}" },
+        b:"Hi {First},\n\nOne thing I left out. It carries 65 percent organic carbon, so it holds water in the root zone and holds nutrients through a rain rather than doing one or the other.\n\nFree sample is yours if you send a ship to address.\n\n{Me}\n{phone}" },
       { t:"Follow up 2, day 7",
         b:"Hi {First},\n\nAre you the one making the call on soil amendments, or does your agronomist own that? Happy to send this to whoever it is useful for.\n\n{Me}\n{phone}" },
       { t:"Breakup, day 12",
         b:"Hi {First},\n\nI will stop here. If water cost or nutrient loss ever gets bad enough to trial something, we are four hours away with product on the ground.\n\n{Me}\n{phone}" },
     ],
     phone:{
-      opener:"Hi {First}, {Me} with American BioCarbon in White Castle. Quick reason for the call. We make a biochar that holds about 3 times its weight in water and keeps nutrients in the root zone, which matters a lot in a season this dry. Are you the one who decides on amendments?",
+      opener:"Hi {First}, {Me} with American BioCarbon in White Castle. Quick reason for the call. We make a biochar that holds about 3 to 3.5 times its weight in water and keeps nutrients in the root zone, which matters a lot in a season this dry. Are you the one who decides on amendments?",
       voicemail:"Hi {First}, {Me} with American BioCarbon. Biochar that holds water and nutrients in the root zone. I would like to mail you a free sample for a test strip. {phone}. Thanks.",
     },
     objections:[
@@ -593,6 +615,91 @@ tracks:[
         b:"Most people I call have not. That is exactly why the sample is free. Put it on a test strip, watch how it waters against the rest of the field, and decide from there." },
       { o:"How much per acre",
         b:"Depends on the ground and what you are trying to fix, and I would rather not guess at it on a cold call. Run the free sample first, then we can size it honestly." },
+    ],
+  },
+
+  /* -------------------------------------------------- FARM PUBLISHED INBOXES
+
+     Added August 14 2026. This lane was missing from this file entirely while holding 26 of
+     the 38 sendable contacts in round 1, which meant the single biggest live segment had no
+     entry in the file that calls itself the source of truth for cold copy.
+
+     It is NOT a separate ICP. Every row carries icp=BC.FARM in the roster. It is a send door:
+     general inboxes read off the farms' own websites, so they are observed addresses rather
+     than pattern guesses, which is why they clear the gate when most named rows do not.
+
+     Two hard rules. There is no first name on any row, so every body opens without one and
+     the named BC.FARM copy must never be pasted in here. And the ask is ROUTING, not a trial:
+     nobody at a shared inbox can approve a strip trial, so email 1 exists to find the human. */
+  {
+    id:"farmRole", short:"Farm Inboxes", tag:"BC.FARM.ROLE",
+    name:"Farm Published Inboxes",
+    who:"General and published inboxes at row crop, sod, pecan, rice and vineyard operations. Read off the farm's own website: info@, office@, sales@ or the owner's catch all.",
+    titles:["Unknown. There is no named contact on these rows by definition."],
+    pains:[
+      "Same underlying pains as BC.FARM. Water cost, nutrient loss after a rain, ground that will not hold either.",
+      "The inbox specific pain is different: whoever reads it is usually not the buyer, so a pitch aimed at a buyer dies there.",
+    ],
+    mechanism:"Identical product story to BC.FARM. The difference is entirely in the ask. Email 1 requests a name, not a decision.",
+    proof:[
+      "Holds roughly 3 to 3.5 times its weight in water",
+      "Carries inherent nutrients of its own",
+      "OMRI Listed, independently lab tested against the IBI panel",
+      "Finished inventory on hand rather than running to order",
+    ],
+    guardrail:"Never open with a name token on this lane. first_name is empty on every row, so any greeting variable merges empty and ships Hi comma. Open with Hello and nothing else. The only merge variables that are safe here are companyName and city.",
+    campaign:{
+      /* 0 by arithmetic, not by demotion. Effort is a percentage of send capacity and the
+         whole table has to sum to 100; this campaign was added at 10 without taking that
+         10 from anywhere, which pushed the total to 110 and failed the canon gate. It also
+         has no companies on its list today, so it cannot consume capacity either way. Give
+         it a real share the day the list exists, and take that share from another ICP. */
+      priority:"P0", effort:0,
+      companies:["Row crop farms with a published inbox","Sod and turf farms","Pecan and permanent crop operations","Rice operations","Vineyards and estate wineries"],
+      triggers:["Drought conditions in their county","A fertilizer price spike","Ground that will not hold water or nutrients"],
+      disq:["No published inbox","Already reached through a named contact at the same account","Outside the radius"],
+      offer:"No offer in email 1. The ask is a name. The sample offer comes after a human is on the thread.",
+      cta:"Could you point me to whoever makes the soil and input calls?",
+      cta2:"If that is not a fit, tell me and I will close the file.",
+      metric:"Named humans identified, then test strips placed",
+      cycle:"Fast on the routing step, then the BC.FARM season cycle once a name lands.",
+      list:"Observed published inboxes only, inside 500 miles. One inbox per account. The second door at these farms is a phone call and the number is in the roster, so there is no wave 2 on this lane.",
+      persona:{
+        cares:"Getting the message to the right person and off their desk.",
+        fears:"Nothing. This is not a buyer, it is a router.",
+        needs:"One clear sentence about who this is for.",
+        language:"Plain. No jargon, because the reader may be an office manager.",
+        avoid:"Any ask that requires authority. No trial commitment, no pricing, no shipping address.",
+        discovery:["Who makes the soil and input calls?","Is there a better address for that?"],
+      },
+    },
+    subjects:[
+      "{{city}} ground",
+      "who makes the soil calls?",
+      "routing question",
+      "soil amendment, White Castle Louisiana",
+      "point me to the right person?",
+    ],
+    variants:[
+      { id:"A", angle:"Routing",
+        subject:"{{city}} ground",
+        body:"Hello,\n\nWe make a sugarcane bagasse biochar in White Castle, Louisiana. It holds roughly 3 to 3.5x its weight in water and carries inherent nutrients of its own, which is why it comes up on ground that drains too fast or seals off.\n\nCould you point me to whoever makes the soil and input calls at {{companyName}}?\n\nVictor Jehle\nAmerican BioCarbon\n(225) 398 9286" },
+    ],
+    followups:[
+      { t:"Step 2, +5 business days",
+        b:"Hello,\n\nFollowing on the note about our bagasse biochar. To be concrete about what a trial looks like: one strip, your normal program either side of it, the same water, read at the point you would read anything else.\n\nIf that is not a fit for {{companyName}}, tell me and I will close the file.\n\nVictor Jehle\nAmerican BioCarbon\n(225) 398 9286" },
+      { t:"Step 3, +7 to 9 business days",
+        b:"Hello,\n\nLast one from me. For the file: 100% sugarcane bagasse out of White Castle, Louisiana, OMRI Listed, IBI tested, and we hold finished inventory rather than running to order.\n\nIf water or soil cost comes up at {{companyName}} next season, I am easy to find.\n\nVictor Jehle\nAmerican BioCarbon\n(225) 398 9286" },
+    ],
+    phone:{
+      opener:"Hi, {Me} with American BioCarbon in White Castle. We make a biochar that holds water and nutrients in the root zone. Who handles soil and input decisions there?",
+      voicemail:"Hi, {Me} with American BioCarbon in White Castle, Louisiana. Trying to reach whoever makes the soil and input calls. {phone}. Thanks.",
+    },
+    objections:[
+      { o:"Send me some information",
+        b:"Happy to. Who should I put on it? I would rather it land with the person who actually walks the ground than sit in a general inbox." },
+      { o:"We are not interested",
+        b:"Understood. Is that a no for the operation, or a no from the front desk? If there is someone who handles amendments I will send it once and leave it there." },
     ],
   },
 
@@ -918,7 +1025,7 @@ tracks:[
     ],
     followups:[
       { t:"Follow up 1, day 3",
-        b:"Hi {First},\n\nBumping this once. Up to about 5 to 1 on non viscous liquids, so less material to solidify a load and less weight going out.\n\nReply and I will send the video and a free sample.\n\n{Me}\n{phone}" },
+        b:"Hi {First},\n\nOne number worth having: up to about 5 to 1 on non viscous liquids, so less material to solidify a load and less weight going out.\n\nReply and I will send the video and a free sample.\n\n{Me}\n{phone}" },
       { t:"Follow up 2, day 7",
         b:"Hi {First},\n\nWho sources the absorbent and solidifier for your crews? Happy to take this to them directly.\n\n{Me}\n{phone}" },
       { t:"Breakup, day 12",
@@ -1213,7 +1320,7 @@ tracks:[
     ],
     followups:[
       { t:"Follow up 1, day 3",
-        b:"Hi {First},\n\nBumping this once. We manufacture a sugarcane absorbent that takes up to about 5 to 1 on non viscous liquids and we sell it by the metric ton to distributors.\n\nHappy to send a free sample and pricing. A ship to address is all I need.\n\n{Me}\n{phone}" },
+        b:"Hi {First},\n\nThe short version: we manufacture a sugarcane absorbent that takes up to about 5 to 1 on non viscous liquids and we sell it by the metric ton to distributors.\n\nHappy to send a free sample and pricing. A ship to address is all I need.\n\n{Me}\n{phone}" },
       { t:"Follow up 2, day 7",
         b:"Hi {First},\n\nAre you the one who evaluates new products for the line, or should I be talking to a category manager? Point me the right way and I will stop filling your inbox.\n\n{Me}\n{phone}" },
       { t:"Breakup, day 12",

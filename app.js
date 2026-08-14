@@ -258,6 +258,7 @@ function renderChrome(){
     <div>
       <img class="logo" src="${ASSETS.logoRev}" alt="American BioCarbon">
       <p class="addr">${raw(BRAND.legal)}<br>${raw(BRAND.address)}<br>${raw(BRAND.location)}</p>
+      <a class="foot-phone" href="${BRAND.phoneHref}">Sales: ${raw(BRAND.phone)}</a>
       <div class="foot-cta"><a class="btn btn-primary btn-sm" href="/request-sample">Request a Sample Kit</a><a class="btn btn-ghost-light btn-sm" href="/contact">Talk to a Specialist</a></div>
     </div>
     <div><h4>Products</h4>
@@ -274,7 +275,8 @@ function renderChrome(){
       <a href="/about">About</a><a href="/contact">Contact</a>
       <a href="/request-sample">Request a Sample Kit</a><a href="/contact">Talk to a Specialist</a></div>
   </div>
-  <div class="legal"><span>© ${new Date().getFullYear()} ${raw(BRAND.name)}. All rights reserved.</span></div>`;
+  <div class="legal"><span>© ${new Date().getFullYear()} ${raw(BRAND.name)}. All rights reserved.</span>
+    <span class="legal-links"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms &amp; Conditions</a></span></div>`;
   const burger = $("#burger");
   const setBurger = open => {
     burger.setAttribute("aria-expanded", String(open));
@@ -517,6 +519,7 @@ function renderForm(kind, qs){
   <section class="phead"><div class="wrap"><div style="max-width:760px">
     ${crumbs([{label:"Home",href:"/"},{label:f.name}])}
     <h1>${raw(f.h)}</h1><p class="sub">${raw(f.sub)}</p>
+    <p class="sub form-call">Prefer to talk now? Call sales at <a href="${BRAND.phoneHref}">${raw(BRAND.phone)}</a>.</p>
   </div></div></section>
   <section class="block"><div class="wrap"><div class="formwrap">
     <div class="formcard" id="mainform"></div>
@@ -548,8 +551,9 @@ function buildForm(kind, mountSel, qs){
     </div>
     ${ctx.productId?`<input type="hidden" name="product_id" value="${esc(ctx.productId)}">`:""}
     ${ctx.preorder?`<input type="hidden" name="preorder" value="1">`:""}
+    ${smsConsentHTML(f)}
     <button type="submit" class="btn btn-primary" style="margin-top:20px;width:100%">${raw(f.h.replace(/^Request an |^Get a |^Get |^Request |^Talk to a /,'').startsWith('Industrial')?'Send Request':'Submit')}</button>
-    <p class="form-note">By submitting, you agree to be contacted about your request. We reply within one business day.</p>
+    <p class="form-note">By submitting, you agree to be contacted about your request. We reply within one business day. See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms &amp; Conditions</a>.</p>
   </form>`;
   // reveal an "other" text box when a select's Other/Something-else option is chosen
   $("#lf").querySelectorAll("select").forEach(sel=>{
@@ -593,6 +597,22 @@ function deliverLead(kind, form){
     body: JSON.stringify({ form:kind, recipients:to, fields, page:location.pathname+location.hash, ts:new Date().toISOString() }),
     keepalive:true
   }).catch(err=>console.error(`[lead] ${kind}: delivery failed`, err));
+}
+/* Express written consent for SMS, captured at the point the number is collected.
+   This checkbox IS our opt-in evidence for A2P 10DLC: it must stay unchecked by
+   default, must never be required to submit (consent cannot be a condition of doing
+   business), and its wording must keep naming the brand, the message types, the
+   frequency, "Msg & data rates may apply", and STOP/HELP. Only rendered for forms
+   that actually ask for a phone number. */
+function smsConsentHTML(f){
+  if(!(f.fields||[]).some(fl=>fl.n==="phone")) return "";
+  return `<label class="consent"><input type="checkbox" name="smsConsent" value="yes">
+    <span>Yes, text me at the number above. By checking this box I agree to receive text
+    messages from American BioCarbon about my sample request, quote, or order, including
+    delivery and scheduling updates. Message frequency varies. Msg &amp; data rates may
+    apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase.
+    See our <a href="/privacy">Privacy Policy</a> and
+    <a href="/terms">Terms &amp; Conditions</a>.</span></label>`;
 }
 function fieldHTML(fl, ctx){
   const req = fl.req?` <span class="req">*</span>`:"";
@@ -1158,6 +1178,237 @@ function renderAbout(){
   ${ctaBand({h:"Work with us",sub:"Get a free sample, or talk to a specialist about volume.",primary:CTA.sample,secondary:CTA.specialist})}`;
 }
 
+/* ================= LEGAL =================
+   Privacy Policy and Terms & Conditions. These are not decorative: the A2P 10DLC
+   campaign registration for our business texting requires both to be public,
+   linkable URLs, and the campaign is rejected outright if the privacy policy does
+   not state that mobile information is never shared with third parties or
+   affiliates for marketing, and that SMS opt-in data and consent are never shared.
+   That language lives in the "Text messaging" section below. Do not soften it,
+   move it behind a form, or delete these routes without re-registering the
+   campaign. LEGAL_UPDATED is the effective date shown on both pages. */
+const LEGAL_UPDATED = "August 14, 2026";
+const LEGAL_ENTITY  = "American BioCarbon CT, LLC";
+const LEGAL_EMAIL   = "victor@americanbiocarbon.com";
+
+function legalPage(o){
+  return `
+  <section class="phead"><div class="wrap"><div style="max-width:760px">
+    ${crumbs([{label:"Home",href:"/"},{label:o.crumb}])}
+    <h1>${raw(o.h1)}</h1>
+    <p class="sub">${raw(o.sub)}</p>
+    <p class="updated">Last updated: ${raw(LEGAL_UPDATED)}</p>
+  </div></div></section>
+  <section class="block"><div class="wrap"><div class="legal-prose">
+    <div class="legal-toc">${o.sections.map(s=>`<a href="#${s.id}">${raw(s.h)}</a>`).join("")}</div>
+    ${o.sections.map(s=>`<h2 id="${s.id}">${raw(s.h)}</h2>${s.body}`).join("")}
+    <h2 id="contact">Contact us</h2>
+    <p>${raw(LEGAL_ENTITY)}<br>${raw(BRAND.address)}<br>
+      Phone: <a href="${BRAND.phoneHref}">${raw(BRAND.phone)}</a><br>
+      Email: <a href="mailto:${o.email}">${raw(o.email)}</a></p>
+  </div></div></section>`;
+}
+
+/* The SMS disclosure block is identical on both pages by design: carriers review the
+   two URLs independently, and each has to stand on its own. */
+function smsDisclosure(){
+  return `
+  <p>American BioCarbon sends text messages only to people who have given us their
+    express consent, and only about the business relationship they contacted us about.</p>
+  <h3>What we send</h3>
+  <ul>
+    <li>Replies from a sales or technical specialist to a request you submitted.</li>
+    <li>Sample kit and order updates, including shipping and tracking notices.</li>
+    <li>Quote follow ups, delivery scheduling, and answers to product questions.</li>
+    <li>Account and service notices related to an order or account you hold with us.</li>
+  </ul>
+  <h3>How you opt in</h3>
+  <p>You consent to receive text messages from us when you provide your mobile number
+    and affirmatively agree, by checking the SMS consent box on a form on this site,
+    by texting us first, or by giving a specialist verbal or written permission during
+    a sales conversation. Consent to receive marketing or promotional text messages is
+    never a condition of purchasing any product or service from us.</p>
+  <h3>Message frequency and cost</h3>
+  <p>Message frequency varies and depends on your activity with us, typically a few
+    messages per month per active request or order. Message and data rates may apply.
+    Your mobile carrier is not liable for delayed or undelivered messages.</p>
+  <h3>How to stop</h3>
+  <p>Reply STOP to any message to opt out at any time. You will receive one final
+    message confirming that you have been unsubscribed, and we will send no further
+    texts to that number unless you opt in again. Reply HELP for help, or contact us
+    at <a href="${BRAND.phoneHref}">${raw(BRAND.phone)}</a> or
+    <a href="mailto:${LEGAL_EMAIL}">${raw(LEGAL_EMAIL)}</a>.</p>
+  <h3>How we treat your mobile information</h3>
+  <p><b>No mobile information will be sold, rented, or shared with third parties or
+    affiliates for marketing or promotional purposes.</b> Text messaging originator
+    opt in data and consent will not be shared with any third parties. We share mobile
+    information only with the vendors that operate the messaging and customer service
+    systems on our behalf, solely so those messages can be delivered and supported, and
+    those vendors are contractually prohibited from using it for any other purpose. All
+    other use case categories exclude text messaging originator opt in data and consent
+    entirely.</p>`;
+}
+
+function renderPrivacy(){
+  setMeta({title:"Privacy Policy | American BioCarbon",desc:"How American BioCarbon collects, uses, and protects personal information, including our text messaging practices, cookies, and your privacy choices."});
+  return legalPage({
+    crumb:"Privacy Policy", h1:"Privacy Policy", email:LEGAL_EMAIL,
+    sub:`This policy explains what ${LEGAL_ENTITY} collects when you use americanbiocarbon.com, contact our sales team, or exchange text messages with us, and what we do and do not do with it.`,
+    sections:[
+      { id:"scope", h:"1. Who this policy covers", body:`
+        <p>This policy applies to ${raw(LEGAL_ENTITY)} ("American BioCarbon", "we", "us", "our")
+          and to americanbiocarbon.com, our sample and quote request forms, our sales
+          communications by email and text message, and our online store. It does not
+          apply to third party websites we link to, which have their own policies.</p>` },
+      { id:"collect", h:"2. Information we collect", body:`
+        <h3>Information you give us</h3>
+        <ul>
+          <li>Name, company, job role, email address, mailing or shipping address, and phone number.</li>
+          <li>Details you provide about your application, such as material to be absorbed, volume, use case, and timeline.</li>
+          <li>Order and payment records. Card payments are processed by our payment processor; we do not receive or store full card numbers.</li>
+          <li>The content of messages you send us by form, email, or text.</li>
+        </ul>
+        <h3>Information collected automatically</h3>
+        <ul>
+          <li>IP address, browser and device type, referring page, pages viewed, and time on page, through Google Analytics.</li>
+          <li>Cookies and similar technologies used for analytics and for our store checkout.</li>
+        </ul>
+        <p>We do not knowingly collect sensitive categories of personal information, and we
+          do not collect personal information from children.</p>` },
+      { id:"use", h:"3. How we use information", body:`
+        <ul>
+          <li>To respond to sample requests, quote requests, technical questions, and other inquiries.</li>
+          <li>To ship samples and fulfill, invoice, and support orders.</li>
+          <li>To send the transactional and relationship messages described in the text messaging section below.</li>
+          <li>To improve the website, our products, and our documentation.</li>
+          <li>To meet legal, tax, safety, and recordkeeping obligations.</li>
+        </ul>` },
+      { id:"sms", h:"4. Text messaging (SMS and MMS)", body:smsDisclosure() },
+      { id:"share", h:"5. How we share information", body:`
+        <p>We do not sell your personal information. We share it only in these situations:</p>
+        <ul>
+          <li><b>Service providers.</b> Shipping carriers, our e-commerce and payment processors, email and messaging providers, and our customer relationship system, each limited to what they need to perform that service for us.</li>
+          <li><b>Legal and safety.</b> When required by law, subpoena, or regulation, or to protect our rights, property, or the safety of others.</li>
+          <li><b>Business transfers.</b> In connection with a merger, acquisition, or sale of assets, subject to this policy.</li>
+        </ul>
+        <p>As stated above, mobile information and SMS opt in data and consent are excluded
+          from any sharing for marketing or promotional purposes, and are never shared with
+          third parties for their own use.</p>` },
+      { id:"cookies", h:"6. Cookies and analytics", body:`
+        <p>We use Google Analytics 4 to understand how visitors use the site. It sets cookies
+          that record pages viewed and general location at a city level. You can block or
+          delete cookies in your browser settings, and you can opt out of Google Analytics
+          using the <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener noreferrer" target="_blank">Google Analytics opt out browser add on</a>.
+          Our store pages set cookies that are necessary for the cart and checkout to work.
+          We do not serve behavioral advertising on this site.</p>` },
+      { id:"retention", h:"7. Retention and security", body:`
+        <p>We keep personal information for as long as needed to serve the purpose it was
+          collected for and to meet legal and accounting requirements, then delete or
+          anonymize it. We use administrative and technical safeguards appropriate to the
+          sensitivity of the data, including encrypted transport and restricted access. No
+          method of transmission or storage is completely secure, so we cannot guarantee
+          absolute security.</p>` },
+      { id:"rights", h:"8. Your choices and rights", body:`
+        <ul>
+          <li>Reply STOP to any text message to stop text messages, or use the unsubscribe link in any marketing email.</li>
+          <li>Request access to, correction of, or deletion of the personal information we hold about you.</li>
+          <li>Ask us to stop using your information for marketing.</li>
+          <li>Residents of states with comprehensive privacy laws, including California, may also request the categories of information collected and disclosed, and may appeal a decision we make on a request. We do not sell or share personal information as those terms are defined in the California Consumer Privacy Act.</li>
+        </ul>
+        <p>To exercise any of these, email <a href="mailto:${LEGAL_EMAIL}">${raw(LEGAL_EMAIL)}</a>
+          or call <a href="${BRAND.phoneHref}">${raw(BRAND.phone)}</a>. We will verify your
+          request and respond within the time the applicable law allows. We will not
+          discriminate against you for exercising a privacy right.</p>` },
+      { id:"children", h:"9. Children", body:`
+        <p>This is a business to business site. It is not directed to children under 13, and
+          we do not knowingly collect their personal information. If you believe a child has
+          given us information, contact us and we will delete it.</p>` },
+      { id:"changes", h:"10. Changes to this policy", body:`
+        <p>We may update this policy. The effective date at the top of the page always shows
+          the current version, and material changes will be posted here before they take
+          effect. Continuing to use the site after an update means you accept the revised
+          policy.</p>` },
+    ],
+  });
+}
+
+function renderTerms(){
+  setMeta({title:"Terms & Conditions | American BioCarbon",desc:"The terms that govern use of americanbiocarbon.com, our sample and quote requests, product orders, and our text messaging program."});
+  return legalPage({
+    crumb:"Terms & Conditions", h1:"Terms & Conditions", email:LEGAL_EMAIL,
+    sub:`These terms govern your use of americanbiocarbon.com and of the samples, quotes, orders, and messages you receive from ${LEGAL_ENTITY}.`,
+    sections:[
+      { id:"accept", h:"1. Acceptance", body:`
+        <p>By using this website, submitting a form, placing an order, or exchanging text
+          messages with us, you agree to these terms and to our
+          <a href="/privacy">Privacy Policy</a>. If you are agreeing on behalf of a company,
+          you confirm you have authority to bind that company. If you do not agree, do not
+          use the site.</p>` },
+      { id:"use", h:"2. Use of the site", body:`
+        <p>You may use this site for legitimate business purposes only. You may not attempt to
+          gain unauthorized access to any system, interfere with the site's operation, scrape
+          it at a volume that degrades service, misrepresent your identity, or use any content
+          here to build a competing product database.</p>` },
+      { id:"products", h:"3. Samples, quotes, and orders", body:`
+        <ul>
+          <li>Sample kits are provided for evaluation. Availability, quantity, and eligibility are at our discretion, and we may limit samples to one per company.</li>
+          <li>Prices, specifications, and availability shown on the site may change without notice and are not an offer to sell. A quote is binding only in the form we issue it, for the period it states.</li>
+          <li>An order is accepted only when we confirm it in writing. We may decline or cancel an order, including for pricing or availability errors, and will refund any amount already charged.</li>
+          <li>Online purchases are processed through our hosted store and are also subject to that store's checkout, payment, and refund terms.</li>
+          <li>Freight, delivery dates, and lead times are estimates unless stated otherwise in a signed agreement.</li>
+        </ul>` },
+      { id:"sms", h:"4. Text messaging terms", body:smsDisclosure() },
+      { id:"technical", h:"5. Product information and suitability", body:`
+        <p>Specification sheets, lab analyses, absorption figures, certifications, and
+          application guidance on this site are provided for general information based on
+          representative samples and testing. Actual performance varies with material,
+          temperature, procedure, and site conditions. You are responsible for determining
+          whether a product is suitable and safe for your application, for reviewing the
+          applicable safety data sheet, and for complying with all laws and permits governing
+          use, handling, and disposal, including disposal of absorbed material. Nothing here
+          is a warranty of results.</p>` },
+      { id:"ip", h:"6. Intellectual property", body:`
+        <p>The site and its content, including text, images, data, spec sheets, logos, and the
+          American BioCarbon name and marks, are owned by us or our licensors and protected by
+          intellectual property law. You may view, download, and print materials for your own
+          internal evaluation and purchasing use. Any other reproduction, distribution, or
+          commercial use requires our written permission.</p>` },
+      { id:"thirdparty", h:"7. Third party links and services", body:`
+        <p>We link to third party sites and use third party services for our store, analytics,
+          and messaging. We do not control them and are not responsible for their content,
+          products, or privacy practices.</p>` },
+      { id:"warranty", h:"8. Disclaimer of warranties", body:`
+        <p>Except for any written warranty we expressly provide with a product, the site and
+          its content are provided "as is" and "as available", and we disclaim all warranties,
+          express or implied, including implied warranties of merchantability, fitness for a
+          particular purpose, title, and non infringement. We do not warrant that the site
+          will be uninterrupted, error free, or free of harmful components.</p>` },
+      { id:"liability", h:"9. Limitation of liability", body:`
+        <p>To the fullest extent permitted by law, we are not liable for indirect, incidental,
+          special, consequential, punitive, or exemplary damages, or for lost profits, lost
+          revenue, or business interruption, arising out of your use of the site, our
+          messages, or our products. Our total liability for any claim relating to the site is
+          limited to one hundred United States dollars, and our total liability for any claim
+          relating to a product is limited to the amount you paid for that product. Some
+          jurisdictions do not allow these limits, so they may not apply to you.</p>` },
+      { id:"indemnity", h:"10. Indemnification", body:`
+        <p>You agree to indemnify and hold harmless ${raw(LEGAL_ENTITY)}, its officers,
+          employees, and agents from any claim, loss, or expense, including reasonable
+          attorney fees, arising from your misuse of the site or of any product, or your
+          breach of these terms.</p>` },
+      { id:"law", h:"11. Governing law", body:`
+        <p>These terms are governed by the laws of the State of Louisiana, without regard to
+          its conflict of laws rules. Any dispute will be brought exclusively in the state or
+          federal courts located in Louisiana, and you consent to their jurisdiction.</p>` },
+      { id:"changes", h:"12. Changes and severability", body:`
+        <p>We may revise these terms at any time by posting an updated version with a new
+          effective date. Continued use of the site after that date means you accept the
+          revision. If any provision is held unenforceable, the remaining provisions stay in
+          effect.</p>` },
+    ],
+  });
+}
+
 /* ---- helpers ---- */
 function prodId(p){ return Object.keys(PRODUCTS).find(k=>PRODUCTS[k]===p); }
 function linkLabel(href){
@@ -1550,6 +1801,8 @@ function router(){
   else if(parts[0]==="compare"){ html=renderCompare(); }
   else if(parts[0]==="technical"){ html=renderTechnical(); formToBuild="docs"; formMount="#pform"; }
   else if(parts[0]==="about"){ html=renderAbout(); }
+  else if(parts[0]==="privacy"){ html=renderPrivacy(); }
+  else if(parts[0]==="terms"){ html=renderTerms(); }
   else if(parts[0]==="environmental-remediation-solutions"){ html=renderEnvironmentalRemediation(); formToBuild="quote"; formMount="#mainform"; }
   else if(parts[0]==="distributors-resellers-industries"){ html=renderResellersIndustries(); formToBuild="distributor"; formMount="#mainform"; }
   else if(parts[0]==="distributors-resellers-agriculture"){ html=renderResellersAgriculture(); formToBuild="distributor"; formMount="#mainform"; }
@@ -1570,6 +1823,10 @@ function router(){
   else if(parts[0]==="compare"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Compare",path:"/compare"}])]); }
   else if(parts[0]==="technical"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Technical Data & Research",path:"/technical"}])]); }
   else if(parts[0]==="about"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"About",path:"/about"}])]); }
+  /* Indexable on purpose: carriers and app stores check that the policy URLs resolve
+     publicly, and a noindex page reads as "hidden legal terms" in a compliance review. */
+  else if(parts[0]==="privacy"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Privacy Policy",path:"/privacy"}])]); }
+  else if(parts[0]==="terms"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Terms & Conditions",path:"/terms"}])]); }
   else if(parts[0]==="environmental-remediation-solutions"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Environmental Remediation",path:"/environmental-remediation-solutions"}])]); }
   else if(parts[0]==="distributors-resellers-industries"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Distributors & Resellers",path:"/distributors-resellers-industries"}])]); }
   else if(parts[0]==="distributors-resellers-agriculture"){ setNoindex(false); setJsonLd([breadcrumbLd([home,{name:"Distributors & Resellers - Agriculture",path:"/distributors-resellers-agriculture"}])]); }

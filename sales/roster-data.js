@@ -15,7 +15,7 @@ window.ROSTER = {
   byIcp: {"AB.DIST":62,"AB.CIVIL":57,"BC.NUR":62,"BC.DIST":13,"BC.COMP":7,"AB.LF":69,"BC.BLEND":7,"AB.OG":42,"AB.HDD":21,"AB.ENV":15,"BC.FARM":78,"AB.MUNI":59,"BC.RANCH":29,"AB.BED":18},
   byLine: {"Absorbent":435,"Biochar":238,"DEAD":120,"?":6},
   byVerify: {"verified":372,"unverified":231,"partial":72,"killed":119,"rejected":1,"review":4},
-  emptyIcps: [],
+  emptyIcps: ["BC.FARM.ROLE"],
   byOrigin: {"desk":552,"sheet":8,"ldeq":66,"hubspot":173},
   icpLabels: {
     "BC.COMP": "Composters and Organics Recyclers",
@@ -23,6 +23,7 @@ window.ROSTER = {
     "BC.BLEND": "Soil Blenders and Bagged Media",
     "BC.RANCH": "Ranchers, Livestock and Poultry",
     "BC.FARM": "Row Crop and Specialty Farms",
+    "BC.FARM.ROLE": "Farm Published Inboxes",
     "BC.DIST": "Ag Distributors and Landscape Supply",
     "AB.OG": "Oil and Gas Field Services",
     "AB.ENV": "Spill Response and Environmental Remediation",
