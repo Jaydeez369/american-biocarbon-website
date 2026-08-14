@@ -41,7 +41,10 @@ const BRAND = {
   legal:"American BioCarbon",
   address:"32525 Highway 1 South, White Castle, LA 70788",
   location:"White Castle, Louisiana · co-located with the Cora Texas Sugar Mill",
-  phone:"(add phone)",           // TODO: confirm
+  /* Sales desk line. `phone` is what a human reads, `phoneHref` is what tel: dials, and
+     they must stay in sync: a mismatch silently dials the wrong number from mobile. */
+  phone:"(225) 398-9286",
+  phoneHref:"tel:+12253989286",
   email:"sales@americanbiocarbon.com", // TODO: confirm
 };
 

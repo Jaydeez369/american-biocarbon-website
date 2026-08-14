@@ -43,6 +43,10 @@ const C = {
 const BRAND = {
   name: "American BioCarbon",
   address: "32525 Highway 1 South, White Castle, LA 70788",
+  /* Kept in sync with BRAND in website/data.js by hand: a Pages Function cannot import the
+     site's browser-global data.js, so this is a deliberate second copy, not a stray one. */
+  phone: "(225) 398-9286",
+  phoneHref: "tel:+12253989286",
   logo: "https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731&width=440&format=png",
   logoRev:
     "https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_rev_38e8f78a-b79f-4c53-8b36-d10683e943cf.webp?v=1710182358&width=440&format=png",
@@ -183,6 +187,7 @@ function footer(env) {
     `<p style="margin:0;font:400 13px/1.6 ${FONT};color:${C.mute}">` +
     `<a href="${o}" style="color:${C.navy600};text-decoration:none">americanbiocarbon.com</a>` +
     ` &nbsp;·&nbsp; <a href="mailto:sales@americanbiocarbon.com" style="color:${C.navy600};text-decoration:none">sales@americanbiocarbon.com</a>` +
+    ` &nbsp;·&nbsp; <a href="${BRAND.phoneHref}" style="color:${C.navy600};text-decoration:none">${esc(BRAND.phone)}</a>` +
     `</p>` +
     `<p style="margin:12px 0 0;font:400 12px/1.5 ${FONT};color:#8b9099">` +
     `You are receiving this because you submitted a request on our website.</p>` +
@@ -446,6 +451,7 @@ export function buildAutoreply(formKey, fields = {}, env = {}, styleOverride) {
     "",
     `- The team at ${BRAND.name}`,
     BRAND.address,
+    BRAND.phone,
     o,
   ]
     .filter((l, i, a) => !(l === "" && a[i - 1] === ""))
