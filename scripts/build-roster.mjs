@@ -59,6 +59,8 @@ const REPO = join(SITE, "..");
 function classify(head) {
   const h = new Set(head);
   if (h.has("Company") && h.has("ICP") && h.has("Why") && h.size === 3) return "assign";
+  if (h.has("Company") && h.has("Reason") && h.size === 2) return "kill";
+  if (h.has("Company") && h.has("Website") && h.has("Source") && h.size === 3) return "domain";
   if (h.has("Company") && h.has("Line") && h.has("ICP")) return "research";
   if (h.has("FacilityName") && h.has("Parish")) return "ldeq";
   if (h.has("Company") && h.has("Verdict")) return "geoaudit";
@@ -122,10 +124,19 @@ function parseCSV(text) {
 }
 
 const clean = s => String(s == null ? "" : s).replace(/\s+/g, " ").trim();
+/* Domains are the join key between this file and the enrichment rosters. Strip scheme,
+   www and any path, and reject anything that is not a bare hostname -- one roster row
+   carries "livingearth.net (verify, see note)" in its website field, which must not
+   silently become a domain. */
+const normDomain = w => {
+  const d = String(w == null ? "" : w).replace(/^https?:\/\//, "").replace(/^www\./, "")
+    .split("/")[0].toLowerCase().trim();
+  return /^[a-z0-9.-]+\.[a-z]{2,}$/.test(d) ? d : "";
+};
 const int = s => { const n = parseInt(String(s).replace(/[^\d-]/g, ""), 10); return Number.isFinite(n) ? n : null; };
 
 const HANDOFF = join(REPO, "handoff");
-const discovered = { research: [], flat: [], geoaudit: [], ldeq: [], assign: [], unknown: [] };
+const discovered = { research: [], flat: [], geoaudit: [], ldeq: [], assign: [], kill: [], domain: [], unknown: [] };
 for (const f of readdirSync(HANDOFF).filter(f => f.toLowerCase().endsWith(".csv")).sort()) {
   const path = join(HANDOFF, f);
   let head = [];
@@ -511,6 +522,169 @@ for (const file of discovered.assign) {
 }
 
 /* ---------------------------------------------------------------------------
+   DOMAIN RECOVERY OVERLAY - handoff/domain-recovery.csv
+
+   A company with no website cannot be ICP-proven, cannot be enriched and cannot be
+   written to, so it sits in the roster inflating every total while being unworkable.
+   Recovering the domain is pure desk research and costs nothing, but it must not be typed
+   into the research CSVs by hand -- those are the generator's input, and run 5 retired
+   build-absorbent-roster.mjs precisely for destroying hand-appended rows.
+
+   Same contract as the other overlays: one row per company, the recovered domain, and the
+   evidence that found it. It only writes where there is nothing usable to lose -- a blank
+   website, or one normDomain already rejects as not-a-hostname (the roster carries
+   "livingearth.net (verify, see note)", which is a note to a human, not a domain). It
+   never overwrites a valid website, so a recovered guess cannot displace researched data.
+   --------------------------------------------------------------------------- */
+let domainsRecovered = 0; const domainMissing = [];
+for (const file of discovered.domain) {
+  const rows = parseCSV(readFileSync(file, "utf8"));
+  if (!rows.length) continue;
+  const head = rows[0].map(clean);
+  const idx = Object.fromEntries(head.map((h, i) => [h, i]));
+  for (const r of rows.slice(1)) {
+    const name = clean(r[idx.Company]);
+    const site = normDomain(clean(r[idx.Website]));
+    const src = clean(r[idx.Source]);
+    if (!name || !site) continue;
+    const rec = companies.get(norm(name));
+    if (!rec) { domainMissing.push(name); continue; }
+    if (rec.dead) continue;
+    if (rec.website && normDomain(rec.website)) continue;   // a usable website is never overwritten
+    rec.website = site;
+    rec.websiteWhy = src;
+    domainsRecovered++;
+  }
+  sourcesUsed.push({ file: file.split("/").pop(), rows: domainsRecovered, strays: true });
+}
+if (domainMissing.length) console.log(`  domain recovery: ${domainMissing.length} name(s) not found: ${domainMissing.slice(0, 5).join("; ")}`);
+if (domainsRecovered) console.log(`  domain recovery: ${domainsRecovered} websites filled in by desk research`);
+
+/* ---------------------------------------------------------------------------
+   KILL OVERLAY - handoff/company-kills.csv
+
+   Until run 6 the only way to kill a company was NOT_A_BUYER, a hardcoded regex over the
+   NAME. That catches "casino" and "steakhouse"; it cannot express "this is a trade
+   association", "this is a franchise head office" or "this sells software to oilfield
+   operators but owns no equipment" -- all of which are things you only learn by reading
+   the site, and all of which Apollo's keyword tagging swept into the roster.
+
+   Same contract as the ICP overlay: a reviewable file, one written reason per row,
+   applied on every rebuild so the decision survives regeneration. The row is NOT deleted.
+   A row that quietly vanishes gets re-scraped and re-added on the next sourcing pass; a
+   row marked dead with a reason stays dead and stays visible.
+   --------------------------------------------------------------------------- */
+let killed = 0; const killMissing = [];
+for (const file of discovered.kill) {
+  const rows = parseCSV(readFileSync(file, "utf8"));
+  if (!rows.length) continue;
+  const head = rows[0].map(clean);
+  const idx = Object.fromEntries(head.map((h, i) => [h, i]));
+  for (const r of rows.slice(1)) {
+    const name = clean(r[idx.Company]);
+    const reason = clean(r[idx.Reason]);
+    if (!name || !reason) continue;
+    const rec = companies.get(norm(name));
+    if (!rec) { killMissing.push(name); continue; }
+    if (rec.dead) continue;
+    rec.dead = true;
+    rec.line = "DEAD";
+    rec.verify = "killed";
+    rec.killWhy = reason;
+    rec.scoreWhy = reason;
+    killed++;
+  }
+  sourcesUsed.push({ file: file.split("/").pop(), rows: killed, strays: true });
+}
+if (killMissing.length) console.log(`  kill overlay: ${killMissing.length} name(s) not found: ${killMissing.slice(0, 5).join("; ")}`);
+if (killed) console.log(`  kill overlay: ${killed} companies killed with a written reason`);
+
+/* ---------- contacts actually on file, joined from the enrichment rosters ----------
+   Until 2026-08-16 the only contact signal in this file was ContactNamesFreeTier, a
+   frozen column of Apollo free-tier names copied off a research sheet. It says nothing
+   about whether we hold a real address, so the Sales OS could show "contacts" for a
+   company we cannot write to and show nothing for one we had just revealed and verified.
+
+   ALL-{absorbent,biochar}-prospects.csv are the source of truth for contacts, and
+   verification-results.csv for whether an address survived. Join them on the EMAIL
+   DOMAIN, never company_name -- the same rule the gate and the enrichment scripts use,
+   because names drift ("LEI, Inc. (a Triumvirate Environmental Company)") and domains
+   do not.
+
+   Built ABOVE the verification loop since 2026-08-17 (run 7): the loop's "phone or
+   email" need must see joined addresses, and the city/state carried on the enrichment
+   rows backfills records that have none. Before that fix a company whose join held
+   verified addresses was still flagged as missing "phone or email". */
+const contactsByDomain = new Map();
+{
+  const verdicts = new Map();
+  const vPath = join(HANDOFF, "enrichment", "instantly", "verification-results.csv");
+  if (existsSync(vPath)) {
+    const all = parseCSV(readFileSync(vPath, "utf8"));
+    const header = all[0].map(h => h.trim()), rows = all.slice(1);
+    const iE = header.indexOf("email"), iS = header.indexOf("status");
+    for (const r of rows) {
+      const e = (r[iE] || "").toLowerCase().trim();
+      /* First real verdict wins, matching ingest-verification.mjs. */
+      if (e && !verdicts.has(e)) verdicts.set(e, (r[iS] || "").toLowerCase().trim());
+    }
+  }
+  for (const line of ["absorbent", "biochar"]) {
+    const p = join(HANDOFF, "enrichment", "instantly", `ALL-${line}-prospects.csv`);
+    if (!existsSync(p)) continue;
+    const all = parseCSV(readFileSync(p, "utf8"));
+    const header = all[0].map(h => h.trim()), rows = all.slice(1);
+    const iE = header.indexOf("email"), iW = header.indexOf("website");
+    const iCity = header.indexOf("city"), iState = header.indexOf("state");
+    const iF = header.indexOf("first_name"), iL = header.indexOf("last_name"), iT = header.indexOf("title");
+    const iCo = header.indexOf("company_name");
+    /* Which domains actually belong to a roster company. Needed by the name fallback
+       below: without it a sister domain (outkastig.com vs outkastindustrial.com) or a
+       free-mail address (the webless Forest Hill nurseries are all gmail/yahoo) joins
+       nothing and the OS shows "needed" for an address we are holding. */
+    const rosterDomains = new Set([...companies.values()].map(c => normDomain(c.website)).filter(Boolean));
+    /* Resolves a CSV company name to the companies-map key. Both the key (first-seen name
+       variant) and the CURRENT display name resolve, because they drift apart as later
+       sources refine the name ("Bracy's Nursery" became "Bracy's Nursery, LLC"). */
+    const nameResolve = new Map();
+    for (const [k, c] of companies.entries()) {
+      nameResolve.set(k, k);
+      const nk = norm(c.name);
+      if (!nameResolve.has(nk)) nameResolve.set(nk, k);
+    }
+    for (const r of rows) {
+      const email = (r[iE] || "").trim();
+      if (!email) continue;                       // address-less stub rows are not contacts
+      /* The website column is the join key, but 48 rows arrived with it blank while the
+         address itself names the company: fall back to the email's own domain so those
+         contacts reach their roster row instead of joining nothing. */
+      let d = normDomain(r[iW]) || normDomain(email.split("@")[1] || "");
+      /* Domain join is canon (names drift, domains do not) — but when the domain matches
+         NO roster company and the row's company name matches one exactly, a name key is
+         the only join there is. Display-side only; enrichment spend still keys on domain. */
+      const coName = iCo >= 0 ? (r[iCo] || "").trim() : "";
+      const nameKey = coName ? nameResolve.get(norm(coName)) : null;
+      if ((!d || !rosterDomains.has(d)) && nameKey) d = "name:" + nameKey;
+      if (!d) continue;
+      if (!contactsByDomain.has(d)) contactsByDomain.set(d, { total: 0, verified: 0, city: "", state: "", list: [] });
+      const rec = contactsByDomain.get(d);
+      rec.total++;
+      const status = verdicts.get(email.toLowerCase()) || "";
+      if (status === "verified") rec.verified++;
+      /* The record itself, so the OS can SHOW the person rather than a count. Short keys
+         on purpose: this array is serialised per company into roster-data.js. */
+      const nm = [iF >= 0 ? r[iF] : "", iL >= 0 ? r[iL] : ""].map(s => (s || "").trim()).filter(Boolean).join(" ");
+      rec.list.push({ n: nm, t: iT >= 0 ? (r[iT] || "").trim() : "", e: email, s: status });
+      /* First non-empty location per domain wins; enrichment rows carry the account's
+         city/state from Apollo research and are the only location source for most
+         contact-first accounts. */
+      if (!rec.city && iCity >= 0 && (r[iCity] || "").trim()) rec.city = r[iCity].trim();
+      if (!rec.state && iState >= 0 && (r[iState] || "").trim()) rec.state = r[iState].trim();
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
    VERIFICATION.
 
    Derived, never asserted. Each record gets `needs`, the list of what is genuinely absent,
@@ -530,7 +704,36 @@ const NOT_A_BUYER = /\b(bicycle club|casino|restaurant|bar and grill|country clu
    are surfaced rather than either killed or dropped into the ordinary call queue. */
 const NEEDS_REVIEW = /\b(university|college|agcenter|extension|institute|research|nonprofit|goodwill|foundation)\b/i;
 
-for (const c of companies.values()) {
+for (const [coKey, c] of companies.entries()) {
+  const dJoined = contactsByDomain.get(normDomain(c.website));
+  const nJoined = contactsByDomain.get("name:" + coKey);
+  const joined = dJoined && nJoined
+    ? { total: dJoined.total + nJoined.total, verified: dJoined.verified + nJoined.verified,
+        city: dJoined.city || nJoined.city, state: dJoined.state || nJoined.state }
+    : (dJoined || nJoined);
+  /* Backfill city/state from the enrichment rosters (run 7, 2026-08-17). The Apollo
+     research rows carry the account's location; a record that has none gets it from
+     there rather than being flagged as location-less forever. Fills only, never
+     overwrites desk research. */
+  if (!c.city && !c.state && joined && (joined.city || joined.state)) {
+    c.city = joined.city;
+    c.state = joined.state;
+    c.locationSource = "enrichment-csv";
+  }
+  /* Freight verdict, derived once a location exists (run 7, 2026-08-17). Two honest
+     cases only: absorbent has NO distance gate by canon (nationwide FOB White Castle),
+     and a biochar account in LA or MS is inside the 500-mile ring by state extent --
+     the same reasoning the geo audit's "inside the state extent" rows already use.
+     Anything else keeps an empty verdict rather than a guessed one. */
+  if (!c.geo && (c.city || c.state)) {
+    if (c.line === "Absorbent") {
+      c.geo = "NO GATE";
+      c.geoWhy = "Absorbent ships nationwide FOB White Castle; distance is freight math, never a disqualifier. Location recorded for quoting.";
+    } else if (c.line === "Biochar" && /^(LA|MS)$/i.test(clean(c.state))) {
+      c.geo = "IN";
+      c.geoWhy = `In ring. ${clean(c.state).toUpperCase() === "LA" ? "Louisiana" : "Mississippi"}: inside the state extent, within 500 driving miles of White Castle.`;
+    }
+  }
   const needs = [];
   if (!c.website) needs.push("website");
   if (!c.icp) needs.push("ICP");
@@ -538,7 +741,9 @@ for (const c of companies.values()) {
   if (!c.geo) needs.push("freight verdict");
   if (c.score == null) needs.push("score");
   if (!c.why) needs.push("reason to work it");
-  if (!(c.phones || []).length && !(c.emails || []).length) needs.push("phone or email");
+  /* A joined enrichment address IS an email; the roster no longer flags "phone or
+     email" for a company the enrichment CSVs can already write to (run 7 fix). */
+  if (!(c.phones || []).length && !(c.emails || []).length && !(joined && joined.total > 0)) needs.push("phone or email");
   c.needs = needs;
 
   if (c.dead) { c.verify = "killed"; continue; }
@@ -558,6 +763,61 @@ for (const c of companies.values()) {
   }
   const core = ["website", "ICP", "freight verdict", "score"].filter(n => needs.includes(n));
   c.verify = core.length === 0 ? "verified" : core.length <= 2 ? "partial" : "unverified";
+}
+
+/* Company verification (handoff/enrichment/company-verification.csv) is a DIFFERENT test
+   from the `verify` field above. `verify` means "does the desk research record have a
+   website, ICP, freight verdict and score" -- a completeness check on our own notes.
+   `companyVerify` means "we fetched the company's live site and its own copy matches this
+   ICP's vocabulary". Only the second one defends the claim that an account is a real,
+   trading, on-ICP prospect, and only it gates Apollo spend and the campaign gate. Surfaced
+   separately here so the OS can never present one as the other. */
+const companyVerdict = new Map();
+{
+  const p = join(HANDOFF, "enrichment", "company-verification.csv");
+  if (existsSync(p)) {
+    const all = parseCSV(readFileSync(p, "utf8"));
+    const h = all[0].map(x => x.trim());
+    const iD = h.indexOf("domain"), iV = h.indexOf("verify"), iW = h.indexOf("verify_why");
+    /* Last row per domain wins: the file is append-only, so a human adjudication of a
+       machine `partial` arrives as a new row appended below it, and must supersede. */
+    for (const r of all.slice(1)) {
+      const d = normDomain(r[iD]);
+      if (d) companyVerdict.set(d, { v: (r[iV] || "").trim(), why: (r[iW] || "").trim() });
+    }
+  }
+}
+
+/* A company can hold BOTH kinds of rec: Bracy's has 4 addresses on bracys.com (domain
+   join) and 2 on gmail (name join). Merge, never prefer — preferring one silently drops
+   the other's addresses, which is how "we have their email" turns into "needed". */
+const recFor = (coKey, c) => {
+  const dRec = contactsByDomain.get(normDomain(c.website));
+  const nRec = contactsByDomain.get("name:" + coKey);
+  if (!dRec || !nRec) return dRec || nRec;
+  return { total: dRec.total + nRec.total, verified: dRec.verified + nRec.verified,
+           city: dRec.city || nRec.city, state: dRec.state || nRec.state,
+           list: [...dRec.list, ...nRec.list] };
+};
+for (const [coKey, c] of companies.entries()) {
+  const cvv = companyVerdict.get(normDomain(c.website));
+  if (cvv) { c.companyVerify = cvv.v; c.companyVerifyWhy = cvv.why; }
+  const rec = recFor(coKey, c);
+  /* Written even when zero so the OS can distinguish "nobody to write to" from "not
+     looked at yet" -- that distinction is the whole point of the gap number. */
+  c.contactsOnFile = rec ? rec.total : 0;
+  c.contactsVerified = rec ? rec.verified : 0;
+  if (rec && rec.list.length) {
+    /* Verified addresses lead, invalid sink; within a band the CSV order (screen rank)
+       holds. Invalid rows stay listed — a rep must see "we had it and it bounced"
+       rather than a gap that invites re-buying the same address. */
+    const bandOf = s => (s === "verified" ? 0 : s === "pending" ? 1 : s === "" ? 2 : s === "invalid" ? 4 : 3);
+    c.contacts = [...rec.list].sort((a, b) => bandOf(a.s) - bandOf(b.s));
+    /* c.emails is what the table's Email column dials from: usable addresses only,
+       enriched-and-verified ahead of the desk-researched info@ style rows. */
+    const usable = c.contacts.filter(x => x.s !== "invalid").map(x => x.e);
+    c.emails = [...new Set([...usable, ...(c.emails || [])])];
+  }
 }
 
 const list = [...companies.values()].sort((a, b) =>
@@ -594,6 +854,19 @@ for (const c of list) {
    call". */
 const needsWork = live.filter(c => c.verify !== "verified").length;
 
+/* The gap: live, ICP'd companies with nobody to write to. This is the number the whole
+   enrichment effort moves, so it is derived here rather than recounted by hand in an
+   inventory note that goes stale the moment the next batch lands. */
+const liveIcp = live.filter(c => c.icp);
+const withContact = liveIcp.filter(c => c.contactsOnFile > 0).length;
+const withVerified = liveIcp.filter(c => c.contactsVerified > 0).length;
+const contactGap = liveIcp.length - withContact;
+const contactsTotal = list.reduce((n, c) => n + (c.contactsOnFile || 0), 0);
+const byCompanyVerify = {};
+for (const c of liveIcp) byCompanyVerify[c.companyVerify || "not-checked"] = (byCompanyVerify[c.companyVerify || "not-checked"] || 0) + 1;
+const icpProven = liveIcp.filter(c => c.companyVerify === "verified").length;
+const contactsVerifiedTotal = list.reduce((n, c) => n + (c.contactsVerified || 0), 0);
+
 const out = `/* ===== VEJ Sales OS - PROSPECTING ROSTER (GENERATED, DO NOT EDIT) =====
    Generated by scripts/build-roster.mjs from the handoff CSVs.
    Re-run \`node scripts/build-roster.mjs\` and commit the result when the roster changes.
@@ -601,6 +874,9 @@ const out = `/* ===== VEJ Sales OS - PROSPECTING ROSTER (GENERATED, DO NOT EDIT)
 
    ${list.length} companies (${live.length} live, ${list.length - live.length} killed or rejected with a written reason).
    ${needsWork} live rows are not desk verified yet: see the verify and needs fields on each record.
+   ${liveIcp.length} live rows carry an ICP; ${withContact} of them have a contact on file and ${contactGap} have nobody to write to.
+   ${contactsTotal} contact addresses joined from the enrichment rosters, ${contactsVerifiedTotal} of them verified.
+   ${icpProven} live ICP'd companies have a PROVEN ICP (live site checked against ICP vocabulary); the rest are ${JSON.stringify(byCompanyVerify)}.
    Sources: ${sourcesUsed.map(s => `${s.file} (${s.rows}${s.strays ? " new" : ""})`).join(", ")}
    ===================================================================== */
 window.ROSTER = {
@@ -608,6 +884,14 @@ window.ROSTER = {
   live: ${live.length},
   dead: ${list.length - live.length},
   needsWork: ${needsWork},
+  liveIcp: ${liveIcp.length},
+  withContact: ${withContact},
+  withVerifiedContact: ${withVerified},
+  contactGap: ${contactGap},
+  contactsTotal: ${contactsTotal},
+  contactsVerified: ${contactsVerifiedTotal},
+  byCompanyVerify: ${JSON.stringify(byCompanyVerify)},
+  icpProven: ${icpProven},
   byIcp: ${JSON.stringify(byIcp)},
   byLine: ${JSON.stringify(byLine)},
   byVerify: ${JSON.stringify(byVerify)},
@@ -637,4 +921,7 @@ if (strayRejected.length) {
   for (const n of strayRejected) console.log(`      "${n.slice(0, 72)}${n.length > 72 ? "..." : ""}"`);
 }
 console.log(`  ${needsWork} live rows still need desk work before they can be called`);
+console.log(`  contacts: ${withContact}/${liveIcp.length} live ICP'd companies have someone to write to (gap ${contactGap})`);
+console.log(`  ${contactsTotal} addresses joined, ${contactsVerifiedTotal} verified`);
+console.log(`  company ICP proof: ${JSON.stringify(byCompanyVerify)}`);
 if (emptyIcps.length) console.log(`  campaigns with no companies on the list: ${emptyIcps.join(", ")}`);

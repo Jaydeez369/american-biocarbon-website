@@ -62,6 +62,38 @@
   };
   const rosterOf = name => rosterIndex().get(norm(name)) || null;
 
+  /* ICP for a CRM record (contact or lead) that does not carry one of its own. Email
+     domain is tried FIRST — key accounts are matched by DOMAIN, never company_name, per
+     the enrichment canon — and the account/company name join is the fallback. Lazy for
+     the same norm() reason as ROSTER_BY above. */
+  let ROSTER_BY_DOM = null;
+  const rosterDomIndex = () => {
+    if(!ROSTER_BY_DOM){
+      ROSTER_BY_DOM = new Map();
+      for(const c of rosterList()){
+        const d = String(c.website||"").toLowerCase().replace(/^https?:\/\//,"").replace(/^www\./,"").replace(/\/.*$/,"").trim();
+        if(d && !ROSTER_BY_DOM.has(d)) ROSTER_BY_DOM.set(d, c);
+      }
+    }
+    return ROSTER_BY_DOM;
+  };
+  const icpFor = rec => {
+    const dom = String(rec.email||"").split("@")[1]?.toLowerCase().trim();
+    const byDom = dom ? rosterDomIndex().get(dom) : null;
+    if(byDom && byDom.icp) return byDom.icp;
+    const byName = rosterOf(rec.account || rec.company || "");
+    return (byName && byName.icp) || "";
+  };
+  const icpCell = icp => icp
+    ? `<span class="co-icp">${esc(icp)}</span>`
+    : `<span class="pdim" title="No roster match by email domain or account name — not in a campaign ICP">—</span>`;
+  /* Order records grouped by ICP (blanks sink), name as the stable tie-break. */
+  const byIcpThen = key => (a,b) => {
+    const ia=a._icp||"", ib=b._icp||"";
+    if(!ia !== !ib) return ia ? -1 : 1;
+    return ia.localeCompare(ib) || String(a[key]||"").localeCompare(String(b[key]||""));
+  };
+
   /* Canonical statuses. The roster arrives as pure prospecting output with no notion of
      where a company sits with us, and the pipeline had no status field at all: an account
      was "a customer" only in the sense that someone typed type:"customer" into a data file.
@@ -741,7 +773,9 @@
      them. Filtering is done in JS over the data array and then re-rendered, NOT by walking
      the DOM and toggling display on every row, because at 336 rows (soon 500+) a per-row
      textContent read per keystroke is thousands of layout reads per character typed. */
-  const CO_F = { q:"", line:"", icp:"", status:"", geo:"", minScore:"", verify:"", origin:"", sort:"score", dir:"asc" };
+  /* Default sort is the Line / ICP column: reps work one campaign at a time, so the table
+     opens grouped by ICP with the highest-scored accounts leading each group. */
+  const CO_F = { q:"", line:"", icp:"", status:"", geo:"", minScore:"", verify:"", proof:"", origin:"", sort:"line", dir:"asc" };
   const CO_PAGE = 100;
   let coShown = CO_PAGE;
 
@@ -782,6 +816,38 @@
         ${c.segment?`<div class="co-seg clamp2">${esc(c.segment)}</div>`:""}
       </td>` },
 
+    /* Contact, Email and Phone sit directly after Company ON PURPOSE: the person and how
+       to reach them are what a rep needs first, without scrolling past the research. */
+    { key:"contacts", label:"Contact",
+      hint:"The best person on file — name and title from the enrichment join, with how many more sit behind them. Falls back to the researched target titles when nobody is on file yet.",
+      blank:c=>!reachOf(c).people && !c.titles,
+      sort:(a,b)=>reachOf(b).people-reachOf(a).people,
+      csv:c=>{ const p=primaryContact(c); return p?`${p.name}${p.title?" — "+p.title:""}`:(c.titles||""); },
+      cell:c=>{ const reach=reachOf(c); const p=primaryContact(c);
+        return `<td class="co-titles">${p
+          ? `<b>${esc(p.name||"—")}</b>${reach.people>1?`<span class="co-more-n" title="${reach.people} named contacts on file">+${reach.people-1}</span>`:""}<div class="clamp2 pdim">${esc(p.title||"")}</div>`
+          : `<div class="clamp2">${esc(c.titles&&c.titles!=="n/a - not a buying account"?c.titles:"—")}</div>`}</td>`; } },
+
+    { key:"email", label:"Email",
+      hint:"Best email on file — enriched and Instantly-verified addresses first, then desk research and CRM",
+      blank:c=>!reachOf(c).emails.length,
+      sort:(a,b)=>reachOf(b).emails.length-reachOf(a).emails.length,
+      csv:c=>reachOf(c).emails.join(" / "),
+      cell:c=>{ const reach=reachOf(c);
+        return `<td class="co-mail">${reach.emails.length
+        ? `<a href="mailto:${esc(reach.emails[0])}">${esc(reach.emails[0])}</a>${reach.emails.length>1?`<span class="co-more-n" title="${esc(reach.emails.slice(1).join(", "))}">+${reach.emails.length-1}</span>`:""}`
+        : `<span class="co-gap" title="No email on file. Apollo enrichment fills this.">needed</span>`}</td>`; } },
+
+    { key:"phone", label:"Phone",
+      hint:"Best phone on file, from the roster or from a CRM contact",
+      blank:c=>!reachOf(c).phones.length,
+      sort:(a,b)=>reachOf(b).phones.length-reachOf(a).phones.length,
+      csv:c=>reachOf(c).phones.join(" / "),
+      cell:c=>{ const reach=reachOf(c);
+        return `<td class="co-tel">${reach.phones.length
+        ? `<a href="tel:${esc(reach.phones[0].replace(/[^\d+]/g,""))}">${esc(reach.phones[0])}</a>${reach.phones.length>1?`<span class="co-more-n" title="${esc(reach.phones.slice(1).join(", "))}">+${reach.phones.length-1}</span>`:""}`
+        : `<span class="co-gap" title="No phone on file. Find one before this row can be worked.">needed</span>`}</td>`; } },
+
     { key:"status", label:"Status",
       hint:"Where this company sits with us",
       sort:(a,b)=>(STATUS[statusOf(b.name)]||STATUS.new_lead).rank-(STATUS[statusOf(a.name)]||STATUS.new_lead).rank,
@@ -799,6 +865,16 @@
         const need=(c.needs||[]).length?`Still needs: ${(c.needs||[]).join(", ")}`:"Nothing missing";
         return `<td><span class="vfy ${v.cls}" title="${esc(v.hint+" · "+need)}">${esc(v.label)}</span></td>`; } },
 
+    /* Sits immediately after `verify` on purpose: the two answer different questions and
+       seeing them side by side is what stops "verified" being read as "proven". */
+    { key:"icpproof", label:"ICP proof",
+      hint:"Did we fetch this company's OWN live site and does its copy match the ICP it is filed under? This is not the same as the Verified column, which only says our desk notes are complete.",
+      sort:(a,b)=>(CVERIFY[b.companyVerify||"not-checked"]||CVERIFY["not-checked"]).rank-(CVERIFY[a.companyVerify||"not-checked"]||CVERIFY["not-checked"]).rank,
+      csv:c=>(CVERIFY[c.companyVerify||"not-checked"]||{}).label||"",
+      cell:c=>{ const v=CVERIFY[c.companyVerify||"not-checked"]||CVERIFY["not-checked"];
+        const why=c.companyVerifyWhy?` · ${c.companyVerifyWhy}`:"";
+        return `<td><span class="vfy ${v.cls}" title="${esc(v.hint+why)}">${esc(v.label)}</span></td>`; } },
+
     { key:"origin", label:"Source",
       hint:"Which system this company came from",
       sort:(a,b)=>String(a.origin||"").localeCompare(String(b.origin||"")),
@@ -809,7 +885,10 @@
     { key:"line", label:"Line / ICP",
       hint:"Product line and the ICP campaign this company belongs to",
       blank:c=>!c.icp,
-      sort:(a,b)=>String(a.icp||"").localeCompare(String(b.icp||"")),
+      /* Compound on purpose: grouping by ICP alone would order companies inside a group
+         by the name tie-break, which buries the accounts worth working first. Within an
+         ICP the score decides, highest first, in BOTH directions of the ICP sort. */
+      sort:(a,b)=>String(a.icp||"").localeCompare(String(b.icp||"")) || ((b.score??-1)-(a.score??-1)),
       csv:c=>`${c.line||""}${c.icp?" / "+c.icp:""}`,
       cell:c=>`<td>${c.dead?`<span class="pdim">Disqualified</span>`
             :`<span class="co-line ${c.line==="Biochar"?"ln-bio":c.line==="Absorbent"?"ln-abs":"ln-none"}">${esc(c.line||"unset")}</span>
@@ -838,40 +917,12 @@
       csv:c=>c.score??"",
       cell:c=>`<td class="num">${c.score!=null?`<span class="sc ${scoreCls(c.score)}">${c.score}</span>`:`<span class="co-gap" title="Never scored. Score it before it goes in a campaign.">unscored</span>`}</td>` },
 
-    { key:"phone", label:"Phone",
-      hint:"Best phone on file, from the roster or from a CRM contact",
-      blank:c=>!reachOf(c).phones.length,
-      sort:(a,b)=>reachOf(b).phones.length-reachOf(a).phones.length,
-      csv:c=>reachOf(c).phones.join(" / "),
-      cell:c=>{ const reach=reachOf(c);
-        return `<td class="co-tel">${reach.phones.length
-        ? `<a href="tel:${esc(reach.phones[0].replace(/[^\d+]/g,""))}">${esc(reach.phones[0])}</a>${reach.phones.length>1?`<span class="co-more-n" title="${esc(reach.phones.slice(1).join(", "))}">+${reach.phones.length-1}</span>`:""}`
-        : `<span class="co-gap" title="No phone on file. Find one before this row can be worked.">needed</span>`}</td>`; } },
-
-    { key:"email", label:"Email",
-      hint:"Best email on file, from the roster or from a CRM contact",
-      blank:c=>!reachOf(c).emails.length,
-      sort:(a,b)=>reachOf(b).emails.length-reachOf(a).emails.length,
-      csv:c=>reachOf(c).emails.join(" / "),
-      cell:c=>{ const reach=reachOf(c);
-        return `<td class="co-mail">${reach.emails.length
-        ? `<a href="mailto:${esc(reach.emails[0])}">${esc(reach.emails[0])}</a>${reach.emails.length>1?`<span class="co-more-n" title="${esc(reach.emails.slice(1).join(", "))}">+${reach.emails.length-1}</span>`:""}`
-        : `<span class="co-gap" title="No email on file. Apollo enrichment fills this.">needed</span>`}</td>`; } },
-
     { key:"why", label:"Why they fit",
       hint:"The written reason this company is on the list",
       blank:c=>!(c.why||c.scoreWhy),
       sort:(a,b)=>String(a.why||"").localeCompare(String(b.why||"")),
       csv:c=>c.dead?(c.scoreWhy||""):(c.why||""),
       cell:c=>`<td class="co-why"><div class="clamp3" title="${esc(c.why||c.scoreWhy||"")}">${esc(c.dead?(c.scoreWhy||"No reason recorded"):(c.why||"—"))}</div></td>` },
-
-    { key:"contacts", label:"Contacts / titles",
-      hint:"Named contacts on file and the titles worth asking for",
-      blank:c=>!reachOf(c).people && !c.titles,
-      sort:(a,b)=>reachOf(b).people-reachOf(a).people,
-      csv:c=>c.titles||"",
-      cell:c=>{ const reach=reachOf(c);
-        return `<td class="co-titles">${reach.people?`<span class="co-ppl" title="Named contacts on file">${reach.people} contact${reach.people>1?"s":""}</span>`:""}<div class="clamp2">${esc(c.titles&&c.titles!=="n/a - not a buying account"?c.titles:"—")}</div></td>`; } },
 
     /* Off by default. Real data, but only some rows have it, so it earns its space only for
        someone actually working the CRM overlap. */
@@ -915,6 +966,20 @@
     unverified: { label:"Unverified", cls:"vfy-no",   rank:2, hint:"Imported, never desk researched. Needs an ICP, freight verdict and score before it is called." },
     killed:     { label:"Killed",     cls:"vfy-dead", rank:1, hint:"Disqualified during research, with a written reason on the profile." },
     rejected:   { label:"Rejected",   cls:"vfy-dead", rank:0, hint:"Not a business that buys what we sell. Kept visible so it is not re-added on the next scrape." },
+  };
+  /* Company ICP PROOF. A different question from VERIFY above, and the roster has been
+     burned by the two being conflated: `verify: verified` only means OUR notes are
+     complete, which can be true for a company nobody ever looked at. This one means we
+     fetched the company's own live site and its copy matches the ICP it is filed under.
+     It is the layer that gates Apollo spend and the campaign gate, so it gets its own
+     column rather than being folded into the one next to it. */
+  const CVERIFY = {
+    verified:     { label:"Proven",      cls:"vfy-ok",   rank:5, hint:"ICP PROVEN: we fetched their live site and their own copy uses this ICP's vocabulary. This is the only state that defends the row and the only one Apollo credits may be spent on." },
+    partial:      { label:"Unproven",    cls:"vfy-part", rank:3, hint:"Site loaded but its copy did not clearly match this ICP. Usually a JS-rendered site; sometimes a company that genuinely does not fit. Held for a human read, not killed." },
+    "mx-only":    { label:"Mail only",   cls:"vfy-part", rank:2, hint:"No usable site, but the domain accepts mail. Real enough to hold, not proven." },
+    failed:       { label:"Failed",      cls:"vfy-dead", rank:1, hint:"Nothing resolves, parked, squatted, or read and judged not a prospect. Never spend on it." },
+    public:       { label:"Public body", cls:"vfy-dead", rank:0, hint:"Screened as a public body. AB.MUNI, never worked." },
+    "not-checked":{ label:"Not checked", cls:"vfy-no",   rank:4, hint:"Never put through the live-site test. Not bad, just unproven by this standard." },
   };
   const ORIGIN = {
     desk:     { label:"Research", cls:"or-desk", hint:"Desk research pass. Triaged, geo checked and scored by hand." },
@@ -1037,6 +1102,16 @@
       if(f.minScore!=="" && (c.score??-1) < +f.minScore) return false;
       if(f.status && statusOf(c.name)!==f.status) return false;
       if(f.verify && c.verify!==f.verify) return false;
+      /* Disqualified rows are excluded from an ICP-proof filter even when they carry a
+         proof verdict, because the two states are independent and both can be true at
+         once: Texas Oil & Gas Association's site really does match AB.OG vocabulary, and
+         it is still killed as a trade body that buys nothing. Counting it as "proven"
+         would put the header count (409, live and ICP'd) one out from the rows on screen.
+
+         A row with no ICP is excluded for the same reason from the other direction: there
+         is no ICP to have proven, so it belongs in the "no ICP" gap rather than swelling
+         "not checked" by 140. Both constraints match how R.icpProven is derived. */
+      if(f.proof && (c.dead || !c.icp || (c.companyVerify||"not-checked")!==f.proof)) return false;
       if(f.origin && (c.origin||"desk")!==f.origin) return false;
       if(f.q && !coBlob(c).includes(f.q)) return false;
       return true;
@@ -1066,10 +1141,10 @@
     CO_F.q=(V("coQ")||"").trim().toLowerCase();
     CO_F.line=V("coLine"); CO_F.icp=V("coIcp"); CO_F.status=V("coStatus");
     CO_F.geo=V("coGeo"); CO_F.minScore=V("coScore"); CO_F.sort=V("coSort")||"score";
-    CO_F.verify=V("coVerify"); CO_F.origin=V("coOrigin");
+    CO_F.verify=V("coVerify"); CO_F.proof=V("coProof"); CO_F.origin=V("coOrigin");
     coShown=CO_PAGE; remount();
   };
-  window.pipeCoReset = () => { Object.assign(CO_F,{q:"",line:"",icp:"",status:"",geo:"",minScore:"",verify:"",origin:"",sort:"score",dir:"asc"}); coShown=CO_PAGE; remount(); };
+  window.pipeCoReset = () => { Object.assign(CO_F,{q:"",line:"",icp:"",status:"",geo:"",minScore:"",verify:"",proof:"",origin:"",sort:"line",dir:"asc"}); coShown=CO_PAGE; remount(); };
   window.pipeCoMore = () => { coShown+=CO_PAGE; remount(); };
 
   const scoreCls = s => s>=9?"sc-hot":s>=7?"sc-warm":s>=5?"sc-mid":"sc-cold";
@@ -1090,8 +1165,24 @@
   function reachOf(c){
     const cs = allContacts().filter(x=>norm(x.account)===norm(c.name));
     const phones = [...new Set([...(c.phones||[]), ...cs.map(x=>x.phone).filter(Boolean), ...cs.map(x=>x.mobile).filter(Boolean)])];
+    /* c.emails leads with the enriched, Instantly-verified addresses (build-roster orders
+       it that way); CRM contact emails append after. */
     const emails = [...new Set([...(c.emails||[]), ...cs.map(x=>x.email).filter(Boolean)])];
-    return { phones, emails, people: cs.length || (c.people||[]).length };
+    /* People = enrichment contacts joined by domain, else CRM matches, else the free-tier
+       harvest names. The three never double-count: they are fallbacks, not a union. */
+    const people = (c.contacts||[]).length || cs.length || (c.people||[]).length;
+    return { phones, emails, people };
+  }
+  /* The one person a rep should ask for first: best verification band wins (build-roster
+     pre-sorts c.contacts), falling back to CRM contacts, then free-harvest names. */
+  function primaryContact(c){
+    const jc=(c.contacts||[]).find(x=>x.s!=="invalid");
+    if(jc) return { name:jc.n, title:jc.t, email:jc.e, status:jc.s };
+    const cc=allContacts().find(x=>norm(x.account)===norm(c.name));
+    if(cc) return { name:cc.name, title:cc.title||"", email:cc.email||"", status:"" };
+    const p=(c.people||[])[0];
+    if(p) return { name:p.name, title:p.title||"", email:"", status:"" };
+    return null;
   }
 
   /* Column picker. Show/hide with a checkbox, reorder by dragging a row or nudging it with
@@ -1150,11 +1241,12 @@
     /* Counts per status across the WHOLE roster, not the filtered set: these double as the
        headline "where does the roster stand" numbers, and they must not move when someone
        types in the search box. */
-    const tally = {}, vTally = {}, oTally = {};
+    const tally = {}, vTally = {}, oTally = {}, cvTally = {};
     for(const c of rosterList()){
       const s=statusOf(c.name); tally[s]=(tally[s]||0)+1;
       vTally[c.verify]=(vTally[c.verify]||0)+1;
       oTally[c.origin||"desk"]=(oTally[c.origin||"desk"]||0)+1;
+      if(!c.dead && c.icp) cvTally[c.companyVerify||"not-checked"]=(cvTally[c.companyVerify||"not-checked"]||0)+1;
     }
     const cols = visibleCols();
 
@@ -1165,6 +1257,7 @@
             `<button class="co-stat ${s.cls}${CO_F.status===k?" on":""}" onclick="pipeCoQuick('status','${k}')" title="${esc(s.hint)}">
                <span class="n">${num(tally[k]||0)}</span><span class="l">${esc(s.label)}</span></button>`).join("")}
           <span class="co-total"><b>${num(R.count)}</b> companies · <b>${num(R.live)}</b> live · <b>${num(vTally.verified||0)}</b> desk verified${R.needsWork?` · <button class="co-total-link" onclick="pipeCoQuick('verify','unverified')" title="Live rows imported or carried over that have never been desk scored. Click to see them.">${num(R.needsWork)} still need work</button>`:""}</span>
+          <span class="co-total"><button class="co-total-link" onclick="pipeCoQuick('proof','verified')" title="Companies whose OWN live site was fetched and matched their ICP's vocabulary. The only state Apollo credits may be spent on. Click to see them."><b>${num(R.icpProven||0)}</b> of ${num(R.liveIcp||0)} ICP PROVEN</button> · <button class="co-total-link" onclick="pipeCoQuick('proof','partial')" title="Site loaded but its copy did not clearly match the ICP. Held for a human read. Click to see them.">${num(cvTally.partial||0)} unproven</button> · <button class="co-total-link" onclick="pipeCoQuick('proof','not-checked')" title="Never put through the live-site test — almost all of these are AB.MUNI (prohibited) or have no website to fetch. Click to see them.">${num(cvTally["not-checked"]||0)} not checked</button></span>
         </div>
       </div>
       <div class="co-bar">
@@ -1175,6 +1268,7 @@
         ${sel("coGeo","Freight",[["","Any freight"],["IN","In zone"],["BORDERLINE","Borderline"],["OUT","Out of zone"]],CO_F.geo)}
         ${sel("coScore","Min score",[["","Any score"],["9","9+ (best)"],["8","8+"],["7","7+"],["5","5+"]],CO_F.minScore)}
         ${sel("coVerify","Verification",[["","Any verification"],...Object.entries(VERIFY).sort((a,b)=>b[1].rank-a[1].rank).map(([k,v])=>[k,`${v.label} (${vTally[k]||0})`])],CO_F.verify)}
+        ${sel("coProof","ICP proof",[["","Any ICP proof"],...Object.entries(CVERIFY).sort((a,b)=>b[1].rank-a[1].rank).map(([k,v])=>[k,`${v.label} (${cvTally[k]||0})`])],CO_F.proof)}
         ${sel("coOrigin","Source",[["","Any source"],...Object.entries(ORIGIN).map(([k,o])=>[k,`${o.label} (${oTally[k]||0})`]).filter(x=>oTally[x[0].replace(/ .*/,"")]!==undefined||true)],CO_F.origin)}
         ${sel("coSort","Sort",CO_COLS.filter(c=>c.sort).map(c=>[c.key,`Sort: ${c.label}`]),CO_F.sort)}
         <button class="btn btn-ghost" onclick="pipeCoReset()">Reset</button>
@@ -1226,19 +1320,23 @@
     coFiltered().map(c=>{const r=reachOf(c);return [c.name,(STATUS[statusOf(c.name)]||{}).label,(VERIFY[c.verify]||{}).label||"",(c.needs||[]).join("; "),(ORIGIN[c.origin]||{}).label||"",c.line,c.icp,c.icpLabel,c.segment,c.city,c.state,c.driveMi,c.geo,c.geoGates?"yes":"no (nationwide)",c.score,r.phones.join(" / "),r.emails.join(" / "),r.people,c.why,c.scoreWhy,c.titles,c.trigger,c.website,c.sourceUrl,c.owner||"",c.lastContacted||"",c.hsDeals||0];}));
 
   function tContacts(){
-    const cs=allContacts();
+    /* Grouped by ICP (email-domain join first, account name second), blanks last —
+       contacts are worked campaign by campaign, same as the prospects table. */
+    const cs=allContacts().map(c=>({...c,_icp:icpFor(c)})).sort(byIcpThen("name"));
     const accounts=[...new Set(liveAccounts().map(a=>a.name).concat(cs.map(c=>c.account)))].filter(Boolean).sort();
+    const icps=[...new Set(cs.map(c=>c._icp))].filter(Boolean).sort();
     return `
       <div class="pdeals-bar">
         <input class="pinput" id="pipeCSearch" placeholder="Search contacts…" oninput="pipeContactFilter()">
+        <select class="pinput" id="pipeCIcp" onchange="pipeContactFilter()"><option value="">All ICPs</option>${icps.map(i=>`<option>${esc(i)}</option>`).join("")}</select>
         <select class="pinput" id="pipeCAccount" onchange="pipeContactFilter()"><option value="">All Accounts</option>${accounts.map(a=>`<option>${esc(a)}</option>`).join("")}</select>
         <span class="pcount-lbl" id="pipeCCount">${cs.length} contacts</span>
         <button class="btn btn-ghost" onclick="pipeContactExport()">⭳ Export CSV</button>
         <button class="btn btn-primary pc-add" onclick="pipeContactModal()">Add Contact</button>
       </div>
-      ${tblWrap(`<thead><tr><th>Name</th><th>Job Title</th><th>Account</th><th>Email / Phone</th><th>Drop-off Address</th><th>Actions</th></tr></thead>
-      <tbody id="pipeCTbl">${cs.map(c=>`<tr data-account="${esc(c.account||"")}">
-        <td title="${esc(c.notes||"")}"><strong>${esc(c.name)}</strong></td><td>${esc(c.title||"—")}</td><td>${c.account?acctLink(c.account):"—"}</td>
+      ${tblWrap(`<thead><tr><th>Name</th><th>Job Title</th><th>ICP</th><th>Account</th><th>Email / Phone</th><th>Drop-off Address</th><th>Actions</th></tr></thead>
+      <tbody id="pipeCTbl">${cs.map(c=>`<tr data-account="${esc(c.account||"")}" data-icp="${esc(c._icp)}">
+        <td title="${esc(c.notes||"")}"><strong>${esc(c.name)}</strong></td><td>${esc(c.title||"—")}</td><td>${icpCell(c._icp)}</td><td>${c.account?acctLink(c.account):"—"}</td>
         <td>${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a><br>`:""}${chip(c.phone)}${c.mobile?` ${chip(c.mobile)} <span class="pdim" style="font-size:10.5px">(mobile)</span>`:""}</td>
         <td class="pnote">${esc(c.dropOff||"—")}</td>
         <td class="pact-cell">${readOnlyContact(c)
@@ -1246,14 +1344,15 @@
           : `<span class="pc-act" onclick="pipeContactModal(${c.ci})" title="Edit">✎</span>
              <span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">🗑</span>`}</td></tr>`).join("")}</tbody>`)}`;
   }
-  window.pipeContactExport=()=>downloadCSV("contacts.csv",["Name","Job Title","Account","Email","Phone","Mobile","Drop-off Address","Notes"],
-    allContacts().map(c=>[c.name,c.title,c.account,c.email,c.phone,c.mobile,c.dropOff,c.notes]));
+  window.pipeContactExport=()=>downloadCSV("contacts.csv",["Name","Job Title","ICP","Account","Email","Phone","Mobile","Drop-off Address","Notes"],
+    allContacts().map(c=>({...c,_icp:icpFor(c)})).sort(byIcpThen("name")).map(c=>[c.name,c.title,c._icp,c.account,c.email,c.phone,c.mobile,c.dropOff,c.notes]));
   window.pipeContactFilter=()=>{
     const q=(V("pipeCSearch")).toLowerCase();
     const a=V("pipeCAccount");
+    const i=V("pipeCIcp");
     let n=0;
     document.querySelectorAll("#pipeCTbl tr").forEach(r=>{
-      const ok=(!q||r.textContent.toLowerCase().includes(q))&&(!a||r.dataset.account===a);
+      const ok=(!q||r.textContent.toLowerCase().includes(q))&&(!a||r.dataset.account===a)&&(!i||r.dataset.icp===i);
       r.style.display=ok?"":"none"; if(ok)n++;
     });
     const c=document.getElementById("pipeCCount"); if(c)c.textContent=n+" contacts";
@@ -1325,19 +1424,22 @@
   /* ================= TAB 7 · LEADS (CRUD + convert-to-deal) ================= */
   const LEAD_ST={converted:"st-won",qualified:"st-discovery",contacted:"cf-medium",new:"cf-secured",disqualified:"cf-low"};
   function tLeads(){
-    const ls=allLeads();
+    /* Same ICP grouping as Contacts: domain join first, company name second, blanks last. */
+    const ls=allLeads().map(l=>({...l,_icp:icpFor(l)})).sort(byIcpThen("contact"));
     const statuses=[...new Set(ls.map(l=>l.status))];
+    const icps=[...new Set(ls.map(l=>l._icp))].filter(Boolean).sort();
     return `
       <div class="pdeals-bar">
         <input class="pinput" id="pipeLSearch" placeholder="Search leads…" oninput="pipeLeadFilter()">
+        <select class="pinput" id="pipeLIcp" onchange="pipeLeadFilter()"><option value="">All ICPs</option>${icps.map(i=>`<option>${esc(i)}</option>`).join("")}</select>
         <select class="pinput" id="pipeLStatus" onchange="pipeLeadFilter()"><option value="">All Status</option>${statuses.map(s=>`<option>${esc(s)}</option>`).join("")}</select>
         <span class="pcount-lbl" id="pipeLCount">${ls.length} leads</span>
         <button class="btn btn-ghost" onclick="pipeLeadExport()">⭳ Export CSV</button>
         <button class="btn btn-primary pc-add" onclick="pipeLeadModal()">Add Lead</button>
       </div>
-      ${tblWrap(`<thead><tr><th>Contact</th><th>Company</th><th>Email</th><th>Phone</th><th>Source</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="pipeLTbl">${ls.map(l=>`<tr data-status="${esc(l.status)}">
-        <td><strong>${esc(l.contact)}</strong></td><td>${esc(l.company)}</td>
+      ${tblWrap(`<thead><tr><th>Contact</th><th>Company</th><th>ICP</th><th>Email</th><th>Phone</th><th>Source</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="pipeLTbl">${ls.map(l=>`<tr data-status="${esc(l.status)}" data-icp="${esc(l._icp)}">
+        <td><strong>${esc(l.contact)}</strong></td><td>${esc(l.company)}</td><td>${icpCell(l._icp)}</td>
         <td>${l.email?`<a href="mailto:${esc(l.email)}">${esc(l.email)}</a>`:"—"}</td><td>${chip(l.phone)||"—"}</td>
         <td><span class="pbadge pfreq">${esc(l.source)}</span></td>
         <td><span class="pbadge ${LEAD_ST[l.status]||"pfreq"}">${esc(l.status)}</span>${l.converted?`<div class="pconf-sub">✓ ${esc(l.convertedTo)}${l.convertedDate?" ("+l.convertedDate+")":""}</div>`:""}</td>
@@ -1345,14 +1447,15 @@
           ${l.base?`<span class="pdim" title="From the SIBRA snapshot">—</span>`
           :`<span class="pc-act" onclick="pipeLeadModal(${l.ci})" title="Edit">✎</span><span class="pc-act pc-del" onclick="pipeLeadDelete(${l.ci})" title="Delete">🗑</span>`}</td></tr>`).join("")}</tbody>`)}`;
   }
-  window.pipeLeadExport=()=>downloadCSV("leads.csv",["Contact","Company","Email","Phone","Source","Status","Converted To","Converted Date"],
-    allLeads().map(l=>[l.contact,l.company,l.email,l.phone,l.source,l.status,l.convertedTo||"",l.convertedDate||""]));
+  window.pipeLeadExport=()=>downloadCSV("leads.csv",["Contact","Company","ICP","Email","Phone","Source","Status","Converted To","Converted Date"],
+    allLeads().map(l=>({...l,_icp:icpFor(l)})).sort(byIcpThen("contact")).map(l=>[l.contact,l.company,l._icp,l.email,l.phone,l.source,l.status,l.convertedTo||"",l.convertedDate||""]));
   window.pipeLeadFilter=()=>{
     const q=(V("pipeLSearch")).toLowerCase();
     const s=V("pipeLStatus");
+    const i=V("pipeLIcp");
     let n=0;
     document.querySelectorAll("#pipeLTbl tr").forEach(r=>{
-      const ok=(!q||r.textContent.toLowerCase().includes(q))&&(!s||r.dataset.status===s);
+      const ok=(!q||r.textContent.toLowerCase().includes(q))&&(!s||r.dataset.status===s)&&(!i||r.dataset.icp===i);
       r.style.display=ok?"":"none"; if(ok)n++;
     });
     const c=document.getElementById("pipeLCount"); if(c)c.textContent=n+" leads";
@@ -1631,9 +1734,24 @@
       </div>`;
     })();
 
+    /* The enrichment join: every Apollo-revealed address for this company with its
+       Instantly verdict. This is the block a rep works from, so it leads the tile. */
+    const enrichedBox = (()=>{
+      const r = acct.r || rosterOf(name);
+      const list = (r && r.contacts) || [];
+      if(!list.length) return "";
+      const chipFor = s => s==="verified" ? `<span class="vfy vfy-ok" title="Instantly-verified deliverable">verified</span>`
+        : s==="invalid" ? `<span class="vfy vfy-dead" title="Bounced verification — do not send; kept so nobody re-buys it">invalid</span>`
+        : s==="pending" ? `<span class="vfy vfy-part" title="Verification still pending">pending</span>`
+        : `<span class="vfy vfy-no" title="Never put through verification">unchecked</span>`;
+      return `<div class="rr-box">
+        <div class="rr-head">Enriched contacts <span title="Apollo-revealed addresses joined by domain, with their Instantly verification verdicts.">${list.length}</span></div>
+        ${list.map(x=>`<div class="rr-row"><span class="rr-k">${esc(x.n||"—")}</span><span class="rr-v">${x.t?`<span class="pdim">${esc(x.t)}</span><br>`:""}<a href="mailto:${esc(x.e)}">${esc(x.e)}</a> ${chipFor(x.s)}</span></div>`).join("")}
+      </div>`;
+    })();
     const contactsTile = `<div class="tile">
-      <div class="tile-head"><h2>Contacts</h2> <span class="count">${contacts.length}</span></div>
-      <div class="tile-body">${rosterReach}${contacts.length?contacts.map(contactCard).join(""):`<div class="av3-empty">No contacts on file. <a class="acct-link" onclick="pipeContactModal()">Add one →</a></div>`}</div>
+      <div class="tile-head"><h2>Contacts</h2> <span class="count">${((acct.r||rosterOf(name)||{}).contacts||[]).length + contacts.length}</span></div>
+      <div class="tile-body">${enrichedBox}${rosterReach}${contacts.length?contacts.map(contactCard).join(""):enrichedBox?"":`<div class="av3-empty">No contacts on file. <a class="acct-link" onclick="pipeContactModal()">Add one →</a></div>`}</div>
     </div>`;
 
     /* The written research, as prose rather than table cells. Someone about to dial this
@@ -1676,7 +1794,8 @@
       <div class="tile-body"><div style="max-height:340px;overflow:auto;font-size:12px;line-height:1.55;white-space:normal">${esc(hubComms).replace(/===ACT===/g,'<hr style="border:none;border-top:1px solid var(--line,#334);margin:8px 0">').replace(/\n/g,"<br>")}</div></div>
     </div>` : "";
 
-    const left = `<section class="stack" aria-label="Company &amp; Contacts">${companyTile}${researchTile}${contactsTile}${hubTile}${attrTile}</section>`;
+    /* Contacts lead the profile: who to reach and how is the first thing a rep needs. */
+    const left = `<section class="stack" aria-label="Company &amp; Contacts">${contactsTile}${companyTile}${researchTile}${hubTile}${attrTile}</section>`;
 
     /* =================== MIDDLE COLUMN =================== */
     const actionBar = `<div class="actionbar">

@@ -81,6 +81,10 @@ const LEAN_NAV=[
   {group:"Grow",items:[
     {id:"funnels",ic:"⇢",t:"Future Funnels"},
   ]},
+  /* The four Operate sections (Sample to Cash, Team & Rhythm, System of Record,
+     Continuity Runbook) were removed 2026-08-17 on the operator's instruction. Their
+     content still lives in ops-data.js / ops.js and the group is recoverable from git
+     history if a real need comes back. */
   /* Onboarding & Scale and Sales × Marketing used to sit here. Both are deleted.
      Onboarding described an accounting handoff for accounts we do not have yet, and
      the 60/90 scale plan was a build plan for a machine that is now built. Sales ×
@@ -494,6 +498,8 @@ const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
 const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
 /* Engine module (engine-data.js + engine.js): campaign architecture and the funnel costing */
 const ENG = k => (window.ENGINE_UI && ENGINE_UI[k]) ? ENGINE_UI[k] : (()=> "");
+/* Operations module (ops-data.js + ops.js): sample to cash, team, system of record, runbook */
+const OPS_R = k => (window.OPS_UI && OPS_UI[k]) ? OPS_UI[k] : (()=> "");
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
 /* newId → ordered list of renderer thunks it composes */
 function compose(id, thunks){
@@ -537,6 +543,8 @@ const LEAN_SECTIONS=[
   ["instantly",[ENG("rInstantly")]],
   ["funnels",  [ENG("rFunnels")]],
   ["crm",      [PL("rCRM")]],
+  // The four Operate sections were removed 2026-08-17 on the operator's instruction;
+  // ops-data.js/ops.js stay on disk and the renderers are one line each to restore.
   ["playbook", [rCollateral, G("rSample"), rPlaybook, G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
 ];
 function render(){
