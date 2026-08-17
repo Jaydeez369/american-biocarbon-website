@@ -1924,7 +1924,15 @@
     if(PROFILE) return renderProfile(PROFILE);
     const at=activeTab();
     const panes=[["prospects",tCompanies],["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["leads",tLeads],["offtake",tOfftake],["production",tProduction],["exec",tExec],["reports",tReports]];
+    /* The deal book's provenance, stated where the KPIs are read. Companies, contacts and
+       ICPs on this page come off the live roster join, but every DEAL number (pipeline,
+       weighted, confirmed revenue, win rate) is computed from the SIBRA snapshot plus
+       local adds — without the date a four-week-old book reads as today's. */
+    const snapNote = P.snapshot
+      ? `<div class="note" style="margin:6px 0 12px;font-size:12.5px"><b>Deal data as of ${esc(P.snapshot)}</b> — the SIBRA snapshot plus anything added here. Accounts, contacts and ICP columns read the live roster. Refreshing the deal book needs an operator login to SIBRA (/api/crm/*).</div>`
+      : "";
     return `<h1 class="pipe-h">Sales Pipeline</h1>
+      ${snapNote}
       <div class="pipe-tabs">${TABS.map(([id,t])=>`<span class="pill${id===at?" active":""}" data-tab="${id}" onclick="pipeTab('${id}')">${t}</span>`).join("")}</div>
       ${panes.map(([id,fn])=>`<div class="pipe-pane${id===at?" active":""}" data-tab="${id}">${fn()}</div>`).join("")}`;
   }

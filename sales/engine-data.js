@@ -60,7 +60,7 @@ instantly:{
     readyLeads:565,
     stranded:0,
     capNote:"The run 9 FAR removals freed the plan cap: 0 leads stranded, down from 138. The plan remains the ceiling for the deferred FAR tier's eventual 475 lead load.",
-    order:"BC.FARM is live with 48 leads. Every fireable campaign is staged with a schedule (08:00 to 16:00 Central, weekdays, 20 a day, BC.FARM.ROLE at 8) and fires on one operator click, in this order: BC.NUR 180, then AB.OG 185, AB.CIVIL 48, AB.ENV 36, AB.DIST 54, AB.HDD 46, AB.LF 14, with BC.FARM.ROLE 2 alongside. The operator ruling defers the FAR tier: of 848 total READY, 337 are NEAR and launchable, 475 FAR wait for later, 28 UNKNOWN wait on desk work. BC.BLEND, BC.COMP and BC.DIST drafts hold on the unanswered competitor or customer ruling. AB.MUNI is prohibited. AB.BED has 0 contacts and cannot fire.",
+    order:"BC.FARM is live with 48 leads. Every fireable campaign is staged with a schedule (08:00 to 16:00 Central, weekdays, 20 a day, BC.FARM.ROLE at 8) and fires on one operator click, in this order: BC.NUR 180, then AB.OG 185, AB.CIVIL 48, AB.ENV 36, AB.DIST 54, AB.HDD 46, AB.LF 14, with BC.FARM.ROLE 2 alongside. The operator ruling defers the FAR tier: of 848 total READY, 337 are NEAR and launchable, 475 FAR wait for later, 28 UNKNOWN wait on desk work, and 8 sit untiered on accounts killed after reveal. BC.BLEND, BC.COMP and BC.DIST drafts hold on the unanswered competitor or customer ruling. AB.MUNI is prohibited. AB.BED has 0 contacts and cannot fire.",
   },
 
   /* The seven ideas the whole build rests on. Each one replaced
@@ -137,7 +137,8 @@ instantly:{
        staged draft    in Instantly, leads loaded, waiting on the operator's click
        staging next    next in the rollout order, being loaded by the Instantly session
        do not launch   held on the unanswered competitor or customer ruling
-       prohibited      public bodies, never sourced, never loaded
+       prohibited      public bodies: a draft shell exists in the workspace but it never
+                       fires and its accounts never enter a send. Phone and mail only.
        no contacts     proven accounts, nobody to write to yet
        manual          worked by hand, never a campaign */
   campaigns:[
@@ -229,7 +230,7 @@ instantly:{
      verification to the Instantly plan lead cap. The class table below is still the
      standing rule for every future import. */
   verification:{
-    state:"1,634 addresses on file, 1,303 verified. The absorbent gate reads READY on 848 leads, every one verified before it moved: 337 NEAR and launchable, 475 FAR deferred by the operator distance ruling, 28 UNKNOWN awaiting desk work. Nothing is stranded; the staged campaigns fire on one operator click.",
+    state:"1,634 addresses on file, 1,303 verified. The absorbent gate reads READY on 848 leads, every one verified before it moved: 337 NEAR and launchable, 475 FAR deferred by the operator distance ruling, 28 UNKNOWN awaiting desk work, 8 untiered on accounts killed after reveal. Nothing is stranded; the staged campaigns fire on one operator click.",
     blunt:"The verification gate has cleared.",
     classes:[
       ["valid","import and send normally","yes"],
@@ -262,7 +263,7 @@ instantly:{
     ["Campaigns in the Instantly workspace","14 of 15 planned, plus the prior AI SDR"],
     ["Launched and sending","1, BC.FARM, 48 leads"],
     ["Fireable staged drafts, leads loaded","8 campaigns, 565 leads"],
-    ["READY by tier","848 total: 337 NEAR launchable, 475 FAR deferred, 28 UNKNOWN"],
+    ["READY by tier","848 total: 337 NEAR launchable, 475 FAR deferred, 28 UNKNOWN, 8 untiered on killed accounts"],
     ["Verified leads stranded on the plan cap","0, freed by the run 9 FAR removals"],
     ["Verified addresses on file","1,303 of 1,634"],
     ["Sends across the staged sequences, all fired","about 2,200"],
@@ -303,7 +304,7 @@ apollo:{
     { f:"Employee count and headcount",  cost:"free",     conf:"confirmed", use:"account scoring and the depth table." },
     { f:"Named contacts with titles",    cost:"free",     conf:"confirmed", use:"ApolloNamedContacts is populated free tier across the roster. This is how the title buckets and the waterfall got built without spending a credit." },
     { f:"Total contact count per company",cost:"free",    conf:"confirmed", use:"tells you whether depth is even available before you allocate credits." },
-    { f:"Work email reveal",             cost:"1 credit", conf:"confirmed", use:"the only thing the 1,000 credit plan is currently allocated against." },
+    { f:"Work email reveal",             cost:"1 credit", conf:"confirmed", use:"what the spent 1,183 credit ceiling went on. Nothing is allocated now; the next reveal tranche needs a new written ceiling." },
     { f:"Direct dial or mobile phone",   cost:"unknown",  conf:"unknown",   use:"THE highest value unknown in the stack. The power dialer funnel is worth nothing without numbers. Check the credit cost per phone reveal before budgeting the dialer." },
     { f:"LinkedIn profile URL",          cost:"unknown",  conf:"unknown",   use:"gates the whole LinkedIn funnel. Check whether it comes with the free named contact or only on a reveal." },
     { f:"Buying intent signals",         cost:"unknown",  conf:"unknown",   use:"usually a higher tier feature. Would let us prioritize the wave 1 order instead of ranking on title alone." },

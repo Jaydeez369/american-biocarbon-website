@@ -7,6 +7,10 @@
    is computed from these records at render time. */
 window.PIPE = {
 
+  /* When this snapshot was pulled from SIBRA. Rendered on the Sales Pipeline page so the
+     deal KPIs are never mistaken for today's book; update it with every re-export. */
+  snapshot: "2026-07-20",
+
   /* Stage ladder — probability drives the weighted pipeline (value × prob). */
   stages: [
     { k:"prospect",            label:"Prospect",            prob:5,   cls:"st-prospect" },
