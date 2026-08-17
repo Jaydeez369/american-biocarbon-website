@@ -172,10 +172,10 @@ const LAUNCH_STEPS = [
     d:"DONE. Every live company carries an ICP and every contact rides its company's code, so reply attribution works per variant.", icps:true },
   { k:"import",  t:"Import into the Sales Pipeline", done:true,
     d:"DONE, contact-join audit 2026-08-17: all 1,593 unique emails join a pipeline company (0 unjoined). Replies have somewhere to land." },
-  { k:"load",    t:"Load the campaigns into Instantly",
-    d:"IN PROGRESS in a separate Instantly session — campaign edits happen there, never from this screen. 9 campaigns are in the workspace (BC.FARM live, 8 absorbent drafts); BC.NUR and BC.FARM.ROLE load next." },
+  { k:"load",    t:"Load the campaigns into Instantly", done:true,
+    d:"DONE, run 9 2026-08-17: 14 campaigns in the workspace, 8 fireable drafts with 565 leads loaded, schedules staged (08:00–16:00 Central, weekdays), all four mailboxes at health 100. Campaign edits happen in the Instantly session, never from this screen." },
   { k:"send",    t:"Send",
-    d:"STARTED: BC.FARM is launched. The rest fire in rollout order — remaining biochar first, then absorbents by READY count. Ramp per inbox rather than opening at full rate; reply rate is the metric, opens are noise since Apple MPP." },
+    d:"STARTED: BC.FARM is launched with 48 leads. Everything else fires on one operator click in the written order — BC.NUR first, then absorbents by loaded count. Ramp per inbox rather than opening at full rate; reply rate is the metric, opens are noise since Apple MPP." },
 ];
 
 /* Thousands-separated integer. pipeline.js has its own num() but it lives inside that file's
@@ -229,11 +229,13 @@ function rLaunchpad(){
       ${tile("Companies", R?fmtN(R.live):"not loaded", R?`${fmtN(R.count)} researched · ${fmtN(R.liveIcp)} live with an ICP`:"roster layer not loaded")}
       ${tile("Contacts", R?fmtN(R.contactsTotal):"not loaded", R?`${fmtN(R.contactsVerified)} verified · on ${fmtN(R.withContact)} companies`:"roster layer not loaded")}
       ${tile("ICPs", icpKeys.length?fmtN(icpKeys.length):"not loaded", icpKeys.length?`${nBio} biochar · ${nAbs} absorbent · every one a campaign`:"roster layer not loaded")}
-      ${tile("Instantly campaigns", IL?`${IL.launched} live · ${IL.ready} ready`:"no live read", IL?`${IL.inWorkspace} in the workspace · ${fmtN(IL.readyLeads)} READY leads · read ${esc(IL.read)}`:"engine layer not loaded")}
+      ${tile("Instantly campaigns", IL?`${IL.launched} live · ${IL.ready} ready`:"no live read", IL?`${IL.inWorkspace} in the workspace · ${fmtN(IL.readyLeads)} leads loaded · read ${esc(IL.read)}`:"engine layer not loaded")}
     </div>`+
     (IL
       ? `<div class="note ok" style="margin-top:10px"><b>Rollout order.</b> ${esc(IL.order)}</div>`+
-        `<div class="note warn" style="margin-top:8px"><b>${fmtN(IL.stranded)} verified leads are stranded on the Instantly plan lead cap.</b> ${esc(IL.capNote)} ${esc(IL.note)}</div>`
+        (IL.stranded
+          ? `<div class="note warn" style="margin-top:8px"><b>${fmtN(IL.stranded)} verified leads are stranded on the Instantly plan lead cap.</b> ${esc(IL.capNote)} ${esc(IL.note)}</div>`
+          : `<div class="note" style="margin-top:8px"><b>Nothing is stranded.</b> ${esc(IL.capNote)} ${esc(IL.note)}</div>`)
       : "")+
     (S && S.contacts && S.contactsNamed < S.contacts
       ? `<div class="note warn" style="margin-top:10px"><b>${fmtN(S.contacts-S.contactsNamed)} contacts have no name.</b> They render blank and one of them can become an account's primary contact. Fix on import rather than after.</div>`

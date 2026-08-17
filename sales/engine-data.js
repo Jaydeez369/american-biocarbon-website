@@ -50,17 +50,17 @@ instantly:{
      in this app writes to Instantly. These numbers are a dated snapshot of that read,
      not something this page can refresh on its own. */
   live:{
-    read:"August 17, 2026",
+    read:"August 17, 2026, run 9",
     note:"A separate session owns the Instantly workspace. Campaign loading and review happen there; this screen only reports the last read.",
-    inWorkspace:9,
+    inWorkspace:14,
     launched:1,
     launchedName:"BC.FARM",
-    drafts:8,
-    ready:6,
-    readyLeads:848,
-    stranded:138,
-    capNote:"The workspace plan cap reads Remaining uploads: 0, so 138 verified READY leads cannot be pushed until the plan is lifted. Billing action, operator owned.",
-    order:"BC.FARM is live. Next is the rest of biochar: BC.NUR, then BC.FARM.ROLE once its leads load. Then absorbents in READY order: AB.OG 313, AB.CIVIL 172, AB.ENV 126, AB.DIST 108, AB.HDD 91, AB.LF 38. BC.BLEND, BC.COMP and BC.DIST hold on the unanswered competitor or customer ruling. AB.MUNI is prohibited. AB.BED has 0 contacts and cannot fire.",
+    drafts:13,
+    ready:8,
+    readyLeads:565,
+    stranded:0,
+    capNote:"The run 9 FAR removals freed the plan cap: 0 leads stranded, down from 138. The plan remains the ceiling for the deferred FAR tier's eventual 475 lead load.",
+    order:"BC.FARM is live with 48 leads. Every fireable campaign is staged with a schedule (08:00 to 16:00 Central, weekdays, 20 a day, BC.FARM.ROLE at 8) and fires on one operator click, in this order: BC.NUR 180, then AB.OG 185, AB.CIVIL 48, AB.ENV 36, AB.DIST 54, AB.HDD 46, AB.LF 14, with BC.FARM.ROLE 2 alongside. The operator ruling defers the FAR tier: of 848 total READY, 337 are NEAR and launchable, 475 FAR wait for later, 28 UNKNOWN wait on desk work. BC.BLEND, BC.COMP and BC.DIST drafts hold on the unanswered competitor or customer ruling. AB.MUNI is prohibited. AB.BED has 0 contacts and cannot fire.",
   },
 
   /* The seven ideas the whole build rests on. Each one replaced
@@ -128,10 +128,11 @@ instantly:{
   /* Campaign map. Accounts and contacts are FALLBACK numbers only: the renderer reads
      the live roster join (window.ROSTER) first, so the table follows the Sales Pipeline
      without an edit here. The fallbacks are the August 17 derivation, kept honest for a
-     partial deployment where roster-data.js is missing. `ready` is the READY lead count
-     from the campaign gate ledger at the last live Instantly read; the gate and the
-     roster are two different ledgers measured at different joins, so ready can sit a few
-     off the contact column and that is not a defect. Status vocabulary:
+     partial deployment where roster-data.js is missing. `ready` is the LEADS LOADED
+     live count from the run 9 Instantly read; the workspace and the roster are two
+     different ledgers measured at different joins, so ready can sit well off the contact
+     column (the FAR tier is deferred out of the loads) and that is not a defect.
+     Status vocabulary:
        live            launched and sending
        staged draft    in Instantly, leads loaded, waiting on the operator's click
        staging next    next in the rollout order, being loaded by the Instantly session
@@ -140,19 +141,19 @@ instantly:{
        no contacts     proven accounts, nobody to write to yet
        manual          worked by hand, never a campaign */
   campaigns:[
-    { code:"BC.FARM", label:"Row crop and specialty farms",       line:"Biochar",   accts:89,  contacts:80,  versions:2, steps:3, cta:"controlled strip or block trial", status:"live" },
-    { code:"BC.NUR",  label:"Nurseries and greenhouse growers",   line:"Biochar",   accts:160, contacts:241, versions:3, steps:3, cta:"bench or media trial",            status:"staging next" },
-    { code:"BC.FARM.ROLE", label:"Farm published inboxes",        line:"Biochar",   accts:0,   contacts:0,   versions:1, steps:3, cta:"route to the soil and input owner", status:"staging next" },
+    { code:"BC.FARM", label:"Row crop and specialty farms",       line:"Biochar",   accts:89,  contacts:80,  versions:2, steps:3, cta:"controlled strip or block trial", status:"live", ready:48 },
+    { code:"BC.NUR",  label:"Nurseries and greenhouse growers",   line:"Biochar",   accts:160, contacts:241, versions:3, steps:3, cta:"bench or media trial",            status:"staged draft", ready:180 },
+    { code:"BC.FARM.ROLE", label:"Farm published inboxes",        line:"Biochar",   accts:0,   contacts:0,   versions:1, steps:3, cta:"route to the soil and input owner", status:"staged draft", ready:2 },
     { code:"BC.DIST", label:"Ag distributors and landscape supply",line:"Biochar",  accts:15,  contacts:53,  versions:2, steps:3, cta:"spec plus freight, route to agronomy", status:"do not launch" },
     { code:"BC.BLEND",label:"Soil blenders and bagged media",     line:"Biochar",   accts:6,   contacts:5,   versions:1, steps:3, cta:"technical spec, then production evaluation", status:"do not launch" },
     { code:"BC.COMP", label:"Composters and organics recyclers",  line:"Biochar",   accts:7,   contacts:7,   versions:1, steps:3, cta:"windrow protocol, then trial material", status:"do not launch" },
     { code:"BC.RANCH",label:"Ranchers, livestock and poultry",    line:"Biochar",   accts:13,  contacts:2,   versions:1, steps:0, cta:"find the use case first",         status:"manual, never built" },
-    { code:"AB.OG",   label:"Oil and gas field services",         line:"Absorbent", accts:102, contacts:296, versions:2, steps:4, cta:"video, or a spill test",          status:"staged draft", ready:313 },
-    { code:"AB.CIVIL",label:"Heavy civil, dredging and slurry",   line:"Absorbent", accts:84,  contacts:175, versions:2, steps:4, cta:"video, or a dewatering job test", status:"staged draft", ready:172 },
-    { code:"AB.ENV",  label:"Spill response and remediation",     line:"Absorbent", accts:56,  contacts:145, versions:1, steps:4, cta:"sample staged for the next callout", status:"staged draft", ready:126 },
-    { code:"AB.DIST", label:"Absorbent distributors and safety supply", line:"Absorbent", accts:93, contacts:124, versions:2, steps:4, cta:"video, or spec then evaluation", status:"staged draft", ready:108 },
-    { code:"AB.HDD",  label:"Directional drilling and utility boring", line:"Absorbent", accts:30, contacts:95, versions:2, steps:4, cta:"video, or a crew test on one bore", status:"staged draft", ready:91 },
-    { code:"AB.LF",   label:"Landfill and leachate operations",   line:"Absorbent", accts:23,  contacts:42,  versions:1, steps:4, cta:"technical packet first",          status:"staged draft", ready:38 },
+    { code:"AB.OG",   label:"Oil and gas field services",         line:"Absorbent", accts:102, contacts:296, versions:2, steps:4, cta:"video, or a spill test",          status:"staged draft", ready:185 },
+    { code:"AB.CIVIL",label:"Heavy civil, dredging and slurry",   line:"Absorbent", accts:84,  contacts:175, versions:2, steps:4, cta:"video, or a dewatering job test", status:"staged draft", ready:48 },
+    { code:"AB.ENV",  label:"Spill response and remediation",     line:"Absorbent", accts:56,  contacts:145, versions:1, steps:4, cta:"sample staged for the next callout", status:"staged draft", ready:36 },
+    { code:"AB.DIST", label:"Absorbent distributors and safety supply", line:"Absorbent", accts:93, contacts:124, versions:2, steps:4, cta:"video, or spec then evaluation", status:"staged draft", ready:54 },
+    { code:"AB.HDD",  label:"Directional drilling and utility boring", line:"Absorbent", accts:30, contacts:95, versions:2, steps:4, cta:"video, or a crew test on one bore", status:"staged draft", ready:46 },
+    { code:"AB.LF",   label:"Landfill and leachate operations",   line:"Absorbent", accts:23,  contacts:42,  versions:1, steps:4, cta:"technical packet first",          status:"staged draft", ready:14 },
     { code:"AB.BED",  label:"Animal bedding and equine supply",   line:"Absorbent", accts:11,  contacts:0,   versions:1, steps:4, cta:"house trial, bedding claims only", status:"no contacts", ready:0 },
     { code:"AB.MUNI", label:"Municipal public works",             line:"Absorbent", accts:59,  contacts:0,   versions:2, steps:4, cta:"video, or technical packet",      status:"prohibited", ready:0 },
   ],
@@ -228,7 +229,7 @@ instantly:{
      verification to the Instantly plan lead cap. The class table below is still the
      standing rule for every future import. */
   verification:{
-    state:"1,634 addresses on file, 1,303 verified. The absorbent gate reads READY on 848 leads and every one of them was verified before it moved. What blocks sending now is the Instantly plan lead cap, with 138 verified leads stranded, not verification.",
+    state:"1,634 addresses on file, 1,303 verified. The absorbent gate reads READY on 848 leads, every one verified before it moved: 337 NEAR and launchable, 475 FAR deferred by the operator distance ruling, 28 UNKNOWN awaiting desk work. Nothing is stranded; the staged campaigns fire on one operator click.",
     blunt:"The verification gate has cleared.",
     classes:[
       ["valid","import and send normally","yes"],
@@ -256,27 +257,28 @@ instantly:{
     blocker:"Name the two sending domains and the four mailboxes and confirm the From name on each is a real person. If any mailbox sends as sales@ or a generic alias, fix it before launch.",
   },
 
-  /* Where the machine stands, as of the last live read. */
+  /* Where the machine stands, as of the run 9 live read. */
   output:[
-    ["Campaigns in the Instantly workspace","9 of 15 planned"],
-    ["Launched and sending","1, BC.FARM"],
-    ["Absorbent leads loaded and READY","848"],
-    ["Verified leads stranded on the plan cap","138"],
+    ["Campaigns in the Instantly workspace","14 of 15 planned, plus the prior AI SDR"],
+    ["Launched and sending","1, BC.FARM, 48 leads"],
+    ["Fireable staged drafts, leads loaded","8 campaigns, 565 leads"],
+    ["READY by tier","848 total: 337 NEAR launchable, 475 FAR deferred, 28 UNKNOWN"],
+    ["Verified leads stranded on the plan cap","0, freed by the run 9 FAR removals"],
     ["Verified addresses on file","1,303 of 1,634"],
-    ["Sends across the staged 4 step absorbent sequences, all fired","about 3,400"],
+    ["Sends across the staged sequences, all fired","about 2,200"],
   ],
   statRead:{
     bar:"100 sends on a version before it can be cut.",
-    reality:"Absorbent clears the bar first: AB.OG at 2 versions and 313 READY leads lands over 150 sends per version, and AB.CIVIL clears it too. On biochar, BC.NUR at 3 versions and 241 verified contacts sits near 80 per version, still under the bar, so no biochar comparison resolves in round 1.",
+    reality:"With the FAR tier deferred, nothing clears the bar in wave 1: AB.OG at 2 versions and 185 loaded leads is about 92 sends per version, the best in the book, and BC.NUR at 3 versions and 180 leads is 60. Round 1 stays a qualitative shakedown on every campaign.",
     allowed:"Read replies for language. Fix anything obviously broken. Note the direction.",
     banned:"Do not cut a version. Do not write the word winner in a report. Auto optimize stays off everywhere, because it would pick a winner off four sends.",
-    unlock:"Lifting the plan cap releases 138 more verified leads immediately, and the BC.NUR load brings the deepest biochar list into play. Those two moves do more for the A/B than any copy edit.",
+    unlock:"The FAR tier holds 475 verified READY leads. When the operator opens it, AB.OG alone roughly triples and the absorbent comparisons start resolving. Until then the fire order is the plan and copy edits are not.",
   },
 
   blockers:[
-    { p:1, t:"Instantly plan lead cap", d:"Remaining uploads reads 0, so 138 verified READY leads cannot be pushed. Billing action, nothing in the workspace fixes it.", owner:"operator" },
-    { p:2, t:"Operator queue unanswered", d:"7 site reads and 5 rulings still open. The competitor or customer ruling holds BC.BLEND, BC.COMP and BC.DIST out of the biochar rollout, and 15 held contacts at ORS Nasco and Perino release at zero cost the moment those two sites are read.", owner:"operator" },
-    { p:3, t:"Apollo ceiling spent", d:"1,183 of 1,183 credits used. About 1,386 scored candidates are already sourced and waiting on site verification; the next reveal tranche needs a new written ceiling.", owner:"operator" },
+    { p:1, t:"Operator queue unanswered", d:"7 site reads and 5 rulings still open, fifth flag. The competitor or customer ruling holds BC.BLEND, BC.COMP and BC.DIST out of the biochar rollout, and 15 held contacts at ORS Nasco and Perino release at zero cost the moment those two sites are read.", owner:"operator" },
+    { p:2, t:"Apollo ceiling spent", d:"1,183 of 1,183 credits used. About 1,386 scored candidates are already sourced and waiting on site verification; the next reveal tranche needs a new written ceiling.", owner:"operator" },
+    { p:3, t:"Plan cap versus the FAR tier", d:"Nothing is stranded today, but the deferred FAR tier holds 475 leads and the current plan cap cannot absorb them when the operator opens that tier. Billing decision to make before then.", owner:"operator" },
     { p:4, t:"Free sample quantity for production, windrow and field trials", d:"Approved sizes cover a bench evaluation and a spill test only. No email may name a windrow, a pallet blend, a field strip or a house as what the free sample covers until operations sets a number.", owner:"Victor and operations" },
     { p:5, t:"Crumble video", d:"Every absorbent version A and every absorbent step 2 references it. If it is missing at launch, drop version A and run those campaigns at one version.", owner:"Victor" },
     { p:6, t:"Crumble technical packet", d:"Blocks AB.MUNI, AB.LF and AB.DIST from converting a reply. A video persuades a person, a document gets a product onto an approved vendor list.", owner:"Jesse, from verified facts only" },
@@ -344,18 +346,18 @@ funnels:[
   /* ---------------------------------------------------- EMAIL */
   {
     id:"email", rank:1, name:"Cold email, Instantly", status:"live, one campaign sending",
-    what:"15 planned campaigns across two product lines, one best fit buyer per account, waves opening behind them. BC.FARM is launched; 6 absorbent campaigns sit staged with 848 READY leads waiting on the operator's click.",
-    gates:["Every address verified and classified, which is now true on all 848 loaded leads","Wave 1 observations read by a human before each launch","Ten deliverability gates green","Sender identity confirmed"],
+    what:"15 planned campaigns across two product lines, one best fit buyer per account, waves opening behind them. BC.FARM is launched; 8 fireable drafts sit staged with 565 leads loaded, schedules set, waiting on the operator's click in the written fire order.",
+    gates:["Every address verified and classified, which is true on every loaded lead","Wave 1 observations read by a human before each launch","Ten deliverability gates green","Sender identity confirmed: four mailboxes, all health 100 at the run 9 read"],
     capacity:"4 inboxes x 20 sends a day = 80 a day, about 1,720 a month. Ramps to 2,150 at 25 per inbox and 2,580 at 30, only on clean health.",
-    volume:"848 absorbent leads READY plus BC.FARM already sending. Full fire is about 3,400 sends across the staged sequences, roughly two months of capacity at the starting rate, so capacity now gates the send, not the list.",
+    volume:"565 leads loaded across the fireable drafts plus BC.FARM sending its 48. Full fire is about 2,200 sends across the staged sequences, over a month of capacity at the starting rate, and the deferred FAR tier holds 475 more verified leads behind that.",
     cost:{ fixed:47, unit:null, unitLabel:"credits and verification are counted under Apollo, not here", conf:"confirmed" },
     math:[
-      ["Leads loaded and READY","848 absorbent, plus BC.FARM live"],
-      ["Sends across the staged sequences","about 3,400"],
+      ["Leads loaded","565 staged, plus 48 live on BC.FARM"],
+      ["Sends across the staged sequences","about 2,200"],
       ["Reply rate, tight targeted list","3 to 8 percent of leads"],
-      ["Replies","25 to 68"],
-      ["Positive replies","12 to 34"],
-      ["Cost per reply at the midpoint","about $7 on the confirmed stack over the two month fire window"],
+      ["Replies","18 to 49"],
+      ["Positive replies","9 to 25"],
+      ["Cost per reply at the midpoint","about $6 on the confirmed stack over the fire window"],
     ],
     conf:"Reply rate is an assumed range for a well targeted B2B list. Everything else is derived from the roster, the gate ledger and the send caps.",
     verdict:"Open and firing order set. Nothing else in this list beats it on cost per conversation.",

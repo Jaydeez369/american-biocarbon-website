@@ -121,9 +121,9 @@
       sec("1","The shape of it")+
       `<div class="grid g4">
         ${tile("In the Instantly workspace", L?String(L.inWorkspace):"no read", L?`${L.launched} launched (${L.launchedName}) · ${L.drafts} staged drafts`:"")}
-        ${tile("Ready to fire", L?String(L.ready):"no read", L?`campaigns with leads loaded, ${fmt(L.readyLeads)} READY leads`:"")}
+        ${tile("Ready to fire", L?String(L.ready):"no read", L?`staged drafts with leads loaded, ${fmt(L.readyLeads)} leads`:"")}
         ${tile("Verified addresses", R?fmt(R.contactsVerified):"not loaded", R?`of ${fmt(R.contactsTotal)} on file in the pipeline`:"roster layer not loaded")}
-        ${tile("Stranded on the plan cap", L?fmt(L.stranded):"no read", "verified leads, waiting on billing", true)}
+        ${tile("Stranded on the plan cap", L?fmt(L.stranded):"no read", L && L.stranded ? "verified leads, waiting on billing" : "freed by the run 9 FAR removals", !!(L && L.stranded))}
       </div>`+
       (L ? `<div class="note" style="margin-top:10px"><b>Rollout order.</b> ${esc(L.order)}</div>` : "")+
 
@@ -159,7 +159,7 @@
       </div>`+
 
       sec("4","The campaign map")+
-      table(["Campaign","Line","Live companies","Verified contacts","READY leads","Versions","Steps","The ask in email 1","Status"],
+      table(["Campaign","Line","Live companies","Verified contacts","Leads loaded","Versions","Steps","The ask in email 1","Status"],
         camps.map(c=>[
           `<strong style="font-family:var(--mono)">${esc(c.code)}</strong><br><span style="color:var(--text-mute);font-size:12px">${esc(c.label)}</span>`,
           badge(c.line, c.line==="Biochar"?"badge-green":"badge-muted"),
@@ -170,7 +170,7 @@
           `<span style="font-family:var(--mono)">${c.steps || "&#183;"}</span>`,
           esc(c.cta),
           statusBadge(c.status)]))+
-      `<div class="note" style="margin-top:10px"><b>Two ledgers, read at different joins.</b> Live companies and verified contacts come off the Sales Pipeline roster at render time, so they follow the pipeline without an edit here. READY leads come off the campaign gate ledger at the last live Instantly read${L?` (${esc(L.read)})`:""}. A small mismatch between the two is expected and is not a defect. A middot in READY means the campaign is either not loaded in Instantly yet or already live and sending, where the gate ledger stops tracking it.</div>`+
+      `<div class="note" style="margin-top:10px"><b>Two ledgers, read at different joins.</b> Live companies and verified contacts come off the Sales Pipeline roster at render time, so they follow the pipeline without an edit here. Leads loaded is the live workspace count at the last Instantly read${L?` (${esc(L.read)})`:""}, and it sits well under the contact column on purpose: the operator distance ruling defers the FAR tier out of the loads. A middot means the campaign is not loaded in Instantly.</div>`+
 
       sec("5","Personalization: research drives the message")+
       `<div class="card pad-lg">
