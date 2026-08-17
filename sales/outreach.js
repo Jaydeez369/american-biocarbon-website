@@ -28,7 +28,24 @@
      filed under it, so "we have a campaign for that" and "we have a list for that" can never
      drift apart again. Guarded because roster-data.js is a separate script that a partial
      deployment could omit. */
-  const rosterCounts = () => (window.ROSTER && window.ROSTER.byIcp) || {};
+  /* LIVE companies only. window.ROSTER.byIcp counts every row ever filed under a code,
+     including killed and rejected ones, which quietly inflated "on the list" above what
+     the pipeline can actually send to. Counting the companies array with dead rows
+     excluded makes this page agree with the Launchpad and the Instantly Logic map, which
+     both read the live join. byIcp stays as the fallback for a partial deployment. */
+  let LIVE_BY_ICP = null;
+  const rosterCounts = () => {
+    const R = window.ROSTER || {};
+    const list = R.companies;
+    if (list && list.length){
+      if (!LIVE_BY_ICP){
+        LIVE_BY_ICP = {};
+        for (const c of list){ if (!c.dead && c.icp) LIVE_BY_ICP[c.icp] = (LIVE_BY_ICP[c.icp] || 0) + 1; }
+      }
+      return LIVE_BY_ICP;
+    }
+    return R.byIcp || {};
+  };
   const rosterTotals = () => {
     const R = window.ROSTER || {};
     return { count: R.count || 0, live: R.live || 0, needsWork: R.needsWork || 0, empty: R.emptyIcps || [] };

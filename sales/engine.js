@@ -43,6 +43,28 @@
 
   const money = v => (v === null || v === undefined) ? "not priced" : ("$" + v);
   const bullets = arr => `<ul class="oe-ul">${arr.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`;
+  const fmt = v => Number.isFinite(+v) ? Math.round(+v).toLocaleString() : String(v ?? "");
+
+  /* Live per ICP aggregation off the Sales Pipeline roster, the canonical layer. The
+     campaign map used to carry typed account and contact counts and they went stale the
+     week they were typed; now the roster join is read at render time and the numbers in
+     engine-data.js are only a fallback for a partial deployment with no roster-data.js.
+     Built lazily and cached: the roster is 1,100+ rows and this runs per render. */
+  let ICP_AGG = null;
+  const icpAgg = () => {
+    if (ICP_AGG) return ICP_AGG;
+    const list = (window.ROSTER && window.ROSTER.companies) || [];
+    if (!list.length) return null;
+    ICP_AGG = {};
+    for (const c of list){
+      if (c.dead || !c.icp) continue;
+      const a = ICP_AGG[c.icp] = ICP_AGG[c.icp] || { accts:0, verified:0 };
+      a.accts++; a.verified += c.contactsVerified || 0;
+    }
+    return ICP_AGG;
+  };
+  const acctsOf   = c => { const a = icpAgg(); return a && a[c.code] ? a[c.code].accts    : c.accts; };
+  const contactsOf= c => { const a = icpAgg(); return a && a[c.code] ? a[c.code].verified : c.contacts; };
 
   /* Month 1 usage is derived, not typed. It read "about 20%" until the contact ceiling
      changed and the send estimate moved from 340 to 415, at which point a hardcoded tile
@@ -66,19 +88,18 @@
        every headline number here filters on steps > 0. */
     const camps  = I.campaigns;
     const built  = camps.filter(c => c.steps > 0);
-    const bioC   = built.filter(c => c.line === "Biochar");
-    const absC   = built.filter(c => c.line === "Absorbent");
     const totalV = built.reduce((n,c)=>n+c.versions,0);
-    const bioContacts = bioC.reduce((n,c)=>n+c.contacts,0);
-    const bioAccts = bioC.reduce((n,c)=>n+c.accts,0);
-    const absAccts = absC.reduce((n,c)=>n+c.accts,0);
     const manual = camps.filter(c => c.steps === 0);
+    const L = I.live || null;
+    const R = window.ROSTER || null;
 
     const tile = (label,val,sub,warn) =>
       `<div class="card kpi${warn?" kpi-warn":""}"><div class="l">${esc(label)}</div><div class="v">${esc(val)}</div><div class="d">${esc(sub||"")}</div></div>`;
 
     const statusBadge = s =>
-      s === "build" ? badge("ready to build","badge-green")
+      s === "live" ? badge("LIVE","badge-green")
+      : s === "staged draft" ? badge("staged draft","badge-green")
+      : s === "staging next" ? badge("staging next","badge-gold")
       : s === "manual, never built" ? badge("manual","badge-muted")
       : badge(s, "badge-red");
 
@@ -86,21 +107,25 @@
       head("Instantly Logic",
         `${esc(I.headline)} Updated ${esc(I.updated)}.`)+
 
-      /* The blocker first, because it is the only thing standing between
-         this design and a send. Everything below is academic until it clears. */
-      `<div class="note warn" style="border-left:4px solid var(--red-soft);font-size:13.5px;margin-bottom:14px">
-         <b>&#9940; ${esc(I.verification.blunt)}</b> ${esc(I.verification.state)}
+      /* State first: the gate that used to block everything has cleared, and the live
+         read tells you what actually stands between the drafts and a send today. */
+      `<div class="note ok" style="border-left:4px solid var(--green-bright);font-size:13.5px;margin-bottom:10px">
+         <b>${esc(I.verification.blunt)}</b> ${esc(I.verification.state)}
        </div>`+
+      (L ? `<div class="note warn" style="border-left:4px solid var(--gold-soft);font-size:13.5px;margin-bottom:14px">
+         <b>Last live read ${esc(L.read)}.</b> ${esc(L.capNote)} ${esc(L.note)}
+       </div>` : "")+
 
       `<div class="card pad-lg" style="margin-bottom:16px"><p style="color:var(--text);font-size:13.5px;line-height:1.65;margin:0">${esc(I.premise)}</p></div>`+
 
       sec("1","The shape of it")+
       `<div class="grid g4">
-        ${tile("Campaigns to build", String(built.length), `${bioAccts} biochar accounts, ${absAccts} absorbent${manual.length?`, plus ${manual.length} worked by hand`:""}`)}
-        ${tile("Email 1 versions", String(totalV), "down from 55 a week ago")}
-        ${tile("Biochar contacts sending", String(bioContacts), `across ${bioAccts} accounts, from 339 on file`)}
-        ${tile("Verified and sendable", "0", "nothing sends until enrichment clears", true)}
+        ${tile("In the Instantly workspace", L?String(L.inWorkspace):"no read", L?`${L.launched} launched (${L.launchedName}) · ${L.drafts} staged drafts`:"")}
+        ${tile("Ready to fire", L?String(L.ready):"no read", L?`campaigns with leads loaded, ${fmt(L.readyLeads)} READY leads`:"")}
+        ${tile("Verified addresses", R?fmt(R.contactsVerified):"not loaded", R?`of ${fmt(R.contactsTotal)} on file in the pipeline`:"roster layer not loaded")}
+        ${tile("Stranded on the plan cap", L?fmt(L.stranded):"no read", "verified leads, waiting on billing", true)}
       </div>`+
+      (L ? `<div class="note" style="margin-top:10px"><b>Rollout order.</b> ${esc(L.order)}</div>` : "")+
 
       sec("2","Seven principles, and what each one replaced")+
       `<p class="lead">Every one of these overturned something that was in the plan a week ago. The was column is not history for its own sake: it is there so a future agent does not quietly restore it because it read well.</p>`+
@@ -125,7 +150,7 @@
           `<strong>${esc(r.w)}</strong>`, esc(r.who), esc(r.when),
           `<span style="font-family:var(--mono)">${esc(r.n)}</span>`]))+
       `<h3 class="sub">Best fit is decided by title, per ICP</h3>
-       <p class="lead">Sales and business development sits last in every single ICP on purpose. 94 of the 339 contacts are sales people. They sell for the account, they do not buy for it.</p>`+
+       <p class="lead">Sales and business development sits last in every single ICP on purpose. A large share of the named contacts on the roster are sales people. They sell for the account, they do not buy for it.</p>`+
       table(["ICP","Title priority, best first"],
         I.waterfall.titlePriority.map(([k,v])=>[`<strong>${esc(k)}</strong>`, esc(v)]))+
       `<div class="grid g2" style="margin-top:12px">
@@ -134,17 +159,18 @@
       </div>`+
 
       sec("4","The campaign map")+
-      table(["Campaign","Line","Accounts","Contacts","Versions","Steps","The ask in email 1","Status"],
+      table(["Campaign","Line","Live companies","Verified contacts","READY leads","Versions","Steps","The ask in email 1","Status"],
         camps.map(c=>[
           `<strong style="font-family:var(--mono)">${esc(c.code)}</strong><br><span style="color:var(--text-mute);font-size:12px">${esc(c.label)}</span>`,
           badge(c.line, c.line==="Biochar"?"badge-green":"badge-muted"),
-          `<span style="font-family:var(--mono)">${esc(c.accts)}</span>`,
-          `<span style="font-family:var(--mono)">${c.contacts || "&#183;"}</span>`,
+          `<span style="font-family:var(--mono)">${fmt(acctsOf(c))}</span>`,
+          `<span style="font-family:var(--mono)">${contactsOf(c) ? fmt(contactsOf(c)) : "&#183;"}</span>`,
+          `<span style="font-family:var(--mono)">${c.ready !== undefined ? fmt(c.ready) : "&#183;"}</span>`,
           `<span style="font-family:var(--mono)">${esc(c.versions)}</span>`,
           `<span style="font-family:var(--mono)">${c.steps || "&#183;"}</span>`,
           esc(c.cta),
           statusBadge(c.status)]))+
-      `<div class="note" style="margin-top:10px"><b>Absorbent contacts read as a middot because there are none.</b> Those 182 accounts are account level rows only. Enrichment has to run before a single absorbent campaign is built.</div>`+
+      `<div class="note" style="margin-top:10px"><b>Two ledgers, read at different joins.</b> Live companies and verified contacts come off the Sales Pipeline roster at render time, so they follow the pipeline without an edit here. READY leads come off the campaign gate ledger at the last live Instantly read${L?` (${esc(L.read)})`:""}. A small mismatch between the two is expected and is not a defect. A middot in READY means the campaign is either not loaded in Instantly yet or already live and sending, where the gate ledger stops tracking it.</div>`+
 
       sec("5","Personalization: research drives the message")+
       `<div class="card pad-lg">
@@ -199,7 +225,7 @@
       </div>`+
       `<div class="note warn" style="margin-top:8px"><b>Open:</b> ${esc(I.sender.blocker)}</div>`+
 
-      sec("9","What round 1 actually produces")+
+      sec("9","Where the machine stands")+
       table(["Metric","Number"], I.output.map(([k,v])=>[`<strong>${esc(k)}</strong>`, `<span style="font-family:var(--mono)">${esc(v)}</span>`]))+
       `<h3 class="sub">The honest statistical read</h3>
        <div class="grid g2">
@@ -283,7 +309,7 @@
         ${tile("Confirmed stack", "$"+stackTotal+" / mo", "Apollo, Instantly, Aloe, Resend")}
         ${tile("Unpriced line items", String(unpriced.length), "domains, verification, 10 DLC", true)}
         ${tile("Email capacity bought", "1,720 / mo", "whether we use it or not")}
-        ${tile("Month 1 usage", monthOneUsage(), "the list is the constraint")}
+        ${tile("Staged send load", monthOneUsage(), "of one month of capacity, so the full fire spans about two months")}
       </div>`+
       table(["Tool","Monthly","Confidence","What it buys","Where the number came from"],
         ENGINE.stack.map(s=>[

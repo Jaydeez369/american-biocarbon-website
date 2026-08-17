@@ -153,25 +153,29 @@ const LIVE = {
 /* The critical path from a raw list to a sent campaign. Ordered because each step genuinely
    blocks the next: you cannot verify a list you have not pulled, and you must not send to a
    list you have not verified. Each is a checkbox, not a date, because dates are what killed
-   the last two versions of this page. */
+   the last two versions of this page.
+
+   done:true marks a step confirmed complete (operator confirmation 2026-08-17) and renders
+   it default-checked. It is only the DEFAULT: unticking it in the UI still works and still
+   persists, so a step that regresses can be reopened without an edit here. */
 const LAUNCH_STEPS = [
-  { k:"pull",    t:"Pull the Apollo list",
-    d:"Target is 1,000+ contacts across the funded ICPs. Filters are in sales-department/APOLLO-PROSPECTING-FILTERS.md." },
-  { k:"dedupe",  t:"Dedupe against the roster already in the pipeline",
-    d:"Account matching folds punctuation, possessives and corporate suffixes, so \"J. Berry Nursery\" lands on the existing \"J Berry Nursery\" rather than creating a twin. Check the Also-known-as row on any account that looks merged." },
-  { k:"verify",  t:"Verify the emails, strip catch-alls and role accounts",
-    d:"info@ and sales@ addresses burn reputation and never reply. Bounce rate over 2% means stop and re-verify, not send slower." },
+  { k:"pull",    t:"Pull the Apollo list", done:true,
+    d:"DONE. 1,183 Apollo credits spent to the operator's written ceiling; 1,145 companies researched. A further tranche needs a new written number." },
+  { k:"dedupe",  t:"Dedupe against the roster already in the pipeline", done:true,
+    d:"DONE, confirmed 2026-08-17. Account matching folds punctuation, possessives and corporate suffixes, so \"J. Berry Nursery\" lands on the existing \"J Berry Nursery\" rather than creating a twin. The Also-known-as row on a profile shows every fold." },
+  { k:"verify",  t:"Verify the emails, strip catch-alls and role accounts", done:true,
+    d:"DONE. 1,303 of 1,634 addresses verified; only verified (READY) leads import, catch-all and risky never do. The absorbent gate reads READY on 848 leads." },
   /* The code list is READ from the roster, never spelled out here. It was hardcoded as the
      old BC-NURS / AB-SPILL style and went stale the moment the taxonomy was unified to the
      BC.NUR / AB.ENV form, which is exactly the drift this whole app has been cleaned of. */
-  { k:"tag",     t:"Tag every contact to an ICP code",
-    d:"Untagged contacts make reply attribution impossible, so you cannot tell which variant won.", icps:true },
-  { k:"import",  t:"Import into the Sales Pipeline",
-    d:"Replies need somewhere to land. A contact that is only in Instantly is invisible the moment someone answers." },
+  { k:"tag",     t:"Tag every contact to an ICP code", done:true,
+    d:"DONE. Every live company carries an ICP and every contact rides its company's code, so reply attribution works per variant.", icps:true },
+  { k:"import",  t:"Import into the Sales Pipeline", done:true,
+    d:"DONE, contact-join audit 2026-08-17: all 1,593 unique emails join a pipeline company (0 unjoined). Replies have somewhere to land." },
   { k:"load",    t:"Load the campaigns into Instantly",
-    d:"25 first-email variants, 5 per biochar ICP, sharing a 2-step follow-up so the A/B stays clean on email 1." },
+    d:"IN PROGRESS in a separate Instantly session — campaign edits happen there, never from this screen. 9 campaigns are in the workspace (BC.FARM live, 8 absorbent drafts); BC.NUR and BC.FARM.ROLE load next." },
   { k:"send",    t:"Send",
-    d:"Ramp sending volume per inbox rather than opening at full rate. Reply rate is the metric; open rate is noise since Apple MPP." },
+    d:"STARTED: BC.FARM is launched. The rest fire in rollout order — remaining biochar first, then absorbents by READY count. Ramp per inbox rather than opening at full rate; reply rate is the metric, opens are noise since Apple MPP." },
 ];
 
 /* Thousands-separated integer. pipeline.js has its own num() but it lives inside that file's
@@ -187,20 +191,26 @@ const icpCodes = () => {
 
 function rLaunchpad(){
   const S = (window.PIPELIVE && PIPELIVE.stats) ? PIPELIVE.stats() : null;
-  /* Campaign counts come from the canonical ICP list, the same one the Campaigns and
-     Outreach Engine sections render. Add a thirteenth ICP and this tile follows. */
-  const oTracks = (typeof OUTREACH !== "undefined" && OUTREACH.tracks) || [];
-  const camps = oTracks.flatMap(t => t.icps || []);
-  const bioCamps = (oTracks.find(t => t.key === "biochar")?.icps || []).length;
+  /* The four "where we are" tiles read the Sales Pipeline roster (window.ROSTER, the
+     generated canonical layer) and the last live Instantly read (ENGINE.instantly.live).
+     PIPELIVE.stats() still backs the hygiene notes below the tiles, but companies,
+     contacts and ICPs on this page mean the prospecting pipeline, not the CRM overlay —
+     the roster is where every ICP, email and verification verdict actually lives. */
+  const R  = window.ROSTER || null;
+  const IL = (typeof ENGINE !== "undefined" && ENGINE.instantly && ENGINE.instantly.live) || null;
+  const icpKeys = (R && R.byIcp) ? Object.keys(R.byIcp) : [];
+  const nBio = icpKeys.filter(k => k.startsWith("BC.")).length;
+  const nAbs = icpKeys.filter(k => k.startsWith("AB.")).length;
 
   const keys = LAUNCH_STEPS.map(s => "lp:" + s.k);
-  const st = checkStats(keys, keys.map(()=>false));
+  const defs = LAUNCH_STEPS.map(s => !!s.done);
+  const st = checkStats(keys, defs);
   const pct = st.total ? Math.round(st.done/st.total*100) : 0;
-  const nextStep = LAUNCH_STEPS.find(s => !getChecks()["lp:"+s.k]);
+  const nextStep = LAUNCH_STEPS.find(s => {
+    const v = getChecks()["lp:"+s.k];
+    return v === undefined ? !s.done : !v;
+  });
 
-  /* Live counts. Rendered as "not loaded" rather than 0 when the pipeline layer is missing,
-     because a confident 0 next to the word "contacts" reads as a real, alarming number. */
-  const n = v => (S ? fmtN(v) : "not loaded");
   const tile = (label, val, sub) =>
     `<div class="card kpi"><div class="l">${esc(label)}</div><div class="v">${val}</div><div class="d">${esc(sub||"")}</div></div>`;
 
@@ -216,11 +226,15 @@ function rLaunchpad(){
 
     sec("1","Where we are")+
     `<div class="grid g4">
-      ${tile("Accounts in pipeline", n(S&&S.accounts), S?`${fmtN(S.accountsHs)} from HubSpot, synced ${esc(S.hsSynced||"unknown")}`:"pipeline layer not loaded")}
-      ${tile("Contacts", n(S&&S.contacts), S?`${fmtN(S.contactsEmail)} with an email address`:"")}
-      ${tile("Campaigns ready", fmtN(camps.length), `${bioCamps} biochar-led`)}
-      ${tile("Biochar on hand", LIVE.inventoryMt+" MT", "finished, ready to ship")}
+      ${tile("Companies", R?fmtN(R.live):"not loaded", R?`${fmtN(R.count)} researched · ${fmtN(R.liveIcp)} live with an ICP`:"roster layer not loaded")}
+      ${tile("Contacts", R?fmtN(R.contactsTotal):"not loaded", R?`${fmtN(R.contactsVerified)} verified · on ${fmtN(R.withContact)} companies`:"roster layer not loaded")}
+      ${tile("ICPs", icpKeys.length?fmtN(icpKeys.length):"not loaded", icpKeys.length?`${nBio} biochar · ${nAbs} absorbent · every one a campaign`:"roster layer not loaded")}
+      ${tile("Instantly campaigns", IL?`${IL.launched} live · ${IL.ready} ready`:"no live read", IL?`${IL.inWorkspace} in the workspace · ${fmtN(IL.readyLeads)} READY leads · read ${esc(IL.read)}`:"engine layer not loaded")}
     </div>`+
+    (IL
+      ? `<div class="note ok" style="margin-top:10px"><b>Rollout order.</b> ${esc(IL.order)}</div>`+
+        `<div class="note warn" style="margin-top:8px"><b>${fmtN(IL.stranded)} verified leads are stranded on the Instantly plan lead cap.</b> ${esc(IL.capNote)} ${esc(IL.note)}</div>`
+      : "")+
     (S && S.contacts && S.contactsNamed < S.contacts
       ? `<div class="note warn" style="margin-top:10px"><b>${fmtN(S.contacts-S.contactsNamed)} contacts have no name.</b> They render blank and one of them can become an account's primary contact. Fix on import rather than after.</div>`
       : "")+
@@ -233,7 +247,7 @@ function rLaunchpad(){
        <div class="dm-row"><span class="dm-tag">LAUNCH STEPS</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
        <p class="dm-mission">Each step blocks the one under it. A campaign fired at an unverified list off a cold inbox does not just underperform, it burns the sending domain for every campaign after it.</p>
        <div class="chk-grid" style="margin-top:10px">
-         ${LAUNCH_STEPS.map(s=>chk("lp:"+s.k, `<b>${esc(s.t)}</b><br><span style="color:var(--text-mute);font-size:12.5px">${esc(s.d)}${s.icps?" Live codes: "+esc(icpCodes()):""}</span>`)).join("")}
+         ${LAUNCH_STEPS.map(s=>chk("lp:"+s.k, `<b>${esc(s.t)}</b><br><span style="color:var(--text-mute);font-size:12.5px">${esc(s.d)}${s.icps?" Live codes: "+esc(icpCodes()):""}</span>`, !!s.done)).join("")}
        </div>
      </div>`+
 

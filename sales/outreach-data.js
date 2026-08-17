@@ -32,7 +32,7 @@ meta:{
   built:"August 11, 2026",
   source:"VDJ call, August 10, 2026. Jesse, Victor and Daniel worked the hooks live, segment by segment. This replaces the prior outreach copy in full.",
   channel:"Instantly for email. Aloe for the power dialer and the voicemail agent once 10 DLC clears. Apollo is the list source.",
-  revised:"August 14, 2026. Merge variable glossary corrected to camelCase, water holding reconciled to 3 to 3.5x, variant count rule reconciled to the arrays, and the banned follow up openers replaced. Architecture rebuilt August 12: account level waterfall, variant counts set by list size, CTA matched to buyer type, and reputation gated sending. See the Instantly Logic section, or the Month 1 email plan in the campaigns folder.",
+  revised:"August 14, 2026. Merge variable glossary corrected to camelCase, water holding reconciled to 3 to 3.5x, variant count rule reconciled to the arrays, and the banned follow up openers replaced. Architecture rebuilt August 12: account level waterfall, variant counts set by list size, CTA matched to buyer type, and reputation gated sending. See the Instantly Logic section, or the Month 1 email plan in the campaigns folder. Revised again August 17, 2026: absorbent geography now carries the operator distance ruling, and the Launchpad and Instantly Logic pages read their counts live from the Sales Pipeline roster.",
   /* Replies land in the Instantly unibox on their own. The cs-ops address is where a
      forwarded thread goes internally; it is NOT a signature line and not a reply-to.
      Putting a third domain in the footer of a cold send is a mismatch a filter notices. */
@@ -79,7 +79,7 @@ meta:{
     "Poultry and livestock: absorbent, bedding and moisture framing only. No feed, animal health or veterinary claims.",
     "Never promise a delivered price in a cold email. Freight decides it and the absorbent buyer pays freight.",
     "Never name a free sample quantity for a windrow, a pallet blend, a field strip or a house. Approved free sizes cover a bench evaluation and a spill test only. Everything larger is an open operations decision.",
-    "Biochar ships within 500 driving miles of White Castle. Absorbent ships NATIONWIDE FOB. Freight shapes which absorbent accounts get worked first, it never disqualifies one.",
+    "Biochar ships within 500 driving miles of White Castle. Absorbent ships NATIONWIDE FOB. Operator ruling August 17, 2026: absorbent accounts past 500 road miles from White Castle score lower and move to a deferred contact tier. Deprioritized for later, never killed and never disqualified.",
   ],
 
   /* Placeholders. The {Curly} tokens below are what a human swaps when working a message
@@ -132,7 +132,7 @@ facts:{
   replyTo: "victor.jehle@cs-ops.com",
   origin: "White Castle, Louisiana",
   biocharRadiusMi: 500,
-  geo: "Biochar ships within 500 miles of White Castle. Absorbent ships nationwide, buyer pays freight.",
+  geo: "Biochar ships within 500 miles of White Castle. Absorbent ships nationwide, buyer pays freight; accounts past 500 road miles sit in a deferred contact tier per the operator ruling of August 17, 2026.",
   certs: "OMRI Listed, independently lab tested against the IBI panel, Puro.earth certified carbon removal. Never IBI Certified, never USDA Organic.",
 },
 
@@ -796,7 +796,7 @@ tracks:[
   name:"Absorbent",
   sub:"Nationwide track. Pellets and crumble, both sold by the metric ton.",
   product:"Absorbent pellets and crumble made from sugarcane bagasse. Takes up to about 5 to 1 on non viscous liquids, against roughly 2.5 times for wood pellets. Lighter to handle and lighter to dispose of than clay.",
-  geo:"Nationwide, FOB White Castle. The buyer covers freight, which is what opens the whole country up. Victor: if they need it and they are willing to pay the freight, that is fine with us.",
+  geo:"Nationwide, FOB White Castle. The buyer covers freight, which is what opens the whole country up. Victor: if they need it and they are willing to pay the freight, that is fine with us. Operator ruling August 17, 2026: accounts past 500 road miles score lower and sit in a deferred contact tier. Near accounts get worked first; far accounts are later, never dead.",
   price:"$275 per metric ton",
   inventory:"Pellets and crumble, both sellable by the metric ton today",
   sample:"1 lb pellets or 1 lb crumble, 4 to 7 business days",

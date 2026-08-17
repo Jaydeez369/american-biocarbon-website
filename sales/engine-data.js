@@ -41,9 +41,27 @@ const ENGINE = {
    1. INSTANTLY ARCHITECTURE
    ============================================================ */
 instantly:{
-  updated:"August 12, 2026",
+  updated:"August 17, 2026",
   headline:"The unit of work is the account, not the contact.",
-  premise:"339 biochar contacts sit on 80 companies. Eleven of them are at one nursery. Treating each contact as an independent cold lead is how you email five people at the same company in one week with near identical copy, annoy the buyer, and teach a spam filter that the domain sends bulk. So the engine sends to one best fit buyer per account, waits, and only then opens a second door. Depth is earned: a score 10 account gets up to seven doors, a score 7 gets three, and sales and business development titles are held at every depth.",
+  premise:"1,634 contact addresses sit on 484 of the 888 live companies in the pipeline, and 1,303 of them are verified. Eleven of them are at one nursery. Treating each contact as an independent cold lead is how you email five people at the same company in one week with near identical copy, annoy the buyer, and teach a spam filter that the domain sends bulk. So the engine sends to one best fit buyer per account, waits, and only then opens a second door. Depth is earned: a score 10 account gets up to seven doors, a score 7 gets three, and sales and business development titles are held at every depth.",
+
+  /* The last live read of the Instantly workspace. A DIFFERENT SESSION owns Instantly
+     right now: campaign loading, review and any status change happen there, and nothing
+     in this app writes to Instantly. These numbers are a dated snapshot of that read,
+     not something this page can refresh on its own. */
+  live:{
+    read:"August 17, 2026",
+    note:"A separate session owns the Instantly workspace. Campaign loading and review happen there; this screen only reports the last read.",
+    inWorkspace:9,
+    launched:1,
+    launchedName:"BC.FARM",
+    drafts:8,
+    ready:6,
+    readyLeads:848,
+    stranded:138,
+    capNote:"The workspace plan cap reads Remaining uploads: 0, so 138 verified READY leads cannot be pushed until the plan is lifted. Billing action, operator owned.",
+    order:"BC.FARM is live. Next is the rest of biochar: BC.NUR, then BC.FARM.ROLE once its leads load. Then absorbents in READY order: AB.OG 313, AB.CIVIL 172, AB.ENV 126, AB.DIST 108, AB.HDD 91, AB.LF 38. BC.BLEND, BC.COMP and BC.DIST hold on the unanswered competitor or customer ruling. AB.MUNI is prohibited. AB.BED has 0 contacts and cannot fire.",
+  },
 
   /* The seven ideas the whole build rests on. Each one replaced
      something that was in the plan a week ago and was wrong. */
@@ -87,7 +105,7 @@ instantly:{
   /* The waterfall, stated as the rule the script implements. */
   waterfall:{
     script:"handoff/enrichment/assign-waves.mjs",
-    note:"The script is the executable version of this table. If the rule changes in the plan, change the script, then re run it. Never hand edit the wave column.",
+    note:"The script is the executable version of this table. If the rule changes in the plan, change the script, then re run it. Never hand edit the wave column. The contact counts below are the August 12 biochar wave snapshot; the script re runs and rewrites them as lists grow, so the RULES here are canon and the counts are historical.",
     ceiling:"Contacts per account by score: 7 at score 10, 5 at scores 8 and 9, 3 at score 7 and below. This replaced a flat 3 on Aug 12. The reason is that verified addresses, not breadth, turned out to be the constraint: once a domain's email pattern is known every named contact at that account is reachable for zero extra credits, so a high scoring account deserves to be worked deeper than a low scoring one.",
     rows:[
       { w:"Wave 1", who:"the single best fit buyer at the account", when:"day 0", n:78 },
@@ -107,22 +125,36 @@ instantly:{
     ],
   },
 
-  /* Campaign map, biochar contacts are real, absorbent is account level only. */
+  /* Campaign map. Accounts and contacts are FALLBACK numbers only: the renderer reads
+     the live roster join (window.ROSTER) first, so the table follows the Sales Pipeline
+     without an edit here. The fallbacks are the August 17 derivation, kept honest for a
+     partial deployment where roster-data.js is missing. `ready` is the READY lead count
+     from the campaign gate ledger at the last live Instantly read; the gate and the
+     roster are two different ledgers measured at different joins, so ready can sit a few
+     off the contact column and that is not a defect. Status vocabulary:
+       live            launched and sending
+       staged draft    in Instantly, leads loaded, waiting on the operator's click
+       staging next    next in the rollout order, being loaded by the Instantly session
+       do not launch   held on the unanswered competitor or customer ruling
+       prohibited      public bodies, never sourced, never loaded
+       no contacts     proven accounts, nobody to write to yet
+       manual          worked by hand, never a campaign */
   campaigns:[
-    { code:"BC.NUR",  label:"Nurseries and greenhouse growers",   line:"Biochar",   accts:37, contacts:108, versions:3, steps:3, cta:"bench or media trial",            status:"build" },
-    { code:"BC.FARM", label:"Row crop and specialty farms",       line:"Biochar",   accts:16, contacts:33, versions:2, steps:3, cta:"controlled strip or block trial", status:"build" },
-    { code:"BC.DIST", label:"Ag distributors and landscape supply",line:"Biochar",  accts:13, contacts:37, versions:2, steps:3, cta:"spec plus freight, route to agronomy", status:"build" },
-    { code:"BC.BLEND",label:"Soil blenders and bagged media",     line:"Biochar",   accts:7,  contacts:17, versions:1, steps:3, cta:"technical spec, then production evaluation", status:"build" },
-    { code:"BC.COMP", label:"Composters and organics recyclers",  line:"Biochar",   accts:5,  contacts:11, versions:1, steps:3, cta:"windrow protocol, then trial material", status:"blocked, protocol one pager missing" },
-    { code:"BC.RANCH",label:"Ranchers, livestock and poultry",    line:"Biochar",   accts:2,  contacts:5,  versions:1, steps:0, cta:"find the use case first",         status:"manual, never built" },
-    { code:"AB.MUNI", label:"Municipal public works",             line:"Absorbent", accts:50, contacts:0,  versions:2, steps:4, cta:"video, or technical packet",      status:"needs enrichment" },
-    { code:"AB.CIVIL",label:"Heavy civil, dredging and slurry",   line:"Absorbent", accts:50, contacts:0,  versions:2, steps:4, cta:"video, or a dewatering job test", status:"needs enrichment" },
-    { code:"AB.DIST", label:"Absorbent distributors and safety supply", line:"Absorbent", accts:25, contacts:0, versions:2, steps:4, cta:"video, or spec then evaluation", status:"needs enrichment" },
-    { code:"AB.OG",   label:"Oil and gas field services",         line:"Absorbent", accts:23, contacts:0,  versions:2, steps:4, cta:"video, or a spill test",          status:"needs enrichment" },
-    { code:"AB.HDD",  label:"Directional drilling and utility boring", line:"Absorbent", accts:16, contacts:0, versions:2, steps:4, cta:"video, or a crew test on one bore", status:"needs enrichment" },
-    { code:"AB.LF",   label:"Landfill and leachate operations",   line:"Absorbent", accts:8,  contacts:0,  versions:1, steps:4, cta:"technical packet first",          status:"needs enrichment" },
-    { code:"AB.ENV",  label:"Spill response and remediation",     line:"Absorbent", accts:6,  contacts:0,  versions:1, steps:4, cta:"sample staged for the next callout", status:"needs enrichment" },
-    { code:"AB.BED",  label:"Animal bedding and equine supply",   line:"Absorbent", accts:4,  contacts:0,  versions:1, steps:4, cta:"house trial, bedding claims only", status:"needs enrichment" },
+    { code:"BC.FARM", label:"Row crop and specialty farms",       line:"Biochar",   accts:89,  contacts:80,  versions:2, steps:3, cta:"controlled strip or block trial", status:"live" },
+    { code:"BC.NUR",  label:"Nurseries and greenhouse growers",   line:"Biochar",   accts:160, contacts:241, versions:3, steps:3, cta:"bench or media trial",            status:"staging next" },
+    { code:"BC.FARM.ROLE", label:"Farm published inboxes",        line:"Biochar",   accts:0,   contacts:0,   versions:1, steps:3, cta:"route to the soil and input owner", status:"staging next" },
+    { code:"BC.DIST", label:"Ag distributors and landscape supply",line:"Biochar",  accts:15,  contacts:53,  versions:2, steps:3, cta:"spec plus freight, route to agronomy", status:"do not launch" },
+    { code:"BC.BLEND",label:"Soil blenders and bagged media",     line:"Biochar",   accts:6,   contacts:5,   versions:1, steps:3, cta:"technical spec, then production evaluation", status:"do not launch" },
+    { code:"BC.COMP", label:"Composters and organics recyclers",  line:"Biochar",   accts:7,   contacts:7,   versions:1, steps:3, cta:"windrow protocol, then trial material", status:"do not launch" },
+    { code:"BC.RANCH",label:"Ranchers, livestock and poultry",    line:"Biochar",   accts:13,  contacts:2,   versions:1, steps:0, cta:"find the use case first",         status:"manual, never built" },
+    { code:"AB.OG",   label:"Oil and gas field services",         line:"Absorbent", accts:102, contacts:296, versions:2, steps:4, cta:"video, or a spill test",          status:"staged draft", ready:313 },
+    { code:"AB.CIVIL",label:"Heavy civil, dredging and slurry",   line:"Absorbent", accts:84,  contacts:175, versions:2, steps:4, cta:"video, or a dewatering job test", status:"staged draft", ready:172 },
+    { code:"AB.ENV",  label:"Spill response and remediation",     line:"Absorbent", accts:56,  contacts:145, versions:1, steps:4, cta:"sample staged for the next callout", status:"staged draft", ready:126 },
+    { code:"AB.DIST", label:"Absorbent distributors and safety supply", line:"Absorbent", accts:93, contacts:124, versions:2, steps:4, cta:"video, or spec then evaluation", status:"staged draft", ready:108 },
+    { code:"AB.HDD",  label:"Directional drilling and utility boring", line:"Absorbent", accts:30, contacts:95, versions:2, steps:4, cta:"video, or a crew test on one bore", status:"staged draft", ready:91 },
+    { code:"AB.LF",   label:"Landfill and leachate operations",   line:"Absorbent", accts:23,  contacts:42,  versions:1, steps:4, cta:"technical packet first",          status:"staged draft", ready:38 },
+    { code:"AB.BED",  label:"Animal bedding and equine supply",   line:"Absorbent", accts:11,  contacts:0,   versions:1, steps:4, cta:"house trial, bedding claims only", status:"no contacts", ready:0 },
+    { code:"AB.MUNI", label:"Municipal public works",             line:"Absorbent", accts:59,  contacts:0,   versions:2, steps:4, cta:"video, or technical packet",      status:"prohibited", ready:0 },
   ],
 
   /* The personalization pipeline, with a worked example so nobody
@@ -192,10 +224,12 @@ instantly:{
     ],
   },
 
-  /* The verification gate. This is the thing actually blocking launch. */
+  /* The verification gate. It CLEARED on August 17, 2026: the blocker moved from
+     verification to the Instantly plan lead cap. The class table below is still the
+     standing rule for every future import. */
   verification:{
-    state:"339 biochar contacts. 9 addresses revealed. 0 have been through verification. Absorbent has 182 accounts and zero contacts.",
-    blunt:"Nothing can send today. This is bigger than every copy question in the repo.",
+    state:"1,634 addresses on file, 1,303 verified. The absorbent gate reads READY on 848 leads and every one of them was verified before it moved. What blocks sending now is the Instantly plan lead cap, with 138 verified leads stranded, not verification.",
+    blunt:"The verification gate has cleared.",
     classes:[
       ["valid","import and send normally","yes"],
       ["invalid","drop, and do not re pull the same address","no"],
@@ -204,7 +238,7 @@ instantly:{
       ["unknown or pending","re run verification, and if it stays unknown treat as catch all","no"],
     ],
     expect:"Catch all domains are common at small farms and municipalities, which is most of BC.FARM and all of AB.MUNI. Plan the phone route there rather than forcing sends.",
-    attrition:"Planning assumption is that 70 to 80 percent of revealed addresses survive verification. That is an assumption, not a measurement. Replace it with the real number after the first run.",
+    attrition:"Measured now, not assumed: 1,303 of the 1,634 addresses on file verified, just under 80 percent, and the latest run resolved 200 reveals at 100 percent with a 6.9 percent invalid rate on verification. The old 70 to 80 percent planning assumption turned out to be right.",
     statusField:"Every row carries send_status. READY, BLOCKED NO EMAIL, BLOCKED UNVERIFIED or HOLD. Only READY imports.",
   },
 
@@ -222,32 +256,34 @@ instantly:{
     blocker:"Name the two sending domains and the four mailboxes and confirm the From name on each is a real person. If any mailbox sends as sales@ or a generic alias, fix it before launch.",
   },
 
-  /* What round 1 produces, and the honest read of it. */
+  /* Where the machine stands, as of the last live read. */
   output:[
-    ["Accounts in the automated program","78"],
-    ["Contacts after the waterfall","206"],
-    ["Contacts surviving verification at 75 percent","about 155"],
-    ["Sends across a 3 step sequence","about 415"],
-    ["Business days to enter wave 1","about 2"],
-    ["Share of one month at 80 per day","about 24 percent"],
+    ["Campaigns in the Instantly workspace","9 of 15 planned"],
+    ["Launched and sending","1, BC.FARM"],
+    ["Absorbent leads loaded and READY","848"],
+    ["Verified leads stranded on the plan cap","138"],
+    ["Verified addresses on file","1,303 of 1,634"],
+    ["Sends across the staged 4 step absorbent sequences, all fired","about 3,400"],
   ],
   statRead:{
     bar:"100 sends on a version before it can be cut.",
-    reality:"BC.NUR at 3 versions and 108 contacts lands near 36 sends per version. That is the best in the book and it is under a third of the bar. No campaign resolves in month 1.",
+    reality:"Absorbent clears the bar first: AB.OG at 2 versions and 313 READY leads lands over 150 sends per version, and AB.CIVIL clears it too. On biochar, BC.NUR at 3 versions and 241 verified contacts sits near 80 per version, still under the bar, so no biochar comparison resolves in round 1.",
     allowed:"Read replies for language. Fix anything obviously broken. Note the direction.",
     banned:"Do not cut a version. Do not write the word winner in a report. Auto optimize stays off everywhere, because it would pick a winner off four sends.",
-    unlock:"At roughly 300 verified in zone accounts, BC.NUR clears 100 sends per version and the comparison starts answering questions. Getting there is worth more than any copy edit.",
+    unlock:"Lifting the plan cap releases 138 more verified leads immediately, and the BC.NUR load brings the deepest biochar list into play. Those two moves do more for the A/B than any copy edit.",
   },
 
   blockers:[
-    { p:1, t:"No verified email addresses", d:"339 contacts, 9 revealed, 0 READY. Absorbent has no contacts at all.", owner:"enrichment run, in progress" },
-    { p:2, t:"Free sample quantity for production, windrow and field trials", d:"Approved sizes cover a bench evaluation and a spill test only. No email may name a windrow, a pallet blend, a field strip or a house as what the free sample covers until operations sets a number.", owner:"Victor and operations" },
-    { p:3, t:"Crumble video", d:"Every absorbent version A and every absorbent step 2 references it. If it is missing at launch, drop version A and run those campaigns at one version.", owner:"Victor" },
-    { p:4, t:"Crumble technical packet", d:"Blocks AB.MUNI, AB.LF and AB.DIST from converting a reply. A video persuades a person, a document gets a product onto an approved vendor list.", owner:"Jesse, from verified facts only" },
-    { p:5, t:"Windrow trial protocol one pager", d:"Blocks BC.COMP email 1 and step 2. The protocol design already exists in playbook 08.", owner:"Jesse" },
-    { p:6, t:"Sender identity confirmation", d:"Two domains, four mailboxes, From name a real person on each.", owner:"Jesse" },
-    { p:7, t:"Municipal packaging below a super sack", d:"If we cannot pack under 1,650 lb, AB.MUNI spill kit and in vehicle use cases close and only yard, street and stormwater demand remains.", owner:"operations" },
-    { p:8, t:"NRCS 336 cost share for BC.FARM", d:"Probably the strongest farm hook available and still unverified. Verify, then add as a third BC.FARM version. Never improvise it on a reply.", owner:"Jesse" },
+    { p:1, t:"Instantly plan lead cap", d:"Remaining uploads reads 0, so 138 verified READY leads cannot be pushed. Billing action, nothing in the workspace fixes it.", owner:"operator" },
+    { p:2, t:"Operator queue unanswered", d:"7 site reads and 5 rulings still open. The competitor or customer ruling holds BC.BLEND, BC.COMP and BC.DIST out of the biochar rollout, and 15 held contacts at ORS Nasco and Perino release at zero cost the moment those two sites are read.", owner:"operator" },
+    { p:3, t:"Apollo ceiling spent", d:"1,183 of 1,183 credits used. About 1,386 scored candidates are already sourced and waiting on site verification; the next reveal tranche needs a new written ceiling.", owner:"operator" },
+    { p:4, t:"Free sample quantity for production, windrow and field trials", d:"Approved sizes cover a bench evaluation and a spill test only. No email may name a windrow, a pallet blend, a field strip or a house as what the free sample covers until operations sets a number.", owner:"Victor and operations" },
+    { p:5, t:"Crumble video", d:"Every absorbent version A and every absorbent step 2 references it. If it is missing at launch, drop version A and run those campaigns at one version.", owner:"Victor" },
+    { p:6, t:"Crumble technical packet", d:"Blocks AB.MUNI, AB.LF and AB.DIST from converting a reply. A video persuades a person, a document gets a product onto an approved vendor list.", owner:"Jesse, from verified facts only" },
+    { p:7, t:"Windrow trial protocol one pager", d:"Blocks BC.COMP email 1 and step 2. The protocol design already exists in playbook 08.", owner:"Jesse" },
+    { p:8, t:"Sender identity confirmation", d:"Two domains, four mailboxes, From name a real person on each.", owner:"Jesse" },
+    { p:9, t:"Municipal packaging below a super sack", d:"If we cannot pack under 1,650 lb, AB.MUNI spill kit and in vehicle use cases close and only yard, street and stormwater demand remains.", owner:"operations" },
+    { p:10, t:"NRCS 336 cost share for BC.FARM", d:"Probably the strongest farm hook available and still unverified. Verify, then add as a third BC.FARM version. Never improvise it on a reply.", owner:"Jesse" },
   ],
 },
 
@@ -255,7 +291,7 @@ instantly:{
    2. APOLLO, WHAT THE DATA ACTUALLY BUYS US
    ============================================================ */
 apollo:{
-  account:"2,600 credits on the account. The enrichment plan spends 1,000 of them by choice and holds the rest for misses and re pulls.",
+  account:"2,600 credits came with the account. The operator's written ceiling of 1,183 is fully spent as of August 17, 2026, and a new tranche needs a new written number before another reveal. About 1,386 scored candidates are already sourced and waiting on free site verification, so the funnel is deep even with the wallet closed.",
   ceiling:"Hard ceiling of 4 contacts per company. The live count pass killed the old 8 deep tier: one nursery had 39 people in Apollo and exactly one decision maker. Depth past 4 buys the fourth best title at the same company, not a fourth door.",
   note:"Apollo org search is fuzzy. A company name match is not proof of the right entity, which is why the roster carries a match verdict and a bad match freezes an account at zero credits.",
 
@@ -307,22 +343,22 @@ stackNote:"Confirmed fixed stack is $157 a month. It buys 1,720 email sends of c
 funnels:[
   /* ---------------------------------------------------- EMAIL */
   {
-    id:"email", rank:1, name:"Cold email, Instantly", status:"live, blocked on verification",
-    what:"12 campaigns across two product lines, one best fit buyer per account, waves opening behind them.",
-    gates:["Every address verified and classified","All 78 wave 1 observations read by a human","Ten deliverability gates green","Sender identity confirmed"],
+    id:"email", rank:1, name:"Cold email, Instantly", status:"live, one campaign sending",
+    what:"15 planned campaigns across two product lines, one best fit buyer per account, waves opening behind them. BC.FARM is launched; 6 absorbent campaigns sit staged with 848 READY leads waiting on the operator's click.",
+    gates:["Every address verified and classified, which is now true on all 848 loaded leads","Wave 1 observations read by a human before each launch","Ten deliverability gates green","Sender identity confirmed"],
     capacity:"4 inboxes x 20 sends a day = 80 a day, about 1,720 a month. Ramps to 2,150 at 25 per inbox and 2,580 at 30, only on clean health.",
-    volume:"Month 1 biochar: about 155 verified contacts and about 415 sends. That is roughly 24 percent of capacity.",
+    volume:"848 absorbent leads READY plus BC.FARM already sending. Full fire is about 3,400 sends across the staged sequences, roughly two months of capacity at the starting rate, so capacity now gates the send, not the list.",
     cost:{ fixed:47, unit:null, unitLabel:"credits and verification are counted under Apollo, not here", conf:"confirmed" },
     math:[
-      ["Sends in month 1","about 415"],
-      ["Reply rate, tight targeted list","3 to 8 percent"],
-      ["Replies","12 to 33"],
-      ["Positive replies","6 to 18"],
-      ["Cost per send at month 1 volume","$0.11 on Instantly alone, $0.38 on the confirmed stack"],
-      ["Cost per reply at the midpoint","about $7 on the confirmed stack"],
+      ["Leads loaded and READY","848 absorbent, plus BC.FARM live"],
+      ["Sends across the staged sequences","about 3,400"],
+      ["Reply rate, tight targeted list","3 to 8 percent of leads"],
+      ["Replies","25 to 68"],
+      ["Positive replies","12 to 34"],
+      ["Cost per reply at the midpoint","about $7 on the confirmed stack over the two month fire window"],
     ],
-    conf:"Reply rate is an assumed range for a well targeted B2B list. Everything else is derived from the roster and the send caps.",
-    verdict:"Open now, the moment verification clears. Nothing else in this list beats it on cost per conversation.",
+    conf:"Reply rate is an assumed range for a well targeted B2B list. Everything else is derived from the roster, the gate ledger and the send caps.",
+    verdict:"Open and firing order set. Nothing else in this list beats it on cost per conversation.",
   },
 
   /* ---------------------------------------------------- PHONE */
@@ -331,7 +367,7 @@ funnels:[
     what:"Bulk outbound dialing against the same roster, plus a receptionist and voicemail agent that books a 10 minute callback straight onto a calendar.",
     gates:["Phone numbers on the roster. Apollo phone reveal cost is unknown and this funnel does not open without it","A named contact, not a switchboard","Email recognition first on top accounts, so the call is not cold"],
     capacity:"Up to 200 dials an hour on the dialer. Jesse put the practical figure at about 100 an hour on the Aug 10 call, and that is the number to plan with until we have measured our own. One hour a day, five days a week, is 500 dials a week at the practical rate.",
-    volume:"The whole 80 account biochar roster is one hour of dialing. The 182 account absorbent roster is two.",
+    volume:"The 290 live biochar accounts are about three hours of dialing at the planning rate. The 458 live absorbent accounts are about five.",
     cost:{ fixed:45, unit:null, unitLabel:"per minute telephony not confirmed, and Apollo phone reveal credits are unknown", conf:"confirmed on the seat, unknown on usage" },
     math:[
       ["Dials per hour, planning rate","100"],
@@ -346,7 +382,7 @@ funnels:[
     rules:[
       "Any positive email reply gets a call the same business day, inside 4 hours where possible.",
       "Accounts scoring 9 or 10 get a call after wave 1 has been delivered 3 or more business days with no reply, then an email recap the same day.",
-      "Accounts with only a published role address such as info@ or sales@ go to phone and never to a campaign. That is 36 of the 50 AB.CIVIL accounts.",
+      "Accounts with only a published role address such as info@ or sales@ go to phone and never to a campaign. The one exception is BC.FARM.ROLE, where observed farm inboxes run as their own nameless lane.",
       "A not me reply that names somebody gets the named person called, then emailed.",
       "Do not call BC.RANCH, AB.LF or AB.MUNI before an email has landed. Those buyers file before they talk.",
     ],
@@ -375,7 +411,7 @@ funnels:[
     what:"Connection requests and short notes to the same named contacts, running alongside email rather than instead of it. Multichannel lifts reply rate on the accounts that ignore one channel.",
     gates:["LinkedIn URLs on the roster. Unknown whether the free Apollo named contact carries one","A seat, and probably Sales Navigator","Somebody willing to send them, because this is manual work and there is no automation that is both safe and allowed"],
     capacity:"Platform limits run roughly 100 to 200 connection requests a week per account, and they tighten on new or low activity profiles. That is a platform rule, not our choice.",
-    volume:"At 100 a week the entire 80 account biochar roster is one week of sending. The 182 account absorbent roster is two.",
+    volume:"At 100 a week the 290 live biochar accounts are about three weeks of sending. The 458 live absorbent accounts are closer to five.",
     cost:{ fixed:99, unit:null, unitLabel:"Sales Navigator list price per seat per month", conf:"list" },
     math:[
       ["Connection requests per week, one seat","100 to 200"],
@@ -450,7 +486,7 @@ funnels:[
     what:"A distributor or supply house that carries the line, so one agreement reaches their whole downstream channel.",
     gates:["A technical packet a product manager can evaluate","Clarity on what we will and will not do on private label"],
     capacity:"Very few accounts, very high value.",
-    volume:"25 AB.DIST accounts and 13 BC.DIST accounts on the roster today.",
+    volume:"93 live AB.DIST accounts and 15 live BC.DIST accounts on the roster today, though BC.DIST holds on the competitor or customer ruling.",
     cost:{ fixed:0, unit:null, unitLabel:"no tool cost, high time cost per account", conf:"confirmed" },
     math:[["Note","per the Aug 10 call the big houses with proprietary trademarked blends will not take a line in. Stocking distributors and suppliers will. Target accordingly"]],
     conf:"The targeting insight is confirmed from the call. Volume is confirmed from the roster.",
