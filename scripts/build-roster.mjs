@@ -182,13 +182,20 @@ const ICP_MIGRATE = {
   "BC-FARM": "BC.FARM",
   "AB-SPILL": "AB.ENV",
   "AB-OG": "AB.OG",
-  "AB-HDD": "AB.HDD",
+  /* The 2026-08-18 split. AB.HDD mixed boring contractors with the dealers who supply
+     them, and AB.BED mixed a channel list with an end-user motion it had no accounts for.
+     The legacy codes migrate to the MAJORITY side of each split, and the per-company
+     assignment overlay (handoff/icp-split-2026-08-18.csv) then corrects every row
+     explicitly, so the default here only ever catches a row the overlay has not named. */
+  "AB-HDD": "AB.HDD.CON",
+  "AB.HDD": "AB.HDD.CON",
+  "AB.BED": "AB.BED.SUP",
   "AB-LF": "AB.LF",
   "AB-CIVIL": "AB.CIVIL",
   "AB-MUNI": "AB.MUNI",
   "AB-RESELL": "AB.DIST",
   "AB-DIST": "AB.DIST",
-  "AB-BED": "AB.BED",
+  "AB-BED": "AB.BED.SUP",
 };
 const unmappedIcps = new Set();
 
