@@ -198,6 +198,7 @@ function rLaunchpad(){
      the roster is where every ICP, email and verification verdict actually lives. */
   const R  = window.ROSTER || null;
   const IL = (typeof ENGINE !== "undefined" && ENGINE.instantly && ENGINE.instantly.live) || null;
+  const P  = window.PHONE || null;
   const icpKeys = (R && R.byIcp) ? Object.keys(R.byIcp) : [];
   const nBio = icpKeys.filter(k => k.startsWith("BC.")).length;
   const nAbs = icpKeys.filter(k => k.startsWith("AB.")).length;
@@ -237,6 +238,25 @@ function rLaunchpad(){
           ? `<div class="note warn" style="margin-top:8px"><b>${fmtN(IL.stranded)} verified leads are stranded on the Instantly plan lead cap.</b> ${esc(IL.capNote)} ${esc(IL.note)}</div>`
           : `<div class="note" style="margin-top:8px"><b>Nothing is stranded.</b> ${esc(IL.capNote)} ${esc(IL.note)}</div>`)
       : "")+
+    /* The phone line, read from window.PHONE (sales-department/allo-analytics/build-phone-snapshot.mjs).
+       It sits in its own row rather than crowding the list tiles, because the outbound funnel and
+       the email funnel are different machines and reading them as one row invites a false compare.
+       Every number is a dated snapshot: Sales OS is static and cannot call Allo at render time. */
+    (P
+      ? `<div class="grid g4" style="margin-top:15px">
+          ${tile("Dials", fmtN(P.dials), `${esc(P.window)} to ${esc(P.read.split(",")[0])}`)}
+          ${tile("Connected", fmtN(P.connected), P.dials ? `${Math.round((P.connectRate||0)*100)}% of dials answered` : "no dials in the window")}
+          ${tile("Conversations", fmtN(P.conversations), P.dials ? `${Math.round((P.conversationRate||0)*100)}% of dials became a real talk` : "no dials in the window")}
+          ${tile("Dialer queue", fmtN(P.queueSize), P.queueSize ? (P.queueStarted?"session running":"staged, not started") : "nothing staged")}
+        </div>`+
+        (P.membersOnSalesLine === 0
+          ? `<div class="note warn" style="margin-top:10px"><b>⛔ Nobody is a member of the sales line ${esc(P.salesLine)}.</b> Every call is answered by the AI receptionist and nothing rings a person. Assigning Victor to the number in the Allo app is the one blocker; a transfer rule cannot be set over the API until it clears.</div>`
+          : "")+
+        (P.conversions === 0 && P.conversations > 0
+          ? `<div class="note" style="margin-top:8px"><b>No dial has converted yet.</b> Conversion counts a call tagged ${esc(P.conversionTags.join(", "))}. If calls are landing and nothing is tagged, the tagging is the gap, not the calling.</div>`
+          : "")
+      : "")+
+
     (S && S.contacts && S.contactsNamed < S.contacts
       ? `<div class="note warn" style="margin-top:10px"><b>${fmtN(S.contacts-S.contactsNamed)} contacts have no name.</b> They render blank and one of them can become an account's primary contact. Fix on import rather than after.</div>`
       : "")+
