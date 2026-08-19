@@ -249,9 +249,12 @@ function rLaunchpad(){
           ${tile("Conversations", fmtN(P.conversations), P.dials ? `${Math.round((P.conversationRate||0)*100)}% of dials became a real talk` : "no dials in the window")}
           ${tile("Dialer queue", fmtN(P.queueSize), P.queueSize ? (P.queueStarted?"session running":"staged, not started") : "nothing staged")}
         </div>`+
-        (P.membersOnSalesLine === 0
-          ? `<div class="note warn" style="margin-top:10px"><b>⛔ Nobody is a member of the sales line ${esc(P.salesLine)}.</b> Every call is answered by the AI receptionist and nothing rings a person. Assigning Victor to the number in the Allo app is the one blocker; a transfer rule cannot be set over the API until it clears.</div>`
-          : "")+
+        /* Reachability is not the member count. A TRANSFER node pointed at an external number
+           rings a human with no membership at all, which is how this line is set up, so the
+           snapshot carries ringsAPerson rather than letting the tile infer it wrongly. */
+        (P.ringsAPerson
+          ? `<div class="note ok" style="margin-top:10px"><b>The sales line rings a person.</b> In business hours ${esc(P.salesLine)} transfers to ${esc(P.transfersTo || P.agentTransfersTo)}; outside hours the AI receptionist answers and can still put a caller through on ${fmtN(P.agentTransferRules)} transfer rules. Nobody is a <i>member</i> of the line, which is fine for an external transfer but still worth fixing so the call shows in the Allo app.</div>`
+          : `<div class="note warn" style="margin-top:10px"><b>⛔ Nothing rings a person on ${esc(P.salesLine)}.</b> Every call is answered by the AI receptionist. Either assign someone to the number in the Allo app, or publish a transfer to a direct number.</div>`)+
         (P.conversions === 0 && P.conversations > 0
           ? `<div class="note" style="margin-top:8px"><b>No dial has converted yet.</b> Conversion counts a call tagged ${esc(P.conversionTags.join(", "))}. If calls are landing and nothing is tagged, the tagging is the gap, not the calling.</div>`
           : "")
