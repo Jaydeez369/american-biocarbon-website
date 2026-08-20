@@ -966,9 +966,9 @@ tracks:[
 
   /* -------------------------------------------------- HDD */
   {
-    id:"hdd-con", short:"HDD Contractors", tag:"AB.HDD.CON",
+    id:"hddCon", short:"HDD Contractors", tag:"AB.HDD.CON",
     name:"Directional Drilling and Boring Contractors",
-    who:"Companies that actually run the bore: HDD contractors, utility boring crews, sewer, water, power and telecom line installers. Classified by NAICS 2371xx. Split out of the old mixed AB.HDD ICP on 2026-08-18 because a contractor and the dealer who supplies him are two different buyers.",
+    who:"Companies that actually run the bore: HDD contractors, utility boring crews, sewer, water, power and telecom line installers. Classified by NAICS 2371xx. Split out of the old mixed AB.HDD ICP on August 18, 2026 because a contractor and the dealer who supplies him are two different buyers.",
     titles:["Owner","Operations Manager","Superintendent","Project Manager","Field Manager"],
     pains:[
       "Returns and slurry pile up at the entry pit and nobody budgeted for cleaning them up.",
@@ -994,7 +994,7 @@ tracks:[
       cta2:"If your supply house would rather stock it, who do you buy fluid from?",
       metric:"1 lb comparisons run, then volume quoted by the metric ton",
       cycle:"2 to 8 weeks, and it turns recurring once it lands.",
-      list:"NEAR tier first per the operator ruling 2026-08-17. 17 accounts on the roster.",
+      list:"NEAR tier first per the operator ruling of August 17, 2026. 17 accounts on the roster.",
       persona:{
         cares:"Keeping the crew boring and getting the pit cleaned up fast.",
         fears:"A load turned away at the disposal gate.",
@@ -1036,9 +1036,9 @@ tracks:[
   },
 
   {
-    id:"hdd-sup", short:"HDD Supply", tag:"AB.HDD.SUP",
+    id:"hddSup", short:"HDD Supply", tag:"AB.HDD.SUP",
     name:"Drilling Fluid, Tooling and Boring Supply",
-    who:"Dealers and supply houses selling bentonite, polymers, tooling, rods and boring consumables to the crews: Vermeer and Ditch Witch dealers, independent HDD supply houses, drilling fluid blenders and the manufacturers behind them. Split out of the old mixed AB.HDD ICP on 2026-08-18.",
+    who:"Dealers and supply houses selling bentonite, polymers, tooling, rods and boring consumables to the crews: Vermeer and Ditch Witch dealers, independent HDD supply houses, drilling fluid blenders and the manufacturers behind them. Split out of the old mixed AB.HDD ICP on August 18, 2026.",
     titles:["Owner","Branch Manager","Product Manager","Purchasing","Category Manager","Sales Engineer"],
     pains:[
       "The granular on the shelf is a commodity nobody has a reason to prefer.",
@@ -1064,7 +1064,7 @@ tracks:[
       cta2:"If the granular line is not yours, whose is it?",
       metric:"Spec sheets into product reviews, then a stocking conversation",
       cycle:"4 to 12 weeks. A line card decision moves at the category review, not at the call.",
-      list:"NEAR tier first per the operator ruling 2026-08-17. 13 accounts on the roster.",
+      list:"NEAR tier first per the operator ruling of August 17, 2026. 13 accounts on the roster.",
       persona:{
         cares:"Margin per shelf foot and whether the counter can explain the product.",
         fears:"Stocking something that does not move, or a supply lapse mid season.",
@@ -1422,7 +1422,7 @@ tracks:[
 
   /* -------------------------------------------------- ANIMAL BEDDING */
   {
-    id:"bed-sup", short:"Bedding Channel", tag:"AB.BED.SUP",
+    id:"bedSup", short:"Bedding Channel", tag:"AB.BED.SUP",
     name:"Bedding Channel, Poultry and Farm Supply",
     who:"Poultry house suppliers, farm and feed stores, bedding distributors and private label manufacturers. Every one of the 11 accounts on this list is a channel account. Not one is a grower or a barn, which is why this is a distribution motion and why the old poultry versus equine framing was wrong about its own list.",
     titles:["Owner","Purchasing","Product Manager","Category Manager","Store Manager","Branch Manager"],
@@ -1441,7 +1441,7 @@ tracks:[
     ],
     guardrail:"The hardest line in the book and the easiest to cross by accident. Bedding, moisture and litter management ONLY. No feed claim. No animal health, performance or mortality claim. No ammonia outcome claim. No compost performance claim. No customer anecdotes. If a reply moves toward health outcomes, say we sell it as a bedding and absorbency product and stop there. The approved free sample is 1 lb and never a house or stall trial.",
     campaign:{
-      priority:"P3, PARKED", effort:4,
+      priority:"P3, PARKED", effort:0,
       companies:["Poultry house suppliers","Farm and feed stores","Bedding distributors","Private label pet and animal bedding manufacturers"],
       triggers:["A shavings supply or price problem","A buyer asking for a plant based option","A private label programme looking for a domestic source"],
       disq:["Anyone wanting a health or performance claim in writing"],
@@ -1491,7 +1491,7 @@ tracks:[
   },
 
   {
-    id:"bed-end", short:"Bedding End User", tag:"AB.BED.END",
+    id:"bedEnd", short:"Bedding End User", tag:"AB.BED.END",
     name:"End User Poultry and Equine",
     who:"Poultry growers and complexes, equine barns, boarding and training operations. ZERO ACCOUNTS ON THE ROSTER. This definition exists so that the language is correct before anybody sources a list, and so nobody sends channel copy to a barn or poultry language to an equine account. There is no campaign.",
     titles:["Owner","Live Production Manager","Complex Manager","Barn Manager","Trainer","Purchasing"],
