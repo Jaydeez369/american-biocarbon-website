@@ -846,7 +846,7 @@ tracks:[
       }
     },
     subjects:[
-      "New absorbent that soaks up five times its weight",
+      "New absorbent that soaks up more than clay or wood",
       "Still using clay litter on your pads?",
       "Our absorbent runs 5 to 1. Does yours?",
       "Lighter disposal on every spill event",
@@ -854,7 +854,7 @@ tracks:[
     ],
     variants:[
       { id:"A", angle:"Direct value",
-        subject:"New absorbent that soaks up five times its weight",
+        subject:"New absorbent that soaks up more than clay or wood",
         body:"Hi {First},\n\nWe make an absorbent out of sugarcane bagasse that takes up to about 5 to 1 on non viscous liquids. Wood pellets run about half that and clay is heavier than both.\n\nFor spill, tank and pad work that means fewer bags out to the job and less weight going to disposal on every event.\n\nCan I send your crew a free sample to test against what they run now? Just reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"Still using clay litter on your pads?",
@@ -1041,7 +1041,7 @@ tracks:[
     who:"Dealers and supply houses selling bentonite, polymers, tooling, rods and boring consumables to the crews: Vermeer and Ditch Witch dealers, independent HDD supply houses, drilling fluid blenders and the manufacturers behind them. Split out of the old mixed AB.HDD ICP on August 18, 2026.",
     titles:["Owner","Branch Manager","Product Manager","Purchasing","Category Manager","Sales Engineer"],
     pains:[
-      "The granular on the shelf is a commodity nobody has a reason to prefer.",
+      "The absorbent on the shelf is a commodity nobody has a reason to prefer.",
       "Every crew buying fluid is buying a cleanup consumable somewhere else.",
       "An imported or single source line is a supply risk on a low margin item.",
       "A line card add has to be evaluated on paper before anyone opens a bag.",
@@ -1061,7 +1061,7 @@ tracks:[
       disq:["A proprietary trademarked blend they manufacture themselves","Pure equipment dealers with no consumables counter"],
       offer:"Pellet spec sheet for the product side, 1 lb sample alongside it.",
       cta:"Want the pellet spec sheet, or a 1 lb sample to look at first?",
-      cta2:"If the granular line is not yours, whose is it?",
+      cta2:"If the absorbent line is not yours, whose is it?",
       metric:"Spec sheets into product reviews, then a stocking conversation",
       cycle:"4 to 12 weeks. A line card decision moves at the category review, not at the call.",
       list:"NEAR tier first per the operator ruling of August 17, 2026. 13 accounts on the roster.",
@@ -1071,13 +1071,13 @@ tracks:[
         needs:"A spec, a price by the ton, and a reason his customer prefers it.",
         language:"Line card, category, stocking, counter, spec, landed cost.",
         avoid:"Jobsite language. He has never stood at an entry pit and does not need to.",
-        discovery:["What granular do you stock today?","Who owns the category decision?","When is your next line review?","Do your crews ask for a plant based option?"]
+        discovery:["What absorbent do you stock today?","Who owns the category decision?","When is your next line review?","Do your crews ask for a plant based option?"]
       }
     },
     subjects:[
       "next to the fluid",
       "spec for your product side",
-      "your granular line",
+      "your absorbent line",
     ],
     variants:[
       { id:"A", angle:"Line card",
@@ -1085,20 +1085,20 @@ tracks:[
         body:"Hi {First},\n\nEvery crew buying bentonite off your counter is also buying something for the mess at the entry pit, usually clay, usually from somebody else.\n\nWe make a sugarcane bagasse sorbent in White Castle. Plant based, up to about 5 to 1 on non viscous liquids against roughly 2.5 to 1 for wood, and we hold finished inventory.\n\nWorth a look as a line card add?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Spec first",
         subject:"spec for your product side",
-        body:"Hi {First},\n\nThis is for whoever owns the granular line rather than a pitch.\n\nOur sorbent is 100% sugarcane bagasse, a sugar mill byproduct, made in White Castle, Louisiana. Up to about 5 to 1 on non viscous liquids, wood is roughly 2.5 to 1, and it sells by the metric ton in 1,650 lb super sacks.\n\nWant the pellet spec sheet, or a 1 lb sample to look at first?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nThis is for whoever owns the absorbent line rather than a pitch.\n\nOur sorbent is 100% sugarcane bagasse, a sugar mill byproduct, made in White Castle, Louisiana. Up to about 5 to 1 on non viscous liquids, wood is roughly 2.5 to 1, and it sells by the metric ton in 1,650 lb super sacks.\n\nWant the pellet spec sheet, or a 1 lb sample to look at first?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
     ],
     followups:[
       { t:"Follow up 1, day 4",
         b:"Hi {First},\n\nThe question your counter will get is which form to sell. Pellets suit thinner fluids and confined work. Crumble covers a large area fast, and most boring crews end up on crumble.\n\nWant the spec sheet, or should I send a 1 lb bag of each?\n\n{Me}\n{phone}" },
       { t:"Close, day 9",
-        b:"Hi {First},\n\nI will stop here. If the granular line is not yours, whose is it? I would rather send this to the right desk than keep it in yours.\n\n{Me}\n{phone}" },
+        b:"Hi {First},\n\nI will stop here. If the absorbent line is not yours, whose is it? I would rather send this to the right desk than keep it in yours.\n\n{Me}\n{phone}" },
     ],
     phone:{
-      opener:"Hi {First}, {Me} with American BioCarbon. Calling about the granular on your counter. Ours is a plant based sorbent made in Louisiana, up to about 5 to 1 on non viscous liquids. Are you the one who decides what gets stocked?",
-      voicemail:"Hi {First}, {Me} with American BioCarbon. Plant based granular sorbent made in Louisiana, sold by the metric ton. I would like to send the spec sheet for a line review. {phone}. Thanks.",
+      opener:"Hi {First}, {Me} with American BioCarbon. Calling about the absorbent on your counter. Ours is a plant based sorbent made in Louisiana, up to about 5 to 1 on non viscous liquids. Are you the one who decides what gets stocked?",
+      voicemail:"Hi {First}, {Me} with American BioCarbon. Plant based sorbent made in Louisiana, sold by the metric ton. I would like to send the spec sheet for a line review. {phone}. Thanks.",
     },
     objections:[
-      { o:"We already carry a granular",
+      { o:"We already carry an absorbent",
         b:"Most houses do. The question is whether yours is plant based and domestically made, because that is the part your crews are starting to ask for. The spec sheet takes two minutes to read." },
       { o:"We have our own blend",
         b:"Then this probably is not for you, and I would rather know now. If it changes, the spec is here." },
@@ -1226,7 +1226,7 @@ tracks:[
       }
     },
     subjects:[
-      "Leachate solidification at five times the soak",
+      "Leachate solidification with less material per event",
       "Cut the weight you are paying to move",
       "Moisture and odor at the working face",
       "A bagasse solidifier, sample is free",
@@ -1346,10 +1346,10 @@ tracks:[
   {
     id:"abdist", short:"Distributors", tag:"AB.DIST",
     name:"Absorbent Distributors and Safety Supply",
-    who:"Industrial safety distributors, environmental and restoration suppliers, and janitorial and sanitation houses that already stock a loose granular absorbent. The shelf slot exists, so the only question is whose product fills it.",
+    who:"Industrial safety distributors, environmental and restoration suppliers, and janitorial and sanitation houses that already stock a loose absorbent. The shelf slot exists, so the only question is whose product fills it.",
     titles:["Owner","Director of Procurement","Category Manager","Product Manager","Purchasing Manager","Branch Manager"],
     pains:[
-      "They already carry a granular absorbent, so switching means displacing an incumbent rather than creating a need.",
+      "They already carry a loose absorbent, so switching means displacing an incumbent rather than creating a need.",
       "House brand and private label lines need a supplier who actually manufactures rather than one who brokers.",
       "Freight eats the margin on anything heavy with low value per pound.",
       "Customers are starting to ask for something that is not mined clay.",
@@ -1363,7 +1363,7 @@ tracks:[
     ],
     guardrail:"Do not promise private label or co branded packaging terms in a cold email. We can produce it, but the terms are a conversation with Victor, not a line in an opener.",
     subjects:[
-      "Who supplies your loose granular absorbent?",
+      "Who supplies your loose absorbent?",
       "A 5 to 1 absorbent you could put your own name on",
       "Your absorbent line is missing a plant based option",
       "We manufacture it, we do not broker it",
@@ -1371,8 +1371,8 @@ tracks:[
     ],
     variants:[
       { id:"A", angle:"Direct value",
-        subject:"Who supplies your loose granular absorbent?",
-        body:"Hi {First},\n\nYou already stock a loose granular absorbent, so this is a supply question rather than a new category.\n\nWe manufacture one from sugarcane bagasse at our own mill in White Castle, Louisiana. It takes up to about 5 to 1 on non viscous liquids in liquid, which is roughly double a wood pellet, and we sell it by the metric ton in 1,650 lb super sacks.\n\nCan I send a free sample and our distributor pricing? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        subject:"Who supplies your loose absorbent?",
+        body:"Hi {First},\n\nYou already stock a loose absorbent, so this is a supply question rather than a new category.\n\nWe manufacture one from sugarcane bagasse at our own mill in White Castle, Louisiana. It takes up to about 5 to 1 on non viscous liquids in liquid, which is roughly double a wood pellet, and we sell it by the metric ton in 1,650 lb super sacks.\n\nCan I send a free sample and our distributor pricing? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"Your absorbent line is missing a plant based option",
         body:"Hi {First},\n\nMost absorbent lines are clay and wood, and more buyers are asking for something that is not mined.\n\nOurs is made from sugarcane bagasse and takes up to about 5 to 1 on non viscous liquids, so it sits above clay on performance rather than beside it on price. We manufacture it ourselves, which means supply is ours and a house label is a real option.\n\nWorth a free sample and a look at distributor pricing? Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
@@ -1389,7 +1389,7 @@ tracks:[
         b:"Hi {First},\n\nI will park this. If a plant based absorbent ever comes up for the line, or if you need a manufacturer behind a house label, we are here.\n\n{Me}\n{phone}" },
     ],
     phone:{
-      opener:"Hi {First}, {Me} with American BioCarbon. You already carry a loose granular absorbent, so I will keep this to a supply question. We manufacture one from sugarcane at our own mill, up to about 5 to 1 on non viscous liquids, sold by the metric ton. Are you the one who evaluates products for the line?",
+      opener:"Hi {First}, {Me} with American BioCarbon. You already carry a loose absorbent, so I will keep this to a supply question. We manufacture one from sugarcane at our own mill, up to about 5 to 1 on non viscous liquids, sold by the metric ton. Are you the one who evaluates products for the line?",
       voicemail:"Hi {First}, {Me} with American BioCarbon. We manufacture a sugarcane absorbent and sell it by the metric ton to distributors. I would like to send a free sample and pricing. {phone}. Thanks.",
     },
     objections:[
@@ -1415,7 +1415,7 @@ tracks:[
         needs:"Pricing by the ton, the super sack format, and a sample they can hand a customer.",
         language:"Line, SKU, sell through, house label, super sack, landed cost.",
         avoid:"Product science. They are buying supply and margin, not chemistry.",
-        discovery:["What loose granular absorbent do you carry today?","Who supplies it, and how is that relationship?","Do you run a house label on any consumables?","What does landed cost need to look like for this to work?"],
+        discovery:["What loose absorbent do you carry today?","Who supplies it, and how is that relationship?","Do you run a house label on any consumables?","What does landed cost need to look like for this to work?"],
       },
     },
   },
