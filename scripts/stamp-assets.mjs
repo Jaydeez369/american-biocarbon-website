@@ -27,6 +27,15 @@ const PAGES = ["index.html", "sales/index.html", "sales/brandkit.html"];
 // href/src="<local path>?v=<token>" -> capture path and token.
 const REF = /(\s(?:href|src)=")([^"?#:]+\.(?:css|js))\?v=([^"#]*)"/g;
 
+/* An unstamped local asset is worse than a stale stamp, and silently so. _headers ships
+   /*.js and /*.css as immutable for a year, and this stamper only rewrites refs that
+   ALREADY carry a ?v=, so a tag written without one is cached in every browser for a year
+   and never picks up a change. That is how phone-data.js, instantly-data.js and
+   apollo-data.js — the three generated snapshots the Sales OS renders — would have gone
+   permanently stale on the first load, defeating the entire point of regenerating them.
+   Seed a new ref with ?v=0 and this stamper will hash it from then on. */
+const UNSTAMPED = /\s(?:href|src)="([^"?#:]+\.(?:css|js))"/g;
+
 const hashes = new Map();
 function hashOf(file) {
   if (!hashes.has(file)) {
@@ -37,6 +46,7 @@ function hashOf(file) {
 
 let stale = 0;
 let missing = 0;
+let unstamped = 0;
 
 /* Sales OS deploys two ways: as /sales/ on the main site, AND as its own standalone
    Cloudflare Pages project (root dir = sales/). A standalone deploy cannot reach
@@ -67,6 +77,16 @@ for (const page of PAGES) {
   }
 
   const html = readFileSync(pagePath, "utf8");
+
+  /* Catch refs that carry no ?v= at all, before stamping the ones that do. These are
+     invisible to REF and would ship immutable-for-a-year with no way to bust them. */
+  UNSTAMPED.lastIndex = 0;
+  for (let m; (m = UNSTAMPED.exec(html)) !== null;) {
+    console.error(`✗ Cache stamp: ${page} references ${m[1]} with no ?v=. `
+      + `_headers ships it immutable for a year, so it can never be updated. Add ?v=0 and rebuild.`);
+    unstamped++;
+  }
+
   const next = html.replace(REF, (whole, attr, ref, token) => {
     // Resolve the reference the way the browser does: relative to the page's own
     // directory. index.html declares <base href="/">, so it resolves from the root.
@@ -155,6 +175,11 @@ for (const md of walkMd(ROOT)) {
 
 if (missing) {
   console.error(`\n✗ Cache stamp: ${missing} broken asset reference(s). Fix before deploying.`);
+  process.exit(1);
+}
+if (unstamped) {
+  console.error(`\n✗ Cache stamp: ${unstamped} asset(s) referenced with no ?v=. They would be `
+    + `cached immutable for a year with no way to bust them. Add ?v=0 to each and rebuild.`);
   process.exit(1);
 }
 if (CHECK && stale) {

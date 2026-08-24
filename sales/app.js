@@ -158,6 +158,11 @@ const LIVE = {
    done:true marks a step confirmed complete (operator confirmation 2026-08-17) and renders
    it default-checked. It is only the DEFAULT: unticking it in the UI still works and still
    persists, so a step that regresses can be reopened without an edit here. */
+/* The generated Instantly snapshot, read once at parse time. instantly-data.js is loaded
+   before this file, so it is already on window; null on a checkout that has never run
+   refresh-snapshots.sh, and every use below falls back to written text. */
+const LIVEQ = (typeof window !== "undefined" && window.INSTANTLY_LIVE) || null;
+
 const LAUNCH_STEPS = [
   { k:"pull",    t:"Pull the Apollo list", done:true,
     d:"DONE. 1,183 Apollo credits spent to the operator's written ceiling; 1,145 companies researched. A further tranche needs a new written number." },
@@ -173,9 +178,21 @@ const LAUNCH_STEPS = [
   { k:"import",  t:"Import into the Sales Pipeline", done:true,
     d:"DONE, contact-join audit 2026-08-17: all 1,593 unique emails join a pipeline company (0 unjoined). Replies have somewhere to land." },
   { k:"load",    t:"Load the campaigns into Instantly", done:true,
-    d:"DONE, run 9 2026-08-17: 14 campaigns in the workspace, 8 fireable drafts with 565 leads loaded, schedules staged (08:00–16:00 Central, weekdays), all four mailboxes at health 100. Campaign edits happen in the Instantly session, never from this screen." },
+    d: LIVEQ
+      ? `DONE, read ${LIVEQ.read}: ${LIVEQ.inWorkspace} campaigns in the workspace, ${LIVEQ.drafts} draft(s), ${LIVEQ.mailboxes} mailboxes carrying ${LIVEQ.dailyCeiling}/day. Campaign edits happen in the Instantly session, never from this screen.`
+      : "DONE, run 9 2026-08-17: 14 campaigns in the workspace, 8 fireable drafts with 565 leads loaded, schedules staged (08:00\u201316:00 Central, weekdays), all four mailboxes at health 100. Campaign edits happen in the Instantly session, never from this screen." },
   { k:"send",    t:"Send",
-    d:"STARTED: BC.FARM is launched with 48 leads. Everything else fires on one operator click in the written order — BC.NUR first, then absorbents by loaded count. Ramp per inbox rather than opening at full rate; reply rate is the metric, opens are noise since Apple MPP." },
+    /* Was a hand-typed "STARTED: BC.FARM is launched with 48 leads ... fires on one operator
+       click", which stayed on the landing screen for a week after nine campaigns went live.
+       Derived from the snapshot now; the fallback is only for a checkout that has not run
+       refresh-snapshots.sh. */
+    d: LIVEQ
+      ? `${LIVEQ.launched} campaign(s) sending: ${LIVEQ.launchedNames.join(", ")}.`
+        + ` ${LIVEQ.totals.sent.toLocaleString()} sent, ${LIVEQ.totals.replies.toLocaleString()} replies, ${LIVEQ.totals.bounced.toLocaleString()} bounced.`
+        + (LIVEQ.pausedNames && LIVEQ.pausedNames.length ? ` Paused: ${LIVEQ.pausedNames.join(", ")}.` : "")
+        + (LIVEQ.oversubscribed ? ` Sending is capacity bound: ${LIVEQ.requestedDaily}/day requested against a ${LIVEQ.dailyCeiling}/day ceiling.` : "")
+        + " Reply rate is the metric; opens are noise since Apple MPP."
+      : "STARTED. Reply rate is the metric, opens are noise since Apple MPP." },
 ];
 
 /* Thousands-separated integer. pipeline.js has its own num() but it lives inside that file's
@@ -197,7 +214,14 @@ function rLaunchpad(){
      contacts and ICPs on this page mean the prospecting pipeline, not the CRM overlay —
      the roster is where every ICP, email and verification verdict actually lives. */
   const R  = window.ROSTER || null;
-  const IL = (typeof ENGINE !== "undefined" && ENGINE.instantly && ENGINE.instantly.live) || null;
+  /* Numbers from the generated snapshot, prose from the hand-written block. ENGINE.instantly
+     .live was typed by hand and on 2026-08-24 this tile still read "1 live" while nine
+     campaigns were sending — on the landing screen, which is the worst place to be wrong.
+     The rollout narrative below it has no generated equivalent, so it still comes from
+     ENGINE; only the counts are taken from instantly-data.js when it is present. */
+  const ILprose = (typeof ENGINE !== "undefined" && ENGINE.instantly && ENGINE.instantly.live) || null;
+  const ILlive = window.INSTANTLY_LIVE || null;
+  const IL = (ILlive || ILprose) ? { ...(ILprose || {}), ...(ILlive || {}) } : null;
   const P  = window.PHONE || null;
   const icpKeys = (R && R.byIcp) ? Object.keys(R.byIcp) : [];
   const nBio = icpKeys.filter(k => k.startsWith("BC.")).length;
@@ -230,13 +254,21 @@ function rLaunchpad(){
       ${tile("Companies", R?fmtN(R.live):"not loaded", R?`${fmtN(R.count)} researched · ${fmtN(R.liveIcp)} live with an ICP`:"roster layer not loaded")}
       ${tile("Contacts", R?fmtN(R.contactsTotal):"not loaded", R?`${fmtN(R.contactsVerified)} verified · on ${fmtN(R.withContact)} companies`:"roster layer not loaded")}
       ${tile("ICPs", icpKeys.length?fmtN(icpKeys.length):"not loaded", icpKeys.length?`${nBio} biochar · ${nAbs} absorbent · every one a campaign`:"roster layer not loaded")}
-      ${tile("Instantly campaigns", IL?`${IL.launched} live · ${IL.ready} ready`:"no live read", IL?`${IL.inWorkspace} in the workspace · ${fmtN(IL.readyLeads)} leads loaded · read ${esc(IL.read)}`:"engine layer not loaded")}
+      ${tile("Instantly campaigns",
+        IL?`${IL.launched} live · ${IL.ready} ready`:"no live read",
+        IL?`${IL.inWorkspace} in the workspace${IL.paused?` · ${IL.paused} paused`:""} · ${fmtN(IL.totals?IL.totals.leads:IL.readyLeads)} leads loaded · read ${esc(IL.read)}`:"engine layer not loaded")}
     </div>`+
-    (IL
-      ? `<div class="note ok" style="margin-top:10px"><b>Rollout order.</b> ${esc(IL.order)}</div>`+
-        (IL.stranded
-          ? `<div class="note warn" style="margin-top:8px"><b>${fmtN(IL.stranded)} verified leads are stranded on the Instantly plan lead cap.</b> ${esc(IL.capNote)} ${esc(IL.note)}</div>`
-          : `<div class="note" style="margin-top:8px"><b>Nothing is stranded.</b> ${esc(IL.capNote)} ${esc(IL.note)}</div>`)
+    (IL && IL.launchedNames
+      ? `<div class="note ok" style="margin-top:10px"><b>Live now.</b> ${esc(IL.launchedNames.join(", "))}${IL.pausedNames&&IL.pausedNames.length?`. Paused: ${esc(IL.pausedNames.join(", "))}`:""}.</div>`
+      : "")+
+    (IL && IL.order && !(IL.launched > 1)
+      ? `<div class="note" style="margin-top:8px"><b>Rollout order.</b> ${esc(IL.order)}</div>`
+      : "")+
+    (IL && IL.stranded
+      ? `<div class="note warn" style="margin-top:8px"><b>${fmtN(IL.stranded)} verified leads are stranded on the Instantly plan lead cap.</b> ${esc(IL.capNote||"")} ${esc(IL.note||"")}</div>`
+      : "")+
+    (IL && IL.oversubscribed
+      ? `<div class="note warn" style="margin-top:8px"><b>Sending is oversubscribed.</b> ${IL.requestedDaily}/day requested across live campaigns against a ${IL.dailyCeiling}/day mailbox ceiling (${IL.mailboxes} mailboxes). Capacity, not list size, is the cap.</div>`
       : "")+
     /* The phone line, read from window.PHONE (sales-department/allo-analytics/build-phone-snapshot.mjs).
        It sits in its own row rather than crowding the list tiles, because the outbound funnel and
@@ -257,7 +289,11 @@ function rLaunchpad(){
           : `<div class="note warn" style="margin-top:10px"><b>⛔ Nothing rings a person on ${esc(P.salesLine)}.</b> Every call is answered by the AI receptionist. Either assign someone to the number in the Allo app, or publish a transfer to a direct number.</div>`)+
         (P.conversions === 0 && P.conversations > 0
           ? `<div class="note" style="margin-top:8px"><b>No dial has converted yet.</b> Conversion counts a call tagged ${esc(P.conversionTags.join(", "))}. If calls are landing and nothing is tagged, the tagging is the gap, not the calling.</div>`
-          : "")
+          : "")+
+        /* Filled in by loadAlloLive() if /api/allo answers. Empty on a static host, on a
+           deployment without ALLO_EXPORT_TOKEN, and any time the Worker is unreachable — the
+           dated snapshot above is always the floor, and this only ever adds to it. */
+        `<div id="allo-live"></div>`
       : "")+
 
     (S && S.contacts && S.contactsNamed < S.contacts
@@ -610,4 +646,76 @@ go(isNavId(start)?start:defaultId);
 window.addEventListener("hashchange", () => {
   const id = (location.hash||"").slice(1);
   if(isNavId(id)) go(id);
+});
+
+/* ---------------------------------------------------------------- live Allo activity
+   The one live read in the Sales OS. Everything else on every page is a dated snapshot,
+   because a static page cannot hold an API key; this works only because /api/allo is a
+   Pages Function that holds the token server side, behind the same password gate.
+
+   Deliberately additive and deliberately quiet. The dated phone snapshot renders first and
+   stays put; this appends a row underneath it if, and only if, the call succeeds. On the
+   local dev server there is no Pages Function at all, so the fetch 404s and nothing happens
+   — which is the same path taken when the token is unset or the Worker is down.
+
+   Never throws, never blocks a render, never retries in a loop. A dashboard that breaks
+   because a dependency blinked is worse than one that is a few hours stale. */
+let alloInFlight = false;
+async function loadAlloLive() {
+  const mount = document.getElementById("allo-live");
+  if (!mount) return;
+  /* go() writes the hash on first paint, so the boot call and the hashchange listener both
+     fire on a cold load. Without this that is two D1 reads for one page view. */
+  if (alloInFlight) return;
+  alloInFlight = true;
+  try { await fetchAlloLive(mount); } finally { alloInFlight = false; }
+}
+
+async function fetchAlloLive(mount) {
+
+  let d;
+  try {
+    const res = await fetch("api/allo?limit=50", { headers: { Accept: "application/json" } });
+    if (!res.ok) return;                       // 404 on a static host is the normal local case
+    d = await res.json();
+  } catch { return; }                          // offline, blocked, or not JSON: stay silent
+  if (!d || d.ok !== true) return;             // not-configured / timeout / unreachable
+
+  const when = d.fetchedAt ? new Date(d.fetchedAt) : new Date();
+  const clock = when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  const t = (label, val, sub) =>
+    `<div class="card kpi"><div class="l">${esc(label)}</div><div class="v">${esc(String(val))}</div><div class="d">${esc(sub || "")}</div></div>`;
+
+  /* The snapshot above is Allo's own 30-day analytics. This is our webhook stream since the
+     Worker was deployed. They are different measurements of different windows, so they get
+     their own row and their own label rather than being averaged into one misleading number. */
+  const recent = (d.recent || [])[0];
+  mount.innerHTML =
+    `<div class="note ok" style="margin-top:14px;border-left:4px solid var(--green-bright)">
+       <b>Live, ${esc(clock)}.</b> Read from the allo-hooks event stream just now, not from the
+       dated snapshot above. That snapshot is Allo's own 30 day analytics; this is every event
+       the webhook has received since the Worker went up.
+     </div>
+     <div class="grid g4" style="margin-top:10px">
+       ${t("Events received", d.total, `${d.inbound} inbound · ${d.outbound} outbound`)}
+       ${t("Calls", d.calls, d.messages ? `${d.messages} message(s) alongside` : "no messages yet")}
+       ${t("Missed or AI answered", d.missed, d.missed ? "somebody still has to call back" : "none outstanding")}
+       ${t("Policy flags", d.policyFlags, d.policyFlags ? "a call mentioned price or a bad claim" : "no breach recorded")}
+     </div>` +
+    (recent
+      ? `<div class="note" style="margin-top:8px"><b>Most recent:</b> ${esc(recent.kind || "event")}
+           ${esc(recent.direction ? recent.direction.toLowerCase() : "")}
+           ${recent.who ? "with " + esc(recent.who) : ""}
+           ${recent.result ? "· " + esc(recent.result) : ""}
+           ${recent.minutes != null ? "· " + esc(String(recent.minutes)) + " min" : ""}
+           ${recent.at ? "· " + esc(new Date(recent.at).toLocaleString()) : ""}</div>`
+      : `<div class="note" style="margin-top:8px">The stream is connected and has received nothing yet.</div>`);
+}
+
+/* Fires on first paint and on every return to the Launchpad, so the numbers are current each
+   time somebody looks rather than only on a hard reload. */
+loadAlloLive();
+window.addEventListener("hashchange", () => {
+  if (((location.hash || "").slice(1) || NAV[0].items[0].id) === "launch") loadAlloLive();
 });
