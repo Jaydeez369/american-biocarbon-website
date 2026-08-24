@@ -90,7 +90,12 @@
     const built  = camps.filter(c => c.steps > 0);
     const totalV = built.reduce((n,c)=>n+c.versions,0);
     const manual = camps.filter(c => c.steps === 0);
-    const L = I.live || null;
+    /* The generated snapshot wins. ENGINE.instantly.live is hand-typed prose and on
+       2026-08-24 it still claimed one campaign was launched, a week after nine went live —
+       so it is now only the fallback for a checkout that has not run refresh-snapshots.sh.
+       Numbers come from instantly-data.js; the argument around them stays in engine-data.js. */
+    const L = window.INSTANTLY_LIVE || I.live || null;
+    const A = window.APOLLO_LIVE || null;
     const R = window.ROSTER || null;
 
     const tile = (label,val,sub,warn) =>
@@ -113,14 +118,22 @@
          <b>${esc(I.verification.blunt)}</b> ${esc(I.verification.state)}
        </div>`+
       (L ? `<div class="note warn" style="border-left:4px solid var(--gold-soft);font-size:13.5px;margin-bottom:14px">
-         <b>Last live read ${esc(L.read)}.</b> ${esc(L.capNote)} ${esc(L.note)}
+         <b>Last live read ${esc(L.read)}.</b> ${esc(L.generator ? "Generated from the Instantly API by refresh-snapshots.sh." : (L.capNote||"") + " " + (L.note||""))}
+         ${L.launchedNames ? `Live now: ${esc(L.launchedNames.join(", "))}.` : ""}
+         ${L.oversubscribed ? `<b>Sending is oversubscribed:</b> ${L.requestedDaily}/day requested against a ${L.dailyCeiling}/day mailbox ceiling.` : ""}
+       </div>` : "")+
+      (A ? `<div class="note${A.ceilingSpent?" warn":""}" style="border-left:4px solid var(--gold-soft);font-size:13.5px;margin-bottom:14px">
+         <b>Apollo, read ${esc(A.read)}.</b> ${esc(A.note)}
+         ${A.spent} of ${A.accountCredits} account credits spent, ${A.contactsObtained} contacts obtained.
+         ${esc(A.gate)}
        </div>` : "")+
 
       `<div class="card pad-lg" style="margin-bottom:16px"><p style="color:var(--text);font-size:13.5px;line-height:1.65;margin:0">${esc(I.premise)}</p></div>`+
 
       sec("1","The shape of it")+
       `<div class="grid g4">
-        ${tile("In the Instantly workspace", L?String(L.inWorkspace):"no read", L?`${L.launched} launched (${L.launchedName}) · ${L.drafts} staged drafts`:"")}
+        ${tile("In the Instantly workspace", L?String(L.inWorkspace):"no read",
+          L?`${L.launched} live${L.paused?` · ${L.paused} paused`:""} · ${L.drafts} staged drafts`:"")}
         ${tile("Ready to fire", L?String(L.ready):"no read", L?`staged drafts with leads loaded, ${fmt(L.readyLeads)} leads`:"")}
         ${tile("Verified addresses", R?fmt(R.contactsVerified):"not loaded", R?`of ${fmt(R.contactsTotal)} on file in the pipeline`:"roster layer not loaded")}
         ${tile("Stranded on the plan cap", L?fmt(L.stranded):"no read", L && L.stranded ? "verified leads, waiting on billing" : "freed by the run 9 FAR removals", !!(L && L.stranded))}

@@ -14,6 +14,7 @@
  *   3. Product facts in OUTREACH.facts match website/data.js, the live checkout.
  *   4. Effort allocation across all campaigns sums to 100.
  *   5. Derived counts on window.ROSTER match the array beneath them.
+ *   6. Every generated snapshot is fresh enough to be worth showing.
  *
  * Reports but does not fail on: campaigns with no companies. A campaign can legitimately be
  * written before its list is built, and the UI already says so loudly on the page.
@@ -83,6 +84,37 @@ const live = ROSTER.companies.filter(c => !c.dead).length;
 if (ROSTER.count !== ROSTER.companies.length) bad(`ROSTER.count says ${ROSTER.count}, array holds ${ROSTER.companies.length}.`);
 else if (ROSTER.live !== live) bad(`ROSTER.live says ${ROSTER.live}, ${live} companies are actually live.`);
 else ok(`Roster counts are derived and correct (${ROSTER.count} total, ${ROSTER.live} live).`);
+
+/* ---- 6. generated snapshots are fresh ----
+   Sales OS is static: no fetch() anywhere in it, so every number on every screen is a dated
+   read written to a file ahead of time. The failure mode is silent and it bit on 2026-08-24,
+   when the Instantly panel still said one campaign was launched a week after nine went live.
+   A stale snapshot looks exactly like a fresh one on screen, so the staleness has to be
+   asserted here instead. Budgets differ because the underlying systems move at different
+   speeds: campaigns and calls change daily, Apollo spend only changes on a reveal run. */
+const SNAPSHOTS = [
+  { file: "sales/instantly-data.js", global: "INSTANTLY_LIVE", days: 2, what: "campaigns, sends and mailboxes" },
+  { file: "sales/phone-data.js", global: "PHONE", days: 3, what: "dials, queue and transfer rules" },
+  { file: "sales/apollo-data.js", global: "APOLLO_LIVE", days: 14, what: "credit spend against the written ceiling" },
+];
+const todayMs = Date.now();
+for (const snap of SNAPSHOTS) {
+  let data;
+  try { data = load(snap.file, `window.${snap.global}`); } catch { data = null; }
+  if (!data) {
+    bad(`${snap.file} is missing or does not define window.${snap.global}. Run sales-department/refresh-snapshots.sh.`);
+    continue;
+  }
+  const stamp = data.readDate || (data.read || "").slice(0, 10);
+  const age = Math.floor((todayMs - Date.parse(stamp)) / 86400000);
+  if (!stamp || Number.isNaN(age)) {
+    bad(`${snap.file} carries no readable date. Run sales-department/refresh-snapshots.sh.`);
+  } else if (age > snap.days) {
+    bad(`${snap.file} is ${age} days old (budget ${snap.days}); it shows ${snap.what}. Run sales-department/refresh-snapshots.sh.`);
+  } else {
+    ok(`${snap.file} is ${age === 0 ? "current" : `${age} day(s) old`}, inside its ${snap.days}-day budget.`);
+  }
+}
 
 /* ---- report only ---- */
 const empty = [...tags].filter(t => !ROSTER.byIcp[t]);
