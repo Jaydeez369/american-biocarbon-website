@@ -713,9 +713,70 @@ async function fetchAlloLive(mount) {
       : `<div class="note" style="margin-top:8px">The stream is connected and has received nothing yet.</div>`);
 }
 
+/* ---------------------------------------------------------------- live Instantly
+   Same pattern as the Allo route: a Pages Function holds the key server side. The response
+   is the SAME SHAPE as instantly-data.js because both go through shapeInstantly(), so this
+   can be dropped straight onto window.INSTANTLY_LIVE and the page re-rendered with no
+   branching anywhere in the renderers.
+
+   The snapshot paints first and this replaces it a moment later. That is only safe because
+   the shapes match; if they ever diverge the numbers would appear to change meaning after
+   load, which is why the shaper is shared rather than copied. */
+let instantlyLiveTried = false;
+async function loadInstantlyLive() {
+  if (instantlyLiveTried) return;
+  instantlyLiveTried = true;
+
+  let d;
+  try {
+    const res = await fetch("api/instantly", { headers: { Accept: "application/json" } });
+    if (!res.ok) return;                 // 404 on a static host: the normal local case
+    d = await res.json();
+  } catch { return; }
+  if (!d || d.ok !== true || typeof d.inWorkspace !== "number") return;
+
+  const before = window.INSTANTLY_LIVE ? JSON.stringify(window.INSTANTLY_LIVE.totals) : null;
+  window.INSTANTLY_LIVE = d;
+
+  /* Only repaint if something actually moved. A gratuitous re-render loses scroll position
+     and any open accordion for no gain, and most loads land on an unchanged workspace. */
+  if (before !== JSON.stringify(d.totals) || !before) {
+    const current = (location.hash || "").slice(1) || NAV[0].items[0].id;
+    if (current === "launch" || current === "instantly") go(current);
+  }
+}
+
+/* ---------------------------------------------------------------- live Apollo
+   Deliberately thin. Apollo exposes no credit balance to this key, so the only thing that can
+   honestly be read live is whether the key still works — see functions/api/apollo.js. The
+   spend figures on screen stay receipt-based. This exists to catch a rotated or revoked key,
+   which is otherwise invisible until the next reveal run fails. */
+async function loadApolloLive() {
+  let d;
+  try {
+    const res = await fetch("api/apollo", { headers: { Accept: "application/json" } });
+    if (!res.ok) return;
+    d = await res.json();
+  } catch { return; }
+  if (!d || d.ok !== true || d.keyValid !== false) return;   // silent unless the key is DEAD
+
+  const host = document.getElementById("sec-launch");
+  if (!host || document.getElementById("apollo-key-warn")) return;
+  const warn = document.createElement("div");
+  warn.id = "apollo-key-warn";
+  warn.className = "note warn";
+  warn.style.marginTop = "10px";
+  warn.innerHTML = `<b>⛔ The Apollo key is not working.</b> ${esc(d.keyDetail || "Apollo rejected it.")}
+    Credit figures on this page are from our own receipts and are still accurate, but no new
+    reveal will run until the key is replaced.`;
+  host.appendChild(warn);
+}
+
 /* Fires on first paint and on every return to the Launchpad, so the numbers are current each
    time somebody looks rather than only on a hard reload. */
 loadAlloLive();
+loadInstantlyLive();
+loadApolloLive();
 window.addEventListener("hashchange", () => {
   if (((location.hash || "").slice(1) || NAV[0].items[0].id) === "launch") loadAlloLive();
 });

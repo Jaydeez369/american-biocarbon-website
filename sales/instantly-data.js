@@ -12,9 +12,9 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-08-24 15:59 UTC",
+  "read": "2026-08-24 16:29 UTC",
   "readDate": "2026-08-24",
-  "generator": "sales-department/instantly-analytics/build-instantly-snapshot.mjs",
+  "source": "snapshot",
   "inWorkspace": 15,
   "launched": 9,
   "launchedNames": [
@@ -40,7 +40,7 @@ window.INSTANTLY_LIVE = {
     "campaigns": 15,
     "leads": 595,
     "contacted": 400,
-    "sent": 429,
+    "sent": 445,
     "replies": 2,
     "bounced": 4,
     "unsubscribed": 0
@@ -50,7 +50,7 @@ window.INSTANTLY_LIVE = {
       "campaigns": 9,
       "leads": 367,
       "contacted": 230,
-      "sent": 255,
+      "sent": 269,
       "replies": 2,
       "bounced": 0,
       "unsubscribed": 0
@@ -59,7 +59,7 @@ window.INSTANTLY_LIVE = {
       "campaigns": 6,
       "leads": 228,
       "contacted": 170,
-      "sent": 174,
+      "sent": 176,
       "replies": 0,
       "bounced": 4,
       "unsubscribed": 0
@@ -91,7 +91,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 48,
-      "sent": 52,
+      "sent": 54,
       "replies": 0,
       "bounced": 0
     },
@@ -102,7 +102,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 52,
-      "sent": 56,
+      "sent": 58,
       "replies": 0,
       "bounced": 0
     },
@@ -113,7 +113,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 26,
-      "sent": 31,
+      "sent": 33,
       "replies": 0,
       "bounced": 0
     },
@@ -124,7 +124,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 11,
-      "sent": 15,
+      "sent": 18,
       "replies": 0,
       "bounced": 0
     },
@@ -146,7 +146,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 14,
-      "sent": 18,
+      "sent": 21,
       "replies": 0,
       "bounced": 0
     },
@@ -168,7 +168,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 191,
-      "sent": 58,
+      "sent": 60,
       "replies": 1,
       "bounced": 0
     },
@@ -223,7 +223,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 47,
-      "sent": 66,
+      "sent": 68,
       "replies": 0,
       "bounced": 2
     },
@@ -239,5 +239,6 @@ window.INSTANTLY_LIVE = {
       "bounced": 0
     }
   ],
-  "oversubscribed": true
+  "oversubscribed": true,
+  "generator": "sales-department/instantly-analytics/build-instantly-snapshot.mjs"
 };
