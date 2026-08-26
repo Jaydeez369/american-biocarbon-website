@@ -6,6 +6,8 @@
  *   1. check-dashes           - brand kit gate (fails the deploy on em/en dashes)
  *   2. check-outreach-dashes  - stricter gate on Sales OS cold copy (no dash at all)
  *   2b. check-sales-canon     - ICP taxonomy, roster freshness, prices, derived counts
+ *   2c. check-contact-rules   - lead forms still require a reachable email and phone,
+ *                               and the browser and /api/lead still agree on what counts
  *   3. build-spec-sheets      - same gate, applied to the text inside the shipped PDFs
  *   4. stamp-assets           - rewrite ?v= tokens to content hashes
  *   5. prerender              - write per-route static metadata snapshots for crawlers
@@ -28,6 +30,7 @@ const STEPS = [
   ["check-dashes.mjs"],
   ["check-outreach-dashes.mjs"],
   ["check-sales-canon.mjs"],
+  ["check-contact-rules.mjs"],
   ["build-spec-sheets.mjs", "--check"],
   ["stamp-assets.mjs"],
   ["prerender.mjs"],

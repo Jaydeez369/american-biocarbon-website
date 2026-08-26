@@ -542,6 +542,36 @@ function formContext(qs){
     preorder: p.get("preorder") === "1",
   };
 }
+/* Email and phone are the two fields a lead is worthless without: no address means no
+   spec sheet and no reply, no number means no call. Both are marked required in FORMS, but
+   `required` alone accepts "x" in a tel box and "a@b" in an email one, so the format is
+   checked here too, before the form will submit.
+
+   MIRROR of functions/api/_contact.js, which rejects the same shapes at the endpoint.
+   Keep them identical. The visitor gets their confirmation the moment this passes and
+   delivery is fire and forget, so anything this waves through and the endpoint then
+   refuses is a lead lost without a trace. scripts/check-contact-rules.mjs fails the build
+   if the two copies drift. */
+const CONTACT_RULES = {
+  email: {
+    ok: v => /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(v.trim()),
+    msg: "Enter a full email address, like name@company.com, so we can send the spec sheet."
+  },
+  phone: {
+    ok: v => { const d = v.replace(/\D+/g, ""); return d.length >= 10 && d.length <= 15; },
+    msg: "Enter a phone number with at least 10 digits, so a specialist can reach you."
+  },
+};
+/* Attach the message to the field itself, so the browser points at the box that is wrong
+   instead of showing a banner. Empty is left to `required`, whose own wording is better
+   than anything we would write. */
+function checkContactFields(form){
+  Object.keys(CONTACT_RULES).forEach(n=>{
+    const el = form.elements[n]; if(!el || typeof el.setCustomValidity!=="function") return;
+    const v = el.value || "";
+    el.setCustomValidity(v.trim() && !CONTACT_RULES[n].ok(v) ? CONTACT_RULES[n].msg : "");
+  });
+}
 function buildForm(kind, mountSel, qs){
   const f = FORMS[kind]; const mount = $(mountSel); if(!f||!mount) return;
   const ctx = formContext(qs);
@@ -563,10 +593,17 @@ function buildForm(kind, mountSel, qs){
       other.hidden=!on; other.required=on&&sel.required; if(!on) other.value=""; if(on) other.focus(); };
     sel.addEventListener("change", sync); sync();
   });
+  // Re-check as they type so a stale "not a valid address" clears itself the moment it is
+  // fixed, rather than surviving until the next submit.
+  Object.keys(CONTACT_RULES).forEach(n=>{
+    const el = $("#lf").elements[n];
+    if(el) el.addEventListener("input", ()=>checkContactFields($("#lf")));
+  });
   $("#lf").addEventListener("submit", e=>{
     e.preventDefault();
     const form = e.currentTarget;
     if(form.dataset.submitted==="1") return;      // guard against accidental double-submit
+    checkContactFields(form);
     if(!form.checkValidity()){ form.reportValidity(); return; }
     form.dataset.submitted="1";
     const btn = form.querySelector('button[type="submit"]');
@@ -596,6 +633,12 @@ function deliverLead(kind, form){
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify({ form:kind, recipients:to, fields, page:location.pathname+location.hash, ts:new Date().toISOString() }),
     keepalive:true
+  }).then(res=>{
+    /* The visitor has already been thanked, so a failure here is invisible to them and can
+       only be caught in the console. A 400 specifically means the endpoint disagreed with
+       the validation above about whether this lead is contactable, which is the one thing
+       that must never happen quietly. */
+    if(!res.ok) console.error(`[lead] ${kind}: endpoint refused the submission`, res.status);
   }).catch(err=>console.error(`[lead] ${kind}: delivery failed`, err));
 }
 /* Express written consent for SMS, captured at the point the number is collected.
@@ -631,7 +674,14 @@ function fieldHTML(fl, ctx){
     if(hasOther){ input+=`<input type="text" class="other-input" name="${fl.n}_other" hidden aria-label="${raw(fl.label)}, please specify" placeholder="${raw(fl.otherPh||"Please specify")}">`; }
   }
   else if(fl.type==="textarea"){ input=`<textarea id="${id}" name="${fl.n}" ${fl.req?"required":""} placeholder="${raw(fl.ph||"")}"></textarea>`; }
-  else { input=`<input id="${id}" type="${fl.type}" name="${fl.n}" ${fl.req?"required":""} placeholder="${raw(fl.ph||"")}">`; }
+  else {
+    // Right keyboard on mobile and the browser's own autofill, on the two fields we now
+    // refuse to submit without. inputmode is what puts a phone keypad up; type="tel" alone
+    // does not on every browser.
+    const extra = fl.type==="tel" ? ` inputmode="tel" autocomplete="tel"`
+                : fl.type==="email" ? ` inputmode="email" autocomplete="email"` : "";
+    input=`<input id="${id}" type="${fl.type}" name="${fl.n}" ${fl.req?"required":""}${extra} placeholder="${raw(fl.ph||"")}">`;
+  }
   return `<div class="field${full}"><label for="${id}">${raw(fl.label)}${req}</label>${input}</div>`;
 }
 

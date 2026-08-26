@@ -25,6 +25,7 @@
  * approved preview and the delivered mail cannot drift apart.
  */
 import { buildAutoreply, buildInternalLead } from "./_email.js";
+import { contactError, emailFrom } from "./_contact.js";
 
 /* Website enquiries go to the two people who actually work the leads, by name.
    These addresses are taken from the live Shopify staff accounts (Settings > Users,
@@ -70,16 +71,10 @@ const DEFAULT_FROM = "American BioCarbon <leads@send.americanbiocarbon.com>";
 const MAX_BODY_BYTES = 32 * 1024;
 
 /* Pull the visitor address out of whatever the form called it, so a reply goes to the
-   prospect rather than to us. Returns null if nothing looks like an address. */
-function replyToFrom(fields) {
-  for (const key of ["email", "Email", "work_email", "contact_email"]) {
-    const v = fields[key];
-    if (typeof v === "string" && /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(v.trim())) {
-      return v.trim();
-    }
-  }
-  return null;
-}
+   prospect rather than to us. Returns null if nothing looks like an address. Same rule as
+   the gate below, from _contact.js, so a lead can never be accepted and then found to have
+   no usable reply address. */
+const replyToFrom = (fields) => emailFrom(fields);
 
 export async function onRequest({ request, env }) {
   /* Single entry point. Exporting onRequest alongside onRequestPost is ambiguous: next()
@@ -130,6 +125,21 @@ export async function onRequest({ request, env }) {
   }
 
   if (!Object.keys(fields).length) return json(400, { error: "no fields submitted" });
+
+  /* Every form on the site marks email and phone required and blocks its own submit until
+     both are valid, so nothing that fails here came from the form working normally: it is a
+     bot, a replayed POST, or a browser told to skip validation. Refuse it rather than mail
+     the desk a lead nobody can call or reply to.
+
+     The rules live in _contact.js and app.js enforces the identical ones in the browser, so
+     a real visitor always sees the error on the field rather than getting a confirmation for
+     a submission this endpoint quietly dropped. Rejections are logged: a run of them means
+     the two copies have drifted, not that visitors suddenly forgot their own phone numbers. */
+  const badContact = contactError(fields);
+  if (badContact) {
+    console.warn("[lead] rejected, not contactable:", badContact, { form, page });
+    return json(400, { error: badContact });
+  }
 
   const key = env.RESEND_API_KEY;
   if (!key) {
