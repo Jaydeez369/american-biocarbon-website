@@ -47,6 +47,14 @@ export CLOUDFLARE_API_TOKEN
 
 export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 
+# TLS is intercepted on this machine, so wrangler's Node fetch dies with
+# UNABLE_TO_GET_ISSUER_CERT_LOCALLY and reports it as a bare "fetch failed" — which looks
+# exactly like Cloudflare being down. Point Node at the system trust store. Harmless
+# elsewhere: if the file is absent, Node ignores the variable.
+if [ -z "${NODE_EXTRA_CA_CERTS:-}" ] && [ -r /etc/ssl/cert.pem ]; then
+  export NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem
+fi
+
 # The gates and the ?v= stamping run against the whole repo, so build from the repo root
 # even though only sales/ is uploaded. A stale stamp is a cache-poisoning bug, not a
 # cosmetic one: index.html would point at a hash that no longer matches the file.
@@ -88,7 +96,19 @@ put_secret ALLO_EXPORT_TOKEN "${ALLO_EXPORT_TOKEN:-$(read_env ALLO_EXPORT_TOKEN)
   "/api/allo will answer not-configured and the Launchpad live row stays hidden."
 
 echo "==> deploy"
-$WRANGLER pages deploy sales --project-name "$PROJECT" --branch main
+# Deploy from INSIDE sales/, not from the repo root with "deploy sales".
+#
+# This is the whole ballgame. wrangler discovers the functions/ directory relative to the
+# CURRENT WORKING DIRECTORY, not relative to the asset directory you name. Run from the repo
+# root, `wrangler pages deploy sales` happily compiles website/functions/ — the MARKETING
+# site's lead API — reports "Uploading Functions bundle", and ships the Sales OS with no
+# _middleware at all. The result is a project that looks deployed and is wide open: on
+# 2026-08-26 that published the roster, COGS and price floors to the public internet, and it
+# had silently been the case since the project was created.
+#
+# cd first so sales/functions/ is the one that gets compiled. The header of this file always
+# said the gate only runs when sales/ IS the project root; now the command actually honours it.
+( cd sales && $WRANGLER pages deploy . --project-name "$PROJECT" --branch "${DEPLOY_BRANCH:-main}" )
 
 cat <<NOTE
 
