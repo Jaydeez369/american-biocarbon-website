@@ -11,21 +11,41 @@
 # scoped API token first (Cloudflare dashboard > My Profile > API Tokens, template
 # "Edit Cloudflare Workers", scoped to the Csopsmarketing account):
 #
-#   export CLOUDFLARE_API_TOKEN=...
-#   export SALES_OS_PASSWORD=...
 #   ./scripts/deploy-sales-os.sh
 #
-# Neither is stored here: this file is committed. The live-data keys are read from the
-# gitignored .env at the repo root (INSTANTLY_API_KEY, APOLLO_API_KEY, ALLO_EXPORT_TOKEN) and
-# any that are missing are skipped with a warning — those routes fail soft on their own.
+# Nothing secret is stored in this file: it is committed. Every credential is read from the
+# shell first and then from the gitignored .env at the repo root:
+#
+#   CLOUDFLARE_API_TOKEN   required. Dashboard > My Profile > API Tokens, template
+#                          "Edit Cloudflare Workers", scoped to the Csopsmarketing account.
+#   SALES_OS_PASSWORD      required. The shared team password for the gate.
+#   INSTANTLY_API_KEY      optional. /api/instantly goes live when set.
+#   APOLLO_API_KEY         optional. /api/apollo goes live when set.
+#   ALLO_EXPORT_TOKEN      optional. The Launchpad live call row appears when set.
+#
+# The three optional ones are skipped with a warning if absent; those routes fail soft on
+# their own and the page keeps rendering its dated snapshot.
 set -euo pipefail
 
 PROJECT="cs-ops-sales-os"
 ACCOUNT_ID="bbc8d43ba1f883d032178837037285e1"   # Csopsmarketing@gmail.com's Account
 WRANGLER="npx -y wrangler@3.114.1"
 
-export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 cd "$(dirname "$0")/.."
+
+# Every credential this script needs can come from the shell OR from the gitignored .env at
+# the repo root, shell winning. Putting them in .env is the norm here — the live-data keys
+# already live there — and it means a deploy is one command with no exports to remember.
+ENV_FILE="$(cd .. && pwd)/.env"
+read_env() { [ -f "$ENV_FILE" ] && sed -n "s/^$1=//p" "$ENV_FILE" | head -1 | tr -d '\r'; }
+
+CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-$(read_env CLOUDFLARE_API_TOKEN)}"
+SALES_OS_PASSWORD="${SALES_OS_PASSWORD:-$(read_env SALES_OS_PASSWORD)}"
+export CLOUDFLARE_API_TOKEN
+
+: "${CLOUDFLARE_API_TOKEN:?set CLOUDFLARE_API_TOKEN in the shell or in .env. Cloudflare dashboard > My Profile > API Tokens, template \"Edit Cloudflare Workers\", scoped to the Csopsmarketing account.}"
+
+export CLOUDFLARE_ACCOUNT_ID="$ACCOUNT_ID"
 
 # The gates and the ?v= stamping run against the whole repo, so build from the repo root
 # even though only sales/ is uploaded. A stale stamp is a cache-poisoning bug, not a
@@ -37,7 +57,7 @@ $WRANGLER pages project create "$PROJECT" --production-branch main || true
 
 # Fail closed. The middleware returns 503 for every route while this is unset, so set it
 # BEFORE the first deploy rather than after.
-printf '%s' "${SALES_OS_PASSWORD:?set SALES_OS_PASSWORD in the environment for this run}" \
+printf '%s' "${SALES_OS_PASSWORD:?set SALES_OS_PASSWORD in the shell or in .env}" \
   | $WRANGLER pages secret put SALES_OS_PASSWORD --project-name "$PROJECT"
 
 # ---------------------------------------------------------------- live-data secrets
@@ -46,10 +66,6 @@ printf '%s' "${SALES_OS_PASSWORD:?set SALES_OS_PASSWORD in the environment for t
 # dated snapshot. So a missing key here degrades one row, it does not break the deploy — which
 # is why these are skipped with a warning rather than treated like SALES_OS_PASSWORD.
 #
-# Sourced from the repo .env, which is gitignored and never committed.
-ENV_FILE="$(cd "$(dirname "$0")/../.." && pwd)/.env"
-read_env() { [ -f "$ENV_FILE" ] && sed -n "s/^$1=//p" "$ENV_FILE" | head -1 | tr -d '\r'; }
-
 put_secret() {
   local name="$1" value="$2" why="$3"
   if [ -z "$value" ]; then
