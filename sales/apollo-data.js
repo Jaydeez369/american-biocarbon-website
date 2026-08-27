@@ -13,21 +13,36 @@
      sales-department/refresh-snapshots.sh
    ================================================================== */
 window.APOLLO_LIVE = {
-  "read": "2026-08-24 15:59 UTC",
-  "readDate": "2026-08-24",
+  "read": "2026-08-27 05:42 UTC",
+  "readDate": "2026-08-27",
   "generator": "sales-department/apollo-analytics/build-apollo-snapshot.mjs",
   "spendsCredits": false,
   "source": "local reveal receipts (handoff/enrichment/api-revealed-*.csv) plus a free key health check",
+  "balanceSource": "app.apollo.io/#/settings/credits/current, read in the browser, 2026-08-26",
   "keyValid": true,
   "keyDetail": "key valid",
-  "accountCredits": 2600,
+  "accountCredits": 2620,
   "operatorCeiling": 1183,
   "ceilingSet": "2026-08-17",
   "spent": 1259,
   "contactsObtained": 949,
   "remainingUnderCeiling": 0,
-  "remainingOnAccount": 1341,
+  "remainingOnAccount": 1049,
   "ceilingSpent": true,
+  "observed": {
+    "on": "2026-08-26",
+    "source": "app.apollo.io/#/settings/credits/current, read in the browser",
+    "available": 1049,
+    "used": 1571,
+    "of": 2620,
+    "renews": "2026-09-10",
+    "byFeature": {
+      "exports": 1368,
+      "waterfallEnrichment": 108,
+      "email": 95
+    }
+  },
+  "unreceiptedSpend": 312,
   "byLine": {
     "absorbent": 1201,
     "biochar": 58
@@ -57,5 +72,6 @@ window.APOLLO_LIVE = {
     "api-revealed-biochar-run5.csv"
   ],
   "gate": "Aug 20 list item 03: Victor reviews the target list BEFORE any further Apollo credits are spent.",
-  "note": "The written ceiling of 1183 is fully spent. A new tranche needs a new written number from the operator before another reveal."
+  "note": "The written ceiling of 1183 is fully spent. A new tranche needs a new written number from the operator before another reveal.",
+  "balanceNote": "Apollo itself shows 1049 of 2620 left on 2026-08-26, renewing 2026-09-10. That is 312 credits further along than these receipts record, because 1368 of the spend went through Exports, which this ledger never watched. Money left is not the same as permission to spend it: the operator's authorisation is 0."
 };

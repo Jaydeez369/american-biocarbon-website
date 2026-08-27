@@ -74,6 +74,9 @@ const LEAN_NAV=[
   {group:"Execute",items:[
     {id:"outreach",ic:"✦",t:"Outreach Engine"},
     {id:"instantly",ic:"⚙",t:"Instantly Logic"},
+    /* Crumble Blitz is a live push against inventory on hand, not reference material, so it
+       sits in Execute next to the send and the pipeline rather than under Reference. */
+    {id:"crumble",ic:"▲",t:"Crumble Blitz"},
     {id:"crm",ic:"◉",t:"Sales Pipeline"},
   ]},
   /* Everything that is not the cold email send. Priced, with a confidence badge on every
@@ -573,6 +576,8 @@ const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
 const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
 /* Engine module (engine-data.js + engine.js): campaign architecture and the funnel costing */
 const ENG = k => (window.ENGINE_UI && ENGINE_UI[k]) ? ENGINE_UI[k] : (()=> "");
+/* Crumble module (crumble-data.js + crumble.js): the six-truckload push and its two gates */
+const CRB = k => (window.CRUMBLE_UI && CRUMBLE_UI[k]) ? CRUMBLE_UI[k] : (()=> "");
 /* Operations module (ops-data.js + ops.js): sample to cash, team, system of record, runbook */
 const OPS_R = k => (window.OPS_UI && OPS_UI[k]) ? OPS_UI[k] : (()=> "");
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
@@ -616,6 +621,9 @@ const LEAN_SECTIONS=[
   // Instantly Logic and Future Funnels each render as a single self contained module, the
   // same way crm and strategy do. Both read engine-data.js and type no numbers of their own.
   ["instantly",[ENG("rInstantly")]],
+  // One self-contained module, same shape as crm/instantly: reads the generated crumble-data.js
+  // and types no numbers of its own, so the page cannot disagree with the module that built it.
+  ["crumble",  [CRB("rCrumble")]],
   ["funnels",  [ENG("rFunnels")]],
   ["crm",      [PL("rCRM")]],
   // The four Operate sections were removed 2026-08-17 on the operator's instruction;

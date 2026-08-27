@@ -12,11 +12,11 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-08-24 16:29 UTC",
-  "readDate": "2026-08-24",
+  "read": "2026-08-27 05:42 UTC",
+  "readDate": "2026-08-27",
   "source": "snapshot",
   "inWorkspace": 15,
-  "launched": 9,
+  "launched": 8,
   "launchedNames": [
     "AB.CIVIL",
     "AB.DIST",
@@ -25,23 +25,22 @@ window.INSTANTLY_LIVE = {
     "AB.LF",
     "AB.OG",
     "BC-NURS",
-    "BC.FARM",
-    "BC.FARM.ROLE"
+    "BC.FARM"
   ],
   "paused": 1,
   "pausedNames": [
     "AB.HDD.SUP"
   ],
   "drafts": 5,
-  "unmanageable": 1,
+  "unmanageable": 0,
   "ready": 0,
   "readyLeads": 0,
   "totals": {
     "campaigns": 15,
     "leads": 595,
-    "contacted": 400,
-    "sent": 445,
-    "replies": 2,
+    "contacted": 617,
+    "sent": 715,
+    "replies": 5,
     "bounced": 4,
     "unsubscribed": 0
   },
@@ -49,8 +48,8 @@ window.INSTANTLY_LIVE = {
     "absorbent": {
       "campaigns": 9,
       "leads": 367,
-      "contacted": 230,
-      "sent": 269,
+      "contacted": 328,
+      "sent": 411,
       "replies": 2,
       "bounced": 0,
       "unsubscribed": 0
@@ -58,9 +57,9 @@ window.INSTANTLY_LIVE = {
     "biochar": {
       "campaigns": 6,
       "leads": 228,
-      "contacted": 170,
-      "sent": 176,
-      "replies": 0,
+      "contacted": 289,
+      "sent": 304,
+      "replies": 3,
       "bounced": 4,
       "unsubscribed": 0
     }
@@ -71,7 +70,7 @@ window.INSTANTLY_LIVE = {
     "getamericanbiocarbon.com": 2
   },
   "dailyCeiling": 120,
-  "requestedDaily": 183,
+  "requestedDaily": 175,
   "campaigns": [
     {
       "name": "AB.BED.SUP · Bedding Channel · R1",
@@ -91,7 +90,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 48,
-      "sent": 54,
+      "sent": 93,
       "replies": 0,
       "bounced": 0
     },
@@ -102,7 +101,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 52,
-      "sent": 58,
+      "sent": 94,
       "replies": 0,
       "bounced": 0
     },
@@ -113,7 +112,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 26,
-      "sent": 33,
+      "sent": 52,
       "replies": 0,
       "bounced": 0
     },
@@ -124,7 +123,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 11,
-      "sent": 18,
+      "sent": 22,
       "replies": 0,
       "bounced": 0
     },
@@ -146,7 +145,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 14,
-      "sent": 21,
+      "sent": 28,
       "replies": 0,
       "bounced": 0
     },
@@ -168,7 +167,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 191,
-      "sent": 60,
+      "sent": 97,
       "replies": 1,
       "bounced": 0
     },
@@ -212,8 +211,8 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 180,
-      "sent": 107,
-      "replies": 0,
+      "sent": 194,
+      "replies": 1,
       "bounced": 2
     },
     {
@@ -223,18 +222,18 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 47,
-      "sent": 68,
-      "replies": 0,
+      "sent": 107,
+      "replies": 2,
       "bounced": 2
     },
     {
       "name": "BC.FARM.ROLE · Farm Published Inboxes · R1",
       "icp": "BC.FARM.ROLE",
       "line": "biochar",
-      "status": "live",
+      "status": "completed",
       "parked": false,
       "leads": 1,
-      "sent": 1,
+      "sent": 3,
       "replies": 0,
       "bounced": 0
     }

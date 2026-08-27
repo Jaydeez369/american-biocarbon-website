@@ -96,6 +96,11 @@ const SNAPSHOTS = [
   { file: "sales/instantly-data.js", global: "INSTANTLY_LIVE", days: 2, what: "campaigns, sends and mailboxes" },
   { file: "sales/phone-data.js", global: "PHONE", days: 3, what: "dials, queue and transfer rules" },
   { file: "sales/apollo-data.js", global: "APOLLO_LIVE", days: 14, what: "credit spend against the written ceiling" },
+  /* 14 days, same as apollo-data.js and for the same reason: it states a credit spend that
+     has not been authorised, and a stale page that says "120 verified" after the underlying
+     list moved is worse than no page. Regenerate with
+     sales-department/crumble-blitz/build-salesos-section.mjs. */
+  { file: "sales/crumble-data.js", global: "CRUMBLE", days: 14, what: "the crumble push, its verified phone targets and the two open gates" },
 ];
 const todayMs = Date.now();
 for (const snap of SNAPSHOTS) {
