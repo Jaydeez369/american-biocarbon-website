@@ -1228,6 +1228,165 @@
     </div>`;
   }
 
+  /* ================= CREATE PROSPECT (writes to Allo CRM) =================
+     Every other control on this tab reads. This one writes, to a real system, so it is built
+     to a different standard than the local-storage CRUD elsewhere in this file.
+
+     WHAT IT ACTUALLY DOES. POST /api/prospect, a Pages Function that holds ALLO_API_KEY on
+     the edge, creates the company and the person, writes the dialer note, and then READS THE
+     RECORD BACK. The read-back is not decoration: on this API a 200 is not evidence that a
+     field was stored — `title` and `first_name` both return 200 and vanish, which is exactly
+     why every Power Dialer card once read "Job & company unknown". So the panel below shows
+     what Allo returned when asked, not what we hoped we sent.
+
+     IT ALSO WRITES LOCALLY, but only after the remote create succeeds. A prospect that exists
+     in this browser and not in Allo is the failure mode worth avoiding: the rep sees it on the
+     roster, nobody can dial it.
+
+     NO FUNCTIONS ON THE STATIC DEV SERVER. `python3 -m http.server` and `npx serve` do not run
+     Pages Functions, so /api/prospect 404s locally. That is reported as "this build has no
+     Function" rather than as a create failure, because the two need different fixes. */
+
+  /* Mirrors functions/_lib/prospect.js normalizeNANP(). Deliberately duplicated: this file is
+     a classic script, not a module, and cannot import across that boundary. The SERVER copy is
+     the one that counts — this exists to fail a typo before a round trip, not to be the gate.
+     Apollo handed us a +91 mobile for a real person on 2026-08-28 and it reached the dialer. */
+  const nanp = raw => {
+    const digits = String(raw||"").replace(/[^\d]/g,"");
+    const ten = digits.length===11 && digits.startsWith("1") ? digits.slice(1) : digits;
+    if(ten.length!==10) return { ok:false, reason:`needs 10 digits, got ${ten.length}` };
+    if(!/^[2-9]\d{2}[2-9]\d{6}$/.test(ten)) return { ok:false, reason:"area code and exchange cannot start with 0 or 1" };
+    return { ok:true, e164:`+1${ten}` };
+  };
+
+  window.pipeProspectModal = prefill => {
+    const p = prefill || {};
+    const icps = window.ROSTER ? Object.keys(window.ROSTER.byIcp).sort() : [];
+    const body = `
+      <div class="note" style="margin:0 0 12px;font-size:12.5px">
+        Creates the company, the person and the dialer note <b>in Allo CRM</b>, then reads the
+        record back and shows you what Allo actually stored. The number is checked before
+        anything is created.
+      </div>
+      <div class="pcf-grid">
+        ${F("prCompany","Company",p.company,1,"e.g. Knight Oil Tools")}
+        ${F("prWebsite","Website",p.website,0,"knightoiltools.com")}
+      </div>
+      <div class="pcf-grid">
+        ${F("prPerson","Person",p.person,1,"e.g. Bill Trahan")}
+        ${F("prTitle","Job title",p.title,0,"General Manager")}
+      </div>
+      <div class="pcf-grid">
+        ${F("prNumber","Direct number",p.number,1,"(337) 581-2756")}
+        ${F("prEmail","Email",p.email,0,"name@company.com")}
+      </div>
+      <div class="pcf-grid">
+        <div class="pcf"><label>ICP</label><input class="pinput" id="prIcp" list="prIcpList" value="${esc(p.icp||"")}" placeholder="AB.OG"><datalist id="prIcpList">${icps.map(k=>`<option value="${esc(k)}">`).join("")}</datalist></div>
+        ${F("prOpener","Open with",p.opener,0,"the line that earns the next 20 seconds")}
+      </div>
+      <div class="pcf"><label>Anything else for the note</label><textarea class="pinput" id="prNote" rows="2" placeholder="What they run today, who referred them, why now">${esc(p.note||"")}</textarea></div>
+      <div id="prResult"></div>`;
+    openModal("Create Prospect", body, "Create in Allo", "pipeProspectCreate()", true);
+    document.getElementById("prCompany").focus();
+  };
+
+  const prSetBusy = (on, label) => {
+    const btn = document.querySelector("#pipeModal .btn-primary");
+    if(!btn) return;
+    btn.disabled = on;
+    btn.textContent = on ? (label||"Creating…") : "Create in Allo";
+  };
+  const prSay = html => { const el=document.getElementById("prResult"); if(el) el.innerHTML=html; };
+
+  window.pipeProspectCreate = async () => {
+    const input = {
+      company:V("prCompany"), website:V("prWebsite"), person:V("prPerson"), title:V("prTitle"),
+      number:V("prNumber"), email:V("prEmail"), icp:V("prIcp"), opener:V("prOpener"), note:V("prNote"),
+    };
+    if(!input.company || !input.person){ prSay(`<div class="note warn" style="margin-top:10px"><b>Company and person are both required.</b></div>`); return; }
+    const n = nanp(input.number);
+    if(!n.ok){
+      prSay(`<div class="note warn" style="margin-top:10px"><b>That number will not dial.</b> ${esc(n.reason)}.
+        Nothing was created — a bad number in the dialer burns a slot mid-session, and a gap is at least visible.</div>`);
+      return;
+    }
+
+    prSetBusy(true);
+    prSay(`<div class="note" style="margin-top:10px">Creating company, person and note in Allo, then reading the record back…</div>`);
+
+    let res, data;
+    try {
+      res = await fetch("/api/prospect", {
+        method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(input),
+      });
+    } catch(e) {
+      prSetBusy(false);
+      prSay(`<div class="note warn" style="margin-top:10px"><b>Could not reach /api/prospect.</b> ${esc(String(e))}<br>Nothing was created.</div>`);
+      return;
+    }
+    const text = await res.text();
+    try { data = JSON.parse(text); }
+    catch {
+      prSetBusy(false);
+      /* A 404 with an HTML body is the static dev server, not a broken route. Say which. */
+      prSay(`<div class="note warn" style="margin-top:10px"><b>This build has no /api/prospect Function.</b>
+        Pages Functions only run on the deployed Sales OS (and under <code>npx wrangler pages dev</code>) —
+        a plain static server returns the 404 page, which is what came back (HTTP ${res.status}).
+        <b>Nothing was created.</b></div>`);
+      return;
+    }
+
+    prSetBusy(false);
+
+    if(!data.ok){
+      const why = data.reason==="not-configured"
+        ? `<b>ALLO_API_KEY is not set on this deployment.</b> Set it in Cloudflare Pages → cs-ops-sales-os → Settings → Variables and secrets. Nothing was created.`
+        : `<b>Allo rejected it.</b> ${esc(data.error||data.reason||"no reason given")}`;
+      prSay(`<div class="note warn" style="margin-top:10px">${why}
+        ${(data.steps||[]).length?`<div style="margin-top:8px;font-size:12px">${data.steps.map(s=>`${esc(s.step)}: ${esc(s.action)}`).join(" · ")}</div>`:""}
+      </div>`);
+      return;
+    }
+
+    /* Remote first, local second — see the header. */
+    upsertAccount(input.company, "prospect");
+    const arr = getCustom();
+    const parts = input.person.trim().split(/\s+/);
+    arr.push({
+      name:input.person, first:parts.slice(0,-1).join(" ")||parts[0], last:parts.length>1?parts[parts.length-1]:"",
+      account:input.company, title:input.title, email:input.email, phone:data.e164, mobile:"",
+      notes:`Created in Allo CRM ${data.personId}${input.note?" — "+input.note:""}`,
+    });
+    saveCustom(arr);
+    addAcctActivity(input.company, {
+      ch:"note", title:"Prospect created in Allo",
+      body:`${input.person}${input.title?", "+input.title:""} — ${data.e164}. Allo person ${data.personId}, company ${data.companyId}.${data.reused?" Filled in an existing bare-number record rather than creating a twin.":""}`,
+      status:"logged",
+    });
+
+    const st = data.stored || {};
+    const row = (k,v,good) => `<tr><td style="padding:2px 10px 2px 0;color:var(--d-text-dim)">${esc(k)}</td><td style="padding:2px 0"><b>${v?esc(v):"<span style='color:var(--crimson-300)'>not stored</span>"}</b>${good===false?` <span style="color:var(--crimson-300)">✕</span>`:v?` ✓`:""}</td></tr>`;
+    prSay(`
+      <div class="note" style="margin-top:10px;border-color:var(--navy-600)">
+        <b>Created in Allo.</b>${data.reused?` It filled in an existing record that held this number as a bare entry rather than creating a second person.`:""}
+        ${data.noteOk?"":` <span style="color:var(--crimson-300)">The dialer note did not write.</span>`}
+        <div style="margin:8px 0 4px;font-size:12px;color:var(--d-text-dim)">What Allo returned when asked for the record back:</div>
+        <table style="font-size:12.5px;border-collapse:collapse">
+          ${row("name", st.name)}
+          ${row("job title", st.job_title)}
+          ${row("company", st.company)}
+          ${row("number", (st.numbers||[]).join(", "))}
+          ${row("email", (st.emails||[]).join(", "))}
+        </table>
+        <div style="margin-top:8px;font-size:11.5px;color:var(--d-text-dim)">person ${esc(data.personId)} · company ${esc(data.companyId)}</div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="pipeProspectModal()">Add another</button>
+        <button class="btn btn-primary" onclick="pipeModalClose();pipeCoRemount()">Done</button>
+      </div>`);
+  };
+  window.pipeCoRemount = () => remount();
+
   function tCompanies(){
     const R = window.ROSTER;
     if(!R) return `<div class="note warn"><b>Roster not loaded.</b> roster-data.js is missing from this deployment. Run <code>node scripts/build-roster.mjs</code> and redeploy.</div>`;
@@ -1275,6 +1434,7 @@
         ${colPicker()}
         <button class="btn btn-ghost" onclick="pipeCoExport()" title="Exports exactly the columns you can see, in the order you put them in">Export view</button>
         <button class="btn btn-ghost" onclick="pipeCoExportAll()" title="Every field we hold, regardless of which columns are shown">Export all fields</button>
+        <button class="btn btn-primary" onclick="pipeProspectModal()" title="Create a company, a person and a dialer note in Allo CRM, then read the record back to prove it landed">+ Create prospect</button>
         <span class="pcount-lbl">${num(rows.length)} shown</span>
       </div>
       ${rows.length?"":`<div class="note" style="margin-top:12px">No company matches these filters. <a href="#" onclick="pipeCoReset();return false">Clear them</a>.</div>`}

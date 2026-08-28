@@ -34,9 +34,15 @@
 
   const kpi = (l,v,d) => `<div class="card kpi"><div class="l">${esc(l)}</div><div class="v">${v}</div>${d?`<div class="cb-kd">${esc(d)}</div>`:""}</div>`;
 
+  /* Green is reserved for a step that is actually finished. Gold is "waiting on a person",
+     red is "blocked on something broken", grey is "parked on purpose". An unknown state falls
+     back to grey rather than green: a gate nobody has taught this map about must not render as
+     done. */
   const GATE_CLASS = {
     "NOT SPENT":"badge-gold", "NOT LOADED":"badge-red", "DEFERRED":"badge-muted",
     "BLOCKED":"badge-red", "READY":"badge-green", "WAITING ON NUMBERS":"badge-gold",
+    "DONE":"badge-green", "LOADED":"badge-green", "POPULATED":"badge-green",
+    "NOT POPULATED":"badge-red",
   };
 
   /* Victor's 2026-08-27 read added two angles. They change what the caller SAYS, so they are
@@ -48,10 +54,13 @@
 
   function rGates(){
     return `
-      <h2 class="sec"><span class="num">02</span>What is holding, and why</h2>
-      <p class="lead">Three things are deliberately not done. Each is a decision somebody has to
-      make rather than a step somebody forgot, so they are stated here instead of sitting in a
-      commit message.</p>
+      <h2 class="sec"><span class="num">02</span>Where each step stands, and why</h2>
+      <p class="lead">${C.gates.length} steps, each carrying the decision behind it rather than
+      just a state. Nothing here is a step somebody forgot, so it is stated on the page instead
+      of sitting in a commit message. ${
+        C.gates.filter(g=>/^(DONE|LOADED|POPULATED)$/.test(g.state)).length} done,
+      ${C.gates.filter(g=>!/^(DONE|LOADED|POPULATED)$/.test(g.state)).length} still a decision
+      somebody has to make.</p>
       <div class="grid g3">
         ${C.gates.map(g=>`<div class="card">
           <div class="cb-gate-h">

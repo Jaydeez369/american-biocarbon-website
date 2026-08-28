@@ -11,9 +11,9 @@
      node build-salesos-section.mjs
    ================================================================== */
 window.CRUMBLE = {
- "read": "2026-08-28 18:16 UTC",
+ "read": "2026-08-28 18:54 UTC",
  "readDate": "2026-08-28",
- "built": "2026-08-28 18:16 UTC",
+ "built": "2026-08-28 18:54 UTC",
  "generator": "sales-department/crumble-blitz/build-salesos-section.mjs",
  "spendsCredits": false,
  "product": "Absorbent Crumble",
@@ -37,19 +37,24 @@ window.CRUMBLE = {
    "LCM": 8,
    "HAULER": 10
   },
-  "numbersInHand": 59,
-  "numbersPending": 20
+  "numbersInHand": 73,
+  "numbersPending": 4
  },
  "gates": [
   {
    "what": "Apollo reveal of the 80 verified numbers",
    "state": "DONE",
-   "detail": "Bought through Apollo's bulk \"Enrich phone numbers\" on 2026-08-28, at 8-12 credits a head rather than the 1 the API list price implied. 59 personal numbers came back for 80 records; the other 20 returned a switchboard only and were NOT counted as revealed. The API route was never available: reveal_phone_number is asynchronous and needs a webhook_url."
+   "detail": "Bought through Apollo's bulk \"Enrich phone numbers\" on 2026-08-28, at 8-12 credits a head rather than the 1 the API list price implied. 76 personal numbers came back for 80 records; the other 4 returned a switchboard only and were NOT counted as revealed. The API route was never available: reveal_phone_number is asynchronous and needs a webhook_url."
   },
   {
    "what": "Allo Power Dialer load",
    "state": "LOADED",
-   "detail": "The queue builds numbers-only, which IS reversible with push-queue.mjs --clear. Only --enrich is one-way, because attaching a company name makes Allo create CRM records it has no DELETE for. 59 personal number(s) loaded as queue \"CRUMBLE 80 - personal mobiles - 2026-08-28\", do-not-disturb ENABLED and nothing dialled. Clear it with push-queue.mjs --clear."
+   "detail": "The queue builds numbers-only and is reversible with push-queue.mjs --clear. 73 personal number(s) loaded as queue \"CRUMBLE 80 - personal mobiles - 2026-08-28\", do-not-disturb ENABLED and nothing dialled. 3 number(s) held back as not dialable on a US line. Clear it with push-queue.mjs --clear."
+  },
+  {
+   "what": "Allo CRM context on the dialer card",
+   "state": "POPULATED",
+   "detail": "73 people and 46 companies created in Allo CRM by populate-allo.mjs, each carrying the number, the email and an organised note with the product, the ask, the opener, the account and the claim limits. 73 note(s) written. Spends no Apollo credits: the numbers were already bought and this is organisation. Every id is in allo-crm-ledger.json, so a re-run skips what exists and \"populate-allo.mjs --confirm --undo\" removes exactly what it made."
   },
   {
    "what": "Reserve tier (121 accounts)",
@@ -13935,6 +13940,20 @@ window.CRUMBLE = {
   },
   {
    "position": 3,
+   "number": "+17132986800",
+   "name": "Bashar Kalai",
+   "title": "President & CEO",
+   "desk": "EXEC",
+   "company": "Amerapex",
+   "website": "https://amerapex.com",
+   "icp": "AB.OG",
+   "angle": "HAULER",
+   "opener": "They haul the waste and may not supply the absorbent. Ask whether they also provide it; a no is the opening, because we make our own line.",
+   "numberType": "mobile",
+   "email": "bkalai@amerapex.com"
+  },
+  {
+   "position": 4,
    "number": "+15807992600",
    "name": "Brad Zimms",
    "title": "Vice President of Coil Tubing & Nitrogen at Cudd Pressure Control",
@@ -13948,7 +13967,7 @@ window.CRUMBLE = {
    "email": "brad.zimms@cudd.com"
   },
   {
-   "position": 4,
+   "position": 5,
    "number": "+13372523886",
    "name": "Kimberly Leleux",
    "title": "Buyer",
@@ -13962,7 +13981,7 @@ window.CRUMBLE = {
    "email": "kleleux@yjosllc.com"
   },
   {
-   "position": 5,
+   "position": 6,
    "number": "+13185648015",
    "name": "Jesse Smith",
    "title": "Regional Operations Manager",
@@ -13976,7 +13995,7 @@ window.CRUMBLE = {
    "email": "jessesmith@yjosllc.com"
   },
   {
-   "position": 6,
+   "position": 7,
    "number": "+18324446844",
    "name": "Brant Leblanc",
    "title": "President",
@@ -13990,7 +14009,7 @@ window.CRUMBLE = {
    "email": "bleblanc@rcigroup.us"
   },
   {
-   "position": 7,
+   "position": 8,
    "number": "+16307505272",
    "name": "Jayaram Subramanian",
    "title": "VP, Engineering",
@@ -14004,7 +14023,7 @@ window.CRUMBLE = {
    "email": "jayaramsubramanian@premiereinc.com"
   },
   {
-   "position": 8,
+   "position": 9,
    "number": "+12815522247",
    "name": "John Callais",
    "title": "Vice President Western Hemisphere",
@@ -14018,7 +14037,7 @@ window.CRUMBLE = {
    "email": "john.callais@enventuregt.com"
   },
   {
-   "position": 9,
+   "position": 10,
    "number": "+12145518808",
    "name": "Jon Rambo",
    "title": "President",
@@ -14032,7 +14051,7 @@ window.CRUMBLE = {
    "email": "jon.rambo@gracosvcs.com"
   },
   {
-   "position": 10,
+   "position": 11,
    "number": "+18177891666",
    "name": "Lindsey McEntire",
    "title": "Vice President Corporate Development",
@@ -14046,7 +14065,7 @@ window.CRUMBLE = {
    "email": "lmcentire@esandh.com"
   },
   {
-   "position": 11,
+   "position": 12,
    "number": "+18328497477",
    "name": "Marc Hatton",
    "title": "General Manager",
@@ -14060,7 +14079,7 @@ window.CRUMBLE = {
    "email": "marc.hatton@sageenvirotech.com"
   },
   {
-   "position": 12,
+   "position": 13,
    "number": "+17818030269",
    "name": "Amanda Barbusin",
    "title": "Procurement Coordinator",
@@ -14074,7 +14093,7 @@ window.CRUMBLE = {
    "email": "abarbusin@bdoilfield.com"
   },
   {
-   "position": 13,
+   "position": 14,
    "number": "+19365371156",
    "name": "Dwayne Walkoviak",
    "title": "Sr. Procurement Specialist",
@@ -14088,7 +14107,7 @@ window.CRUMBLE = {
    "email": "dwayne.walkoviak@enventuregt.com"
   },
   {
-   "position": 14,
+   "position": 15,
    "number": "+18327440123",
    "name": "Grechen Melara",
    "title": "Procurement Specialist",
@@ -14102,7 +14121,7 @@ window.CRUMBLE = {
    "email": "grechenmelara@premiereinc.com"
   },
   {
-   "position": 15,
+   "position": 16,
    "number": "+15703372876",
    "name": "Chad Savrock",
    "title": "HSE Consultant",
@@ -14116,7 +14135,7 @@ window.CRUMBLE = {
    "email": "csavrock@rcigroup.us"
   },
   {
-   "position": 16,
+   "position": 17,
    "number": "+15044210206",
    "name": "Dan Talbot",
    "title": "Operations Coordinator and Billing Manager at ES&H Safety and Health.",
@@ -14130,7 +14149,7 @@ window.CRUMBLE = {
    "email": "dtalbot@esandh.com"
   },
   {
-   "position": 17,
+   "position": 18,
    "number": "+18325060096",
    "name": "Jeff Fernandez",
    "title": "Operations Manager",
@@ -14144,7 +14163,35 @@ window.CRUMBLE = {
    "email": "jeff.fernandez@sageenvirotech.com"
   },
   {
-   "position": 18,
+   "position": 19,
+   "number": "+13375013512",
+   "name": "Baer Anderson",
+   "title": "Vice President of Finance",
+   "desk": "EXEC",
+   "company": "Ecoserv, LLC",
+   "website": "https://ecoserv.net",
+   "icp": "AB.OG",
+   "angle": "HAULER",
+   "opener": "They haul the waste and may not supply the absorbent. Ask whether they also provide it; a no is the opening, because we make our own line.",
+   "numberType": "mobile",
+   "email": "banderson@ecoserv.net"
+  },
+  {
+   "position": 20,
+   "number": "+16013310424",
+   "name": "Brian Lowry",
+   "title": "Regional Vice President",
+   "desk": "EXEC",
+   "company": "Vacuum Truck Rentals, LLC",
+   "website": "https://vactruckrental.com",
+   "icp": "AB.OG",
+   "angle": "HAULER",
+   "opener": "They haul the waste and may not supply the absorbent. Ask whether they also provide it; a no is the opening, because we make our own line.",
+   "numberType": "mobile",
+   "email": "blowry@vactruckrental.com"
+  },
+  {
+   "position": 21,
    "number": "+12514635489",
    "name": "Caroline Reeves",
    "title": "Vice President at SpillTech",
@@ -14158,7 +14205,7 @@ window.CRUMBLE = {
    "email": "caroliner@spilltech.com"
   },
   {
-   "position": 19,
+   "position": 22,
    "number": "+17136700666",
    "name": "Michael Fraga",
    "title": "Warehouse Manager",
@@ -14172,7 +14219,21 @@ window.CRUMBLE = {
    "email": "michaelf@spilltech.com"
   },
   {
-   "position": 20,
+   "position": 23,
+   "number": "+19185770086",
+   "name": "Allen Lawson",
+   "title": "Branch Manager",
+   "desk": "PROJECT",
+   "company": "Vacuum Truck Rentals, LLC",
+   "website": "https://vactruckrental.com",
+   "icp": "AB.OG",
+   "angle": "HAULER",
+   "opener": "They haul the waste and may not supply the absorbent. Ask whether they also provide it; a no is the opening, because we make our own line.",
+   "numberType": "mobile",
+   "email": "alawson@vactruckrental.com"
+  },
+  {
+   "position": 24,
    "number": "+15862959908",
    "name": "Adam Pomichowski",
    "title": "Vice President Finance & Strategy",
@@ -14186,7 +14247,7 @@ window.CRUMBLE = {
    "email": "apomichowski@fortisenergyservices.com"
   },
   {
-   "position": 21,
+   "position": 25,
    "number": "+13373160541",
    "name": "Amy Hains",
    "title": "Co-Owner",
@@ -14200,7 +14261,7 @@ window.CRUMBLE = {
    "email": "amy@24hr-safety.com"
   },
   {
-   "position": 22,
+   "position": 26,
    "number": "+13049823118",
    "name": "Brandon Jones",
    "title": "Vice President of Sales",
@@ -14214,7 +14275,7 @@ window.CRUMBLE = {
    "email": "bjones@reconoilfieldservices.com"
   },
   {
-   "position": 23,
+   "position": 27,
    "number": "+15122013942",
    "name": "Brent Leger",
    "title": "Vice President Finance",
@@ -14228,7 +14289,21 @@ window.CRUMBLE = {
    "email": "bleger@encoreofs.com"
   },
   {
-   "position": 24,
+   "position": 28,
+   "number": "+18039689100",
+   "name": "Chris Meldrim",
+   "title": "General Manager",
+   "desk": "EXEC",
+   "company": "Thompson Industrial Services, LLC",
+   "website": "https://industrial.thompsonind.com",
+   "icp": "AB.OG",
+   "angle": "HAULER",
+   "opener": "They haul the waste and may not supply the absorbent. Ask whether they also provide it; a no is the opening, because we make our own line.",
+   "numberType": "mobile",
+   "email": "cmeldrim@thompsonind.com"
+  },
+  {
+   "position": 29,
    "number": "+19033680750",
    "name": "Dale Nace",
    "title": "Vice President of Operations",
@@ -14242,7 +14317,7 @@ window.CRUMBLE = {
    "email": "dnace@sdspetroleumconsultants.com"
   },
   {
-   "position": 25,
+   "position": 30,
    "number": "+19852328588",
    "name": "Derek Bollom",
    "title": "Vice President - Offshore / Offsite",
@@ -14256,7 +14331,7 @@ window.CRUMBLE = {
    "email": "dbollom@qualitycompanies.com"
   },
   {
-   "position": 26,
+   "position": 31,
    "number": "+13462029175",
    "name": "Drew Krupa",
    "title": "Vice President Operations",
@@ -14270,7 +14345,7 @@ window.CRUMBLE = {
    "email": "drew.krupa@ctest.com"
   },
   {
-   "position": 27,
+   "position": 32,
    "number": "+14324889326",
    "name": "Jared Perry",
    "title": "Vice President of Business Development",
@@ -14284,7 +14359,7 @@ window.CRUMBLE = {
    "email": "jperry@goodnightmidstream.com"
   },
   {
-   "position": 28,
+   "position": 33,
    "number": "+17135409709",
    "name": "Julia Meade",
    "title": "Vice President of Global Business Development",
@@ -14298,7 +14373,7 @@ window.CRUMBLE = {
    "email": "julia.meade@workstrings.com"
   },
   {
-   "position": 29,
+   "position": 34,
    "number": "+12056028471",
    "name": "Kyle Milling",
    "title": "Vice President Corporate Affairs",
@@ -14312,7 +14387,7 @@ window.CRUMBLE = {
    "email": "kyle@wildcatoiltools.com"
   },
   {
-   "position": 30,
+   "position": 35,
    "number": "+18329436450",
    "name": "Mark Newman",
    "title": "President",
@@ -14326,7 +14401,7 @@ window.CRUMBLE = {
    "email": "mark.newman@tamintl.com"
   },
   {
-   "position": 31,
+   "position": 36,
    "number": "+13373806858",
    "name": "Brandon Labit",
    "title": "Purchasing Manager",
@@ -14340,7 +14415,7 @@ window.CRUMBLE = {
    "email": "brandon.labit@workstrings.com"
   },
   {
-   "position": 32,
+   "position": 37,
    "number": "+17138949006",
    "name": "Clara Crisostomo",
    "title": "Buyer",
@@ -14354,7 +14429,21 @@ window.CRUMBLE = {
    "email": "clara.crisostomo@tamintl.com"
   },
   {
-   "position": 33,
+   "position": 38,
+   "number": "+19563435985",
+   "name": "Jason Michalsky",
+   "title": "Senior Sourcing Specialist",
+   "desk": "PURCHASING",
+   "company": "24Hr Safety, LLC",
+   "website": "https://24hr-safety.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jasonm@24hr-safety.com"
+  },
+  {
+   "position": 39,
    "number": "+13214467263",
    "name": "Bryan Schmidt",
    "title": "Operations Manager",
@@ -14368,7 +14457,7 @@ window.CRUMBLE = {
    "email": "bryan.schmidt@onexcp.com"
   },
   {
-   "position": 34,
+   "position": 40,
    "number": "+14054282176",
    "name": "Don Sherrill",
    "title": "Operations Manager",
@@ -14382,7 +14471,7 @@ window.CRUMBLE = {
    "email": "don@wildcatoiltools.com"
   },
   {
-   "position": 35,
+   "position": 41,
    "number": "+12253236017",
    "name": "Jacob Lagrange",
    "title": "Operations Manager - Special Projects",
@@ -14396,7 +14485,7 @@ window.CRUMBLE = {
    "email": "jlagrange@qualitycompanies.com"
   },
   {
-   "position": 36,
+   "position": 42,
    "number": "+17203008968",
    "name": "Landon Kelly",
    "title": "Operations Foreman",
@@ -14410,7 +14499,7 @@ window.CRUMBLE = {
    "email": "lkelly@goodnightmidstream.com"
   },
   {
-   "position": 37,
+   "position": 43,
    "number": "+19895067879",
    "name": "Randy Martinez",
    "title": "Operations Manager",
@@ -14424,7 +14513,7 @@ window.CRUMBLE = {
    "email": "rmartinez@fortisenergyservices.com"
   },
   {
-   "position": 38,
+   "position": 44,
    "number": "+19037203907",
    "name": "Scott Stovall",
    "title": "Put Your Hands on Something",
@@ -14438,7 +14527,7 @@ window.CRUMBLE = {
    "email": "scott@sdspetroleumconsultants.com"
   },
   {
-   "position": 39,
+   "position": 45,
    "number": "+19037673275",
    "name": "Austin Wight",
    "title": "Vice President, Commercial",
@@ -14452,7 +14541,7 @@ window.CRUMBLE = {
    "email": "awight@kinetik.com"
   },
   {
-   "position": 40,
+   "position": 46,
    "number": "+17132547580",
    "name": "Chris Stover",
    "title": "Vice President, Well Control Operations",
@@ -14466,7 +14555,21 @@ window.CRUMBLE = {
    "email": "cstover@wildwell.com"
   },
   {
-   "position": 41,
+   "position": 47,
+   "number": "+12147349416",
+   "name": "Clint Miller",
+   "title": "Vice President of Gulf Coast Business Unit",
+   "desk": "EXEC",
+   "company": "Remedial Construction Services (RECON)",
+   "website": "https://reconservices.com",
+   "icp": "AB.ENV",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "clint.miller@reconservices.com"
+  },
+  {
+   "position": 48,
    "number": "+19857228234",
    "name": "Devon Robicheaux",
    "title": "General Manager",
@@ -14480,7 +14583,7 @@ window.CRUMBLE = {
    "email": "drobicheaux@economicaljanitorial.com"
   },
   {
-   "position": 42,
+   "position": 49,
    "number": "+13372981657",
    "name": "Edgar Martien",
    "title": "President",
@@ -14494,7 +14597,7 @@ window.CRUMBLE = {
    "email": "edgar@petroinc.net"
   },
   {
-   "position": 43,
+   "position": 50,
    "number": "+19728975874",
    "name": "Kelli Meyer",
    "title": "Vice President of Communications",
@@ -14508,7 +14611,7 @@ window.CRUMBLE = {
    "email": "kmeyer@vermeertexas.com"
   },
   {
-   "position": 44,
+   "position": 51,
    "number": "+15042104057",
    "name": "Martiny Steve",
    "title": "Purchasing Manager",
@@ -14522,7 +14625,21 @@ window.CRUMBLE = {
    "email": "smartiny@economicaljanitorial.com"
   },
   {
-   "position": 45,
+   "position": 52,
+   "number": "+12142369432",
+   "name": "Doug Schondel",
+   "title": "V.P of HDD Operations, North Texas Region.",
+   "desk": "OPS",
+   "company": "Vermeer Texas-Louisiana",
+   "website": "https://vermeertexas.com",
+   "icp": "AB.HDD",
+   "angle": "LCM",
+   "opener": "Lost circulation angle: crumble is a coarse granular cellulosic, the form LCM is graded on. Ask what they run for seepage to moderate losses today.",
+   "numberType": "mobile",
+   "email": "dougs@vermeertexas.com"
+  },
+  {
+   "position": 53,
    "number": "+13184707586",
    "name": "Keith Emerson",
    "title": "Rig Equipment Manager",
@@ -14536,7 +14653,7 @@ window.CRUMBLE = {
    "email": "keith.emerson@petroinc.net"
   },
   {
-   "position": 46,
+   "position": 54,
    "number": "+17136704830",
    "name": "Ryan Wilcox",
    "title": "Vice President",
@@ -14550,7 +14667,7 @@ window.CRUMBLE = {
    "email": "rwilcox@aplico.com"
   },
   {
-   "position": 47,
+   "position": 55,
    "number": "+12562480417",
    "name": "Adrian Martinez",
    "title": "Purchasing Manager",
@@ -14564,7 +14681,7 @@ window.CRUMBLE = {
    "email": "amartinez@martinsupply.com"
   },
   {
-   "position": 48,
+   "position": 56,
    "number": "+18012326846",
    "name": "Art Burns",
    "title": "Director of Procurement",
@@ -14578,7 +14695,7 @@ window.CRUMBLE = {
    "email": "art@stimchems.com"
   },
   {
-   "position": 49,
+   "position": 57,
    "number": "+18176948830",
    "name": "Bobby McDonald",
    "title": "Director of Field Operations",
@@ -14592,7 +14709,7 @@ window.CRUMBLE = {
    "email": "bobby@stimchems.com"
   },
   {
-   "position": 50,
+   "position": 58,
    "number": "+19035780281",
    "name": "Bryan Ferguson",
    "title": "Project Manager",
@@ -14606,7 +14723,7 @@ window.CRUMBLE = {
    "email": "bferguson@aplico.com"
   },
   {
-   "position": 51,
+   "position": 59,
    "number": "+12565540332",
    "name": "Ryan Wright",
    "title": "Category Manager",
@@ -14620,7 +14737,35 @@ window.CRUMBLE = {
    "email": "rgwright@martinsupply.com"
   },
   {
-   "position": 52,
+   "position": 60,
+   "number": "+14097677219",
+   "name": "Al Williams",
+   "title": "Vice President of Risk Management",
+   "desk": "EXEC",
+   "company": "AMMCO Solutions Group LLC",
+   "website": "https://ammco.com",
+   "icp": "AB.ENV",
+   "angle": "HAULER",
+   "opener": "They haul the waste and may not supply the absorbent. Ask whether they also provide it; a no is the opening, because we make our own line.",
+   "numberType": "work_direct",
+   "email": "al.williams@ammco.com"
+  },
+  {
+   "position": 61,
+   "number": "+12815703329",
+   "name": "Brent Hill",
+   "title": "Owner/Partner",
+   "desk": "EXEC",
+   "company": "Stream Environmental",
+   "website": "https://streamenvironmental.net",
+   "icp": "AB.OG",
+   "angle": "HAULER",
+   "opener": "They haul the waste and may not supply the absorbent. Ask whether they also provide it; a no is the opening, because we make our own line.",
+   "numberType": "mobile",
+   "email": "bhill@streamenvironmental.net"
+  },
+  {
+   "position": 62,
    "number": "+12055291661",
    "name": "Jimmy Pleasant",
    "title": "President and COO",
@@ -14634,7 +14779,7 @@ window.CRUMBLE = {
    "email": "jpleasant@mountainoilfield.com"
   },
   {
-   "position": 53,
+   "position": 63,
    "number": "+13372572424",
    "name": "Allen Wallace",
    "title": "Purchasing and Inventory Manager",
@@ -14648,7 +14793,7 @@ window.CRUMBLE = {
    "email": "allenwallace@quailtools.com"
   },
   {
-   "position": 54,
+   "position": 64,
    "number": "+19032358037",
    "name": "Stormy Holder",
    "title": "Purchasing / Payroll",
@@ -14662,7 +14807,21 @@ window.CRUMBLE = {
    "email": "sholder@mountainoilfield.com"
   },
   {
-   "position": 55,
+   "position": 65,
+   "number": "+19856880218",
+   "name": "Casey Guidry",
+   "title": "Operations Manager",
+   "desk": "OPS",
+   "company": "AMPOL American Pollution Control, Corp.",
+   "website": "https://ampol.net",
+   "icp": "AB.ENV",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "cguidry@ampol.net"
+  },
+  {
+   "position": 66,
    "number": "+13076798807",
    "name": "Jason Cosgrave",
    "title": "Operations Manager",
@@ -14676,7 +14835,7 @@ window.CRUMBLE = {
    "email": "jasoncosgrave@quailtools.com"
   },
   {
-   "position": 56,
+   "position": 67,
    "number": "+19414025375",
    "name": "Joslyn Ginn",
    "title": "Business Operations Manager",
@@ -14690,7 +14849,21 @@ window.CRUMBLE = {
    "email": "joslyn.ginn@ceresenv.com"
   },
   {
-   "position": 57,
+   "position": 68,
+   "number": "+12257473696",
+   "name": "Robert Lazard",
+   "title": "Project Manager",
+   "desk": "PROJECT",
+   "company": "AMPOL American Pollution Control, Corp.",
+   "website": "https://ampol.net",
+   "icp": "AB.ENV",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "rlazard@ampol.net"
+  },
+  {
+   "position": 69,
    "number": "+19852224888",
    "name": "Jacob Trapani",
    "title": "Vice President",
@@ -14704,7 +14877,21 @@ window.CRUMBLE = {
    "email": "jacob@bldllc.net"
   },
   {
-   "position": 58,
+   "position": 70,
+   "number": "+12254131273",
+   "name": "Michael Reitz",
+   "title": "President & Chief Operating Officer",
+   "desk": "EXEC",
+   "company": "WaterBridge",
+   "website": "https://h2obridge.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "michael.reitz@h2obridge.com"
+  },
+  {
+   "position": 71,
    "number": "+18328499139",
    "name": "Brenda Garces",
    "title": "Buyer Planner I",
@@ -14716,14 +14903,38 @@ window.CRUMBLE = {
    "opener": "",
    "numberType": "mobile",
    "email": "bgarces@ncsmultistage.com"
+  },
+  {
+   "position": 72,
+   "number": "+18327062141",
+   "name": "Marina Ludlow",
+   "title": "Procurement Manager",
+   "desk": "PURCHASING",
+   "company": "WaterBridge",
+   "website": "https://h2obridge.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "marina.ludlow@h2obridge.com"
   }
  ],
  "queueName": "CRUMBLE 80 - personal mobiles - 2026-08-28",
  "notDialable": [
   {
+   "name": "Raissa Torres",
+   "company": "Amerapex",
+   "number": "+5522998036935"
+  },
+  {
    "name": "Berzis Irani",
    "company": "Black Diamond Oilfield Services",
    "number": "+919607203998"
+  },
+  {
+   "name": "Dumitru Cucu",
+   "company": "Remedial Construction Services (RECON)",
+   "number": "+40748888152"
   }
  ]
 };

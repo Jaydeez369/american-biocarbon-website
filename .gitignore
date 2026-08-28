@@ -16,3 +16,6 @@ assets/spec-sheets/*.CLEAN.pdf
 spec-templates/_preview-*.pdf
 design-lab.html
 hero-lab.html
+
+# Wrangler local secrets for `wrangler pages dev`. Real API keys - never commit.
+.dev.vars
