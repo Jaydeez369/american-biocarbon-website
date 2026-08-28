@@ -34,7 +34,17 @@
 
   const kpi = (l,v,d) => `<div class="card kpi"><div class="l">${esc(l)}</div><div class="v">${v}</div>${d?`<div class="cb-kd">${esc(d)}</div>`:""}</div>`;
 
-  const GATE_CLASS = { "NOT SPENT":"badge-gold", "NOT LOADED":"badge-red", "DEFERRED":"badge-muted" };
+  const GATE_CLASS = {
+    "NOT SPENT":"badge-gold", "NOT LOADED":"badge-red", "DEFERRED":"badge-muted",
+    "BLOCKED":"badge-red", "READY":"badge-green", "WAITING ON NUMBERS":"badge-gold",
+  };
+
+  /* Victor's 2026-08-27 read added two angles. They change what the caller SAYS, so they are
+     rendered as their own band rather than folded into the account note. */
+  const ANGLE_LABEL = { LCM:"Lost circulation angle", HAULER:"Hauler angle" };
+  const angleBand = a => a.angleOpener
+    ? `<p class="cb-angle cb-angle-${esc(a.angle)}"><b>${esc(ANGLE_LABEL[a.angle]||a.angle)}</b>${esc(a.angleOpener)}</p>`
+    : "";
 
   function rGates(){
     return `
@@ -61,7 +71,13 @@
       <p class="lead">Cut from the call list to the names where a direct line changes the odds,
       two per company from different desks. <b>Every one is a confirmed Apollo yes</b> — each
       person was checked individually, so no credit buys a blank. ${num(s.verifiedYesCallFirst)}
-      confirmed yeses were available to choose ${num(s.phoneTargets)} from.</p>
+      confirmed yeses were available to choose ${num(s.phoneTargets)} from.
+      ${s.byAngle && (s.byAngle.LCM||s.byAngle.HAULER) ? `Angle mix after Victor's read:
+      <b>${num(s.byAngle.LCM||0)} lost-circulation</b>, <b>${num(s.byAngle.HAULER||0)} hauler</b>,
+      ${num(s.byAngle.DIRECT||0)} direct.` : ""}</p>
+      <div class="note"><b>${num(s.numbersInHand)} of ${num(s.phoneTargets)} numbers are in hand.</b>
+      Apollo delivers a phone reveal asynchronously and refuses <code>reveal_phone_number</code> without a
+      <code>webhook_url</code>, so the numbers land on a webhook rather than in the response. See the gate above.</div>
       <div class="tbl-wrap"><table class="cb-tbl">
         <thead><tr><th>#</th><th>Name</th><th>Title</th><th>Desk</th><th>Company</th><th>ICP</th><th>Where</th></tr></thead>
         <tbody>
@@ -95,6 +111,7 @@
               <span>${esc(a.city)}${a.state?", "+esc(a.state):""}</span>
               <span>${a.roadMi?esc(a.roadMi)+" road mi":"distance unknown"}</span>
               <span>fit ${esc(a.fit)}</span>
+              ${a.angle && a.angle!=="DIRECT"?`<span class="cb-angle-tag cb-angle-${esc(a.angle)}">${esc(a.angle)}</span>`:""}
               ${a.targets?`<span class="cb-tgt">${a.targets} phone target${a.targets>1?"s":""}</span>`:""}
             </div>
           </div>
@@ -102,6 +119,7 @@
             ${a.note?`<em>${esc(a.note)}</em>`:""}</div>
         </div>
         <p class="cb-why">${esc(a.why)}</p>
+        ${angleBand(a)}
         ${a.trigger?`<p class="cb-trig"><b>Open with</b> ${esc(a.trigger)}</p>`:""}
         <div class="tbl-wrap"><table class="cb-tbl">
           <thead><tr><th>Seat</th><th>Name</th><th>Title</th><th>Desk</th><th>Email</th><th>Emailed</th><th>Phone target</th></tr></thead>
