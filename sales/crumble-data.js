@@ -11,9 +11,9 @@
      node build-salesos-section.mjs
    ================================================================== */
 window.CRUMBLE = {
- "read": "2026-08-28 18:54 UTC",
+ "read": "2026-08-28 19:20 UTC",
  "readDate": "2026-08-28",
- "built": "2026-08-28 18:54 UTC",
+ "built": "2026-08-28 19:20 UTC",
  "generator": "sales-department/crumble-blitz/build-salesos-section.mjs",
  "spendsCredits": false,
  "product": "Absorbent Crumble",
