@@ -12,8 +12,8 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-08-27 05:42 UTC",
-  "readDate": "2026-08-27",
+  "read": "2026-08-28 18:41 UTC",
+  "readDate": "2026-08-28",
   "source": "snapshot",
   "inWorkspace": 15,
   "launched": 8,
@@ -38,28 +38,28 @@ window.INSTANTLY_LIVE = {
   "totals": {
     "campaigns": 15,
     "leads": 595,
-    "contacted": 617,
-    "sent": 715,
-    "replies": 5,
-    "bounced": 4,
+    "contacted": 732,
+    "sent": 840,
+    "replies": 7,
+    "bounced": 5,
     "unsubscribed": 0
   },
   "byLine": {
     "absorbent": {
       "campaigns": 9,
       "leads": 367,
-      "contacted": 328,
-      "sent": 411,
+      "contacted": 413,
+      "sent": 463,
       "replies": 2,
-      "bounced": 0,
+      "bounced": 1,
       "unsubscribed": 0
     },
     "biochar": {
       "campaigns": 6,
       "leads": 228,
-      "contacted": 289,
-      "sent": 304,
-      "replies": 3,
+      "contacted": 319,
+      "sent": 377,
+      "replies": 5,
       "bounced": 4,
       "unsubscribed": 0
     }
@@ -90,7 +90,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 48,
-      "sent": 93,
+      "sent": 96,
       "replies": 0,
       "bounced": 0
     },
@@ -101,7 +101,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 52,
-      "sent": 94,
+      "sent": 103,
       "replies": 0,
       "bounced": 0
     },
@@ -167,9 +167,9 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 191,
-      "sent": 97,
+      "sent": 137,
       "replies": 1,
-      "bounced": 0
+      "bounced": 1
     },
     {
       "name": "BC-BLEND · Soil & Media Blenders · R1",
@@ -211,8 +211,8 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 180,
-      "sent": 194,
-      "replies": 1,
+      "sent": 254,
+      "replies": 3,
       "bounced": 2
     },
     {
@@ -222,7 +222,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 47,
-      "sent": 107,
+      "sent": 120,
       "replies": 2,
       "bounced": 2
     },

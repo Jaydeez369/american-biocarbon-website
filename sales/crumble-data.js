@@ -11,9 +11,9 @@
      node build-salesos-section.mjs
    ================================================================== */
 window.CRUMBLE = {
- "read": "2026-08-28 18:16 UTC",
+ "read": "2026-08-28 18:43 UTC",
  "readDate": "2026-08-28",
- "built": "2026-08-28 18:16 UTC",
+ "built": "2026-08-28 18:43 UTC",
  "generator": "sales-department/crumble-blitz/build-salesos-section.mjs",
  "spendsCredits": false,
  "product": "Absorbent Crumble",
@@ -44,12 +44,17 @@ window.CRUMBLE = {
   {
    "what": "Apollo reveal of the 80 verified numbers",
    "state": "DONE",
-   "detail": "Bought through Apollo's bulk \"Enrich phone numbers\" on 2026-08-28, at 8-12 credits a head rather than the 1 the API list price implied. 59 personal numbers came back for 80 records; the other 20 returned a switchboard only and were NOT counted as revealed. The API route was never available: reveal_phone_number is asynchronous and needs a webhook_url."
+   "detail": "Bought through Apollo's bulk \"Enrich phone numbers\" on 2026-08-28, at 8-12 credits a head rather than the 1 the API list price implied. 60 personal numbers came back for 80 records; the other 20 returned a switchboard only and were NOT counted as revealed. The API route was never available: reveal_phone_number is asynchronous and needs a webhook_url."
   },
   {
    "what": "Allo Power Dialer load",
    "state": "LOADED",
-   "detail": "The queue builds numbers-only, which IS reversible with push-queue.mjs --clear. Only --enrich is one-way, because attaching a company name makes Allo create CRM records it has no DELETE for. 59 personal number(s) loaded as queue \"CRUMBLE 80 - personal mobiles - 2026-08-28\", do-not-disturb ENABLED and nothing dialled. Clear it with push-queue.mjs --clear."
+   "detail": "The queue builds numbers-only and is reversible with push-queue.mjs --clear. 59 personal number(s) loaded as queue \"CRUMBLE 80 - personal mobiles - 2026-08-28\", do-not-disturb ENABLED and nothing dialled. 1 number(s) held back as not dialable on a US line. Clear it with push-queue.mjs --clear."
+  },
+  {
+   "what": "Allo CRM context on the dialer card",
+   "state": "POPULATED",
+   "detail": "59 people and 37 companies created in Allo CRM by populate-allo.mjs, each carrying the number, the email and an organised note with the product, the ask, the opener, the account and the claim limits. 59 note(s) written. Spends no Apollo credits: the numbers were already bought and this is organisation. Every id is in allo-crm-ledger.json, so a re-run skips what exists and \"populate-allo.mjs --confirm --undo\" removes exactly what it made."
   },
   {
    "what": "Reserve tier (121 accounts)",

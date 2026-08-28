@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Exercises the three /api routes the way Cloudflare will call them.
+/* Exercises the four /api routes the way Cloudflare will call them.
  *
  *     node scripts/test-api-routes.mjs          fail-soft paths only, no network
  *     NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem \
@@ -36,6 +36,7 @@ const LIVE = process.argv.includes('--live')
 const { onRequestGet: allo } = await import('../sales/functions/api/allo.js')
 const { onRequestGet: instantly } = await import('../sales/functions/api/instantly.js')
 const { onRequestGet: apollo } = await import('../sales/functions/api/apollo.js')
+const { onRequestPost: prospect, onRequestGet: prospectGet } = await import('../sales/functions/api/prospect.js')
 
 let pass = 0, fail = 0
 const ok = (n, c, d = '') => c ? (pass++, console.log(`  ok    ${n}`)) : (fail++, console.error(`  FAIL  ${n}${d ? `\n          ${d}` : ''}`))
@@ -111,6 +112,69 @@ if (LIVE) {
     ok('key reports valid', a.body.keyValid === true, JSON.stringify(a.body).slice(0, 160))
     ok('no credit figure is invented', a.body.credits === undefined && a.body.spendsCredits === false)
   }
+}
+
+
+/* ---------------------------------------------------------------- /api/prospect
+   The only WRITE route on the project, so it is tested to a different standard than the three
+   readers: the thing that must be proven is that nothing reaches Allo unless the input is
+   good. Every case below is asserted WITHOUT a key, so this section cannot create a record
+   even if the logic regressed — the "no key" and "bad input" guards are what is under test,
+   and both must trip before any network call is attempted.
+
+   NOTE the deliberate difference in posture from the readers above. A reader that fails soft
+   leaves a dated snapshot on screen, which beats an error. A create that failed soft would
+   tell somebody their prospect is in Allo when it is not, so these return 4xx and say why. */
+console.log('\n/api/prospect refuses before it writes')
+{
+  const post = async (env, body) => {
+    const res = await prospect({ env, request: new Request('https://sales.example/api/prospect', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: typeof body === 'string' ? body : JSON.stringify(body),
+    }) })
+    return { status: res.status, body: await res.json() }
+  }
+  const good = { person: 'Bill Trahan', company: 'Knight Oil Tools', number: '(337) 581-2756' }
+
+  const unset = await post({}, good)
+  ok('no key: refuses rather than throwing', unset.body.ok === false && unset.body.reason === 'not-configured', JSON.stringify(unset.body).slice(0, 140))
+
+  const blank = await post({ ALLO_API_KEY: '   ' }, good)
+  ok('whitespace key counts as unset', blank.body.ok === false && blank.body.reason === 'not-configured')
+
+  const notJson = await post({ ALLO_API_KEY: 'k' }, 'not json at all')
+  ok('a non-JSON body is a 400, not a 500', notJson.status === 400 && notJson.body.reason === 'bad-request', `got ${notJson.status}`)
+
+  /* The +91 mobile Apollo returned for a real person at Black Diamond on 2026-08-28 reached
+     the Power Dialer. It must not be creatable by hand either. */
+  const foreign = await post({ ALLO_API_KEY: 'k' }, { ...good, number: '+919607203998' })
+  ok('a non-NANP number is rejected before any write', foreign.status === 400 && foreign.body.reason === 'invalid', JSON.stringify(foreign.body).slice(0, 140))
+  ok('and the rejection says which field', /number/.test(foreign.body.error || ''), foreign.body.error)
+
+  const noNumber = await post({ ALLO_API_KEY: 'k' }, { person: 'A B', company: 'C' })
+  ok('a prospect with no number is refused', noNumber.status === 400 && /number/.test(noNumber.body.error || ''), noNumber.body.error)
+
+  const noPerson = await post({ ALLO_API_KEY: 'k' }, { company: 'C', number: '3375812756' })
+  ok('a prospect with no person is refused', noPerson.status === 400, `got ${noPerson.status}`)
+
+  const badEmail = await post({ ALLO_API_KEY: 'k' }, { ...good, email: 'not-an-email' })
+  ok('a malformed email is refused', badEmail.status === 400 && /email/.test(badEmail.body.error || ''), badEmail.body.error)
+
+  const g = await prospectGet()
+  ok('GET explains itself instead of 404ing', g.status === 405)
+}
+
+/* The shared module is what both the edge route and salesos-tests/test-prospect-e2e.mjs run,
+   so a regression in it breaks the button and the test in the same way. These two assertions
+   are cheap and lock the field names that this API silently drops. */
+console.log('\nthe Allo person field names, which are silently dropped when wrong')
+{
+  const { nameFields, normalizeNANP } = await import('../sales/functions/_lib/prospect.js')
+  const f = nameFields('Bill Trahan')
+  ok('full name goes in `name`', f.name === 'Bill Trahan', JSON.stringify(f))
+  ok('last_name stays empty so the card does not read "Bill Trahan Trahan"', f.last_name === '')
+  ok('there is no first_name field (Allo returns 200 and drops it)', !('first_name' in f))
+  ok('NANP normalises to E.164', normalizeNANP('(337) 581-2756').e164 === '+13375812756')
 }
 
 console.log(`\n${pass} passed, ${fail} failed`)
