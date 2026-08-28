@@ -11,9 +11,9 @@
      node build-salesos-section.mjs
    ================================================================== */
 window.CRUMBLE = {
- "read": "2026-08-28 15:10 UTC",
+ "read": "2026-08-28 18:16 UTC",
  "readDate": "2026-08-28",
- "built": "2026-08-28 15:10 UTC",
+ "built": "2026-08-28 18:16 UTC",
  "generator": "sales-department/crumble-blitz/build-salesos-section.mjs",
  "spendsCredits": false,
  "product": "Absorbent Crumble",
@@ -28,28 +28,28 @@ window.CRUMBLE = {
   "verifiedYes": 579,
   "verifiedYesCallFirst": 243,
   "verifiedChecked": 624,
-  "phoneTargets": 100,
-  "phoneTargetCompanies": 59,
-  "creditsIfBought": 100,
+  "phoneTargets": 80,
+  "phoneTargetCompanies": 46,
+  "creditsIfBought": 80,
   "creditsAvailable": 1049,
   "byAngle": {
-   "DIRECT": 75,
-   "LCM": 14,
-   "HAULER": 11
+   "DIRECT": 62,
+   "LCM": 8,
+   "HAULER": 10
   },
-  "numbersInHand": 0,
-  "numbersPending": 100
+  "numbersInHand": 59,
+  "numbersPending": 20
  },
  "gates": [
   {
-   "what": "Apollo reveal of the 100 verified numbers",
-   "state": "BLOCKED",
-   "detail": "Apollo delivers a phone reveal asynchronously and refuses reveal_phone_number without a webhook_url. Our allo-hooks Worker can receive it, but the Cloudflare API token in .env sees zero accounts and cannot deploy or touch D1. Needs a token with Workers Scripts:Edit, D1:Edit and Workers KV Storage:Edit. ~100 credits of 1,049 once unblocked; every row is already a confirmed Apollo yes."
+   "what": "Apollo reveal of the 80 verified numbers",
+   "state": "DONE",
+   "detail": "Bought through Apollo's bulk \"Enrich phone numbers\" on 2026-08-28, at 8-12 credits a head rather than the 1 the API list price implied. 59 personal numbers came back for 80 records; the other 20 returned a switchboard only and were NOT counted as revealed. The API route was never available: reveal_phone_number is asynchronous and needs a webhook_url."
   },
   {
    "what": "Allo Power Dialer load",
-   "state": "WAITING ON NUMBERS",
-   "detail": "The queue builds numbers-only, which IS reversible with push-queue.mjs --clear. Only --enrich is one-way, because attaching a company name makes Allo create CRM records it has no DELETE for. 0 number(s) in hand, 100 pending a reveal."
+   "state": "LOADED",
+   "detail": "The queue builds numbers-only, which IS reversible with push-queue.mjs --clear. Only --enrich is one-way, because attaching a company name makes Allo create CRM records it has no DELETE for. 59 personal number(s) loaded as queue \"CRUMBLE 80 - personal mobiles - 2026-08-28\", do-not-disturb ENABLED and nothing dialled. Clear it with push-queue.mjs --clear."
   },
   {
    "what": "Reserve tier (121 accounts)",
@@ -3202,9 +3202,9 @@ window.CRUMBLE = {
      "email": "brendand@bldllc.net",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 82,
-     "apolloId": "60ba7c06b2af2900014cfe9b"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 3,
@@ -3231,7 +3231,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 2
+   "targets": 1
   },
   {
    "domain": "stabildrill.com",
@@ -3264,9 +3264,9 @@ window.CRUMBLE = {
      "email": "hunter.beebe@stabildrill.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 81,
-     "apolloId": "5f5a7549d3277800012b6781"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -3305,7 +3305,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 1
+   "targets": 0
   },
   {
    "domain": "ncsmultistage.com",
@@ -3474,9 +3474,9 @@ window.CRUMBLE = {
      "email": "kayla@lindamood.net",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 84,
-     "apolloId": "66fc14b4ecbb9b0001a508df"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -3486,9 +3486,9 @@ window.CRUMBLE = {
      "email": "james@lindamood.net",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 89,
-     "apolloId": "5abfc07ca6da98cf5f045fc7"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 3,
@@ -3515,7 +3515,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 2
+   "targets": 0
   },
   {
    "domain": "cpmpipelines.com",
@@ -3548,9 +3548,9 @@ window.CRUMBLE = {
      "email": "craig@cpmpipelines.com",
      "emailed": "no",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 83,
-     "apolloId": "54a5c32a7468693676e5e6a5"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -3572,9 +3572,9 @@ window.CRUMBLE = {
      "email": "david@cpmpipelines.com",
      "emailed": "no",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 88,
-     "apolloId": "5ab2e2a4a6da9870c15527a4"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 4,
@@ -3589,7 +3589,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 2
+   "targets": 0
   },
   {
    "domain": "vermeersoutheast.com",
@@ -3622,9 +3622,9 @@ window.CRUMBLE = {
      "email": "markmiller@vermeersoutheast.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 85,
-     "apolloId": "66eed6455ced090001cf36b2"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -3634,9 +3634,9 @@ window.CRUMBLE = {
      "email": "tobysmith@vermeersoutheast.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 86,
-     "apolloId": "6535b81900d76600019ab57d"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 3,
@@ -3663,7 +3663,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 2
+   "targets": 0
   },
   {
    "domain": "hexacontainment.com",
@@ -3708,9 +3708,9 @@ window.CRUMBLE = {
      "email": "oscar.olmos@hexacontainment.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 87,
-     "apolloId": "6154bc0dba111e000151f12b"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 3,
@@ -3725,7 +3725,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 1
+   "targets": 0
   },
   {
    "domain": "taslp.com",
@@ -3758,9 +3758,9 @@ window.CRUMBLE = {
      "email": "cbonilla@taslp.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 91,
-     "apolloId": "66febc46a6bb820001c55f09"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -3799,7 +3799,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 1
+   "targets": 0
   },
   {
    "domain": "usdredge.com",
@@ -3832,9 +3832,9 @@ window.CRUMBLE = {
      "email": "ken@usdredge.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 93,
-     "apolloId": "66f1b9d179bb740001b11756"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -3844,9 +3844,9 @@ window.CRUMBLE = {
      "email": "csmith@usdredge.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 98,
-     "apolloId": "613b107b1ed9ab0001e46c52"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 3,
@@ -3861,7 +3861,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 2
+   "targets": 0
   },
   {
    "domain": "colbysupply.com",
@@ -3894,9 +3894,9 @@ window.CRUMBLE = {
      "email": "colin@colbysupply.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 92,
-     "apolloId": "66ff0e4804b8ba0001e3b9de"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -3906,12 +3906,12 @@ window.CRUMBLE = {
      "email": "angie@colbysupply.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 97,
-     "apolloId": "6513aec89d78b300018e9454"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     }
    ],
-   "targets": 2
+   "targets": 0
   },
   {
    "domain": "cepsorbents.com",
@@ -3956,12 +3956,12 @@ window.CRUMBLE = {
      "email": "slee@cepsorbents.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 96,
-     "apolloId": "5addcc4fa6da984ca5d96118"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     }
    ],
-   "targets": 1
+   "targets": 0
   },
   {
    "domain": "afflink.com",
@@ -3994,9 +3994,9 @@ window.CRUMBLE = {
      "email": "rwright@afflink.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 94,
-     "apolloId": "6108f3b98b4a5500013bedf9"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -4011,7 +4011,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 1
+   "targets": 0
   },
   {
    "domain": "e3enviro.com",
@@ -4044,9 +4044,9 @@ window.CRUMBLE = {
      "email": "dguillory@e3enviro.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 99,
-     "apolloId": "54c2b7a47468697af743dbbe"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -4085,7 +4085,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 1
+   "targets": 0
   },
   {
    "domain": "btconstruction.com",
@@ -4118,9 +4118,9 @@ window.CRUMBLE = {
      "email": "chris.gray@btconstruction.com",
      "emailed": "no",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 90,
-     "apolloId": "5b264cf7a6da98787ccd8403"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -4159,7 +4159,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 1
+   "targets": 0
   },
   {
    "domain": "cleancoastsupply.com",
@@ -4192,9 +4192,9 @@ window.CRUMBLE = {
      "email": "ronnie@cleancoastsupply.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 95,
-     "apolloId": "60c1cfc83b5cee00012089f8"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 2,
@@ -4204,9 +4204,9 @@ window.CRUMBLE = {
      "email": "alisa@cleancoastsupply.com",
      "emailed": "yes",
      "emailNote": "",
-     "phoneTarget": true,
-     "targetNo": 100,
-     "apolloId": "6535aae04295080001c41c8a"
+     "phoneTarget": false,
+     "targetNo": null,
+     "apolloId": ""
     },
     {
      "seat": 3,
@@ -4221,7 +4221,7 @@ window.CRUMBLE = {
      "apolloId": ""
     }
    ],
-   "targets": 2
+   "targets": 0
   },
   {
    "domain": "stellaenv.com",
@@ -13888,6 +13888,842 @@ window.CRUMBLE = {
     }
    ],
    "targets": 0
+  }
+ ],
+ "dialOrder": [
+  {
+   "position": 0,
+   "number": "+13375812756",
+   "name": "Bill Trahan",
+   "title": "General Manager",
+   "desk": "EXEC",
+   "company": "Knight Oil Tools",
+   "website": "https://ke.services",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "billt@rogersoiltools.com"
+  },
+  {
+   "position": 1,
+   "number": "+14326614466",
+   "name": "Francisco Bermudez",
+   "title": "Vice President, Global Cementing",
+   "desk": "EXEC",
+   "company": "Impact Fluid Solutions",
+   "website": "https://impact-fluids.com",
+   "icp": "AB.OG",
+   "angle": "LCM",
+   "opener": "Lost circulation angle: crumble is a coarse granular cellulosic, the form LCM is graded on. Ask what they run for seepage to moderate losses today.",
+   "numberType": "mobile",
+   "email": "francisco.bermudez@impact-fluids.com"
+  },
+  {
+   "position": 2,
+   "number": "+14053172199",
+   "name": "Courtney Brackin",
+   "title": "President & CEO",
+   "desk": "EXEC",
+   "company": "OMNI Environmental Solutions",
+   "website": "https://omnienvironmentalsolutions.com",
+   "icp": "AB.OG",
+   "angle": "HAULER",
+   "opener": "They haul the waste and may not supply the absorbent. Ask whether they also provide it; a no is the opening, because we make our own line.",
+   "numberType": "mobile",
+   "email": "courtney.brackin@oesinc.com"
+  },
+  {
+   "position": 3,
+   "number": "+15807992600",
+   "name": "Brad Zimms",
+   "title": "Vice President of Coil Tubing & Nitrogen at Cudd Pressure Control",
+   "desk": "EXEC",
+   "company": "CUDD Pressure Control",
+   "website": "https://cuddpressure.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "brad.zimms@cudd.com"
+  },
+  {
+   "position": 4,
+   "number": "+13372523886",
+   "name": "Kimberly Leleux",
+   "title": "Buyer",
+   "desk": "PURCHASING",
+   "company": "Yellowjacket Oilfield Services",
+   "website": "https://yjosllc.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "kleleux@yjosllc.com"
+  },
+  {
+   "position": 5,
+   "number": "+13185648015",
+   "name": "Jesse Smith",
+   "title": "Regional Operations Manager",
+   "desk": "OPS",
+   "company": "Yellowjacket Oilfield Services",
+   "website": "https://yjosllc.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jessesmith@yjosllc.com"
+  },
+  {
+   "position": 6,
+   "number": "+18324446844",
+   "name": "Brant Leblanc",
+   "title": "President",
+   "desk": "EXEC",
+   "company": "RCI Energy Group",
+   "website": "https://rcigroup.us",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "bleblanc@rcigroup.us"
+  },
+  {
+   "position": 7,
+   "number": "+16307505272",
+   "name": "Jayaram Subramanian",
+   "title": "VP, Engineering",
+   "desk": "EXEC",
+   "company": "Premiere Inc.",
+   "website": "https://premiereinc.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jayaramsubramanian@premiereinc.com"
+  },
+  {
+   "position": 8,
+   "number": "+12815522247",
+   "name": "John Callais",
+   "title": "Vice President Western Hemisphere",
+   "desk": "EXEC",
+   "company": "Enventure Global Technology Inc.",
+   "website": "https://enventuregt.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "john.callais@enventuregt.com"
+  },
+  {
+   "position": 9,
+   "number": "+12145518808",
+   "name": "Jon Rambo",
+   "title": "President",
+   "desk": "EXEC",
+   "company": "Graco Oilfield Services",
+   "website": "https://gracooilfieldservices.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jon.rambo@gracosvcs.com"
+  },
+  {
+   "position": 10,
+   "number": "+18177891666",
+   "name": "Lindsey McEntire",
+   "title": "Vice President Corporate Development",
+   "desk": "EXEC",
+   "company": "Environmental Safety and Health Consulting Services",
+   "website": "https://esandh.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "lmcentire@esandh.com"
+  },
+  {
+   "position": 11,
+   "number": "+18328497477",
+   "name": "Marc Hatton",
+   "title": "General Manager",
+   "desk": "EXEC",
+   "company": "Sage Enviro Tech, LTD",
+   "website": "https://sageenvirotech.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "marc.hatton@sageenvirotech.com"
+  },
+  {
+   "position": 12,
+   "number": "+17818030269",
+   "name": "Amanda Barbusin",
+   "title": "Procurement Coordinator",
+   "desk": "PURCHASING",
+   "company": "Black Diamond Oilfield Services",
+   "website": "https://bdoilfield.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "abarbusin@bdoilfield.com"
+  },
+  {
+   "position": 13,
+   "number": "+19365371156",
+   "name": "Dwayne Walkoviak",
+   "title": "Sr. Procurement Specialist",
+   "desk": "PURCHASING",
+   "company": "Enventure Global Technology Inc.",
+   "website": "https://enventuregt.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "dwayne.walkoviak@enventuregt.com"
+  },
+  {
+   "position": 14,
+   "number": "+18327440123",
+   "name": "Grechen Melara",
+   "title": "Procurement Specialist",
+   "desk": "PURCHASING",
+   "company": "Premiere Inc.",
+   "website": "https://premiereinc.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "grechenmelara@premiereinc.com"
+  },
+  {
+   "position": 15,
+   "number": "+15703372876",
+   "name": "Chad Savrock",
+   "title": "HSE Consultant",
+   "desk": "OPS",
+   "company": "RCI Energy Group",
+   "website": "https://rcigroup.us",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "csavrock@rcigroup.us"
+  },
+  {
+   "position": 16,
+   "number": "+15044210206",
+   "name": "Dan Talbot",
+   "title": "Operations Coordinator and Billing Manager at ES&H Safety and Health.",
+   "desk": "OPS",
+   "company": "Environmental Safety and Health Consulting Services",
+   "website": "https://esandh.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "dtalbot@esandh.com"
+  },
+  {
+   "position": 17,
+   "number": "+18325060096",
+   "name": "Jeff Fernandez",
+   "title": "Operations Manager",
+   "desk": "OPS",
+   "company": "Sage Enviro Tech, LTD",
+   "website": "https://sageenvirotech.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jeff.fernandez@sageenvirotech.com"
+  },
+  {
+   "position": 18,
+   "number": "+12514635489",
+   "name": "Caroline Reeves",
+   "title": "Vice President at SpillTech",
+   "desk": "EXEC",
+   "company": "SpillTech",
+   "website": "https://spilltech.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "caroliner@spilltech.com"
+  },
+  {
+   "position": 19,
+   "number": "+17136700666",
+   "name": "Michael Fraga",
+   "title": "Warehouse Manager",
+   "desk": "OPS",
+   "company": "SpillTech",
+   "website": "https://spilltech.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "work_direct",
+   "email": "michaelf@spilltech.com"
+  },
+  {
+   "position": 20,
+   "number": "+15862959908",
+   "name": "Adam Pomichowski",
+   "title": "Vice President Finance & Strategy",
+   "desk": "EXEC",
+   "company": "Fortis Energy Services, Inc.",
+   "website": "https://fortisenergyservices.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "apomichowski@fortisenergyservices.com"
+  },
+  {
+   "position": 21,
+   "number": "+13373160541",
+   "name": "Amy Hains",
+   "title": "Co-Owner",
+   "desk": "EXEC",
+   "company": "24Hr Safety, LLC",
+   "website": "https://24hr-safety.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "amy@24hr-safety.com"
+  },
+  {
+   "position": 22,
+   "number": "+13049823118",
+   "name": "Brandon Jones",
+   "title": "Vice President of Sales",
+   "desk": "EXEC",
+   "company": "Recon Oilfield Services",
+   "website": "https://reconoilfieldservices.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "bjones@reconoilfieldservices.com"
+  },
+  {
+   "position": 23,
+   "number": "+15122013942",
+   "name": "Brent Leger",
+   "title": "Vice President Finance",
+   "desk": "EXEC",
+   "company": "Encore Oilfield Services, LLC",
+   "website": "https://encoreofs.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "bleger@encoreofs.com"
+  },
+  {
+   "position": 24,
+   "number": "+19033680750",
+   "name": "Dale Nace",
+   "title": "Vice President of Operations",
+   "desk": "EXEC",
+   "company": "SDS Petroleum Consultants",
+   "website": "https://sdspetroleumconsultants.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "dnace@sdspetroleumconsultants.com"
+  },
+  {
+   "position": 25,
+   "number": "+19852328588",
+   "name": "Derek Bollom",
+   "title": "Vice President - Offshore / Offsite",
+   "desk": "EXEC",
+   "company": "Quality Companies",
+   "website": "https://qualitycompanies.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "dbollom@qualitycompanies.com"
+  },
+  {
+   "position": 26,
+   "number": "+13462029175",
+   "name": "Drew Krupa",
+   "title": "Vice President Operations",
+   "desk": "EXEC",
+   "company": "One X: A Completions Partner",
+   "website": "https://onexcp.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "drew.krupa@ctest.com"
+  },
+  {
+   "position": 27,
+   "number": "+14324889326",
+   "name": "Jared Perry",
+   "title": "Vice President of Business Development",
+   "desk": "EXEC",
+   "company": "Goodnight Midstream",
+   "website": "https://goodnightmidstream.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jperry@goodnightmidstream.com"
+  },
+  {
+   "position": 28,
+   "number": "+17135409709",
+   "name": "Julia Meade",
+   "title": "Vice President of Global Business Development",
+   "desk": "EXEC",
+   "company": "Workstrings International",
+   "website": "https://workstringsinternational.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "julia.meade@workstrings.com"
+  },
+  {
+   "position": 29,
+   "number": "+12056028471",
+   "name": "Kyle Milling",
+   "title": "Vice President Corporate Affairs",
+   "desk": "EXEC",
+   "company": "Wildcat Oil Tools",
+   "website": "https://wildcatoiltools.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "kyle@wildcatoiltools.com"
+  },
+  {
+   "position": 30,
+   "number": "+18329436450",
+   "name": "Mark Newman",
+   "title": "President",
+   "desk": "EXEC",
+   "company": "TAM International",
+   "website": "https://tamintl.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "mark.newman@tamintl.com"
+  },
+  {
+   "position": 31,
+   "number": "+13373806858",
+   "name": "Brandon Labit",
+   "title": "Purchasing Manager",
+   "desk": "PURCHASING",
+   "company": "Workstrings International",
+   "website": "https://workstringsinternational.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "brandon.labit@workstrings.com"
+  },
+  {
+   "position": 32,
+   "number": "+17138949006",
+   "name": "Clara Crisostomo",
+   "title": "Buyer",
+   "desk": "PURCHASING",
+   "company": "TAM International",
+   "website": "https://tamintl.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "clara.crisostomo@tamintl.com"
+  },
+  {
+   "position": 33,
+   "number": "+13214467263",
+   "name": "Bryan Schmidt",
+   "title": "Operations Manager",
+   "desk": "OPS",
+   "company": "One X: A Completions Partner",
+   "website": "https://onexcp.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "bryan.schmidt@onexcp.com"
+  },
+  {
+   "position": 34,
+   "number": "+14054282176",
+   "name": "Don Sherrill",
+   "title": "Operations Manager",
+   "desk": "OPS",
+   "company": "Wildcat Oil Tools",
+   "website": "https://wildcatoiltools.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "don@wildcatoiltools.com"
+  },
+  {
+   "position": 35,
+   "number": "+12253236017",
+   "name": "Jacob Lagrange",
+   "title": "Operations Manager - Special Projects",
+   "desk": "OPS",
+   "company": "Quality Companies",
+   "website": "https://qualitycompanies.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jlagrange@qualitycompanies.com"
+  },
+  {
+   "position": 36,
+   "number": "+17203008968",
+   "name": "Landon Kelly",
+   "title": "Operations Foreman",
+   "desk": "OPS",
+   "company": "Goodnight Midstream",
+   "website": "https://goodnightmidstream.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "lkelly@goodnightmidstream.com"
+  },
+  {
+   "position": 37,
+   "number": "+19895067879",
+   "name": "Randy Martinez",
+   "title": "Operations Manager",
+   "desk": "OPS",
+   "company": "Fortis Energy Services, Inc.",
+   "website": "https://fortisenergyservices.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "rmartinez@fortisenergyservices.com"
+  },
+  {
+   "position": 38,
+   "number": "+19037203907",
+   "name": "Scott Stovall",
+   "title": "Put Your Hands on Something",
+   "desk": "OTHER",
+   "company": "SDS Petroleum Consultants",
+   "website": "https://sdspetroleumconsultants.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "scott@sdspetroleumconsultants.com"
+  },
+  {
+   "position": 39,
+   "number": "+19037673275",
+   "name": "Austin Wight",
+   "title": "Vice President, Commercial",
+   "desk": "EXEC",
+   "company": "Kinetik",
+   "website": "https://kinetik.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "awight@kinetik.com"
+  },
+  {
+   "position": 40,
+   "number": "+17132547580",
+   "name": "Chris Stover",
+   "title": "Vice President, Well Control Operations",
+   "desk": "EXEC",
+   "company": "Wild Well",
+   "website": "https://wildwell.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "cstover@wildwell.com"
+  },
+  {
+   "position": 41,
+   "number": "+19857228234",
+   "name": "Devon Robicheaux",
+   "title": "General Manager",
+   "desk": "EXEC",
+   "company": "Economical Janitorial & Paper Supplies, LLC",
+   "website": "https://economicaljanitorial.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "drobicheaux@economicaljanitorial.com"
+  },
+  {
+   "position": 42,
+   "number": "+13372981657",
+   "name": "Edgar Martien",
+   "title": "President",
+   "desk": "EXEC",
+   "company": "Petroleum Co-Ordinators, Inc.",
+   "website": "https://petroinc.net",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "edgar@petroinc.net"
+  },
+  {
+   "position": 43,
+   "number": "+19728975874",
+   "name": "Kelli Meyer",
+   "title": "Vice President of Communications",
+   "desk": "EXEC",
+   "company": "Vermeer Texas-Louisiana",
+   "website": "https://vermeertexas.com",
+   "icp": "AB.HDD",
+   "angle": "LCM",
+   "opener": "Lost circulation angle: crumble is a coarse granular cellulosic, the form LCM is graded on. Ask what they run for seepage to moderate losses today.",
+   "numberType": "mobile",
+   "email": "kmeyer@vermeertexas.com"
+  },
+  {
+   "position": 44,
+   "number": "+15042104057",
+   "name": "Martiny Steve",
+   "title": "Purchasing Manager",
+   "desk": "PURCHASING",
+   "company": "Economical Janitorial & Paper Supplies, LLC",
+   "website": "https://economicaljanitorial.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "work_direct",
+   "email": "smartiny@economicaljanitorial.com"
+  },
+  {
+   "position": 45,
+   "number": "+13184707586",
+   "name": "Keith Emerson",
+   "title": "Rig Equipment Manager",
+   "desk": "PROJECT",
+   "company": "Petroleum Co-Ordinators, Inc.",
+   "website": "https://petroinc.net",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "keith.emerson@petroinc.net"
+  },
+  {
+   "position": 46,
+   "number": "+17136704830",
+   "name": "Ryan Wilcox",
+   "title": "Vice President",
+   "desk": "EXEC",
+   "company": "Associated Pipe Line Contractors, Inc.",
+   "website": "https://associatedpipeline.com",
+   "icp": "AB.HDD",
+   "angle": "LCM",
+   "opener": "Lost circulation angle: crumble is a coarse granular cellulosic, the form LCM is graded on. Ask what they run for seepage to moderate losses today.",
+   "numberType": "mobile",
+   "email": "rwilcox@aplico.com"
+  },
+  {
+   "position": 47,
+   "number": "+12562480417",
+   "name": "Adrian Martinez",
+   "title": "Purchasing Manager",
+   "desk": "PURCHASING",
+   "company": "Martin Inc. (Martin Supply)",
+   "website": "https://martinsupply.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "work_direct",
+   "email": "amartinez@martinsupply.com"
+  },
+  {
+   "position": 48,
+   "number": "+18012326846",
+   "name": "Art Burns",
+   "title": "Director of Procurement",
+   "desk": "PURCHASING",
+   "company": "Downhole Chemical Solutions",
+   "website": "https://downholechem.com",
+   "icp": "AB.OG",
+   "angle": "LCM",
+   "opener": "Lost circulation angle: crumble is a coarse granular cellulosic, the form LCM is graded on. Ask what they run for seepage to moderate losses today.",
+   "numberType": "mobile",
+   "email": "art@stimchems.com"
+  },
+  {
+   "position": 49,
+   "number": "+18176948830",
+   "name": "Bobby McDonald",
+   "title": "Director of Field Operations",
+   "desk": "OPS",
+   "company": "Downhole Chemical Solutions",
+   "website": "https://downholechem.com",
+   "icp": "AB.OG",
+   "angle": "LCM",
+   "opener": "Lost circulation angle: crumble is a coarse granular cellulosic, the form LCM is graded on. Ask what they run for seepage to moderate losses today.",
+   "numberType": "mobile",
+   "email": "bobby@stimchems.com"
+  },
+  {
+   "position": 50,
+   "number": "+19035780281",
+   "name": "Bryan Ferguson",
+   "title": "Project Manager",
+   "desk": "PROJECT",
+   "company": "Associated Pipe Line Contractors, Inc.",
+   "website": "https://associatedpipeline.com",
+   "icp": "AB.HDD",
+   "angle": "LCM",
+   "opener": "Lost circulation angle: crumble is a coarse granular cellulosic, the form LCM is graded on. Ask what they run for seepage to moderate losses today.",
+   "numberType": "mobile",
+   "email": "bferguson@aplico.com"
+  },
+  {
+   "position": 51,
+   "number": "+12565540332",
+   "name": "Ryan Wright",
+   "title": "Category Manager",
+   "desk": "PROJECT",
+   "company": "Martin Inc. (Martin Supply)",
+   "website": "https://martinsupply.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "rgwright@martinsupply.com"
+  },
+  {
+   "position": 52,
+   "number": "+12055291661",
+   "name": "Jimmy Pleasant",
+   "title": "President and COO",
+   "desk": "EXEC",
+   "company": "Mountain Supply & Service, L.L.C.",
+   "website": "https://mountainoilfield.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jpleasant@mountainoilfield.com"
+  },
+  {
+   "position": 53,
+   "number": "+13372572424",
+   "name": "Allen Wallace",
+   "title": "Purchasing and Inventory Manager",
+   "desk": "PURCHASING",
+   "company": "Quail Tools",
+   "website": "https://quailtools.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "allenwallace@quailtools.com"
+  },
+  {
+   "position": 54,
+   "number": "+19032358037",
+   "name": "Stormy Holder",
+   "title": "Purchasing / Payroll",
+   "desk": "PURCHASING",
+   "company": "Mountain Supply & Service, L.L.C.",
+   "website": "https://mountainoilfield.com",
+   "icp": "AB.DIST",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "sholder@mountainoilfield.com"
+  },
+  {
+   "position": 55,
+   "number": "+13076798807",
+   "name": "Jason Cosgrave",
+   "title": "Operations Manager",
+   "desk": "OPS",
+   "company": "Quail Tools",
+   "website": "https://quailtools.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "jasoncosgrave@quailtools.com"
+  },
+  {
+   "position": 56,
+   "number": "+19414025375",
+   "name": "Joslyn Ginn",
+   "title": "Business Operations Manager",
+   "desk": "OPS",
+   "company": "Ceres Environmental Services, Inc.",
+   "website": "https://ceresenvironmental.com",
+   "icp": "AB.ENV",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "joslyn.ginn@ceresenv.com"
+  },
+  {
+   "position": 57,
+   "number": "+19852224888",
+   "name": "Jacob Trapani",
+   "title": "Vice President",
+   "desk": "EXEC",
+   "company": "BLD Services LLC",
+   "website": "https://bldllc.net",
+   "icp": "AB.HDD",
+   "angle": "LCM",
+   "opener": "Lost circulation angle: crumble is a coarse granular cellulosic, the form LCM is graded on. Ask what they run for seepage to moderate losses today.",
+   "numberType": "mobile",
+   "email": "jacob@bldllc.net"
+  },
+  {
+   "position": 58,
+   "number": "+18328499139",
+   "name": "Brenda Garces",
+   "title": "Buyer Planner I",
+   "desk": "PURCHASING",
+   "company": "NCS Multistage",
+   "website": "https://ncsmultistage.com",
+   "icp": "AB.OG",
+   "angle": "DIRECT",
+   "opener": "",
+   "numberType": "mobile",
+   "email": "bgarces@ncsmultistage.com"
+  }
+ ],
+ "queueName": "CRUMBLE 80 - personal mobiles - 2026-08-28",
+ "notDialable": [
+  {
+   "name": "Berzis Irani",
+   "company": "Black Diamond Oilfield Services",
+   "number": "+919607203998"
   }
  ]
 };

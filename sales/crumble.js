@@ -94,10 +94,39 @@
       </table></div>`;
   }
 
+  /* Sits directly beside the Allo Power Dialer during a session. The dialer shows a bare
+     number because the queue is loaded numbers-only (which is what keeps it reversible), so
+     this is where the caller reads who is actually ringing. Position matches the queue. */
+  function rDialOrder(){
+    const d = C.dialOrder || [];
+    if (!d.length) return "";
+    return `
+      <h2 class="sec"><span class="num">04</span>Dial order — ${num(d.length)} loaded in Allo</h2>
+      <p class="lead">Queue <b>${esc(C.queueName)}</b>, do-not-disturb enabled, nothing dialled.
+      The Power Dialer shows only the number, because loading it numbers-only is what keeps the
+      load reversible — attaching company names would make Allo create CRM records it has no
+      DELETE for. <b>Position here matches position there.</b></p>
+      ${(C.notDialable||[]).length ? `<div class="note"><b>${C.notDialable.length} held back as not US-dialable.</b>
+        ${C.notDialable.map(n=>esc(n.name)+" ("+esc(n.company)+") "+esc(n.number)).join("; ")} — a real number for a real
+        person, and not one to dial from a Louisiana line.</div>` : ""}
+      <div class="tbl-wrap"><table class="cb-tbl">
+        <thead><tr><th>#</th><th>Number</th><th>Name</th><th>Title</th><th>Desk</th><th>Company</th><th>Open with</th></tr></thead>
+        <tbody>${d.map(r=>`<tr>
+          <td class="cb-n">${r.position}</td>
+          <td class="cb-tel-cell">${esc(r.number)}${r.numberType!=="mobile"?`<span class="cb-flag">${esc(r.numberType)}</span>`:""}</td>
+          <td class="cb-nm">${esc(r.name)}</td>
+          <td>${esc(r.title)}</td>
+          <td><span class="pill">${esc(r.desk)}</span></td>
+          <td>${site(r.company, r.website)}</td>
+          <td>${r.angle && r.angle!=="DIRECT" ? `<span class="cb-angle-tag cb-angle-${esc(r.angle)}">${esc(r.angle)}</span>` : `<span class="cb-dash">standard</span>`}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>`;
+  }
+
   function rAccounts(){
     const call = C.accounts.filter(a=>a.group==="CALL FIRST");
     return `
-      <h2 class="sec"><span class="num">04</span>Call first — ${num(call.length)} accounts</h2>
+      <h2 class="sec"><span class="num">05</span>Call first — ${num(call.length)} accounts</h2>
       <p class="lead">Inside 500 road miles of White Castle. Ranked on ICP fit for crumble,
       freight, roster score, how many different desks we can reach, and whether a name on the
       account can say yes without asking anyone. Company names link out to their site.</p>
@@ -160,6 +189,7 @@
       on a single purchase order.</div>
       ${rGates()}
       ${rTargets()}
+      ${rDialOrder()}
       ${rAccounts()}`;
   }
 

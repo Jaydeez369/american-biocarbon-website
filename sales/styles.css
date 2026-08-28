@@ -421,3 +421,4 @@ table.cb-tbl tr:last-child td{border-bottom:0}
 .cb-angle-HAULER{border-color:var(--gold);color:var(--gold);background:rgba(var(--gold-rgb),.07)}
 .cb-angle-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;padding:1px 6px;
   border-radius:999px;border:1px solid currentColor;font-weight:600}
+.cb-tel-cell{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--navy-800);font-weight:600}
