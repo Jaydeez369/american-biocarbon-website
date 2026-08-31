@@ -30,6 +30,231 @@
   const N_KEY="vej_pipe_acct_notes_v1";  // per-account notes/activity (profile timeline)
   const QX_KEY="vej_pipe_extra_quarters";
 
+  /* ================= SHARED STORE SYNC =================
+     Until 2026-08-31 everything above this comment lived ONLY in localStorage. That is a cache,
+     not a database: a deal typed on a laptop did not exist on a phone, Victor could not see
+     Sarah's contacts, and "clear site data" was a silent unrecoverable delete of the book of
+     business. /api/deal and /api/contact put those two stores in D1 behind the login.
+
+     LOCALSTORAGE STAYS, deliberately, as a write-through cache and offline fallback:
+
+       write  local first, then the network. A rep on a bad connection in a yard never loses a
+              typed entry to a failed fetch, and never waits on one either — the UI re-renders
+              from local state exactly as fast as it always did.
+       read   render local immediately, hydrate from the server, re-render if anything changed.
+              The page is never blank waiting on a fetch.
+       fail   the local write already happened, so a failure is a SYNC failure, not data loss.
+              It is queued and retried; nothing is thrown away.
+
+     EVERY RECORD CARRIES A CLIENT-MINTED `id`. That is what makes the whole thing idempotent:
+     replaying a queue after a reconnect writes the rows it holds rather than a second copy of
+     each. Without stable ids the sync would duplicate the pipeline every time someone drove
+     through a dead spot. Records created before this feature have no id, so migrate() mints
+     them once and the flag below stops it running twice. */
+  const SYNC_KEY="vej_pipe_sync_queue_v1";   // writes that have not reached the server yet
+  const MIG_KEY="vej_pipe_migrated_v1";      // one-time localStorage -> D1 push, per browser
+  const ROUTES={ deals:"/api/deal", contacts:"/api/contact" };
+  const STORES={ deals:D_KEY, contacts:C_KEY };
+
+  const uid = p => `${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+  const nowISO = () => new Date().toISOString();
+
+  /* Digits only, last ten — the NANP identity. The activity feed precomputes the same key on
+     the edge; two normalisers for one join is how a call lands on nobody's timeline. */
+  const phoneKey = raw => { const d=String(raw||"").replace(/[^\d]/g,""); return d.length<10?"":d.slice(-10); };
+  const toE164 = raw => { const k=phoneKey(raw); return k?`+1${k}`:""; };
+
+  let SYNC_STATE={ ok:null, reason:null, at:null };   // surfaced in the UI, not just the console
+
+  /* Queued writes survive a reload, so closing the laptop mid-sync does not strand a deal in
+     one browser. Drained on every successful call and on load. */
+  const queueAdd = item => { const q=lsGet(SYNC_KEY,[]); q.push(item); lsSet(SYNC_KEY,q); };
+
+  async function apiCall(kind, method, body, query){
+    const url=ROUTES[kind]+(query||"");
+    const res=await fetch(url,{ method, headers:{"Content-Type":"application/json"},
+      credentials:"same-origin", body:body?JSON.stringify(body):undefined });
+    let data={}; try{ data=await res.json(); }catch(e){}
+    if(!res.ok || data.ok===false){
+      const err=new Error(data.error||data.reason||`store returned ${res.status}`);
+      err.reason=data.reason; throw err;
+    }
+    return data;
+  }
+
+  /* Push one record. Local is already written by the caller, so a failure here queues rather
+     than alerting — the rep's entry is safe and the retry is invisible. The one thing this
+     must NOT do is report success it did not get. */
+  async function pushRecord(kind, rec){
+    try{
+      await apiCall(kind,"POST",rec);
+      SYNC_STATE={ ok:true, reason:null, at:nowISO() };
+      await drainQueue();
+    }catch(err){
+      SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
+      queueAdd({ kind, method:"POST", rec });
+    }
+    syncBadge();
+  }
+
+  async function removeRecord(kind, id){
+    if(!id) return;
+    try{
+      await apiCall(kind,"DELETE",null,`?id=${encodeURIComponent(id)}`);
+      SYNC_STATE={ ok:true, reason:null, at:nowISO() };
+    }catch(err){
+      SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
+      queueAdd({ kind, method:"DELETE", id });
+    }
+    syncBadge();
+  }
+
+  async function drainQueue(){
+    const q=lsGet(SYNC_KEY,[]); if(!q.length) return;
+    const left=[];
+    for(const item of q){
+      try{
+        if(item.method==="DELETE") await apiCall(item.kind,"DELETE",null,`?id=${encodeURIComponent(item.id)}`);
+        else await apiCall(item.kind,"POST",item.rec);
+      }catch(e){ left.push(item); }
+    }
+    lsSet(SYNC_KEY,left);
+  }
+
+  /* Merge server rows into the local store, keyed by id, newest updated_at winning.
+     Records the server does not know about are KEPT, not deleted — an unsynced local record
+     is a pending write, and treating "absent upstream" as "deleted" would erase exactly the
+     entries this whole design exists to protect. */
+  function mergeDown(kind, remote){
+    const key=STORES[kind];
+    const local=lsGet(key,[]);
+    const byId=new Map();
+    local.forEach(r=>{ if(r&&r.id) byId.set(r.id,r); });
+    let changed=false;
+    for(const r of remote){
+      if(!r||!r.id) continue;
+      const mine=byId.get(r.id);
+      if(!mine || String(r.updated_at||"")>=String(mine.updated_at||"")){ byId.set(r.id,r); changed=true; }
+    }
+    const unsynced=local.filter(r=>!r||!r.id);
+    const merged=[...byId.values(),...unsynced];
+    if(changed||merged.length!==local.length){ lsSet(key,merged); return true; }
+    return false;
+  }
+
+  /* The one-time migration. Anything already sitting in this browser's localStorage is minted
+     an id and pushed as a batch. Keyed by MIG_KEY so a reload cannot run it twice, and keyed by
+     id upstream so even if it did, the result would be the same rows rather than duplicates —
+     belt and braces, because a duplicated pipeline is very visible and very annoying to undo. */
+  async function migrateUp(){
+    if(lsGet(MIG_KEY,false)) return;
+    let pushed=0;
+    for(const kind of ["deals","contacts"]){
+      const key=STORES[kind];
+      const arr=lsGet(key,[]);
+      if(!arr.length) continue;
+      const stamped=arr.map(r=>({ ...r, id:r.id||uid(kind==="deals"?"deal":"contact"),
+        created_at:r.created_at||nowISO(), updated_at:r.updated_at||nowISO() }));
+      lsSet(key,stamped);                       // local first, so ids survive a failed push
+      try{ await apiCall(kind,"POST",{records:stamped}); pushed+=stamped.length; }
+      catch(e){ stamped.forEach(rec=>queueAdd({kind,method:"POST",rec})); }
+    }
+    lsSet(MIG_KEY,true);
+    if(pushed) console.info(`[pipeline] migrated ${pushed} local records into the shared store`);
+  }
+
+  /* Called once on load. Renders from local immediately (the caller already did), then brings
+     the shared store down and re-renders only if something actually changed — a pointless
+     rerender mid-typing would blow away a half-filled modal. */
+  async function hydrate(){
+    await migrateUp();
+    await drainQueue();
+    let changed=false;
+    for(const kind of ["deals","contacts"]){
+      try{
+        const data=await apiCall(kind,"GET");
+        if(Array.isArray(data.records) && mergeDown(kind,data.records)) changed=true;
+        SYNC_STATE={ ok:true, reason:null, at:nowISO() };
+      }catch(err){
+        SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
+      }
+    }
+    await loadPhoneActivity();
+    syncBadge();
+    if(changed||PHONE.rows.length) rr();
+  }
+
+  /* ---- phone activity, from /api/activity (allo-hooks D1, live) ----
+     Matched onto accounts in the browser rather than on the edge, using the SAME norm()/canon
+     key the rest of the pipeline uses, so a call cannot invent a duplicate account. */
+  const PHONE={ rows:[], byKey:new Map(), ok:null, reason:null };
+  async function loadPhoneActivity(){
+    try{
+      const res=await fetch("/api/activity?limit=1000",{credentials:"same-origin"});
+      const data=await res.json();
+      PHONE.ok=!!data.ok; PHONE.reason=data.reason||null;
+      PHONE.rows=Array.isArray(data.rows)?data.rows:[];
+      PHONE.byKey=new Map();
+      for(const r of PHONE.rows){
+        if(!r.key) continue;
+        if(!PHONE.byKey.has(r.key)) PHONE.byKey.set(r.key,[]);
+        PHONE.byKey.get(r.key).push(r);
+      }
+    }catch(e){ PHONE.ok=false; PHONE.reason="unreachable"; }
+  }
+
+  /* Every phone row belonging to an account, found by matching the numbers on that account's
+     contacts. Falls back to the company name the phone system itself recorded, which is how a
+     call from a number nobody has on file still reaches the right timeline. */
+  function phoneActivityFor(name){
+    if(!PHONE.rows.length) return [];
+    const keys=new Set();
+    allContacts().filter(c=>norm(c.account||"")===norm(name)).forEach(c=>{
+      [c.phone,c.mobile,c.phoneE164].forEach(v=>{ const k=phoneKey(v); if(k) keys.add(k); });
+    });
+    const out=[];
+    const seen=new Set();
+    for(const r of PHONE.rows){
+      const hit=(r.key&&keys.has(r.key)) || (r.company&&norm(r.company)===norm(name));
+      if(!hit) continue;
+      const sig=`${r.at}|${r.kind}|${r.key}`;
+      if(seen.has(sig)) continue;
+      seen.add(sig);
+      out.push(r);
+    }
+    return out;
+  }
+
+  /* Turn a phone row into the timeline's own activity shape. `_idx` is deliberately absent so
+     no delete button renders: these are facts the phone system recorded, not notes the team
+     typed, and letting somebody "delete" one from here would suggest it changed anything. */
+  function phoneToActivity(r){
+    const who=r.who||r.number||"";
+    const dir=r.direction==="INBOUND"?"Inbound":r.direction==="OUTBOUND"?"Outbound":"";
+    const mins=r.minutes!=null?` · ${r.minutes} min`:"";
+    let title, body="";
+    if(r.kind==="call"){ title=`${dir} Call${r.result?" — "+r.result:""}`.trim(); body=(r.summary||"")+(mins&&!r.summary?`Duration ${r.minutes} min`:""); }
+    else if(r.kind==="sms"){ title=`${dir} Text`.trim(); body=r.summary||""; }
+    else if(r.kind==="summary"){ title="AI Call Summary"; body=r.summary||""; }
+    else { title="Tag"; body=(r.tags||[]).join(", "); }
+    if(r.policyFlag) body=(body?body+"\n\n":"")+`Policy flag: ${r.policyFlag}`;
+    if(r.tags&&r.tags.length&&r.kind!=="tag") body=(body?body+"\n\n":"")+`Tags: ${r.tags.join(", ")}`;
+    return { ch:r.kind==="sms"?"sms":r.kind==="call"||r.kind==="summary"?"call":"note",
+      who:who+(mins&&r.kind==="call"?mins:""), title, body:body||"(no summary recorded)",
+      status:"logged", ts:r.at, _phone:true };
+  }
+
+  /* A small, honest indicator. The failure this guards against is a rep believing a deal is
+     shared when it is sitting in a retry queue, so the badge says which it is. */
+  function syncBadge(){
+    const el=document.getElementById("pipeSyncState"); if(!el) return;
+    const q=lsGet(SYNC_KEY,[]).length;
+    if(SYNC_STATE.ok===null){ el.textContent=""; return; }
+    if(SYNC_STATE.ok&&!q){ el.className="psync ok"; el.textContent="Shared"; el.title="Saved to the shared store, visible to the whole team."; }
+    else { el.className="psync warn"; el.textContent=q?`Local only (${q} queued)`:"Local only";
+      el.title=`Saved in this browser and queued for the shared store. Reason: ${SYNC_STATE.reason||"unknown"}`; }
+  }
+
   const customDeals=()=>lsGet(D_KEY,[]).map((d,ci)=>({...d,qty:+d.qty||0,price:+d.price||0,ci,custom:true}));
   const liveDeals=()=>P.deals.map(d=>({...d,base:true})).concat(customDeals());
   const hsContacts=()=>((window.HUBSPOT&&window.HUBSPOT.contacts)||[]).map(c=>({...c,hubspot:true}));
@@ -401,8 +626,18 @@
       order:V("pdOrder"), close:V("pdClose")||todayISO(), stage:V("pdStage"), conf:V("pdConf"),
       status:V("pdStatus"), owner:V("pdOwner"), notes:V("pdNotes") };
     const arr=lsGet(D_KEY,[]);
+    /* The id is preserved on edit and minted on create, so an edit updates the shared row
+       rather than creating a second one. updated_at is what the server's last-write-wins
+       guard compares, so it has to be stamped here, at the moment the human hit Save. */
+    const prev=ci>=0?arr[ci]:null;
+    rec.id=(prev&&prev.id)||uid("deal");
+    rec.created_at=(prev&&prev.created_at)||nowISO();
+    rec.updated_at=nowISO();
     if(ci>=0) arr[ci]=rec; else arr.push(rec);
     lsSet(D_KEY,arr);
+    /* Local is committed. The push is fire-and-forget on purpose: the modal closes and the
+       page re-renders at local speed, and a failed push queues rather than blocking a rep. */
+    pushRecord("deals",rec);
     /* if this deal came from converting a custom lead, flip that lead to converted */
     if(leadCi!=null&&leadCi>=0){ const ls=lsGet(L_KEY,[]); if(ls[leadCi]){ ls[leadCi].status="converted"; ls[leadCi].converted=true; ls[leadCi].convertedTo=deal; ls[leadCi].convertedDate=todayISO(); lsSet(L_KEY,ls); } }
     pipeModalClose(); rr();
@@ -410,7 +645,7 @@
   window.pipeDealDelete=ci=>{
     const arr=lsGet(D_KEY,[]); const d=arr[ci];
     if(!d) return; if(!confirm(`Delete deal "${d.deal}"?`)) return;
-    arr.splice(ci,1); lsSet(D_KEY,arr); rr();
+    arr.splice(ci,1); lsSet(D_KEY,arr); removeRecord("deals",d.id); rr();
   };
   window.pipeDealExport=()=>downloadCSV("sales-pipeline.csv",
     ["Deal Name","Customer","Product","Sector","Qty","UOM","Price/Unit","Order Type","Close Date","Stage","Confidence","Status","Deal Value","Weighted Value","Quarter","Assigned To","Notes"],
@@ -1565,20 +1800,29 @@
     if(isNewAcct) upsertAccount(account,"prospect");
     const rec={ name:first+" "+last, first, last, account, title:V("pcTitle"), email:V("pcEmail"),
       phone:V("pcPhone"), mobile:V("pcMobile"), dropOff:V("pcDrop"), notes:V("pcNotes") };
+    /* Stored, not computed per query. This is the key the phone activity feed joins a call
+       against, and normalising it in two places is how a call ends up on nobody's timeline. */
+    rec.phoneE164=toE164(rec.mobile)||toE164(rec.phone)||"";
     const arr=getCustom();
     /* Belt to the readOnlyContact() suspenders. An edit that arrives with an index this store
        does not contain is a BUG, not a request to create a record: silently pushing was how
        "edit an imported contact" turned into "duplicate it". Refuse instead of guessing. */
     if(idx!=null && idx>=0){
       if(!arr[idx]){ alert("That contact could not be edited here. It comes from an imported source and is read-only."); return; }
+      rec.id=arr[idx].id||uid("contact");
+      rec.created_at=arr[idx].created_at||nowISO();
       arr[idx]=rec;
-    } else arr.push(rec);
-    saveCustom(arr); pipeModalClose(); rr();
+    } else {
+      rec.id=uid("contact"); rec.created_at=nowISO();
+      arr.push(rec);
+    }
+    rec.updated_at=nowISO();
+    saveCustom(arr); pushRecord("contacts",rec); pipeModalClose(); rr();
   };
   window.pipeContactDelete=idx=>{
     const arr=getCustom(); const c=arr[idx];
     if(!c) return; if(!confirm(`Delete contact "${c.name}"?`)) return;
-    arr.splice(idx,1); saveCustom(arr); rr();
+    arr.splice(idx,1); saveCustom(arr); removeRecord("contacts",c.id); rr();
   };
 
   /* ================= TAB 7 · LEADS (CRUD + convert-to-deal) ================= */
@@ -1970,6 +2214,11 @@
       body:`${d.deal} (${money(value(d))}) marked ${stageOf(d.stage).label}`, status:"logged", ts:safeISO(d) }));
     deals.filter(d=>d.notes).forEach(d=>derived.push({ ch:"note", who:d.owner||"", title:"Deal Note — "+d.deal,
       body:d.notes, status:"logged", ts:safeISO(d) }));
+    /* Calls, texts and AI summaries from the phone system, matched to this account by the
+       numbers on its contacts. These had been landing in D1 since 2026-08-19 with no way to
+       reach a screen — an account could have been called twice and its timeline showed only
+       what somebody typed by hand. */
+    phoneActivityFor(name).forEach(r=>derived.push(phoneToActivity(r)));
     const all = stored.concat(derived).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
     const filterSet = PROFILE_FILTER==="all" ? null : PROFILE_FILTER.split(",");
     const shown = filterSet ? all.filter(a=>filterSet.includes(a.ch)) : all;
@@ -2126,5 +2375,20 @@
     };
   }
 
-  window.PIPELIVE = { rCRM, stats };
+  /* `sync` is exposed so the Launchpad and the e2e test can drive a refresh without reloading,
+     and so a rep who watched a save fail can retry it deliberately rather than by guessing. */
+  window.PIPELIVE = { rCRM, stats, sync:{ hydrate, drainQueue, state:()=>({...SYNC_STATE}),
+    queued:()=>lsGet(SYNC_KEY,[]).length, phone:()=>({ok:PHONE.ok,reason:PHONE.reason,rows:PHONE.rows.length}) } };
+
+  /* Hydrate AFTER first paint, never before it. The page renders from localStorage instantly
+     the way it always has; the shared store arrives a moment later and re-renders only if it
+     actually carries something new. Blocking the first render on a network call would trade a
+     real defect for a worse one — a dashboard that hangs when a dependency is slow. */
+  if(typeof window!=="undefined"){
+    const start=()=>{ hydrate().catch(e=>console.warn("[pipeline] hydrate failed",e)); };
+    if(document.readyState==="complete"||document.readyState==="interactive") setTimeout(start,0);
+    else window.addEventListener("DOMContentLoaded",start);
+    /* Coming back from a dead spot should not need a reload to push what is queued. */
+    window.addEventListener("online",()=>{ drainQueue().then(syncBadge); });
+  }
 })();
