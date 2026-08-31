@@ -594,6 +594,8 @@ async function loadApolloLive() {
 loadAlloLive();
 loadInstantlyLive();
 loadApolloLive();
-window.addEventListener("hashchange", () => {
-  if (((location.hash || "").slice(1) || NAV[0].items[0].id) === "launch") loadAlloLive();
-});
+/* The hashchange refetch that used to sit here named the "launch" section, which no longer
+   exists, so it could never fire. loadAlloLive() self-guards on a missing #allo-live mount and
+   is now a no-op for the same reason: the live call data it fetched is the Inbox's job, and the
+   Inbox refetches on its own hydrate. Left in place rather than deleted because the Instantly
+   and Apollo loaders beside it share its helpers and still mount. */

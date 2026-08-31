@@ -1230,7 +1230,9 @@
 
   /* ================= TAB 5 · DEALS (flat list, full CRUD) ================= */
   function tDeals(){
-    const ds=[...liveDeals()].sort((a,b)=>closeDate(b)-closeDate(a));
+    /* Honours the same period as the strip, so the tile and the table can never disagree —
+       a header saying 6 open deals above a list of 40 is how people stop trusting both. */
+    const ds=[...liveDeals()].filter(inPeriod).sort((a,b)=>closeDate(b)-closeDate(a));
     return `
       <div class="pdeals-bar"><input class="pinput" id="pipeDealSearch" placeholder="Search deals…" oninput="pipeDealFilter()">
         <select class="pinput" id="pipeDealStatus" onchange="pipeDealFilter()"><option value="">All Status</option><option>open</option><option>won</option><option>lost</option></select>
@@ -2665,18 +2667,61 @@
      carry the accent rail: replies waiting, missed calls, leads to ring. The other three are
      context. The old Launchpad put fourteen tiles on screen with no way to tell which of them
      you were supposed to do something about, which is the reason it read as fluff. */
+  /* ---- period filter ----
+     Applies to the DEAL numbers only, by close date. It deliberately does not touch the three
+     inbound counts: a missed call from last quarter is not less unanswered because the quarter
+     ended, and filtering the work queue by period would hide exactly the oldest thing that
+     most needs picking up. */
+  const PERIOD_KEY="vej_pipe_period";
+  const PERIODS=[["all","All time"],["month","This month"],["quarter","This quarter"],["year","This year"]];
+  const period=()=>{ const p=lsGet(PERIOD_KEY,"all"); return PERIODS.some(x=>x[0]===p)?p:"all"; };
+  window.pipePeriod=p=>{ lsSet(PERIOD_KEY,p); rr(); };
+
+  function inPeriod(d){
+    const p=period(); if(p==="all") return true;
+    const t=closeDate(d); if(!t||isNaN(t)) return false;
+    const now=new Date();
+    if(p==="year")    return t.getUTCFullYear()===now.getUTCFullYear();
+    if(p==="month")   return t.getUTCFullYear()===now.getUTCFullYear() && t.getUTCMonth()===now.getUTCMonth();
+    if(p==="quarter") return t.getUTCFullYear()===now.getUTCFullYear()
+                          && Math.floor(t.getUTCMonth()/3)===Math.floor(now.getUTCMonth()/3);
+    return true;
+  }
+
+  /* Every tile goes somewhere. A number you cannot act on is decoration, and the old Launchpad
+     was fourteen of them. The three inbound tiles open the Inbox already filtered to the thing
+     they counted, so the click lands on the work rather than near it. */
+  window.pipeGoInbox=f=>{
+    INBOX_FILTER=f;
+    if(typeof go==="function") go("inbox");
+    remountInbox();
+  };
+  window.pipeGoTab=t=>{
+    lsSet(TAB_KEY,t);
+    if(typeof go==="function") go("crm");
+    rr();
+  };
+
   function rStrip(){
-    const d=liveDeals().filter(x=>x.status==="open");
+    const d=liveDeals().filter(x=>x.status==="open"&&inPeriod(x));
     const read=readSet();
     const items=inboxItems();
-    const cell=(l,v,hot)=>`<div class="pstrip-cell${hot?" hot":""}"><div class="ps-l">${esc(l)}</div><div class="ps-v">${v}</div></div>`;
-    return `<div class="pstrip">
-      ${cell("Open pipeline",money(sum(d,value)))}
-      ${cell("Open deals",num(d.length))}
-      ${cell("Accounts",num(liveAccounts().length))}
-      ${cell("Replies waiting",num(items.filter(i=>i.type==="reply"&&!read.has(i.sig)).length),true)}
-      ${cell("Missed calls",num(items.filter(i=>i.type==="missed"&&!read.has(i.sig)).length),true)}
-      ${cell("Leads to ring",num(items.filter(i=>i.type==="lead").length),true)}
+    const cell=(l,v,onclick,hot)=>`<button type="button" class="pstrip-cell${hot?" hot":""}" onclick="${onclick}">
+      <div class="ps-l">${esc(l)}</div><div class="ps-v">${v}</div></button>`;
+    const pills=PERIODS.map(([k,label])=>
+      `<button type="button" class="pv-btn${period()===k?" active":""}" onclick="pipePeriod('${k}')">${esc(label)}</button>`).join("");
+
+    return `<div class="pstrip-bar">
+        <div class="pview">${pills}</div>
+        <span class="pstrip-note">Deal figures only. The three inbound counts ignore the period, because an old missed call is not less unanswered.</span>
+      </div>
+      <div class="pstrip">
+      ${cell("Open pipeline",money(sum(d,value)),"pipeGoTab('pipeline')")}
+      ${cell("Open deals",num(d.length),"pipeGoTab('deals')")}
+      ${cell("Contacts",num(allContacts().length),"pipeGoTab('people')")}
+      ${cell("Replies waiting",num(items.filter(i=>i.type==="reply"&&!read.has(i.sig)).length),"pipeGoInbox('reply')",true)}
+      ${cell("Missed calls",num(items.filter(i=>i.type==="missed"&&!read.has(i.sig)).length),"pipeGoInbox('missed')",true)}
+      ${cell("Leads to ring",num(items.filter(i=>i.type==="lead").length),"pipeGoInbox('lead')",true)}
     </div>`;
   }
 
@@ -2849,7 +2894,12 @@
       </div>`;
     });
 
-    return `<div class="sec-head">
+    /* The icon sprite has to be in the DOM for <use href="#i-call"> to resolve. It used to be
+       emitted only by the account profile, so every icon in the Inbox rendered as an empty
+       circle — the markup was right and the symbols simply were not on the page. Each section
+       that draws icons now carries its own copy; duplicate symbol ids are harmless and a lot
+       safer than one section depending on another having rendered first. */
+    return `${AV3_SPRITE}<div class="sec-head">
         <div><h2>Inbox</h2><p class="sec-sub">Everything that came in. Calls, texts, replies, flags.</p></div>
         <button type="button" class="btn btn-ghost" onclick="pipeInboxReadAll()">Mark all read</button>
       </div>
@@ -2969,7 +3019,7 @@
       <button type="button" class="tdy-x" onclick="pipeTodoDelete('${esc(t.id)}')" title="Delete">&times;</button>
     </div>`;
 
-    return `<div class="sec-head">
+    return `${AV3_SPRITE}<div class="sec-head">
         <div><h2>Today</h2><p class="sec-sub">What is waiting, oldest first.</p></div>
       </div>
       <div class="tdy-todos">
