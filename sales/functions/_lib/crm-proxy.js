@@ -49,7 +49,7 @@ const json = (body, status = 200) =>
 
 /**
  * @param {object} context  the Pages Function context
- * @param {'deals'|'contacts'} kind  which table this route fronts
+ * @param {'deals'|'contacts'|'leads'|'records'} kind  which table this route fronts
  */
 export async function proxyCrm(context, kind) {
   const { env, request } = context;
@@ -67,10 +67,13 @@ export async function proxyCrm(context, kind) {
   const incoming = new URL(request.url);
   const target = new URL(`${base}/crm/${kind}`);
 
-  /* Only `id` is forwarded, and only for DELETE. Passing the caller's whole query string
-     through would let a bookmark reach any parameter the Worker ever adds. */
+  /* Only `id` and `kind` are forwarded. Passing the caller's whole query string through would
+     let a bookmark reach any parameter the Worker ever adds; naming the two the contract uses
+     keeps that surface fixed. */
   const id = incoming.searchParams.get('id');
   if (id) target.searchParams.set('id', id);
+  const recordKind = incoming.searchParams.get('kind');
+  if (recordKind) target.searchParams.set('kind', recordKind);
 
   let body;
   if (method === 'POST' || method === 'PATCH') {

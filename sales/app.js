@@ -62,38 +62,40 @@ function script(label,body){
    outreach, work the replies in the pipeline. Everything below Execute is reference material
    you open when a specific question comes up, not something you read top to bottom. */
 const LEAN_NAV=[
-  {group:"Launch",items:[
-    {id:"launch",ic:"◎",t:"Launchpad"},
-    {id:"strategy",ic:"◆",t:"Campaigns & ICP"},
+  /* IA v7, 2026-08-31. Rebuilt around what a rep does, not around what the company was
+     building. Three changes and each one closes a complaint:
+
+       WORK comes first and Pipeline is the landing screen. You log in to the book of business,
+       not to a status page.
+
+       Launchpad is GONE as a section. It was 14 tiles and 9 cards of counts and a launch
+       checklist for work that shipped months ago, and none of it was actionable. The six
+       numbers worth keeping are a strip across the top of Pipeline; the three that represent
+       work carry an accent rail so the eye lands on those.
+
+       Inbox and Today are new, and they are the reason the phone and Instantly work was worth
+       doing. Every call, text, reply, policy flag and phone lead now arrives somewhere a person
+       looks, instead of in three systems nobody opens.
+
+     Crumble Blitz is deleted: 14,940 lines of crumble-data.js, most of the payload every user
+     downloaded on every load, for a push against inventory that is over. The data file and
+     module stay in git history.
+
+     Campaigns & ICP moved to Execute, where the operator asked for it: it belongs beside the
+     copy and the send, not in a "Launch" group that no longer exists. */
+  {group:"Work",items:[
+    {id:"crm",ic:"◉",t:"Pipeline"},
+    {id:"inbox",ic:"✉",t:"Inbox"},
+    {id:"today",ic:"✓",t:"Today"},
   ]},
-  /* Instantly Logic sits between the copy and the pipeline because that is where it sits
-     in the work: you read the words in Outreach Engine, you understand why the campaign is
-     shaped that way here, and replies land in Sales Pipeline. It answers "why three variants
-     on nurseries and one on blenders" and "why is nothing sending yet", which are the two
-     questions the Outreach Engine cannot answer because it only holds copy. */
   {group:"Execute",items:[
+    {id:"strategy",ic:"◆",t:"Campaigns & ICP"},
     {id:"outreach",ic:"✦",t:"Outreach Engine"},
     {id:"instantly",ic:"⚙",t:"Instantly Logic"},
-    /* Crumble Blitz is a live push against inventory on hand, not reference material, so it
-       sits in Execute next to the send and the pipeline rather than under Reference. */
-    {id:"crumble",ic:"▲",t:"Crumble Blitz"},
-    {id:"crm",ic:"◉",t:"Sales Pipeline"},
   ]},
-  /* Everything that is not the cold email send. Priced, with a confidence badge on every
-     number, so a channel cannot get approved on a figure nobody has actually invoiced. */
   {group:"Grow",items:[
     {id:"funnels",ic:"⇢",t:"Future Funnels"},
   ]},
-  /* The four Operate sections (Sample to Cash, Team & Rhythm, System of Record,
-     Continuity Runbook) were removed 2026-08-17 on the operator's instruction. Their
-     content still lives in ops-data.js / ops.js and the group is recoverable from git
-     history if a real need comes back. */
-  /* Onboarding & Scale and Sales × Marketing used to sit here. Both are deleted.
-     Onboarding described an accounting handoff for accounts we do not have yet, and
-     the 60/90 scale plan was a build plan for a machine that is now built. Sales ×
-     Marketing was a working agreement with a marketing team that does not exist as a
-     counterparty today, anchored to a "Progreaux" rebrand name that the July 17 call
-     retired. Both are recoverable from git history if a real need comes back. */
   {group:"Reference",items:[
     {id:"product",ic:"❝",t:"Product & Messaging"},
     {id:"playbook",ic:"▷",t:"Assets & Playbook"},
@@ -166,38 +168,6 @@ const LIVE = {
    refresh-snapshots.sh, and every use below falls back to written text. */
 const LIVEQ = (typeof window !== "undefined" && window.INSTANTLY_LIVE) || null;
 
-const LAUNCH_STEPS = [
-  { k:"pull",    t:"Pull the Apollo list", done:true,
-    d:"DONE. 1,183 Apollo credits spent to the operator's written ceiling; 1,145 companies researched. A further tranche needs a new written number." },
-  { k:"dedupe",  t:"Dedupe against the roster already in the pipeline", done:true,
-    d:"DONE, confirmed 2026-08-17. Account matching folds punctuation, possessives and corporate suffixes, so \"J. Berry Nursery\" lands on the existing \"J Berry Nursery\" rather than creating a twin. The Also-known-as row on a profile shows every fold." },
-  { k:"verify",  t:"Verify the emails, strip catch-alls and role accounts", done:true,
-    d:"DONE. 1,303 of 1,634 addresses verified; only verified (READY) leads import, catch-all and risky never do. The absorbent gate reads READY on 848 leads." },
-  /* The code list is READ from the roster, never spelled out here. It was hardcoded as the
-     old BC-NURS / AB-SPILL style and went stale the moment the taxonomy was unified to the
-     BC.NUR / AB.ENV form, which is exactly the drift this whole app has been cleaned of. */
-  { k:"tag",     t:"Tag every contact to an ICP code", done:true,
-    d:"DONE. Every live company carries an ICP and every contact rides its company's code, so reply attribution works per variant.", icps:true },
-  { k:"import",  t:"Import into the Sales Pipeline", done:true,
-    d:"DONE, contact-join audit 2026-08-17: all 1,593 unique emails join a pipeline company (0 unjoined). Replies have somewhere to land." },
-  { k:"load",    t:"Load the campaigns into Instantly", done:true,
-    d: LIVEQ
-      ? `DONE, read ${LIVEQ.read}: ${LIVEQ.inWorkspace} campaigns in the workspace, ${LIVEQ.drafts} draft(s), ${LIVEQ.mailboxes} mailboxes carrying ${LIVEQ.dailyCeiling}/day. Campaign edits happen in the Instantly session, never from this screen.`
-      : "DONE, run 9 2026-08-17: 14 campaigns in the workspace, 8 fireable drafts with 565 leads loaded, schedules staged (08:00\u201316:00 Central, weekdays), all four mailboxes at health 100. Campaign edits happen in the Instantly session, never from this screen." },
-  { k:"send",    t:"Send",
-    /* Was a hand-typed "STARTED: BC.FARM is launched with 48 leads ... fires on one operator
-       click", which stayed on the landing screen for a week after nine campaigns went live.
-       Derived from the snapshot now; the fallback is only for a checkout that has not run
-       refresh-snapshots.sh. */
-    d: LIVEQ
-      ? `${LIVEQ.launched} campaign(s) sending: ${LIVEQ.launchedNames.join(", ")}.`
-        + ` ${LIVEQ.totals.sent.toLocaleString()} sent, ${LIVEQ.totals.replies.toLocaleString()} replies, ${LIVEQ.totals.bounced.toLocaleString()} bounced.`
-        + (LIVEQ.pausedNames && LIVEQ.pausedNames.length ? ` Paused: ${LIVEQ.pausedNames.join(", ")}.` : "")
-        + (LIVEQ.oversubscribed ? ` Sending is capacity bound: ${LIVEQ.requestedDaily}/day requested against a ${LIVEQ.dailyCeiling}/day ceiling.` : "")
-        + " Reply rate is the metric; opens are noise since Apple MPP."
-      : "STARTED. Reply rate is the metric, opens are noise since Apple MPP." },
-];
-
 /* Thousands-separated integer. pipeline.js has its own num() but it lives inside that file's
    IIFE and is not global, so app.js needs its own rather than reaching for one that is not there. */
 const fmtN = v => Number.isFinite(+v) ? Math.round(+v).toLocaleString() : "0";
@@ -208,138 +178,6 @@ const icpCodes = () => {
   if(!R || !R.byIcp) return "see Campaigns & ICP";
   return Object.keys(R.byIcp).sort().join(", ");
 };
-
-function rLaunchpad(){
-  const S = (window.PIPELIVE && PIPELIVE.stats) ? PIPELIVE.stats() : null;
-  /* The four "where we are" tiles read the Sales Pipeline roster (window.ROSTER, the
-     generated canonical layer) and the last live Instantly read (ENGINE.instantly.live).
-     PIPELIVE.stats() still backs the hygiene notes below the tiles, but companies,
-     contacts and ICPs on this page mean the prospecting pipeline, not the CRM overlay —
-     the roster is where every ICP, email and verification verdict actually lives. */
-  const R  = window.ROSTER || null;
-  /* Numbers from the generated snapshot, prose from the hand-written block. ENGINE.instantly
-     .live was typed by hand and on 2026-08-24 this tile still read "1 live" while nine
-     campaigns were sending — on the landing screen, which is the worst place to be wrong.
-     The rollout narrative below it has no generated equivalent, so it still comes from
-     ENGINE; only the counts are taken from instantly-data.js when it is present. */
-  const ILprose = (typeof ENGINE !== "undefined" && ENGINE.instantly && ENGINE.instantly.live) || null;
-  const ILlive = window.INSTANTLY_LIVE || null;
-  const IL = (ILlive || ILprose) ? { ...(ILprose || {}), ...(ILlive || {}) } : null;
-  const P  = window.PHONE || null;
-  const icpKeys = (R && R.byIcp) ? Object.keys(R.byIcp) : [];
-  const nBio = icpKeys.filter(k => k.startsWith("BC.")).length;
-  const nAbs = icpKeys.filter(k => k.startsWith("AB.")).length;
-
-  const keys = LAUNCH_STEPS.map(s => "lp:" + s.k);
-  const defs = LAUNCH_STEPS.map(s => !!s.done);
-  const st = checkStats(keys, defs);
-  const pct = st.total ? Math.round(st.done/st.total*100) : 0;
-  const nextStep = LAUNCH_STEPS.find(s => {
-    const v = getChecks()["lp:"+s.k];
-    return v === undefined ? !s.done : !v;
-  });
-
-  const tile = (label, val, sub) =>
-    `<div class="card kpi"><div class="l">${esc(label)}</div><div class="v">${val}</div><div class="d">${esc(sub||"")}</div></div>`;
-
-  return page("launch",
-    head("Launchpad", nextStep
-      ? `Next: ${esc(nextStep.t)}.`
-      : "Every launch step is checked off. Working replies is the job now.")+
-
-    /* Blocker first. Every price and freight radius in this app is downstream of it. */
-    `<div class="note warn" style="border-left:4px solid var(--gold-soft);font-size:13.5px;margin-bottom:14px">
-       <b>⛔ Freight and COGS are unverified.</b> No firm biochar price goes out beyond the published $${LIVE.biocharMt}/MT. Every freight radius and margin figure in this app is provisional until Finance confirms cost per ton and zone rates. Quote the published price or quote nothing.
-     </div>`+
-
-    sec("1","Where we are")+
-    `<div class="grid g4">
-      ${tile("Companies", R?fmtN(R.live):"not loaded", R?`${fmtN(R.count)} researched · ${fmtN(R.liveIcp)} live with an ICP`:"roster layer not loaded")}
-      ${tile("Contacts", R?fmtN(R.contactsTotal):"not loaded", R?`${fmtN(R.contactsVerified)} verified · on ${fmtN(R.withContact)} companies`:"roster layer not loaded")}
-      ${tile("ICPs", icpKeys.length?fmtN(icpKeys.length):"not loaded", icpKeys.length?`${nBio} biochar · ${nAbs} absorbent · every one a campaign`:"roster layer not loaded")}
-      ${tile("Instantly campaigns",
-        IL?`${IL.launched} live · ${IL.ready} ready`:"no live read",
-        IL?`${IL.inWorkspace} in the workspace${IL.paused?` · ${IL.paused} paused`:""} · ${fmtN(IL.totals?IL.totals.leads:IL.readyLeads)} leads loaded · read ${esc(IL.read)}`:"engine layer not loaded")}
-    </div>`+
-    (IL && IL.launchedNames
-      ? `<div class="note ok" style="margin-top:10px"><b>Live now.</b> ${esc(IL.launchedNames.join(", "))}${IL.pausedNames&&IL.pausedNames.length?`. Paused: ${esc(IL.pausedNames.join(", "))}`:""}.</div>`
-      : "")+
-    (IL && IL.order && !(IL.launched > 1)
-      ? `<div class="note" style="margin-top:8px"><b>Rollout order.</b> ${esc(IL.order)}</div>`
-      : "")+
-    (IL && IL.stranded
-      ? `<div class="note warn" style="margin-top:8px"><b>${fmtN(IL.stranded)} verified leads are stranded on the Instantly plan lead cap.</b> ${esc(IL.capNote||"")} ${esc(IL.note||"")}</div>`
-      : "")+
-    (IL && IL.oversubscribed
-      ? `<div class="note warn" style="margin-top:8px"><b>Sending is oversubscribed.</b> ${IL.requestedDaily}/day requested across live campaigns against a ${IL.dailyCeiling}/day mailbox ceiling (${IL.mailboxes} mailboxes). Capacity, not list size, is the cap.</div>`
-      : "")+
-    /* The phone line, read from window.PHONE (sales-department/allo-analytics/build-phone-snapshot.mjs).
-       It sits in its own row rather than crowding the list tiles, because the outbound funnel and
-       the email funnel are different machines and reading them as one row invites a false compare.
-       Every number is a dated snapshot: Sales OS is static and cannot call Allo at render time. */
-    (P
-      ? `<div class="grid g4" style="margin-top:15px">
-          ${tile("Dials", fmtN(P.dials), `${esc(P.window)} to ${esc(P.read.split(",")[0])}`)}
-          ${tile("Connected", fmtN(P.connected), P.dials ? `${Math.round((P.connectRate||0)*100)}% of dials answered` : "no dials in the window")}
-          ${tile("Conversations", fmtN(P.conversations), P.dials ? `${Math.round((P.conversationRate||0)*100)}% of dials became a real talk` : "no dials in the window")}
-          ${tile("Dialer queue", fmtN(P.queueSize), P.queueSize ? (P.queueStarted?"session running":"staged, not started") : "nothing staged")}
-        </div>`+
-        /* Reachability is not the member count. A TRANSFER node pointed at an external number
-           rings a human with no membership at all, which is how this line is set up, so the
-           snapshot carries ringsAPerson rather than letting the tile infer it wrongly. */
-        (P.ringsAPerson
-          ? `<div class="note ok" style="margin-top:10px"><b>The sales line rings a person.</b> In business hours ${esc(P.salesLine)} transfers to ${esc(P.transfersTo || P.agentTransfersTo)}; outside hours the AI receptionist answers and can still put a caller through on ${fmtN(P.agentTransferRules)} transfer rules. Nobody is a <i>member</i> of the line, which is fine for an external transfer but still worth fixing so the call shows in the Allo app.</div>`
-          : `<div class="note warn" style="margin-top:10px"><b>⛔ Nothing rings a person on ${esc(P.salesLine)}.</b> Every call is answered by the AI receptionist. Either assign someone to the number in the Allo app, or publish a transfer to a direct number.</div>`)+
-        (P.conversions === 0 && P.conversations > 0
-          ? `<div class="note" style="margin-top:8px"><b>No dial has converted yet.</b> Conversion counts a call tagged ${esc(P.conversionTags.join(", "))}. If calls are landing and nothing is tagged, the tagging is the gap, not the calling.</div>`
-          : "")+
-        /* Filled in by loadAlloLive() if /api/allo answers. Empty on a static host, on a
-           deployment without ALLO_EXPORT_TOKEN, and any time the Worker is unreachable — the
-           dated snapshot above is always the floor, and this only ever adds to it. */
-        `<div id="allo-live"></div>`
-      : "")+
-
-    (S && S.contacts && S.contactsNamed < S.contacts
-      ? `<div class="note warn" style="margin-top:10px"><b>${fmtN(S.contacts-S.contactsNamed)} contacts have no name.</b> They render blank and one of them can become an account's primary contact. Fix on import rather than after.</div>`
-      : "")+
-    (S && S.merged && S.merged.length
-      ? `<div class="note" style="margin-top:10px"><b>${fmtN(S.merged.length)} account name group(s) were folded together:</b> ${S.merged.map(g=>esc(g.join(" = "))).join(" · ")}. If any of those is a different company, its records are on the wrong profile.</div>`
-      : "")+
-
-    sec("2","The path to sent")+
-    `<div class="daily-mission card pad-lg">
-       <div class="dm-row"><span class="dm-tag">LAUNCH STEPS</span><div class="dm-bar"><span style="width:${pct}%"></span></div><span class="dm-pct">${st.done}/${st.total} · ${pct}%</span></div>
-       <p class="dm-mission">Each step blocks the one under it. A campaign fired at an unverified list off a cold inbox does not just underperform, it burns the sending domain for every campaign after it.</p>
-       <div class="chk-grid" style="margin-top:10px">
-         ${LAUNCH_STEPS.map(s=>chk("lp:"+s.k, `<b>${esc(s.t)}</b><br><span style="color:var(--text-mute);font-size:12.5px">${esc(s.d)}${s.icps?" Live codes: "+esc(icpCodes()):""}</span>`, !!s.done)).join("")}
-       </div>
-     </div>`+
-
-    sec("3","What we are selling, at what price")+
-    table(["Line","Live price","Free sample"],[
-      [`<strong>100% Biochar</strong> ${badge("PRIORITY","badge-green")}`, `$${LIVE.biocharMt} / MT`, "1/2 lb (8 oz)"],
-      ["<strong>Absorbent Pellets</strong>", `$${LIVE.absorbentMt} / MT`, "1 lb"],
-      ["<strong>Absorbent Crumble</strong>", `$${LIVE.absorbentMt} / MT`, "1 lb"],
-    ])+
-    `<div class="note ok" style="margin-top:10px">All three sell by the metric ton today with working checkout, so a winning trial converts to a <b>paid order</b>, not just an LOI. Truckload volume is the only thing still waiting on the Q4 ramp, and that is what the LOI reserves. Samples ship in ${esc(LIVE.sampleEta)}; FOB bulk bags in ${esc(LIVE.bulkEta)}.</div>`+
-    `<div class="note" style="margin-top:8px"><b>Geography:</b> ${esc(LIVE.geo)} <b>Replies route to:</b> ${esc(LIVE.replyTo)}.</div>`+
-
-    sec("4","Rules that do not bend")+
-    `<div class="grid g2">
-      <div class="card"><h4>Claim discipline</h4><p>OMRI <b>Listed</b>, never Certified. IBI <b>tested</b>, never Certified, we have never held it. Never USDA Organic in any form, including "compatible" or "pending". Puro.earth certified is real. Full table in Product &amp; Messaging.</p></div>
-      <div class="card"><h4>The cold ask</h4><p>A free sample. Never a bulk quote, never an LOI, never a contract in a first touch. The order is the close after a trial wins; the LOI reserves Q4 truckload after that.</p></div>
-      <div class="card"><h4>Poultry and livestock</h4><p>Bedding, moisture and manure or compost use only. No feed claims and no animal-health claims, in any channel, ever.</p></div>
-      <div class="card"><h4>Brand</h4><p>Customer-facing name is <b>American BioCarbon</b> today. The rebrand name is not decided, so keep cold copy brand-light and lead with the product. ProGreaux LLC is the legal entity for contracts only.</p></div>
-    </div>`+
-
-    sec("5","Where to go next")+
-    `<div class="grid g3">
-      <div class="card"><h4><a href="#strategy" onclick="go('strategy')">Campaigns &amp; ICP →</a></h4><p>Who each campaign targets, the proof to use, and the disqualifiers.</p></div>
-      <div class="card"><h4><a href="#outreach" onclick="go('outreach')">Outreach Engine →</a></h4><p>Both tracks side by side. Subject pools, message variants and call openers, ready to copy.</p></div>
-      <div class="card"><h4><a href="#crm" onclick="go('crm')">Sales Pipeline →</a></h4><p>Accounts, contacts and deals. Where replies land and get worked.</p></div>
-    </div>`
-  );
-}
 
 /* rSegments, segCard, rankbar and rPersonas lived here and are deleted.
 
@@ -576,10 +414,7 @@ const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
 const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
 /* Engine module (engine-data.js + engine.js): campaign architecture and the funnel costing */
 const ENG = k => (window.ENGINE_UI && ENGINE_UI[k]) ? ENGINE_UI[k] : (()=> "");
-/* Crumble module (crumble-data.js + crumble.js): the six-truckload push and its two gates */
-const CRB = k => (window.CRUMBLE_UI && CRUMBLE_UI[k]) ? CRUMBLE_UI[k] : (()=> "");
 /* Operations module (ops-data.js + ops.js): sample to cash, team, system of record, runbook */
-const OPS_R = k => (window.OPS_UI && OPS_UI[k]) ? OPS_UI[k] : (()=> "");
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
 /* newId → ordered list of renderer thunks it composes */
 function compose(id, thunks){
@@ -588,48 +423,22 @@ function compose(id, thunks){
 
 /* LEAN = daily-driver. BUILD = parked heavy modules (build-later.html). */
 const LEAN_SECTIONS=[
-  // IA v6, rebuilt around the campaign launch rather than around a 30-day plan.
-  //   launch     = pre-send gates + offer + allocation, then the readiness checklists
-  //   strategy   = the campaigns themselves, with the ICP and persona targeting behind them
-  //   outreach   = every piece of copy that actually goes out
-  //   crm        = where the Apollo import and the replies land
-  // The 30-day calendar, the 31-90 horizon and the 30/60/90 roadmap that used to lead this
-  // list are deleted. Their dates had run out and they described building the machine that
-  // is now built.
-  //
-  // rChecklist / rPrelaunch / rLaunch used to sit under Launchpad as "launch gates". They are
-  // gone too. They were not gates, they were a stale build-out plan: they listed the homepage,
-  // the sample form, the spec sheets and analytics as P0 "Todo" when all of them have been
-  // live since the apex cutover, and they still framed the hero around an oil-and-gas-first
-  // thesis that biochar-priority replaced. A checklist that reports finished work as unstarted
-  // trains people to ignore checklists. The seven launch steps on the Launchpad replace them.
-  ["launch",   [rLaunchpad]],
-  ["strategy", [OUT("rCampaigns")]],
-  ["product",  [rBiochar, rMessaging]],
-  // Target accounts deliberately do NOT render here any more. This section used to open with
-  // rAccounts, a hardcoded list of invented companies with invented deal sizes sitting in a
-  // tool reps actually work from. Real accounts live in the Sales Pipeline section, which
-  // reads the roster and HubSpot import.
-  // outreach is now ONE canonical module (outreach.js + outreach-data.js), not a stack of
-  // seven renderers. The old stack was three overlapping banks of copy: DATA.outreach,
-  // GTM.sequences and GTM.scriptLibrary all held a "soil blenders" pitch and they disagreed
-  // with each other. The Aug 10 VDJ call rewrote the messaging from scratch with Victor and
-  // Daniel in the room, so the engine is now a single source with two tracks. LinkedIn,
-  // social and the long-term channel plan moved down to the playbook: they are reference
-  // material, not the cold send.
-  ["outreach", [OUT("rOutreach")]],
-  // Instantly Logic and Future Funnels each render as a single self contained module, the
-  // same way crm and strategy do. Both read engine-data.js and type no numbers of their own.
-  ["instantly",[ENG("rInstantly")]],
-  // One self-contained module, same shape as crm/instantly: reads the generated crumble-data.js
-  // and types no numbers of its own, so the page cannot disagree with the module that built it.
-  ["crumble",  [CRB("rCrumble")]],
-  ["funnels",  [ENG("rFunnels")]],
+  /* Order here is render order, not nav order; nav decides what a person sees first. Pipeline
+     leads because it is the landing section — see the note on LEAN_NAV for the whole rationale.
+
+     rLaunchpad is gone with the Launchpad section. Its live counts moved into the Pipeline
+     header strip, where they sit next to the thing they describe. */
   ["crm",      [PL("rCRM")]],
-  // The four Operate sections were removed 2026-08-17 on the operator's instruction;
-  // ops-data.js/ops.js stay on disk and the renderers are one line each to restore.
+  ["inbox",    [PL("rInbox")]],
+  ["today",    [PL("rToday")]],
+  ["strategy", [OUT("rCampaigns")]],
+  ["outreach", [OUT("rOutreach")]],
+  ["instantly",[ENG("rInstantly")]],
+  ["funnels",  [ENG("rFunnels")]],
+  ["product",  [rBiochar, rMessaging]],
   ["playbook", [rCollateral, G("rSample"), rPlaybook, G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
 ];
+
 function render(){
   $("#content").innerHTML = LEAN_SECTIONS.map(([id,thunks])=>compose(id,thunks)).join("");
 }

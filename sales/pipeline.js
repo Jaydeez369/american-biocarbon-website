@@ -18,7 +18,14 @@
   const kfmt = n => "$" + Math.round(fin(n)/1000) + "K";
   const num = n => Math.round(fin(n)).toLocaleString();
   const lsGet=(k,d)=>{ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } };
-  const lsSet=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+  /* Every write to one of the six shared stores schedules a push. Hooking the setter rather
+     than editing a dozen call sites is deliberate: a new save handler added later is synced
+     without anyone remembering to wire it, which is exactly how these six got left behind when
+     deals and contacts moved to D1. */
+  const lsSet=(k,v)=>{
+    try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){}
+    try{ if(typeof scheduleSync==="function") scheduleSync(k); }catch(e){}
+  };
   const rr=()=>{ if(typeof rerender==="function") rerender(); };
 
   /* ======================= LIVE DATA LAYER ======================= */
@@ -109,12 +116,92 @@
     syncBadge();
   }
 
+  /* ---- the generic store: notes, custom leads, accounts, offtake, status, quarters ----
+     These six were still localStorage-only after deals and contacts moved to D1. `note` is the
+     one that mattered most: every call, email, note, task and meeting a rep logs lands there,
+     and it was the least shared thing in the product. Same write-through contract as deals —
+     local first so nothing typed is ever lost, then the network, then a queued retry. */
+  /* Built LAZILY, not at definition time. ST_KEY is declared further down this file, so an
+     eager object literal here dies with "Cannot access 'ST_KEY' before initialization" and
+     takes the whole IIFE — and therefore window.PIPELIVE, and therefore every section — with
+     it. Exactly the trap the ROSTER_BY index above already documents. */
+  const RECORD_KEYS=()=>({ [N_KEY]:"note", [L_KEY]:"lead", [A_KEY]:"account",
+                           [O_KEY]:"offtake", [ST_KEY]:"status", [QX_KEY]:"quarter" });
+  let _recordKind=null;
+  const RECORD_KIND_OF=k=>{ if(!_recordKind) _recordKind=RECORD_KEYS(); return _recordKind[k]; };
+
+  async function recordCall(kind, method, body, extra){
+    const q=`?kind=${encodeURIComponent(kind)}${extra||""}`;
+    const res=await fetch("/api/record"+q,{ method, headers:{"Content-Type":"application/json"},
+      credentials:"same-origin", body:body?JSON.stringify(body):undefined });
+    let data={}; try{ data=await res.json(); }catch(e){}
+    if(!res.ok||data.ok===false){ const e=new Error(data.error||data.reason||`store returned ${res.status}`); e.reason=data.reason; throw e; }
+    return data;
+  }
+
+  async function pushRecords(kind, list){
+    try{
+      await recordCall(kind,"POST",{records:list});
+      SYNC_STATE={ ok:true, reason:null, at:nowISO() };
+    }catch(err){
+      SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
+      list.forEach(rec=>queueAdd({ generic:kind, method:"POST", rec }));
+    }
+    syncBadge();
+  }
+
+  /* GRANULARITY, and the tradeoff, stated plainly.
+
+     `note` syncs ONE RECORD PER ACCOUNT (id = the account name): the timeline is the store two
+     people are most likely to touch at once, and per-account records mean Victor logging a call
+     on Flowerwood cannot clobber Sarah logging one on Murff. Within a single account it is
+     still last-write-wins.
+
+     The other five sync as ONE record holding the whole blob. They are small, rarely edited,
+     and edited by one person at a time; splitting them would mean inventing stable ids for
+     things that never had them (a status override is keyed by a normalised account name, a
+     quarter is a bare string) for contention that does not happen in practice. If offtake
+     editing ever becomes a two-person job this is the line to revisit. */
+  function syncStore(key){
+    const kind=RECORD_KIND_OF(key); if(!kind) return;
+    const val=lsGet(key,null); if(val==null) return;
+    const at=nowISO();
+    if(kind==="note"){
+      const list=Object.entries(val).map(([account,acts])=>({
+        id:account, scope:account, acts, updated_at:at }));
+      if(list.length) pushRecords(kind,list);
+    } else {
+      pushRecords(kind,[{ id:"all", data:val, updated_at:at }]);
+    }
+  }
+
+  /* Debounced: a single rep action can call lsSet more than once (consolidating note buckets
+     rewrites the store, then the caller writes again), and each one should not be its own
+     round trip. */
+  const SYNC_TIMERS={};
+  function scheduleSync(key){
+    if(!RECORD_KIND_OF(key)) return;
+    clearTimeout(SYNC_TIMERS[key]);
+    SYNC_TIMERS[key]=setTimeout(()=>syncStore(key),400);
+  }
+
+  async function removeGeneric(kind, id){
+    if(!id) return;
+    try{ await recordCall(kind,"DELETE",null,`&id=${encodeURIComponent(id)}`); }
+    catch(err){ queueAdd({ generic:kind, method:"DELETE", id }); }
+    syncBadge();
+  }
+
   async function drainQueue(){
     const q=lsGet(SYNC_KEY,[]); if(!q.length) return;
     const left=[];
     for(const item of q){
       try{
-        if(item.method==="DELETE") await apiCall(item.kind,"DELETE",null,`?id=${encodeURIComponent(item.id)}`);
+        if(item.generic){
+          if(item.method==="DELETE") await recordCall(item.generic,"DELETE",null,`&id=${encodeURIComponent(item.id)}`);
+          else await recordCall(item.generic,"POST",item.rec);
+        }
+        else if(item.method==="DELETE") await apiCall(item.kind,"DELETE",null,`?id=${encodeURIComponent(item.id)}`);
         else await apiCall(item.kind,"POST",item.rec);
       }catch(e){ left.push(item); }
     }
@@ -179,6 +266,7 @@
         SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
       }
     }
+    if(await hydrateGeneric()) changed=true;
     await loadPhoneActivity();
     await loadPhoneLeads();
     await loadMail();
@@ -250,6 +338,54 @@
     return { ch:"email", who:r.who||"", title, body:r.body||"(no body captured)",
       status:r.isReply?"replied":"logged", ts:r.at, _mail:true };
   }
+
+  /* Bring the six generic stores down. Merged by updated_at like deals and contacts: a local
+     record the server has not seen is KEPT, because an unsynced local edit is a pending write
+     and treating "absent upstream" as "deleted" would erase the very entries this exists to
+     protect. */
+  async function hydrateGeneric(){
+    let changed=false;
+    for(const [key,kind] of Object.entries(RECORD_KEYS())){
+      let data;
+      try{ data=await recordCall(kind,"GET"); }
+      catch(err){ SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() }; continue; }
+      const recs=Array.isArray(data.records)?data.records:[];
+      if(!recs.length) continue;
+
+      if(kind==="note"){
+        const local=lsGet(N_KEY,{});
+        let touched=false;
+        for(const r of recs){
+          if(!r.id||!Array.isArray(r.acts)) continue;
+          /* Per account, the newer side wins whole. Merging two timelines entry by entry would
+             need per-activity ids these records have never had; account granularity is the
+             honest limit and it is stated where syncStore explains the tradeoff. */
+          const mine=local[r.id];
+          if(!mine || (r.updated_at||"") >= (LOCAL_STAMP[r.id]||"")){
+            local[r.id]=r.acts; touched=true;
+          }
+        }
+        if(touched){ writeQuiet(N_KEY,local); changed=true; }
+      } else {
+        const rec=recs.find(x=>x.id==="all");
+        if(rec && rec.data!=null){
+          const key2=key;
+          const cur=JSON.stringify(lsGet(key2,null));
+          if(cur!==JSON.stringify(rec.data)){ writeQuiet(key2,rec.data); changed=true; }
+        }
+      }
+    }
+    return changed;
+  }
+
+  /* Timestamps for the note buckets this browser last wrote, so hydrate can tell its own work
+     from somebody else's without re-pushing everything it just pulled. */
+  const LOCAL_STAMP={};
+
+  /* Write to localStorage WITHOUT scheduling a push. Hydration must not echo what it just
+     received straight back to the server; without this, every load would rewrite every record
+     and two browsers would ping-pong updated_at forever. */
+  function writeQuiet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 
   async function loadPhoneLeads(){
     try{
@@ -540,6 +676,7 @@
   const addAcctActivity = (name,act) => {
     const all=lsGet(N_KEY,{});
     (all[name]=all[name]||[]).unshift({ ch:"note", status:"logged", ts:new Date().toISOString(), ...act });
+    LOCAL_STAMP[name]=new Date().toISOString();
     lsSet(N_KEY,all);
   };
   /* back-compat: a plain note is just a note-channel activity */
@@ -635,15 +772,22 @@
      the companies someone has actually spoken to; Prospects shows every company researched,
      with the ICP and score that decide which get worked next. "Contacts" is now "People" so the two are
      not confused: a company is the unit of work, a person is how you reach it. */
+  /* The "Prospects" tab (tCompanies, the flat account list) was removed 2026-08-31. It was a
+     directory of 322 rows nobody browsed: every route a rep actually takes to an account goes
+     THROUGH something else — a deal, a contact, a call in the Inbox — and each of those already
+     opens the account profile directly. Account records themselves are untouched; the profile
+     is where the timeline, the phone activity and the Instantly mail render, and it is reached
+     from every one of those places. tCompanies stays in git history. */
   const TABS = [
-    ["prospects","Prospects"],["pipeline","Pipeline"],["deals","Deals"],["people","People"],
+    ["pipeline","Pipeline"],["deals","Deals"],["people","People"],
     ["leads","Leads"],["offtake","Offtake Pipeline"],["production","Production Plan"],
     ["exec","Executive Dashboard"],["reports","Reports"],
   ];
   const TAB_KEY = "vej_pipe_tab";
-  /* Falls back to prospects, and also catches the retired "contacts"/"companies" ids still sitting in the
-     localStorage of anyone who used the old build. */
-  const activeTab = () => { const t=lsGet(TAB_KEY,null); return TABS.some(x=>x[0]===t)?t:"prospects"; };
+  /* Falls back to pipeline, and also catches the retired "prospects"/"contacts"/"companies"
+     ids still sitting in the localStorage of anyone who used an earlier build — without this,
+     everyone who last used the Prospects tab would open to a blank pane. */
+  const activeTab = () => { const t=lsGet(TAB_KEY,null); return TABS.some(x=>x[0]===t)?t:"pipeline"; };
   window.pipeTab = id => {
     lsSet(TAB_KEY,id);
     document.querySelectorAll(".pipe-pane").forEach(p=>p.classList.toggle("active",p.dataset.tab===id));
@@ -2470,7 +2614,7 @@
   function sectionInner(){
     if(PROFILE) return renderProfile(PROFILE);
     const at=activeTab();
-    const panes=[["prospects",tCompanies],["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["leads",tLeads],["offtake",tOfftake],["production",tProduction],["exec",tExec],["reports",tReports]];
+    const panes=[["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["leads",tLeads],["offtake",tOfftake],["production",tProduction],["exec",tExec],["reports",tReports]];
     /* The deal book's provenance, stated where the KPIs are read. Companies, contacts and
        ICPs on this page come off the live roster join, but every DEAL number (pipeline,
        weighted, confirmed revenue, win rate) is computed from the SIBRA snapshot plus
@@ -2483,7 +2627,26 @@
       <div class="pipe-tabs">${TABS.map(([id,t])=>`<span class="pill${id===at?" active":""}" data-tab="${id}" onclick="pipeTab('${id}')">${t}</span>`).join("")}</div>
       ${panes.map(([id,fn])=>`<div class="pipe-pane${id===at?" active":""}" data-tab="${id}">${fn()}</div>`).join("")}`;
   }
-  function rCRM(){ return `<section class="section" id="sec-crm">${sectionInner()}</section>`; }
+  /* The strip that replaced the Launchpad. Six numbers, and only the three that represent WORK
+     carry the accent rail: replies waiting, missed calls, leads to ring. The other three are
+     context. The old Launchpad put fourteen tiles on screen with no way to tell which of them
+     you were supposed to do something about, which is the reason it read as fluff. */
+  function rStrip(){
+    const d=liveDeals().filter(x=>x.status==="open");
+    const read=readSet();
+    const items=inboxItems();
+    const cell=(l,v,hot)=>`<div class="pstrip-cell${hot?" hot":""}"><div class="ps-l">${esc(l)}</div><div class="ps-v">${v}</div></div>`;
+    return `<div class="pstrip">
+      ${cell("Open pipeline",money(sum(d,value)))}
+      ${cell("Open deals",num(d.length))}
+      ${cell("Accounts",num(liveAccounts().length))}
+      ${cell("Replies waiting",num(items.filter(i=>i.type==="reply"&&!read.has(i.sig)).length),true)}
+      ${cell("Missed calls",num(items.filter(i=>i.type==="missed"&&!read.has(i.sig)).length),true)}
+      ${cell("Leads to ring",num(items.filter(i=>i.type==="lead").length),true)}
+    </div>`;
+  }
+
+  function rCRM(){ return `<section class="section" id="sec-crm">${rStrip()}${sectionInner()}</section>`; }
 
   /* Live counts for the Launchpad. Exposed as a function, not a snapshot, so the numbers are
      computed at render time from whatever is actually loaded. This is the whole reason the
@@ -2515,7 +2678,185 @@
 
   /* `sync` is exposed so the Launchpad and the e2e test can drive a refresh without reloading,
      and so a rep who watched a save fail can retry it deliberately rather than by guessing. */
-  window.PIPELIVE = { rCRM, stats, sync:{ hydrate, drainQueue, state:()=>({...SYNC_STATE}),
+
+  /* ================= INBOX =================
+     One feed for everything that came IN: missed calls, texts, Instantly replies, policy flags
+     and leads the phone created. Until now each of those lived in a different place and three
+     of them lived nowhere a rep would look.
+
+     It invents no data. /api/activity, /api/email and /api/lead already return all of it; this
+     merges them on one timeline and gives each row the single action it deserves. */
+  const READ_KEY="vej_inbox_read_v1";
+  const readSet=()=>new Set(lsGet(READ_KEY,[]));
+  window.pipeInboxRead=sig=>{ const r=readSet(); r.add(sig); lsSet(READ_KEY,[...r]); remountInbox(); };
+  window.pipeInboxReadAll=()=>{ lsSet(READ_KEY,inboxItems().map(i=>i.sig)); remountInbox(); };
+  let INBOX_FILTER="all";
+  window.pipeInboxFilter=f=>{ INBOX_FILTER=f; remountInbox(); };
+  function remountInbox(){ const el=document.getElementById("sec-inbox"); if(el) el.innerHTML=rInbox(); }
+
+  /* The account a number or a domain belongs to, or null. Reuses the same matching the account
+     timeline uses, so a row in the Inbox and the same event on the account agree. */
+  function acctForNumber(k){
+    if(!k) return null;
+    const c=allContacts().find(c=>phoneKey(c.phone)===k||phoneKey(c.mobile)===k||phoneKey(c.phoneE164)===k);
+    return c?canonAcct(c.account):null;
+  }
+  function acctForDomain(d){
+    if(!d) return null;
+    const hit=liveAccounts().find(a=>{
+      const h=String(a.website||a.domain||"").replace(/^https?:\/\//,"").replace(/^www\./,"").split("/")[0].toLowerCase();
+      return h&&h===d;
+    });
+    if(hit) return hit.name;
+    const c=allContacts().find(c=>String(c.email||"").toLowerCase().endsWith("@"+d));
+    return c?canonAcct(c.account):null;
+  }
+
+  function inboxItems(){
+    const out=[];
+    const MISSED=/VOICEMAIL|NO_ANSWER|MISSED|FAILED|TRANSFERRED_AI/i;
+
+    PHONE.rows.forEach(r=>{
+      const acct=acctForNumber(r.key);
+      const sig=`p|${r.at}|${r.kind}|${r.key}`;
+      if(r.policyFlag){
+        out.push({ sig, type:"flag", at:r.at, title:"Policy flag \u2014 "+r.policyFlag,
+          who:r.who||r.number, acct, body:r.summary||"Review the recording before the prospect acts on it.",
+          action:"Review call", href:acct });
+        return;
+      }
+      if(r.kind==="call"&&r.result&&MISSED.test(r.result)){
+        out.push({ sig, type:"missed", at:r.at, title:"Missed call \u2014 "+r.result.toLowerCase().replace(/_/g," "),
+          who:r.who||r.number, acct, body:r.summary||"No summary recorded.", action:"Call back", tel:r.number, href:acct });
+        return;
+      }
+      if(r.kind==="sms"&&r.direction==="INBOUND"){
+        out.push({ sig, type:"text", at:r.at, title:"Text received", who:r.who||r.number, acct,
+          body:r.summary||"", action:"Reply", tel:r.number, href:acct });
+      }
+    });
+
+    MAIL.rows.filter(r=>r.isReply).forEach(r=>{
+      const acct=acctForDomain(r.key);
+      out.push({ sig:`m|${r.at}|${r.threadId||r.subject}`, type:"reply", at:r.at,
+        title:"Reply \u2014 "+r.subject, who:r.from, acct, body:r.body||"", action:"Open account", href:acct });
+    });
+
+    /* Only leads nobody has claimed. A claimed lead is somebody's work in progress, not an
+       unread item, and leaving it here would mean the Inbox never empties. */
+    PHONE_LEADS.filter(l=>!l.claimed).forEach(l=>{
+      if(acctForNumber(phoneKey(l.phoneE164))) return;   // already a known contact
+      out.push({ sig:`l|${l.phoneE164}`, type:"lead", at:l.last_seen, title:"New lead from the phone",
+        who:l.name||l.phoneE164, acct:null,
+        body:l.last_summary||`${l.call_count} call${l.call_count===1?"":"s"}, ${l.sms_count} text${l.sms_count===1?"":"s"}.`,
+        action:"Claim lead", lead:l.phoneE164, tel:l.phoneE164 });
+    });
+
+    return out.filter(i=>i.at).sort((a,b)=>new Date(b.at)-new Date(a.at));
+  }
+
+  const INBOX_META={
+    missed:{ label:"Missed calls", rail:"var(--accent)", bg:"#fdeaef", fg:"#b91237", ic:"call" },
+    text:  { label:"Texts",        rail:"var(--line-2)", bg:"var(--paper-2)", fg:"var(--text-dim)", ic:"sms" },
+    reply: { label:"Replies",      rail:"var(--accent)", bg:"#eef2f9", fg:"#24478a", ic:"email" },
+    flag:  { label:"Policy flags", rail:"var(--gold)",   bg:"#fbf4e6", fg:"#8a6412", ic:"system" },
+    lead:  { label:"New leads",    rail:"var(--accent)", bg:"#f0f7ee", fg:"#3f5f3c", ic:"task" },
+  };
+
+  function rInbox(){
+    const items=inboxItems();
+    const read=readSet();
+    const unread=items.filter(i=>!read.has(i.sig));
+    const shown=INBOX_FILTER==="all"?items:items.filter(i=>i.type===INBOX_FILTER);
+
+    if(PHONE.ok===false&&MAIL.ok===false){
+      return `<div class="ibx-empty">The phone system and Instantly are both unreachable right now. Nothing is lost; this fills in when they answer.</div>`;
+    }
+
+    const chip=(f,label,n,hot)=>`<button type="button" class="ibx-chip${INBOX_FILTER===f?" on":""}" onclick="pipeInboxFilter('${f}')">${esc(label)} <b class="${hot&&n?"hot":""}">${n}</b></button>`;
+    const chips=[chip("all","All",items.length,false)]
+      .concat(Object.entries(INBOX_META).map(([k,m])=>
+        chip(k,m.label,items.filter(i=>i.type===k).length,k!=="text")));
+
+    let body="", lastDay=null;
+    if(!shown.length) body=`<div class="ibx-empty">Nothing here.</div>`;
+    else shown.forEach(i=>{
+      const dk=dayKey(i.at);
+      if(dk!==lastDay){ body+=`<div class="ibx-day">${esc(dk)}</div>`; lastDay=dk; }
+      const m=INBOX_META[i.type]||INBOX_META.text;
+      const isNew=!read.has(i.sig);
+      const act = i.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${esc(i.lead)}')">${esc(i.action)}</button>`
+        : i.tel ? `<a class="btn btn-accent ibx-act" href="${i.type==="text"?"sms":"tel"}:${esc(i.tel)}">${esc(i.action)}</a>`
+        : i.href ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeOpenAccount('${esc(i.href).replace(/'/g,"\\'")}')">${esc(i.action)}</button>`
+        : "";
+      body+=`<div class="ibx-row${isNew?" new":""}" style="--rail:${m.rail}">
+        <div class="ibx-ico" style="background:${m.bg};color:${m.fg}">${iconSvg(m.ic)}</div>
+        <div class="ibx-main">
+          <div class="ibx-head">
+            <span class="ibx-title">${esc(i.title)}</span>
+            ${i.acct?`<a class="acct-link" onclick="pipeOpenAccount('${esc(i.acct).replace(/'/g,"\\'")}')">${esc(i.acct)}</a>`
+                    :`<span class="ibx-who">${esc(i.who||"")}</span>`}
+          </div>
+          <p class="ibx-body">${esc(String(i.body||"").slice(0,260))}</p>
+        </div>
+        <div class="ibx-side">
+          <span class="ibx-time">${esc(timeStr(i.at))}</span>
+          ${act}
+          ${isNew?`<button type="button" class="ibx-dismiss" onclick="pipeInboxRead('${esc(i.sig)}')" title="Mark read">Mark read</button>`:""}
+        </div>
+      </div>`;
+    });
+
+    return `<div class="sec-head">
+        <div><h2>Inbox</h2><p class="sec-sub">Everything that came in. Calls, texts, replies, flags.</p></div>
+        <button type="button" class="btn btn-ghost" onclick="pipeInboxReadAll()">Mark all read</button>
+      </div>
+      <div class="ibx-chips">${chips.join("")}</div>
+      <div class="ibx-feed">${body}</div>
+      <p class="ibx-foot">${unread.length} unread &middot; live from the phone system and Instantly.</p>`;
+  }
+
+  /* ================= TODAY =================
+     What a rep should do next, in one list, ordered by how long it has been waiting. Built from
+     the same three feeds as the Inbox plus deals whose close date has passed. Nothing here is a
+     new store: a to-do the system can derive is one nobody has to remember to write down. */
+  function rToday(){
+    const read=readSet();
+    const rows=[];
+
+    inboxItems().filter(i=>!read.has(i.sig)&&i.type!=="text").forEach(i=>{
+      rows.push({ at:i.at, what:i.title, who:i.acct||i.who, why:INBOX_META[i.type].label,
+        action:i.action, lead:i.lead, tel:i.tel, href:i.href });
+    });
+
+    const today=todayISO();
+    liveDeals().filter(d=>d.status==="open"&&d.close&&d.close<today).forEach(d=>{
+      rows.push({ at:d.close, what:`Deal past its close date \u2014 ${d.deal}`, who:d.customer,
+        why:"Deals", action:"Open account", href:canonAcct(d.customer) });
+    });
+
+    rows.sort((a,b)=>new Date(a.at)-new Date(b.at));   // oldest first: longest waiting, first
+
+    const body=rows.length?rows.map(r=>{
+      const act = r.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${esc(r.lead)}')">${esc(r.action)}</button>`
+        : r.tel ? `<a class="btn btn-accent ibx-act" href="tel:${esc(r.tel)}">${esc(r.action)}</a>`
+        : r.href ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeOpenAccount('${esc(r.href).replace(/'/g,"\\'")}')">${esc(r.action)}</button>`
+        : "";
+      return `<div class="tdy-row">
+        <div class="tdy-main"><span class="tdy-what">${esc(r.what)}</span>
+          <span class="tdy-who">${esc(r.who||"")}</span></div>
+        <span class="tdy-why">${esc(r.why)}</span>
+        <span class="tdy-age">${esc(dayKey(r.at))}</span>
+        ${act}</div>`;
+    }).join(""):`<div class="ibx-empty">Nothing waiting. Everything inbound has been picked up.</div>`;
+
+    return `<div class="sec-head">
+        <div><h2>Today</h2><p class="sec-sub">What is waiting, oldest first.</p></div>
+      </div>
+      <div class="tdy-list">${body}</div>`;
+  }
+
+  window.PIPELIVE = { rCRM, rInbox, rToday, inboxCount:()=>{ const r=readSet(); return inboxItems().filter(i=>!r.has(i.sig)).length; }, stats, sync:{ hydrate, drainQueue, state:()=>({...SYNC_STATE}),
     queued:()=>lsGet(SYNC_KEY,[]).length, phone:()=>({ok:PHONE.ok,reason:PHONE.reason,rows:PHONE.rows.length}),
     mail:()=>({ok:MAIL.ok,reason:MAIL.reason,rows:MAIL.rows.length,replies:MAIL.replies}) } };
 

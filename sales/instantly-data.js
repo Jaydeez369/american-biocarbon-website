@@ -12,11 +12,11 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-08-28 18:41 UTC",
-  "readDate": "2026-08-28",
+  "read": "2026-08-31 14:53 UTC",
+  "readDate": "2026-08-31",
   "source": "snapshot",
   "inWorkspace": 15,
-  "launched": 8,
+  "launched": 7,
   "launchedNames": [
     "AB.CIVIL",
     "AB.DIST",
@@ -24,8 +24,7 @@ window.INSTANTLY_LIVE = {
     "AB.HDD.CON",
     "AB.LF",
     "AB.OG",
-    "BC-NURS",
-    "BC.FARM"
+    "BC-NURS"
   ],
   "paused": 1,
   "pausedNames": [
@@ -38,8 +37,8 @@ window.INSTANTLY_LIVE = {
   "totals": {
     "campaigns": 15,
     "leads": 595,
-    "contacted": 732,
-    "sent": 840,
+    "contacted": 826,
+    "sent": 939,
     "replies": 7,
     "bounced": 5,
     "unsubscribed": 0
@@ -48,8 +47,8 @@ window.INSTANTLY_LIVE = {
     "absorbent": {
       "campaigns": 9,
       "leads": 367,
-      "contacted": 413,
-      "sent": 463,
+      "contacted": 463,
+      "sent": 523,
       "replies": 2,
       "bounced": 1,
       "unsubscribed": 0
@@ -57,8 +56,8 @@ window.INSTANTLY_LIVE = {
     "biochar": {
       "campaigns": 6,
       "leads": 228,
-      "contacted": 319,
-      "sent": 377,
+      "contacted": 363,
+      "sent": 416,
       "replies": 5,
       "bounced": 4,
       "unsubscribed": 0
@@ -70,7 +69,7 @@ window.INSTANTLY_LIVE = {
     "getamericanbiocarbon.com": 2
   },
   "dailyCeiling": 120,
-  "requestedDaily": 175,
+  "requestedDaily": 150,
   "campaigns": [
     {
       "name": "AB.BED.SUP · Bedding Channel · R1",
@@ -90,7 +89,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 48,
-      "sent": 96,
+      "sent": 105,
       "replies": 0,
       "bounced": 0
     },
@@ -101,7 +100,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 52,
-      "sent": 103,
+      "sent": 113,
       "replies": 0,
       "bounced": 0
     },
@@ -112,7 +111,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 26,
-      "sent": 52,
+      "sent": 62,
       "replies": 0,
       "bounced": 0
     },
@@ -123,7 +122,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 11,
-      "sent": 22,
+      "sent": 33,
       "replies": 0,
       "bounced": 0
     },
@@ -145,7 +144,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 14,
-      "sent": 28,
+      "sent": 38,
       "replies": 0,
       "bounced": 0
     },
@@ -167,7 +166,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 191,
-      "sent": 137,
+      "sent": 147,
       "replies": 1,
       "bounced": 1
     },
@@ -211,7 +210,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 180,
-      "sent": 254,
+      "sent": 276,
       "replies": 3,
       "bounced": 2
     },
@@ -219,10 +218,10 @@ window.INSTANTLY_LIVE = {
       "name": "BC.FARM · Row Crop and Specialty Farms · R1",
       "icp": "BC.FARM",
       "line": "biochar",
-      "status": "live",
+      "status": "completed",
       "parked": false,
       "leads": 47,
-      "sent": 120,
+      "sent": 137,
       "replies": 2,
       "bounced": 2
     },
