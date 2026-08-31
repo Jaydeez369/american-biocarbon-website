@@ -181,8 +181,9 @@
     }
     await loadPhoneActivity();
     await loadPhoneLeads();
+    await loadMail();
     syncBadge();
-    if(changed||PHONE.rows.length||PHONE_LEADS.length) rr();
+    if(changed||PHONE.rows.length||PHONE_LEADS.length||MAIL.rows.length) rr();
   }
 
   /* ---- phone activity, from /api/activity (allo-hooks D1, live) ----
@@ -202,6 +203,52 @@
         PHONE.byKey.get(r.key).push(r);
       }
     }catch(e){ PHONE.ok=false; PHONE.reason="unreachable"; }
+  }
+
+  /* ---- Instantly mail, from /api/email ----
+     The twin of PHONE: same live-fetch, same fail-soft, same in-browser matching. Joined on
+     EMAIL DOMAIN rather than address, because a campaign writes to one person at a company and
+     the reply can come from another, or from a shared inbox — matching the exact address would
+     split one conversation across two accounts. */
+  const MAIL={ rows:[], ok:null, reason:null, replies:0 };
+  async function loadMail(){
+    try{
+      const res=await fetch("/api/email",{credentials:"same-origin"});
+      const data=await res.json();
+      MAIL.ok=!!data.ok; MAIL.reason=data.reason||null;
+      MAIL.rows=Array.isArray(data.rows)?data.rows:[];
+      MAIL.replies=data.replies||0;
+    }catch(e){ MAIL.ok=false; MAIL.reason="unreachable"; MAIL.rows=[]; }
+  }
+
+  /* Domains belonging to an account: from its contacts' addresses, plus the account's own
+     website host, which is how mail matches an account that has no contact on file yet. */
+  function domainsFor(name){
+    const out=new Set();
+    const dom=a=>{ const s=String(a||"").toLowerCase(); const i=s.lastIndexOf("@"); return i===-1?"":s.slice(i+1); };
+    allContacts().filter(c=>norm(c.account||"")===norm(name)).forEach(c=>{ const d=dom(c.email); if(d) out.add(d); });
+    const acct=liveAccounts().find(a=>norm(a.name)===norm(name));
+    const host=String((acct&&(acct.website||acct.domain))||"").replace(/^https?:\/\//,"").replace(/^www\./,"").split("/")[0].toLowerCase();
+    if(host) out.add(host);
+    return out;
+  }
+
+  function mailFor(name){
+    if(!MAIL.rows.length) return [];
+    const doms=domainsFor(name);
+    if(!doms.size) return [];
+    return MAIL.rows.filter(r=>r.key&&doms.has(r.key));
+  }
+
+  /* Instantly mail as a timeline activity. No `_idx`, so no delete button: this is what the
+     sending system recorded, not a note the team typed, and offering to delete it would imply
+     the deletion reached Instantly. */
+  function mailToActivity(r){
+    const title=r.isReply
+      ? `Reply received — ${r.subject}`
+      : (r.manual?`Reply sent — ${r.subject}`:`Email sent — ${r.subject}`);
+    return { ch:"email", who:r.who||"", title, body:r.body||"(no body captured)",
+      status:r.isReply?"replied":"logged", ts:r.at, _mail:true };
   }
 
   async function loadPhoneLeads(){
@@ -2306,6 +2353,10 @@
        reach a screen — an account could have been called twice and its timeline showed only
        what somebody typed by hand. */
     phoneActivityFor(name).forEach(r=>derived.push(phoneToActivity(r)));
+    /* Instantly mail, including the replies that until now lived only in Instantly's own inbox
+       — the one system meant to be the book of business was the one place the correspondence
+       was not. */
+    mailFor(name).forEach(r=>derived.push(mailToActivity(r)));
     const all = stored.concat(derived).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
     const filterSet = PROFILE_FILTER==="all" ? null : PROFILE_FILTER.split(",");
     const shown = filterSet ? all.filter(a=>filterSet.includes(a.ch)) : all;
@@ -2465,7 +2516,8 @@
   /* `sync` is exposed so the Launchpad and the e2e test can drive a refresh without reloading,
      and so a rep who watched a save fail can retry it deliberately rather than by guessing. */
   window.PIPELIVE = { rCRM, stats, sync:{ hydrate, drainQueue, state:()=>({...SYNC_STATE}),
-    queued:()=>lsGet(SYNC_KEY,[]).length, phone:()=>({ok:PHONE.ok,reason:PHONE.reason,rows:PHONE.rows.length}) } };
+    queued:()=>lsGet(SYNC_KEY,[]).length, phone:()=>({ok:PHONE.ok,reason:PHONE.reason,rows:PHONE.rows.length}),
+    mail:()=>({ok:MAIL.ok,reason:MAIL.reason,rows:MAIL.rows.length,replies:MAIL.replies}) } };
 
   /* Hydrate AFTER first paint, never before it. The page renders from localStorage instantly
      the way it always has; the shared store arrives a moment later and re-renders only if it
