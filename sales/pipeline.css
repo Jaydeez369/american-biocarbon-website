@@ -679,3 +679,23 @@ tr.co-dead:hover{opacity:.85}
 .tdy-why{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;
   color:var(--text-mute);flex-shrink:0}
 .tdy-age{font-family:var(--mono);font-size:11px;color:var(--text-mute);flex-shrink:0;min-width:78px;text-align:right}
+
+/* to-dos: the one thing on Today that is typed rather than derived */
+.tdy-todos{background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--sh-1);padding:14px 16px;margin-bottom:22px}
+.tdy-add{display:flex;gap:8px;margin-bottom:10px}
+.tdy-add .pinput{flex:1}
+.tdy-todo{display:flex;align-items:center;gap:10px;padding:7px 2px;border-top:1px solid var(--line-soft)}
+.tdy-todo:first-of-type{border-top:none}
+.tdy-check{width:18px;height:18px;flex-shrink:0;border:1.5px solid var(--line-2);background:#fff;
+  border-radius:5px;cursor:pointer;font-size:11px;line-height:1;color:#fff;padding:0}
+.tdy-todo.done .tdy-check{background:var(--green);border-color:var(--green)}
+.tdy-text{flex:1;font-size:13.5px;color:var(--text)}
+.tdy-todo.done .tdy-text{color:var(--text-mute);text-decoration:line-through}
+.tdy-x{background:none;border:none;color:var(--text-mute);font-size:17px;line-height:1;cursor:pointer;padding:0 4px}
+.tdy-x:hover{color:var(--red-soft)}
+.tdy-donehead{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--text-mute);margin:12px 0 2px}
+.tdy-head{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--text-mute);font-weight:600;margin:0 2px 10px}
+.ibx-row[onclick]:hover{border-color:var(--line-2);box-shadow:var(--sh-2)}

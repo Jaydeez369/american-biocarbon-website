@@ -140,6 +140,11 @@ export async function onRequestGet(context) {
     return {
       at: e.timestamp_created || e.timestamp_email || null,
       kind: 'email',
+      /* `id` is Instantly's own uuid for the message and is what POST /emails/reply wants as
+         `reply_to_uuid`; `eaccount` is the mailbox that must send the reply. Both are carried
+         through so the Inbox can reply without a second round trip to find them. */
+      id: e.id || null,
+      eaccount: e.eaccount || null,
       direction: inbound ? 'INBOUND' : 'OUTBOUND',
       /* A prospect choosing to answer is the event worth surfacing; a campaign step is not. */
       isReply: inbound,

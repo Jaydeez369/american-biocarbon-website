@@ -126,7 +126,8 @@
      takes the whole IIFE — and therefore window.PIPELIVE, and therefore every section — with
      it. Exactly the trap the ROSTER_BY index above already documents. */
   const RECORD_KEYS=()=>({ [N_KEY]:"note", [L_KEY]:"lead", [A_KEY]:"account",
-                           [O_KEY]:"offtake", [ST_KEY]:"status", [QX_KEY]:"quarter" });
+                           [O_KEY]:"offtake", [ST_KEY]:"status", [QX_KEY]:"quarter",
+                           [T_KEY]:"todo" });
   let _recordKind=null;
   const RECORD_KIND_OF=k=>{ if(!_recordKind) _recordKind=RECORD_KEYS(); return _recordKind[k]; };
 
@@ -399,13 +400,32 @@
      untouched new traffic; it stays in the list, because a rep needs to see what they claimed.
      This is the one write the dashboard is allowed to make to a lead, because it is a statement
      about what a HUMAN has done, not a correction of what the phone recorded. */
-  window.pipeLeadClaim=async(phone,status)=>{
+  window.pipeLeadClaim=phone=>{
+    /* Claiming used to only flip a flag: the lead left the queue and the person was still in no
+       book, which meant the phone captured a conversation and the journey stopped there. It now
+       opens the contact form prefilled, so claiming a lead and having a contact are one action.
+       The lead is marked claimed only AFTER the contact saves, so an abandoned form leaves the
+       lead in the queue rather than losing it. */
+    const l=PHONE_LEADS.find(x=>x.phoneE164===phone);
+    if(!l){ alert("That lead is no longer in the queue."); return; }
+    const parts=String(l.name||"").trim().split(/\s+/);
+    pipeContactModal(null,{
+      first:parts[0]||"", last:parts.slice(1).join(" ")||"",
+      account:l.company||"", phone:l.phoneE164,
+      notes:l.last_summary?`From the phone: ${l.last_summary}`:"",
+      __leadPhone:l.phoneE164,
+    });
+  };
+
+  /* Called by pipeContactSave once the contact is actually stored. */
+  async function claimLeadAfterContact(phone,contact){
     try{
       await fetch("/api/lead",{ method:"PATCH", headers:{"Content-Type":"application/json"},
-        credentials:"same-origin", body:JSON.stringify({ id:phone, claimed:1, status:status||"qualified" }) });
-      await loadPhoneLeads(); rr();
-    }catch(e){ alert("Could not update that lead. It is still in the queue."); }
-  };
+        credentials:"same-origin",
+        body:JSON.stringify({ id:phone, claimed:1, status:"qualified", name:contact.name, company:contact.account }) });
+      await loadPhoneLeads();
+    }catch(e){ /* the contact exists either way; the lead simply stays in the queue */ }
+  }
 
   /* Every phone row belonging to an account, found by matching the numbers on that account's
      contacts. Falls back to the company name the phone system itself recorded, which is how a
@@ -778,9 +798,13 @@
      opens the account profile directly. Account records themselves are untouched; the profile
      is where the timeline, the phone activity and the Instantly mail render, and it is reached
      from every one of those places. tCompanies stays in git history. */
+  /* The Leads tab was removed 2026-08-31, after Prospects. Leads now arrive in the Inbox the
+     moment the phone creates one, and claiming one there turns it into a contact in a single
+     step. A separate tab listing the same rows a second time meant two places to work the same
+     queue and no rule for which was authoritative. tLeads stays in git history. */
   const TABS = [
     ["pipeline","Pipeline"],["deals","Deals"],["people","People"],
-    ["leads","Leads"],["offtake","Offtake Pipeline"],["production","Production Plan"],
+    ["offtake","Offtake Pipeline"],["production","Production Plan"],
     ["exec","Executive Dashboard"],["reports","Reports"],
   ];
   const TAB_KEY = "vej_pipe_tab";
@@ -1990,9 +2014,13 @@
     });
     const c=document.getElementById("pipeCCount"); if(c)c.textContent=n+" contacts";
   };
-  window.pipeContactModal=idx=>{
-    const cur=(idx!=null&&idx>=0)?getCustom()[idx]:{};
+  /* `prefill` lets a phone lead become a contact without retyping what the call already told
+     us. Same shape as the deal modal's prefill, and it carries __leadPhone so the save handler
+     can mark the lead claimed once the contact actually exists. */
+  window.pipeContactModal=(idx,prefill)=>{
+    const cur=(idx!=null&&idx>=0)?getCustom()[idx]:(prefill||{});
     if(!cur) return;
+    PENDING_LEAD=(prefill&&prefill.__leadPhone)||null;
     const accounts=accountNames();
     const body=`
       <div class="pcf-grid">${F("pcFirst","First Name",cur.first,1)}${F("pcLast","Last Name",cur.last,1)}</div>
@@ -2026,6 +2054,9 @@
 
      Guarding on `ci` rather than on a source flag is the durable form: any future read-only
      source is covered without touching this again. */
+  /* The lead a currently-open contact form came from, if any. Cleared on save and on cancel so
+     a later unrelated contact cannot accidentally claim it. */
+  let PENDING_LEAD=null;
   const readOnlyContact = c => c.ci === undefined || c.ci === null;
   const readOnlyWhy = c => c.hubspot
     ? "Imported from HubSpot, read-only here. Edit it in HubSpot and re-run the import."
@@ -2055,7 +2086,10 @@
       arr.push(rec);
     }
     rec.updated_at=nowISO();
-    saveCustom(arr); pushRecord("contacts",rec); pipeModalClose(); rr();
+    saveCustom(arr); pushRecord("contacts",rec);
+    /* Only now, with the contact committed, does the lead leave the queue. */
+    if(PENDING_LEAD){ claimLeadAfterContact(PENDING_LEAD,rec); PENDING_LEAD=null; }
+    pipeModalClose(); rr();
   };
   window.pipeContactDelete=idx=>{
     const arr=getCustom(); const c=arr[idx];
@@ -2614,7 +2648,7 @@
   function sectionInner(){
     if(PROFILE) return renderProfile(PROFILE);
     const at=activeTab();
-    const panes=[["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["leads",tLeads],["offtake",tOfftake],["production",tProduction],["exec",tExec],["reports",tReports]];
+    const panes=[["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["offtake",tOfftake],["production",tProduction],["exec",tExec],["reports",tReports]];
     /* The deal book's provenance, stated where the KPIs are read. Companies, contacts and
        ICPs on this page come off the live roster join, but every DEAL number (pipeline,
        weighted, confirmed revenue, win rate) is computed from the SIBRA snapshot plus
@@ -2739,7 +2773,10 @@
     MAIL.rows.filter(r=>r.isReply).forEach(r=>{
       const acct=acctForDomain(r.key);
       out.push({ sig:`m|${r.at}|${r.threadId||r.subject}`, type:"reply", at:r.at,
-        title:"Reply \u2014 "+r.subject, who:r.from, acct, body:r.body||"", action:"Open account", href:acct });
+        title:"Reply \u2014 "+r.subject, who:r.from, acct, body:r.body||"",
+        /* Replying is the point of a reply landing here. The two handles the Instantly reply
+           endpoint needs ride along so the composer needs no second lookup. */
+        action:"Reply", replyTo:r.id, eaccount:r.eaccount, subject:r.subject, href:acct });
     });
 
     /* Only leads nobody has claimed. A claimed lead is somebody's work in progress, not an
@@ -2785,11 +2822,16 @@
       if(dk!==lastDay){ body+=`<div class="ibx-day">${esc(dk)}</div>`; lastDay=dk; }
       const m=INBOX_META[i.type]||INBOX_META.text;
       const isNew=!read.has(i.sig);
-      const act = i.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${esc(i.lead)}')">${esc(i.action)}</button>`
+      const act = i.replyTo ? `<button type="button" class="btn btn-accent ibx-act" onclick="pipeReplyModal('${esc(i.sig)}')">Reply</button>`
+        : i.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${esc(i.lead)}')">${esc(i.action)}</button>`
         : i.tel ? `<a class="btn btn-accent ibx-act" href="${i.type==="text"?"sms":"tel"}:${esc(i.tel)}">${esc(i.action)}</a>`
         : i.href ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeOpenAccount('${esc(i.href).replace(/'/g,"\\'")}')">${esc(i.action)}</button>`
         : "";
-      body+=`<div class="ibx-row${isNew?" new":""}" style="--rail:${m.rail}">
+      /* The whole row opens the account, not just the link in it. A feed where only one small
+         word is clickable makes people hunt for the target; the action button stops the click
+         from bubbling so Reply and Call back still do their own thing. */
+      const open=i.acct?` onclick="pipeOpenAccount('${esc(i.acct).replace(/'/g,"\\'")}')" style="--rail:${m.rail};cursor:pointer"`:` style="--rail:${m.rail}"`;
+      body+=`<div class="ibx-row${isNew?" new":""}"${open}>
         <div class="ibx-ico" style="background:${m.bg};color:${m.fg}">${iconSvg(m.ic)}</div>
         <div class="ibx-main">
           <div class="ibx-head">
@@ -2799,7 +2841,7 @@
           </div>
           <p class="ibx-body">${esc(String(i.body||"").slice(0,260))}</p>
         </div>
-        <div class="ibx-side">
+        <div class="ibx-side" onclick="event.stopPropagation()">
           <span class="ibx-time">${esc(timeStr(i.at))}</span>
           ${act}
           ${isNew?`<button type="button" class="ibx-dismiss" onclick="pipeInboxRead('${esc(i.sig)}')" title="Mark read">Mark read</button>`:""}
@@ -2815,6 +2857,75 @@
       <div class="ibx-feed">${body}</div>
       <p class="ibx-foot">${unread.length} unread &middot; live from the phone system and Instantly.</p>`;
   }
+
+  /* ---- reply, in thread, through Instantly ----
+     The plan this account is on does not allow replying from Instantly's own inbox; the API
+     allows it, so the reply happens here instead. In thread deliberately: a reply sent from
+     anywhere else starts a second conversation the campaign cannot see and spends domain
+     warming Instantly is managing. */
+  window.pipeReplyModal=sig=>{
+    const i=inboxItems().find(x=>x.sig===sig);
+    if(!i||!i.replyTo){ alert("That message cannot be replied to. It has no Instantly handle."); return; }
+    const body=`<div class="pcf-hint">Replying to <b>${esc(i.who||"")}</b> from <b>${esc(i.eaccount||"")}</b>, in the same thread.</div>
+      <div class="pcf"><label>Subject</label><input class="pinput" id="rpSubj" value="${esc(/^re:/i.test(i.subject||"")?i.subject:"Re: "+(i.subject||""))}"></div>
+      <div class="pcf"><label>Message *</label><textarea class="pinput" id="rpBody" rows="8" placeholder="Write your reply…"></textarea></div>
+      <div class="pcf-hint" id="rpState"></div>`;
+    openModal("Reply",body,"Send reply",`pipeReplySend('${esc(sig)}')`,false);
+    const el=document.getElementById("rpBody"); if(el) el.focus();
+  };
+
+  window.pipeReplySend=async sig=>{
+    const i=inboxItems().find(x=>x.sig===sig); if(!i) return;
+    const text=V("rpBody"), subject=V("rpSubj");
+    if(!text){ alert("A message is required."); return; }
+    const state=document.getElementById("rpState");
+    if(state) state.textContent="Sending…";
+    try{
+      const res=await fetch("/api/reply",{ method:"POST", headers:{"Content-Type":"application/json"},
+        credentials:"same-origin",
+        body:JSON.stringify({ replyToUuid:i.replyTo, eaccount:i.eaccount, subject, text }) });
+      const data=await res.json();
+      if(!data.ok) throw new Error(data.error||data.reason||"the reply was refused");
+      /* Logged on the account as well as sent, so the timeline shows the whole conversation
+         rather than only the half Instantly happens to return on the next read. */
+      if(i.acct) addAcctActivity(i.acct,{ ch:"email", who:i.eaccount||"", title:"Reply sent \u2014 "+subject,
+        body:text, status:"sent" });
+      pipeInboxRead(sig);
+      pipeModalClose();
+      await loadMail(); remountInbox();
+    }catch(err){
+      /* Fails loud: telling somebody their reply was sent when it was not means they stop
+         following up on a prospect who never heard from them. */
+      if(state) state.innerHTML=`<b style="color:var(--red)">Not sent.</b> ${esc(err.message)}`;
+      else alert("The reply was not sent: "+err.message);
+    }
+  };
+
+  /* ---- manual to-dos ----
+     Everything else on Today is DERIVED — a to-do the system can work out is one nobody should
+     have to write down. But not every commitment has an event behind it ("call Daniel about the
+     invoice", "chase the COA"), and those had nowhere to live. These are real records in the
+     shared store, so a task Victor writes is a task Sarah sees. */
+  const T_KEY="vej_pipe_todos_v1";
+  const todos=()=>lsGet(T_KEY,[]);
+  window.pipeTodoAdd=()=>{
+    const el=document.getElementById("tdyNew"); const what=el?el.value.trim():"";
+    if(!what) return;
+    const arr=todos();
+    arr.push({ id:uid("todo"), what, done:false, who:(P.team[0]&&P.team[0].name)||"",
+      created_at:nowISO(), updated_at:nowISO() });
+    lsSet(T_KEY,arr); if(el) el.value=""; remountToday();
+  };
+  window.pipeTodoToggle=id=>{
+    const arr=todos(); const t=arr.find(x=>x.id===id); if(!t) return;
+    t.done=!t.done; t.updated_at=nowISO(); lsSet(T_KEY,arr); remountToday();
+  };
+  window.pipeTodoDelete=id=>{
+    const arr=todos(); const i=arr.findIndex(x=>x.id===id); if(i<0) return;
+    const [gone]=arr.splice(i,1); lsSet(T_KEY,arr);
+    removeGeneric("todo",gone.id); remountToday();
+  };
+  function remountToday(){ const el=document.getElementById("sec-today"); if(el) el.innerHTML=rToday(); }
 
   /* ================= TODAY =================
      What a rep should do next, in one list, ordered by how long it has been waiting. Built from
@@ -2850,9 +2961,26 @@
         ${act}</div>`;
     }).join(""):`<div class="ibx-empty">Nothing waiting. Everything inbound has been picked up.</div>`;
 
+    const ts=todos();
+    const open=ts.filter(t=>!t.done), done=ts.filter(t=>t.done);
+    const todoRow=t=>`<div class="tdy-todo${t.done?" done":""}">
+      <button type="button" class="tdy-check" onclick="pipeTodoToggle('${esc(t.id)}')" aria-label="${t.done?"Mark not done":"Mark done"}">${t.done?"&#10003;":""}</button>
+      <span class="tdy-text">${esc(t.what)}</span>
+      <button type="button" class="tdy-x" onclick="pipeTodoDelete('${esc(t.id)}')" title="Delete">&times;</button>
+    </div>`;
+
     return `<div class="sec-head">
         <div><h2>Today</h2><p class="sec-sub">What is waiting, oldest first.</p></div>
       </div>
+      <div class="tdy-todos">
+        <div class="tdy-add">
+          <input class="pinput" id="tdyNew" placeholder="Add a to-do&hellip;" onkeydown="if(event.key==='Enter')pipeTodoAdd()">
+          <button type="button" class="btn btn-primary" onclick="pipeTodoAdd()">Add</button>
+        </div>
+        ${open.map(todoRow).join("")}
+        ${done.length?`<div class="tdy-donehead">${done.length} done</div>${done.map(todoRow).join("")}`:""}
+      </div>
+      <div class="tdy-head">Waiting on you</div>
       <div class="tdy-list">${body}</div>`;
   }
 
