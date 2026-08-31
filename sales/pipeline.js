@@ -180,8 +180,9 @@
       }
     }
     await loadPhoneActivity();
+    await loadPhoneLeads();
     syncBadge();
-    if(changed||PHONE.rows.length) rr();
+    if(changed||PHONE.rows.length||PHONE_LEADS.length) rr();
   }
 
   /* ---- phone activity, from /api/activity (allo-hooks D1, live) ----
@@ -202,6 +203,26 @@
       }
     }catch(e){ PHONE.ok=false; PHONE.reason="unreachable"; }
   }
+
+  async function loadPhoneLeads(){
+    try{
+      const res=await fetch("/api/lead",{credentials:"same-origin"});
+      const data=await res.json();
+      PHONE_LEADS=Array.isArray(data.records)?data.records:[];
+    }catch(e){ PHONE_LEADS=[]; }
+  }
+
+  /* Claim a lead. The phone stops writing to it, and its status changes so it stops reading as
+     untouched new traffic; it stays in the list, because a rep needs to see what they claimed.
+     This is the one write the dashboard is allowed to make to a lead, because it is a statement
+     about what a HUMAN has done, not a correction of what the phone recorded. */
+  window.pipeLeadClaim=async(phone,status)=>{
+    try{
+      await fetch("/api/lead",{ method:"PATCH", headers:{"Content-Type":"application/json"},
+        credentials:"same-origin", body:JSON.stringify({ id:phone, claimed:1, status:status||"qualified" }) });
+      await loadPhoneLeads(); rr();
+    }catch(e){ alert("Could not update that lead. It is still in the queue."); }
+  };
 
   /* Every phone row belonging to an account, found by matching the numbers on that account's
      contacts. Falls back to the company name the phone system itself recorded, which is how a
@@ -259,7 +280,33 @@
   const liveDeals=()=>P.deals.map(d=>({...d,base:true})).concat(customDeals());
   const hsContacts=()=>((window.HUBSPOT&&window.HUBSPOT.contacts)||[]).map(c=>({...c,hubspot:true}));
   const allContacts=()=>P.contacts.map(c=>({...c,base:true})).concat(lsGet(C_KEY,[]).map((c,ci)=>({...c,ci}))).concat(hsContacts());
-  const allLeads=()=>P.leads.map(l=>({...l,base:true})).concat(lsGet(L_KEY,[]).map((l,ci)=>({...l,ci})));
+  /* Leads the PHONE created, from /api/lead. A call from a number nobody had on file used to
+     produce an activity row and nothing else — it matched no contact, rendered on no account,
+     and the caller existed nowhere a rep would look. These are read-only here: the row is a
+     record of a real conversation, so a rep claims or removes one but does not rewrite it. */
+  let PHONE_LEADS=[];
+  const phoneLeads=()=>PHONE_LEADS.map(l=>({
+    contact:l.name||"",
+    company:l.company||"",
+    phone:l.phoneE164,
+    status:l.status||"new",
+    source:l.source||"phone",
+    notes:l.last_summary||"",
+    lastSeen:l.last_seen,
+    calls:l.call_count||0,
+    texts:l.sms_count||0,
+    result:l.last_result||"",
+    phoneLead:true,
+    id:l.phoneE164,
+  }));
+  const allLeads=()=>P.leads.map(l=>({...l,base:true}))
+    .concat(lsGet(L_KEY,[]).map((l,ci)=>({...l,ci})))
+    /* A number a rep has already turned into a contact is not still a lead. Without this the
+       callback queue would keep showing people who are already in the book. */
+    .concat(phoneLeads().filter(pl=>{
+      const k=phoneKey(pl.phone);
+      return !allContacts().some(c=>phoneKey(c.phone)===k||phoneKey(c.mobile)===k||phoneKey(c.phoneE164)===k);
+    }));
   const offRowsAll=()=>P.offtake.rows.map(r=>({...r,base:true})).concat(lsGet(O_KEY,[]).map((r,ci)=>({confirmed:{},vols:{},...r,ci})));
   /* accounts = snapshot ∪ custom ∪ anything referenced by a deal/contact/offtake row */
   /* Every distinct spelling that norm() folded into one account, keyed by canonical name.
@@ -1956,16 +2003,56 @@
     task:   { label:"Task",    status:"scheduled" },
     meeting:{ label:"Meeting", status:"scheduled" },
   };
-  window.pipeAcctComm = (ch,name) => {
+  /* The best number for an account: a mobile beats a desk line, and anything beats nothing. */
+  function bestNumberFor(name){
+    const cs=allContacts().filter(c=>norm(c.account||"")===norm(name));
+    for(const c of cs){ const m=toE164(c.mobile); if(m) return { e164:m, who:c.name, kind:"mobile" }; }
+    for(const c of cs){ const p=toE164(c.phone)||toE164(c.phoneE164); if(p) return { e164:p, who:c.name, kind:"phone" }; }
+    return null;
+  }
+
+  /* ACTUALLY PLACE THE CALL, then log it.
+   *
+   * These buttons used to open a "Log Call" form and nothing else — a rep clicked Call, typed
+   * what happened, and no call was ever placed. That is a logging tool wearing a dialer's
+   * clothes, and it is worse than no button because it looks like it did something.
+   *
+   * It hands off with a tel: / sms: link rather than dialling through Allo, because Allo has no
+   * API for it: /v2/api/calls, /messages and /sms all 404 and only /v2/api/crm/* exists. So the
+   * honest thing is to hand the number to whatever the operator actually dials with — desk
+   * phone, softphone, or the phone in their hand — and then log it. Probed 2026-08-31; if Allo
+   * ever ships a dial endpoint this is the one function to change.
+   *
+   * The log form still opens, because a call nobody wrote up is a call the account forgets. */
+  window.pipeAcctDial = (ch,name,explicit,who) => {
+    /* A button on a contact card dials THAT person; the account action bar falls back to the
+       best number on the account. Without the explicit argument every contact's Call button
+       rang whoever happened to sort first, which is a worse bug than no button at all. */
+    const best = explicit ? { e164:explicit, who:who||"", kind:"contact" } : bestNumberFor(name);
+    if(!best){
+      alert("No dialable number on this account. Add a phone or mobile to a contact first.");
+      return;
+    }
+    /* Opened before the modal so the handoff is the click's direct result — a browser will
+       block a tel: navigation that happens after an await or a re-render. */
+    window.location.href = (ch==="sms"?"sms:":"tel:")+best.e164;
+    pipeAcctComm(ch,name,best);
+  };
+
+  window.pipeAcctComm = (ch,name,dialed) => {
     const m=CH_META[ch]||CH_META.note;
     let body="";
+    /* Prepended at openModal, not assigned here: every branch below reassigns `body`. */
+    const dialHint = dialed
+      ? `<div class="pcf-hint">Dialing <b>${esc(dialed.e164)}</b>${dialed.who?" &middot; "+esc(dialed.who):""}. Log what happened when you are done.</div>`
+      : "";
     if(ch==="email")      body=F("acEmailSubj","Subject",null,1,"Subject line")+`<div class="pcf"><label>Body *</label><textarea class="pinput" id="acEmailBody" rows="4" placeholder="Write your message…"></textarea></div>`;
     else if(ch==="sms")   body=`<div class="pcf"><label>Message *</label><textarea class="pinput" id="acSmsBody" rows="3" placeholder="Type SMS message…"></textarea></div>`;
     else if(ch==="call")  body=F("acCallOut","Outcome",null,1,"e.g. Confirmed order, discussed timing")+F("acCallDur","Duration (min)",null,0,"e.g. 12","number");
     else if(ch==="note")  body=`<div class="pcf"><label>Note *</label><textarea class="pinput" id="acNoteBody" rows="3" placeholder="Write an internal note…"></textarea></div>`;
     else if(ch==="task")  body=F("acTaskTitle","Title",null,1,"Task title")+F("acTaskDue","Due Date",todayISO(),1,"","date");
     else if(ch==="meeting")body=F("acMeetTitle","Title",null,1,"Meeting title")+F("acMeetWhen","Date & Time",null,1,"","datetime-local");
-    openModal("New "+m.label, body, "Log "+m.label, `pipeAcctCommSave('${ch}')`, false);
+    openModal("New "+m.label, dialHint+body, "Log "+m.label, `pipeAcctCommSave('${ch}')`, false);
   };
   window.pipeAcctCommSave = ch => {
     if(!PROFILE) return;
@@ -2115,8 +2202,8 @@
       </div>
       <div class="c-actions">
         <button type="button" class="icon-btn" aria-label="Email ${esc(c.name)}" onclick="pipeAcctComm('email','${safe}')">${iconSvg("email")}</button>
-        <button type="button" class="icon-btn" aria-label="Call ${esc(c.name)}" onclick="pipeAcctComm('call','${safe}')">${iconSvg("call")}</button>
-        <button type="button" class="icon-btn" aria-label="SMS ${esc(c.name)}" onclick="pipeAcctComm('sms','${safe}')">${iconSvg("sms")}</button>
+        <button type="button" class="icon-btn" aria-label="Call ${esc(c.name)}" onclick="pipeAcctDial('call','${safe}','${esc(toE164(c.mobile)||toE164(c.phone)||toE164(c.phoneE164))}','${esc(c.name||"")}')">${iconSvg("call")}</button>
+        <button type="button" class="icon-btn" aria-label="SMS ${esc(c.name)}" onclick="pipeAcctDial('sms','${safe}','${esc(toE164(c.mobile)||toE164(c.phone)||toE164(c.phoneE164))}','${esc(c.name||"")}')">${iconSvg("sms")}</button>
       </div>
     </div>`;
     /* Roster-sourced reachability: the phone, email and named people the research pass found,
@@ -2203,7 +2290,7 @@
 
     /* =================== MIDDLE COLUMN =================== */
     const actionBar = `<div class="actionbar">
-      ${["email","call","sms","note","task","meeting"].map(ch=>`<button type="button" class="action-tile" data-ch="${ch}" onclick="pipeAcctComm('${ch}','${safe}')">
+      ${["email","call","sms","note","task","meeting"].map(ch=>`<button type="button" class="action-tile" data-ch="${ch}" onclick="${ch==="call"||ch==="sms"?"pipeAcctDial":"pipeAcctComm"}('${ch}','${safe}')">
         <div class="aico">${iconSvg(ch)}</div><div class="alabel">${esc(CH_META[ch].label)}</div></button>`).join("")}
     </div>`;
 
