@@ -12,23 +12,21 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-08-31 14:53 UTC",
-  "readDate": "2026-08-31",
+  "read": "2026-09-02 05:20 UTC",
+  "readDate": "2026-09-02",
   "source": "snapshot",
   "inWorkspace": 15,
-  "launched": 7,
+  "launched": 4,
   "launchedNames": [
     "AB.CIVIL",
     "AB.DIST",
     "AB.ENV",
-    "AB.HDD.CON",
-    "AB.LF",
-    "AB.OG",
-    "BC-NURS"
+    "AB.OG"
   ],
-  "paused": 1,
+  "paused": 2,
   "pausedNames": [
-    "AB.HDD.SUP"
+    "AB.HDD.SUP",
+    "BC-NURS"
   ],
   "drafts": 5,
   "unmanageable": 0,
@@ -36,10 +34,10 @@ window.INSTANTLY_LIVE = {
   "readyLeads": 0,
   "totals": {
     "campaigns": 15,
-    "leads": 595,
-    "contacted": 826,
-    "sent": 939,
-    "replies": 7,
+    "leads": 500,
+    "contacted": 1000,
+    "sent": 1007,
+    "replies": 10,
     "bounced": 5,
     "unsubscribed": 0
   },
@@ -47,18 +45,18 @@ window.INSTANTLY_LIVE = {
     "absorbent": {
       "campaigns": 9,
       "leads": 367,
-      "contacted": 463,
-      "sent": 523,
-      "replies": 2,
+      "contacted": 582,
+      "sent": 583,
+      "replies": 3,
       "bounced": 1,
       "unsubscribed": 0
     },
     "biochar": {
       "campaigns": 6,
-      "leads": 228,
-      "contacted": 363,
-      "sent": 416,
-      "replies": 5,
+      "leads": 133,
+      "contacted": 418,
+      "sent": 424,
+      "replies": 7,
       "bounced": 4,
       "unsubscribed": 0
     }
@@ -69,7 +67,7 @@ window.INSTANTLY_LIVE = {
     "getamericanbiocarbon.com": 2
   },
   "dailyCeiling": 120,
-  "requestedDaily": 150,
+  "requestedDaily": 80,
   "campaigns": [
     {
       "name": "AB.BED.SUP · Bedding Channel · R1",
@@ -89,7 +87,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 48,
-      "sent": 105,
+      "sent": 119,
       "replies": 0,
       "bounced": 0
     },
@@ -100,8 +98,8 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 52,
-      "sent": 113,
-      "replies": 0,
+      "sent": 127,
+      "replies": 1,
       "bounced": 0
     },
     {
@@ -111,7 +109,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 26,
-      "sent": 62,
+      "sent": 76,
       "replies": 0,
       "bounced": 0
     },
@@ -119,7 +117,7 @@ window.INSTANTLY_LIVE = {
       "name": "AB.HDD.CON · Directional Drilling and Boring Contractors · R1",
       "icp": "AB.HDD.CON",
       "line": "absorbent",
-      "status": "live",
+      "status": "completed",
       "parked": false,
       "leads": 11,
       "sent": 33,
@@ -141,10 +139,10 @@ window.INSTANTLY_LIVE = {
       "name": "AB.LF · Landfill and Leachate Operations · R1",
       "icp": "AB.LF",
       "line": "absorbent",
-      "status": "live",
+      "status": "completed",
       "parked": false,
       "leads": 14,
-      "sent": 38,
+      "sent": 42,
       "replies": 0,
       "bounced": 0
     },
@@ -166,7 +164,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 191,
-      "sent": 147,
+      "sent": 161,
       "replies": 1,
       "bounced": 1
     },
@@ -207,11 +205,11 @@ window.INSTANTLY_LIVE = {
       "name": "BC-NURS · Landscape & Nursery · R1",
       "icp": "BC-NURS",
       "line": "biochar",
-      "status": "live",
+      "status": "paused",
       "parked": false,
-      "leads": 180,
-      "sent": 276,
-      "replies": 3,
+      "leads": 85,
+      "sent": 284,
+      "replies": 5,
       "bounced": 2
     },
     {
@@ -237,6 +235,6 @@ window.INSTANTLY_LIVE = {
       "bounced": 0
     }
   ],
-  "oversubscribed": true,
+  "oversubscribed": false,
   "generator": "sales-department/instantly-analytics/build-instantly-snapshot.mjs"
 };
