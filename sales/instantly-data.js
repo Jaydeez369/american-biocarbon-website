@@ -12,7 +12,7 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-09-02 05:20 UTC",
+  "read": "2026-09-02 05:46 UTC",
   "readDate": "2026-09-02",
   "source": "snapshot",
   "inWorkspace": 15,
@@ -34,7 +34,7 @@ window.INSTANTLY_LIVE = {
   "readyLeads": 0,
   "totals": {
     "campaigns": 15,
-    "leads": 500,
+    "leads": 595,
     "contacted": 1000,
     "sent": 1007,
     "replies": 10,
@@ -53,7 +53,7 @@ window.INSTANTLY_LIVE = {
     },
     "biochar": {
       "campaigns": 6,
-      "leads": 133,
+      "leads": 228,
       "contacted": 418,
       "sent": 424,
       "replies": 7,
@@ -207,7 +207,7 @@ window.INSTANTLY_LIVE = {
       "line": "biochar",
       "status": "paused",
       "parked": false,
-      "leads": 85,
+      "leads": 180,
       "sent": 284,
       "replies": 5,
       "bounced": 2
