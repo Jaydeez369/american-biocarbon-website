@@ -44,8 +44,20 @@ export const CAPABILITIES = ['read', 'record.write', 'record.delete', 'outbound.
  *   manager  a rep who works the pipeline all day: reads everything, writes records,
  *            answers prospects. Cannot delete and cannot change who has access — the two
  *            actions whose damage outlives the day they happen.
+ *   sdr      the same reach as a manager over the data, and it exists for a reason that is
+ *            not about permissions at all: REPORTING SCOPE. The daily summary shows an admin
+ *            everyone, a manager the SDRs beneath them, and an SDR only their own day, and
+ *            that hierarchy needs a name for "the person being reported on" as distinct from
+ *            "the person reading the report". Deliberately identical to manager in what it
+ *            may DO: an SDR who could not write a record or answer a prospect could not do
+ *            the job, and inventing a narrower permission set nobody asked for would be a
+ *            restriction discovered the first time somebody needed to work.
  *   dev      the operator who deploys and debugs. Everything, plus it is the account the
  *            diagnostics routes answer to. Held by whoever is on the hook at 2am.
+ *
+ * NO ACCOUNT HOLDS `sdr` YET, and that is the intended state. Adding the role is a code
+ * change; granting it to a person is an edit to SALES_OS_USERS, which is a decision about who
+ * can log in and is not one this file makes on anybody's behalf.
  *
  * `manager` is the interesting line. It is drawn at "recoverable by the person who did
  * it" — a wrong edit is fixed by editing again, a deletion needs somebody else, and a
@@ -55,8 +67,37 @@ export const CAPABILITIES = ['read', 'record.write', 'record.delete', 'outbound.
 export const ROLES = {
   admin: ['read', 'record.write', 'record.delete', 'outbound.send', 'admin'],
   manager: ['read', 'record.write', 'outbound.send'],
+  sdr: ['read', 'record.write', 'outbound.send'],
   dev: ['read', 'record.write', 'record.delete', 'outbound.send', 'admin'],
 };
+
+/**
+ * Who each role may SEE IN A REPORT, which is a different question from what they may do.
+ *
+ * The capability table above answers "may this person delete a record". This answers "whose
+ * day appears on this person's daily summary", and the two must not be conflated: a manager
+ * and an SDR have identical capabilities and very different reporting scope, which is the
+ * whole reason `sdr` exists as a separate role.
+ *
+ *   all    every account's activity.
+ *   team   the SDRs, plus themselves. A manager's view.
+ *   self   only their own.
+ *
+ * Enforced on the edge in api/summary.js, not by hiding a tab. The scope decides which rows
+ * leave the building, so a rep cannot read a colleague's day by retyping a fetch.
+ */
+export const REPORT_SCOPE = {
+  admin: 'all',
+  dev: 'all',
+  manager: 'team',
+  sdr: 'self',
+};
+
+/** The roles a `team` scope contains. Named here so the summary route does not hardcode it. */
+export const REPORTED_ON = ['sdr'];
+
+export const scopeOf = (account) =>
+  (account && typeof account.role === 'string' && REPORT_SCOPE[account.role]) || 'self';
 
 export const DEFAULT_ROLE = 'manager';
 

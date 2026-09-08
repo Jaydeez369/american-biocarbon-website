@@ -99,7 +99,12 @@ const LEAN_NAV=[
      answers a different question from Work (what do I do next) and from Execute (send the
      thing): it answers whether any of it is working. */
   {group:"Measure",items:[
+    {id:"summary",ic:"◷",t:"Daily Summary"},
     {id:"reports",ic:"▤",t:"Reports"},
+    /* The systems map sits under Measure rather than in a settings corner on purpose. It
+       measures the plumbing, and the plumbing is the reason to trust or distrust everything
+       above it: a Reports figure is only worth reading if the feed behind it is connected. */
+    {id:"systems",ic:"◈",t:"Systems Map"},
   ]},
   {group:"Execute",items:[
     {id:"strategy",ic:"◆",t:"Campaigns & ICP"},
@@ -534,6 +539,8 @@ const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
 /* Reports module (reports.js). Same shape as PL/OUT/ENG: a missing file degrades one
    section to empty rather than taking the render down with it. */
 const RPT = k => (window.REPORTS_UI && REPORTS_UI[k]) ? REPORTS_UI[k] : (()=> "");
+/* Daily summary and systems map (summary.js). Same fail-soft shape as the others. */
+const SUM = k => (window.SUMMARY_UI && SUMMARY_UI[k]) ? SUMMARY_UI[k] : (()=> "");
 /* Canonical outreach module (outreach-data.js + outreach.js, both load before app.js) */
 const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
 /* Engine module (engine-data.js + engine.js): campaign architecture and the funnel costing */
@@ -556,7 +563,9 @@ const LEAN_SECTIONS=[
   ["crm",      [PL("rCRM")]],
   ["inbox",    [PL("rInbox")]],
   ["today",    [PL("rToday")]],
+  ["summary",  [SUM("rSummary")]],
   ["reports",  [RPT("rReports")]],
+  ["systems",  [SUM("rSystems")]],
   ["strategy", [OUT("rCampaigns")]],
   ["outreach", [OUT("rOutreach")]],
   ["instantly",[ENG("rInstantly")]],
