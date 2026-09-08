@@ -93,20 +93,85 @@ const LEAN_NAV=[
     {id:"inbox",ic:"✉",t:"Inbox"},
     {id:"today",ic:"✓",t:"Today"},
   ]},
+  /* Reports, promoted 2026-09-08 out of the seventh tab of the Pipeline page. It was asked
+     for by name and it was filed where nothing is found: behind a tab strip, on a page
+     whose first tab has the same name as the page. Measure is its own group because it
+     answers a different question from Work (what do I do next) and from Execute (send the
+     thing): it answers whether any of it is working. */
+  {group:"Measure",items:[
+    {id:"reports",ic:"▤",t:"Reports"},
+  ]},
   {group:"Execute",items:[
     {id:"strategy",ic:"◆",t:"Campaigns & ICP"},
     {id:"outreach",ic:"✦",t:"Outreach Engine"},
     {id:"instantly",ic:"⚙",t:"Instantly Logic"},
   ]},
-  {group:"Grow",items:[
-    {id:"funnels",ic:"⇢",t:"Future Funnels"},
-  ]},
+  /* Reference collapsed from three entries to one on 2026-09-08. Future Funnels, Product &
+     Messaging and Assets & Playbook were three top level sections of static prose with no
+     computed output between them (gtm.js is 120 lines and reads no record). The content is
+     good and none of it is deleted; it is reference material, and reference material filed
+     as three peers of the pipeline made the nav claim that reading about a funnel is the
+     same kind of act as working one. One entry, tabs inside. */
   {group:"Reference",items:[
-    {id:"product",ic:"❝",t:"Product & Messaging"},
-    {id:"playbook",ic:"▷",t:"Assets & Playbook"},
+    {id:"reference",ic:"❝",t:"Reference"},
   ]},
 ];
 const NAV = LEAN_NAV;
+
+/* ================= THE ROSTER, LOADED LATE =================
+   roster-data.js is 2.1 MB of the 2.9 MB this app pulled down synchronously before it
+   painted a single pixel. It is 1,145 researched companies, and it was blocking the login
+   screen on every load for everybody, including Victor and Daniel on phones, most of whom
+   open the app to look at the Inbox and never touch it.
+
+   WHAT THIS ACTUALLY BUYS, stated honestly rather than as a headline. The landing section
+   IS Leads, which reads the roster, so this is not "the roster is never loaded". It is:
+   the parser no longer blocks first paint. The app renders from the other 0.8 MB, the
+   roster arrives a moment later over the same connection, and the sections that need it
+   re render. The person sees the shell, the nav and the Inbox counts immediately instead of
+   a white page. That is the whole claim.
+
+   THE TRAP THIS HAS TO AVOID, and it is a real one. outreach.js caches LIVE_BY_ICP and
+   engine.js caches ICP_AGG on their FIRST call. If either renders before the roster lands,
+   it caches the fallback numbers and never recomputes, and Campaigns & ICP would show the
+   stale engine-data.js figures forever with nothing on screen saying so. So the load does
+   not merely fire a re render: it calls each module's bust hook first. A module that gains
+   a roster derived cache later must add a hook here or it will silently freeze the same way. */
+let ROSTER_PROMISE=null;
+const ROSTER_SECTIONS=new Set(["leads","strategy","crm","reports","instantly","reference"]);
+function ensureRoster(){
+  if(window.ROSTER) return Promise.resolve(true);
+  if(ROSTER_PROMISE) return ROSTER_PROMISE;
+  ROSTER_PROMISE=new Promise(resolve=>{
+    const el=document.createElement("script");
+    /* The stamp is written into a data attribute on the placeholder in index.html by
+       scripts/stamp-assets.mjs, the same pass that stamps every other ?v=. Reading it from
+       there rather than hardcoding it keeps the cache busting correct: assets are served
+       immutable for a year, so a roster fetched without the current hash would be a stale
+       file that looks live. */
+    const stamp=document.getElementById("rosterSrc");
+    el.src=(stamp&&stamp.getAttribute("data-src"))||"roster-data.js";
+    el.async=true;
+    el.onload=()=>{ rosterReady(); resolve(true); };
+    el.onerror=()=>{
+      console.warn("[roster] failed to load; roster derived counts will use their fallbacks");
+      ROSTER_PROMISE=null;      // a dropped connection should not disable the roster forever
+      resolve(false);
+    };
+    document.head.appendChild(el);
+  });
+  return ROSTER_PROMISE;
+}
+/* Every module that caches something derived from the roster clears it here. Guarded
+   individually so one missing module cannot stop the others being busted. */
+function rosterReady(){
+  for(const bust of [window.pipeRosterBust, window.outreachRosterBust, window.engineRosterBust]){
+    try{ if(typeof bust==="function") bust(); }catch(e){ console.warn("[roster] bust failed",e); }
+  }
+  try{ rerender(); }catch(e){ console.warn("[roster] re render failed",e); }
+  const cur=(location.hash||"").slice(1);
+  if(cur) go(cur,{keepScroll:true});
+}
 
 function buildNav(){
   $("#nav").innerHTML = NAV.map(g=>`<div class="nav-group">${g.group}</div>`+
@@ -116,6 +181,11 @@ function buildNav(){
 const titleOf = id => NAV.flatMap(g=>g.items).find(i=>i.id===id)?.t||"";
 
 function go(id, opts={}){
+  /* Opening a section that reads the roster is the signal to fetch it. Deliberately not
+     awaited: the section renders now from whatever it has, and re renders when the roster
+     lands. Blocking the nav on a 2.1 MB parse would move the stall from load to every
+     single click, which is worse, not better. */
+  if(ROSTER_SECTIONS.has(id)) ensureRoster();
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   const sec=document.getElementById("sec-"+id); if(sec)sec.classList.add("active");
   document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.id===id));
@@ -407,6 +477,52 @@ function rPlaybook(){
   );
 }
 
+/* ================= REFERENCE =================
+   One section, three tabs, holding what used to be three top level nav entries: Future
+   Funnels, Product & Messaging, and Assets & Playbook.
+
+   WHY THEY WERE COLLAPSED. None of the three reads a record. gtm.js is 120 lines of static
+   prose with no computed output at all; the product and playbook renderers below are copy
+   blocks and asset lists. That is good material and it is not deleted, not shortened and
+   not moved to another repo. It is reference: a thing you go and read once, not a thing you
+   work. Filing three of them as peers of Pipeline and Leads made the nav assert that
+   reading about a funnel is the same class of act as working one, and it pushed the section
+   a rep actually needs below the fold on a phone.
+
+   The tab state is deliberately NOT persisted. Unlike the pipeline tabs, which a rep returns
+   to many times a day, this is a reference shelf: opening it should show the top of it. */
+let REF_TAB = "product";
+const REF_TABS = [
+  ["product","Product & Messaging"],
+  ["playbook","Assets & Playbook"],
+  ["funnels","Future Funnels"],
+];
+window.refTab = id => {
+  REF_TAB = id;
+  document.querySelectorAll("#sec-reference .ref-pane").forEach(p=>p.classList.toggle("active",p.dataset.tab===id));
+  document.querySelectorAll("#sec-reference .pipe-tabs .pill").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));
+};
+function rReference(){
+  /* Every pane is rendered, and CSS shows the active one. Same shape as the pipeline panes,
+     and it carries the same warning: a test that renders this and greps for a string is
+     reading all three panes at once. Cut by data-tab. */
+  const panes = {
+    product:  [rBiochar, rMessaging],
+    playbook: [rCollateral, G("rSample"), rPlaybook, G("rLinkedIn"), G("rSocial"), G("rLongTerm")],
+    funnels:  [ENG("rFunnels")],
+  };
+  const body = REF_TABS.map(([id,label])=>
+    `<div class="ref-pane${id===REF_TAB?" active":""}" data-tab="${id}">${panes[id].map(stripBody).join(mergeDiv)}</div>`
+  ).join("");
+  return `<section class="section" id="sec-reference">
+    <h1 class="page-h">Reference</h1>
+    <p class="page-sub">The material you read once and come back to: what the product is, what to say about it, what to send, and the funnels that are not built yet. Nothing here reads a live record, which is why it is one section rather than three.</p>
+    <div class="pipe-tabs">${REF_TABS.map(([id,label])=>
+      `<span class="pill${id===REF_TAB?" active":""}" data-tab="${id}" onclick="refTab('${id}')">${label}</span>`).join("")}</div>
+    ${body}
+  </section>`;
+}
+
 function stripBody(fn){
   let h="";
   try{ h=fn()||""; }catch(e){ console.error("renderer failed:",e&&e.message,e); return ""; }
@@ -415,6 +531,9 @@ function stripBody(fn){
 const G = k => (window.GTMB && GTMB[k]) ? GTMB[k] : (()=> "");
 /* Live SIBRA pipeline module (pipeline.js, loads before app.js) */
 const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
+/* Reports module (reports.js). Same shape as PL/OUT/ENG: a missing file degrades one
+   section to empty rather than taking the render down with it. */
+const RPT = k => (window.REPORTS_UI && REPORTS_UI[k]) ? REPORTS_UI[k] : (()=> "");
 /* Canonical outreach module (outreach-data.js + outreach.js, both load before app.js) */
 const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
 /* Engine module (engine-data.js + engine.js): campaign architecture and the funnel costing */
@@ -437,12 +556,11 @@ const LEAN_SECTIONS=[
   ["crm",      [PL("rCRM")]],
   ["inbox",    [PL("rInbox")]],
   ["today",    [PL("rToday")]],
+  ["reports",  [RPT("rReports")]],
   ["strategy", [OUT("rCampaigns")]],
   ["outreach", [OUT("rOutreach")]],
   ["instantly",[ENG("rInstantly")]],
-  ["funnels",  [ENG("rFunnels")]],
-  ["product",  [rBiochar, rMessaging]],
-  ["playbook", [rCollateral, G("rSample"), rPlaybook, G("rLinkedIn"), G("rSocial"), G("rLongTerm")]],
+  ["reference",[rReference]],
 ];
 
 function render(){
@@ -458,17 +576,110 @@ if (!location.pathname.includes("/sales/")) {
   const sw = document.querySelector(".app-switch");
   if (sw) sw.style.display = "none";
 }
+/* ================= GLOBAL SEARCH, the shell =================
+   The matching lives in pipeline.js, beside the records and the norm() fold that decides two
+   spellings are one company (see the block above PIPELIVE.data). This is only the overlay:
+   open it, type, arrow through, enter. Reachable from every section, which is the entire
+   point, since the four boxes it replaces each only searched the table they sat in. */
+function openSearch(){
+  if(document.getElementById("gsWrap")) return;
+  const wrap=document.createElement("div");
+  wrap.id="gsWrap"; wrap.className="gs-wrap";
+  wrap.innerHTML=`<div class="gs-panel" role="dialog" aria-label="Search">
+      <input id="gsInput" class="gs-input" type="search" autocomplete="off" spellcheck="false"
+             placeholder="Search accounts, contacts, deals and leads" aria-label="Search" />
+      <div class="gs-results" id="gsResults"></div>
+      <div class="gs-foot">Enter opens the top result · Esc closes</div>
+    </div>`;
+  wrap.addEventListener("click", e => { if(e.target===wrap) closeSearch(); });
+  document.body.appendChild(wrap);
+  const input=document.getElementById("gsInput");
+  const paint=()=>{
+    const el=document.getElementById("gsResults");
+    if(!el) return;
+    el.innerHTML = (window.PIPELIVE && PIPELIVE.data)
+      ? window.pipeSearchResults(input.value)
+      : `<p class="gs-hint">The record store did not load, so there is nothing to search.</p>`;
+  };
+  input.addEventListener("input", paint);
+  input.addEventListener("keydown", e => {
+    if(e.key==="Escape"){ closeSearch(); return; }
+    if(e.key==="Enter"){
+      const first=document.querySelector("#gsResults .gs-row");
+      if(first) first.click();
+    }
+  });
+  /* Opening the search is the one moment we KNOW the person is looking for a company by
+     name, and the roster is where 1,145 of the ~1,200 names live. Kick the lazy load here
+     rather than making them find nothing and retype. */
+  ensureRoster().then(paint);
+  paint();
+  input.focus();
+}
+function closeSearch(){ const n=document.getElementById("gsWrap"); if(n) n.remove(); }
+window.openSearch=openSearch; window.closeSearch=closeSearch;
+/* "/" is the search key everywhere else a person works, so it is the search key here. Ignored
+   while a field has focus, or typing a slash into a note would open the overlay instead. */
+document.addEventListener("keydown", e => {
+  const t=e.target||{};
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName||"") || t.isContentEditable;
+  if(e.key==="/" && !typing && !e.metaKey && !e.ctrlKey){ e.preventDefault(); openSearch(); }
+  if(e.key==="k" && (e.metaKey||e.ctrlKey)){ e.preventDefault(); openSearch(); }
+});
+
+/* ================= WHO IS LOOKING, in the corner =================
+   Reads the same sales_os_role cookie pipeline.js reads, with the same standing: a hint for
+   the screen. It is shown because a person who cannot see a Delete button should be able to
+   find out why without asking, and because "which account am I logged in as" is otherwise
+   unanswerable from inside the app. */
+(function(){
+  const chip=document.getElementById("roleChip");
+  if(!chip) return;
+  const role=(window.PIPELIVE && PIPELIVE.data && PIPELIVE.data.role && PIPELIVE.data.role())||"";
+  const name=(()=>{ for(const p of String(document.cookie||"").split(";")){
+      const i=p.indexOf("="); if(i<0) continue;
+      if(p.slice(0,i).trim()==="sales_os_name") return decodeURIComponent(p.slice(i+1).trim());
+    } return ""; })();
+  if(!role && !name) return;
+  chip.hidden=false;
+  chip.textContent = name ? `${name} · ${role||"unknown role"}` : role;
+  chip.title = role==="admin"||role==="dev"
+    ? "This account may read, write, delete and manage access."
+    : role==="manager"
+      ? "This account may read, write records and send outbound. Deleting and managing access are admin only, and controls for them are hidden."
+      : "This account's role was not recognised, so anything beyond reading is hidden.";
+  chip.className="role-chip r-"+(role||"unknown");
+})();
+
+/* Belt and braces: start the roster after first paint even if the landing section does not
+   need it, so it is warm by the time anyone opens search or Leads. requestIdleCallback where
+   it exists, because this is the definition of work that should yield to anything real. */
+if(typeof window!=="undefined"){
+  const warm=()=>ensureRoster();
+  if(typeof requestIdleCallback==="function") requestIdleCallback(warm,{timeout:2500});
+  else setTimeout(warm,300);
+}
 $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
 const defaultId = NAV[0].items[0].id;
 const isNavId = id => NAV.flatMap(g=>g.items).some(i=>i.id===id);
-const start=(location.hash||"").slice(1);
-go(isNavId(start)?start:defaultId);
+/* Sections that used to be their own nav entry and are now a tab inside Reference. Someone
+   has #product bookmarked, and dropping them on Leads with no explanation reads as the link
+   being broken. Resolve to the section AND open the right tab. */
+const RETIRED = { product:["reference","product"], playbook:["reference","playbook"], funnels:["reference","funnels"] };
+function resolve(id){
+  if(isNavId(id)) return id;
+  const r=RETIRED[id];
+  if(r){ REF_TAB = r[1]; return r[0]; }
+  return null;
+}
+const start=resolve((location.hash||"").slice(1));
+go(start||defaultId);
 /* go() writes location.hash on every nav, so without this Back/Forward changes the URL and
    nothing else. Re-setting the hash to its current value does not re-fire hashchange, so
    calling go() from here cannot loop. */
 window.addEventListener("hashchange", () => {
-  const id = (location.hash||"").slice(1);
-  if(isNavId(id)) go(id);
+  const id = resolve((location.hash||"").slice(1));
+  if(id){ if(id==="reference") refTab(REF_TAB); go(id); }
 });
 
 /* ---------------------------------------------------------------- live Allo activity

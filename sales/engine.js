@@ -51,6 +51,11 @@
      engine-data.js are only a fallback for a partial deployment with no roster-data.js.
      Built lazily and cached: the roster is 1,100+ rows and this runs per render. */
   let ICP_AGG = null;
+  /* See outreach.js: same cache, same reason, same hook. app.js calls this when the lazily
+     loaded roster executes, because icpAgg() returns null and caches nothing when the roster
+     is absent but WILL cache a stale aggregate if it is called during the window where a
+     partial roster exists. */
+  window.engineRosterBust = () => { ICP_AGG = null; };
   const icpAgg = () => {
     if (ICP_AGG) return ICP_AGG;
     const list = (window.ROSTER && window.ROSTER.companies) || [];

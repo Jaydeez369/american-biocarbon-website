@@ -1,0 +1,199 @@
+/* ============================================================
+   Reports (reports.js).
+
+   Reads the same role tokens the rest of the Sales OS uses (--line, --paper-2, --brand,
+   --text-dim, --sh-1). No raw brand hex here: the palette is tokens.css, and a colour
+   restated in a fifth file is how the two themes drifted last time. The only literal
+   colours below are the three delta states, which are status colours rather than brand
+   colours and are defined once at the top.
+   ============================================================ */
+:root{
+  --rpt-up:#2f7a48;
+  --rpt-down:#b8323c;
+  --rpt-flat:var(--text-dim);
+}
+
+/* ---- the filter bar: always on screen, never collapsible ---------------- */
+.rpt-bar{background:var(--paper-2);border:1px solid var(--line);border-radius:10px;
+  padding:12px 14px;margin:14px 0 16px}
+.rpt-row{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin-bottom:10px}
+.rpt-row:last-of-type{margin-bottom:0}
+.rpt-row.toggles{gap:16px;align-items:center;padding-top:10px;border-top:1px dashed var(--line)}
+
+.rpt-f{display:flex;flex-direction:column;gap:3px;font-size:11px;font-weight:600;
+  color:var(--text-dim);text-transform:uppercase;letter-spacing:.03em}
+.rpt-f select{font:inherit;font-size:12.5px;font-weight:400;text-transform:none;letter-spacing:0;
+  color:var(--text);background:#fff;border:1px solid var(--line-2);border-radius:7px;
+  padding:5px 8px;min-width:130px}
+.rpt-f.wide select{min-width:165px}
+.rpt-f select:focus{outline:none;border-color:var(--brand);box-shadow:var(--ring)}
+
+.rpt-custom{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 10px;
+  padding:8px 10px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:12.5px}
+.rpt-custom input{font:inherit;border:1px solid var(--line-2);border-radius:6px;padding:4px 7px}
+
+.rpt-tg{display:flex;flex-direction:column;gap:3px;font-size:11px;font-weight:600;
+  color:var(--text-dim);text-transform:uppercase;letter-spacing:.03em}
+.rpt-tgb{display:inline-flex;background:#eaf0f6;border:1px solid var(--line);border-radius:8px;padding:2px}
+.rpt-tgb button{font:inherit;font-size:12px;font-weight:500;text-transform:none;letter-spacing:0;
+  border:0;background:transparent;color:var(--text-dim);padding:4px 11px;border-radius:6px;cursor:pointer}
+.rpt-tgb button.on{background:#fff;color:var(--brand);font-weight:600;box-shadow:var(--sh-1)}
+.rpt-reset{margin-left:auto}
+
+/* The state line. This is the load bearing element of the whole screen: it names the window,
+   the basis, the measure and the population, which are the four things you must know before
+   any figure above or below it means anything. It is styled to be read, not skimmed. */
+.rpt-state{margin-top:10px;padding-top:9px;border-top:1px solid var(--line);
+  font-size:12.5px;color:var(--text-dim);line-height:1.6}
+.rpt-state b{color:var(--text);font-weight:600}
+.rpt-note{font-size:12px;margin-top:8px}
+
+/* ---- the two ways this app admits it does not know something ------------ */
+/* flag: something is wrong or degenerate RIGHT NOW and the figures near it are affected. */
+.rpt-flag{margin-top:10px;padding:9px 12px;border-radius:8px;font-size:12.5px;line-height:1.55;
+  background:rgba(var(--brand-rgb),.06);border:1px solid rgba(var(--brand-rgb),.25);color:var(--text)}
+/* caveat: a permanent limit of the data, attached to the chart it limits. Quieter, because
+   it is always true and must not shout over the figures every single render. */
+.rpt-caveat{margin-top:12px;padding:8px 11px;border-left:3px solid var(--line-2);
+  background:var(--paper-2);border-radius:0 6px 6px 0;
+  font-size:12px;line-height:1.55;color:var(--text-dim)}
+.rpt-caveat b{color:var(--text)}
+
+.rpt-conf{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;padding:10px 12px;
+  border-radius:8px;font-size:12.5px;line-height:1.55;background:var(--paper-2);border:1px solid var(--line)}
+.rpt-conf .rc-badge{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.04em;
+  padding:3px 8px;border-radius:5px;white-space:nowrap}
+.rpt-conf.low .rc-badge{background:rgba(184,50,60,.1);color:var(--rpt-down);border:1px solid rgba(184,50,60,.3)}
+
+/* ---- deltas ------------------------------------------------------------- */
+.rpt-d{font-size:12px;font-weight:600;margin-left:6px;white-space:nowrap}
+.rpt-d.up{color:var(--rpt-up)} .rpt-d.down{color:var(--rpt-down)} .rpt-d.flat{color:var(--rpt-flat);font-weight:500}
+
+/* ---- cards and tabs ----------------------------------------------------- */
+.rpt-tabs{margin:16px 0 14px}
+.rpt-card{padding:16px 18px}
+.rpt-chead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+.rpt-chead h3{margin:0 0 3px;font-size:15px}
+.rpt-chead p{margin:0;font-size:12.5px;line-height:1.5;max-width:70ch}
+.rpt-h{margin:20px 0 10px;font-size:13px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em}
+.rpt-foot{margin-top:16px;font-size:12px;line-height:1.55}
+
+/* ---- bars --------------------------------------------------------------- */
+/* rpt-cbar, not rpt-bar. These two were both called .rpt-bar for about an hour, and since
+   the chart rule is a three column grid it was applying to the FILTER BAR container as well
+   and sizing every filter row to the 170px label column. Distinct names, because a container
+   and the thing it contains sharing a class is a bug waiting for a stylesheet reorder. */
+.rpt-cbar{display:grid;grid-template-columns:170px 1fr auto;gap:4px 12px;align-items:center;
+  padding:5px 6px;border-radius:6px;margin:0 -6px}
+.rpt-cbar.click{cursor:pointer}
+.rpt-cbar.click:hover{background:var(--paper-2)}
+.rb-l{font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rb-track{height:16px;background:var(--paper-2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.rb-fill{display:block;height:100%;border-radius:8px;transition:width .18s ease}
+.rb-v{font-size:12.5px;font-weight:600;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rb-s{grid-column:2/4;font-size:11.5px;color:var(--text-dim);margin-top:-2px}
+
+/* ---- funnel ------------------------------------------------------------- */
+.rpt-fnhead,.rpt-fn{display:grid;grid-template-columns:160px 1fr 54px 108px 60px 54px;
+  gap:12px;align-items:center;padding:6px;border-radius:6px;margin:0 -6px}
+.rpt-fnhead{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;
+  letter-spacing:.04em;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:4px}
+.rpt-fn.click{cursor:pointer}
+.rpt-fn.click:hover{background:var(--paper-2)}
+.fn-l{font-size:12.5px;font-weight:500}
+.fn-track{height:18px;background:var(--paper-2);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.fn-fill{display:block;height:100%;border-radius:9px}
+.fn-n,.fn-v,.fn-c,.fn-a{font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+.fn-n,.fn-c{font-weight:600}
+.fn-a{color:var(--text-dim)}
+
+/* ---- tables ------------------------------------------------------------- */
+.rpt-tbl{width:100%;font-size:12.5px}
+.rpt-tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--text-dim)}
+.rpt-tbl .ta-r{text-align:right;font-variant-numeric:tabular-nums}
+.rpt-tbl tr.click{cursor:pointer}
+.rpt-tbl tr.click:hover{background:var(--paper-2)}
+.rpt-tbl tr.rpt-tot td{font-weight:700;border-top:2px solid var(--line-2);background:var(--paper-2)}
+
+/* ---- forecast target --------------------------------------------------- */
+.rpt-tgt{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;
+  padding:9px 12px;background:var(--paper-2);border:1px solid var(--line);border-radius:8px;font-size:12.5px}
+.rpt-tgt label{font-weight:600}
+.rpt-tgt input{font:inherit;width:130px;border:1px solid var(--line-2);border-radius:6px;padding:4px 8px}
+
+/* ---- drill through ------------------------------------------------------ */
+.rpt-drill-sub{margin:0 0 12px;font-size:12.5px}
+
+/* ---- phones ------------------------------------------------------------- */
+@media (max-width:820px){
+  .rpt-f select,.rpt-f.wide select{min-width:0;width:100%}
+  .rpt-f{flex:1 1 46%}
+  .rpt-row.toggles{flex-direction:column;align-items:stretch}
+  .rpt-reset{margin-left:0}
+  .rpt-cbar{grid-template-columns:1fr auto;gap:3px 8px}
+  .rb-track{grid-column:1/3;order:3}
+  .rb-s{grid-column:1/3}
+  .rpt-fnhead{display:none}
+  .rpt-fn{grid-template-columns:1fr 54px 60px;gap:6px}
+  .fn-track{display:none}
+  .fn-v{grid-column:1/4;text-align:left;color:var(--text-dim)}
+  .rpt-chead{flex-direction:column}
+}
+
+/* ============================================================
+   GLOBAL SEARCH and the role chip.
+
+   Filed in reports.css rather than a seventh stylesheet: both shipped on 2026-09-08 with
+   Reports, both are small, and the app already loads six sheets before it draws anything.
+   ============================================================ */
+.gs-open{display:inline-flex;align-items:center;gap:7px}
+.gs-open .gs-ic{font-size:15px;line-height:1}
+.gs-open kbd{font:inherit;font-size:10.5px;padding:1px 5px;border-radius:4px;
+  border:1px solid var(--line-2);background:var(--paper-2);color:var(--text-dim)}
+
+.gs-wrap{position:fixed;inset:0;z-index:200;background:rgba(20,26,38,.45);
+  display:flex;justify-content:center;align-items:flex-start;padding:8vh 16px 16px}
+.gs-panel{width:min(620px,100%);background:#fff;border:1px solid var(--line-2);
+  border-radius:12px;box-shadow:0 18px 50px rgba(20,26,38,.3);overflow:hidden;display:flex;flex-direction:column}
+.gs-input{font:inherit;font-size:16px;border:0;border-bottom:1px solid var(--line);
+  padding:15px 18px;width:100%;color:var(--text)}
+.gs-input:focus{outline:none}
+.gs-results{max-height:min(56vh,460px);overflow-y:auto;padding:6px}
+.gs-hint{margin:0;padding:16px 14px;font-size:12.5px;color:var(--text-dim);line-height:1.55}
+.gs-group{margin-bottom:4px}
+.gs-gh{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--text-dim);padding:8px 12px 4px}
+.gs-row{display:flex;flex-direction:column;gap:1px;width:100%;text-align:left;font:inherit;
+  border:0;background:transparent;padding:7px 12px;border-radius:7px;cursor:pointer}
+.gs-row:hover,.gs-row:focus{background:var(--paper-2);outline:none}
+.gs-l{font-size:13.5px;font-weight:600;color:var(--text)}
+.gs-s{font-size:11.5px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gs-foot{padding:8px 14px;border-top:1px solid var(--line);font-size:11px;color:var(--text-dim);background:var(--paper-2)}
+
+/* The role chip and the note left where a control was withheld. Both exist so that "I cannot
+   see the button" has a visible answer inside the app instead of being a support text. */
+.role-chip{font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;white-space:nowrap;
+  background:var(--paper-2);border:1px solid var(--line);color:var(--text-dim);cursor:help}
+.role-chip.r-admin,.role-chip.r-dev{color:var(--brand);border-color:rgba(var(--brand-rgb),.35)}
+.role-off{font-size:11.5px;color:var(--text-dim);font-style:italic;cursor:help}
+
+@media (max-width:820px){
+  .gs-open .gs-t,.gs-open kbd{display:none}
+  .role-chip{display:none}
+  .gs-wrap{padding:0}
+  .gs-panel{width:100%;height:100%;border-radius:0;max-height:none}
+  .gs-results{max-height:none;flex:1}
+}
+
+/* ---- the audit trail: the profile strip and the admin table -------------- */
+.aud-tile{margin-top:14px}
+.aud-row{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;padding:6px 0;
+  border-bottom:1px solid var(--line);font-size:12.5px}
+.aud-row:last-of-type{border-bottom:0}
+.aud-who{font-weight:600}
+.aud-act,.aud-what{color:var(--text-dim)}
+.aud-when{margin-left:auto;font-size:11.5px;color:var(--text-dim);white-space:nowrap}
+.aud-fields{flex-basis:100%;font-size:11.5px;color:var(--text-dim);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.aud-note{margin:10px 0 0;font-size:11.5px;color:var(--text-dim);line-height:1.5}
+.aud-id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--text-dim)}
+@media (max-width:820px){ .aud-when{margin-left:0;flex-basis:100%} }

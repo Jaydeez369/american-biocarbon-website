@@ -28,6 +28,67 @@
   };
   const rr=()=>{ if(typeof rerender==="function") rerender(); };
 
+  /* ================= WHO IS LOOKING =================
+     _middleware.js sets sales_os_role beside the signed session cookie, deliberately readable
+     by JavaScript. Read the header of that file for the standing of this value: it is a HINT
+     FOR THE SCREEN AND NOTHING ELSE. The bundle is on the reader's machine, the fetch is
+     theirs to retype, and every real decision is made on the edge in _lib/authz.js against
+     the SIGNED cookie, which this one is not. Nothing below is a control. It exists so that a
+     manager is not shown a button whose only possible outcome is a 403.
+
+     The table is a copy of ROLES in _lib/authz.js. Two copies of a permission table is a
+     thing to be nervous about, so: the copy is checked against the original by
+     salesos-tests/test-authz.mjs, which fails if they drift. It cannot be imported, because
+     that file is an ES module served only to the edge runtime and this is a classic script
+     inside an IIFE. An unknown or absent role grants nothing here, the same way it does
+     there: if the two disagree about who someone is, the safe reading is to show less. */
+  const ROLE_CAPS = {
+    admin:   ["read","record.write","record.delete","outbound.send","admin"],
+    manager: ["read","record.write","outbound.send"],
+    dev:     ["read","record.write","record.delete","outbound.send","admin"],
+  };
+  function readCookie(name){
+    if(typeof document==="undefined"||!document.cookie) return "";
+    for(const part of String(document.cookie).split(";")){
+      const i=part.indexOf("=");
+      if(i<0) continue;
+      if(part.slice(0,i).trim()===name) return decodeURIComponent(part.slice(i+1).trim());
+    }
+    return "";
+  }
+  const ROLE = (()=>{ const r=readCookie("sales_os_role").toLowerCase(); return ROLE_CAPS[r]?r:""; })();
+  const can = cap => !!(ROLE_CAPS[ROLE]||[]).includes(cap);
+  /* Named so a call site reads as the thing it is guarding rather than as a role check. The
+     whole point of capabilities over roles is that "can a manager delete" is answered in one
+     table, not by grepping for role==="admin" across three thousand lines. */
+  const canDelete = () => can("record.delete");
+  const canWrite  = () => can("record.write");
+  const canSend   = () => can("outbound.send");
+
+  /* The server's own words, shown to the person who hit the wall. authz.js answers a 403 with
+     `${role} is not allowed to ${capability}`, which is a better message than anything this
+     file could invent, because it is the actual rule that actually fired. */
+  let LAST_REFUSAL=null;
+  function refused(err){
+    LAST_REFUSAL={ at:Date.now(), message:String((err&&err.error)||(err&&err.message)||"not allowed"),
+                   role:(err&&err.role)||ROLE||"unknown", required:(err&&err.required)||null };
+    try{ alert(LAST_REFUSAL.message + "\n\nNothing was changed. Ask Victor if you need this."); }catch(_){}
+  }
+  /* Rendered wherever a control had to be withheld, so the absence is explained rather than
+     looking like a missing feature or a broken build. */
+  /* The handlers guard too, not only the markup. A render that happened before a session
+     expired still has its buttons, and the browser console is always there. This is still not
+     a control (see above) but it makes the app's own behaviour consistent with what the edge
+     will do, instead of appearing to work and then silently failing a moment later. */
+  function guardDelete(what){
+    if(canDelete()) return true;
+    refused({ error:`${ROLE||"your account"} is not allowed to record.delete`, role:ROLE, required:"record.delete" });
+    return false;
+  }
+  const roleNote = what => can("record.delete") ? "" :
+    `<span class="role-off" title="Your account is ${esc(ROLE||"unrecognised")}. Deleting needs an admin.">${esc(what)} is admin only</span>`;
+
+
   /* ======================= LIVE DATA LAYER ======================= */
   const D_KEY="vej_pipe_deals_v1";       // custom deals
   const C_KEY="vej_pipe_contacts_v1";    // custom contacts
@@ -85,7 +146,14 @@
     let data={}; try{ data=await res.json(); }catch(e){}
     if(!res.ok || data.ok===false){
       const err=new Error(data.error||data.reason||`store returned ${res.status}`);
-      err.reason=data.reason; throw err;
+      err.reason=data.reason;
+      /* Carried separately from the message because the callers branch on it: 403 means stop,
+         every other failure means retry later. Both the status and the reason are checked,
+         because the edge answers 403 with reason "forbidden" and a proxy in front of it may
+         one day answer 403 with no body at all. */
+      err.forbidden = res.status===403 || data.reason==="forbidden";
+      err.role=data.role; err.required=data.required; err.error=data.error;
+      throw err;
     }
     return data;
   }
@@ -100,7 +168,13 @@
       await drainQueue();
     }catch(err){
       SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
-      queueAdd({ kind, method:"POST", rec });
+      /* A refusal is not a network blip. Queueing a 403 schedules a write that is guaranteed
+         to fail on every retry for as long as the account holds that role, and the queue is
+         drained on load, on reconnect and after every successful call: one forbidden delete
+         would retry forever, keep the sync badge red, and make every real failure invisible
+         behind it. Surface it once, to the person who did it, and drop it. */
+      if(err.forbidden){ refused(err); }
+      else queueAdd({ kind, method:"POST", rec });
     }
     syncBadge();
   }
@@ -112,7 +186,8 @@
       SYNC_STATE={ ok:true, reason:null, at:nowISO() };
     }catch(err){
       SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
-      queueAdd({ kind, method:"DELETE", id });
+      if(err.forbidden){ refused(err); }        // see pushRecord: never retry a refusal
+      else queueAdd({ kind, method:"DELETE", id });
     }
     syncBadge();
   }
@@ -126,9 +201,21 @@
      eager object literal here dies with "Cannot access 'ST_KEY' before initialization" and
      takes the whole IIFE — and therefore window.PIPELIVE, and therefore every section — with
      it. Exactly the trap the ROSTER_BY index above already documents. */
+  /* POOL_KEY joined this list on 2026-09-08. Leads added or imported on the Leads screen were
+     the last thing in the app that lived only in the browser that typed them: a rep importing
+     a CSV of 200 companies on a laptop had them nowhere else, and clearing site data was a
+     silent unrecoverable delete of the whole import.
+
+     THE ORDER THIS HAD TO HAPPEN IN, because getting it backwards is what broke `todo` once
+     already: the Worker's KINDS set must accept 'pool' BEFORE this line ships. If the browser
+     writes a kind the Worker rejects, every write 400s, each failure is queued for retry, the
+     queue drains on load and on reconnect and refills every time, and the sync badge goes red
+     with the real cause buried under thousands of identical retries. Verified before this
+     edit: GET /crm/records?kind=pool on the deployed Worker answers ok:true, and a bogus kind
+     answers ok:false, which is what proves the check is live rather than absent. */
   const RECORD_KEYS=()=>({ [N_KEY]:"note", [L_KEY]:"lead", [A_KEY]:"account",
                            [O_KEY]:"offtake", [ST_KEY]:"status", [QX_KEY]:"quarter",
-                           [T_KEY]:"todo" });
+                           [T_KEY]:"todo", [POOL_KEY]:"pool" });
   let _recordKind=null;
   const RECORD_KIND_OF=k=>{ if(!_recordKind) _recordKind=RECORD_KEYS(); return _recordKind[k]; };
 
@@ -137,7 +224,13 @@
     const res=await fetch("/api/record"+q,{ method, headers:{"Content-Type":"application/json"},
       credentials:"same-origin", body:body?JSON.stringify(body):undefined });
     let data={}; try{ data=await res.json(); }catch(e){}
-    if(!res.ok||data.ok===false){ const e=new Error(data.error||data.reason||`store returned ${res.status}`); e.reason=data.reason; throw e; }
+    if(!res.ok||data.ok===false){
+      const e=new Error(data.error||data.reason||`store returned ${res.status}`);
+      e.reason=data.reason;
+      e.forbidden = res.status===403 || data.reason==="forbidden";   // see apiCall
+      e.role=data.role; e.required=data.required; e.error=data.error;
+      throw e;
+    }
     return data;
   }
 
@@ -147,7 +240,8 @@
       SYNC_STATE={ ok:true, reason:null, at:nowISO() };
     }catch(err){
       SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
-      list.forEach(rec=>queueAdd({ generic:kind, method:"POST", rec }));
+      if(err.forbidden) refused(err);           // see pushRecord: never retry a refusal
+      else list.forEach(rec=>queueAdd({ generic:kind, method:"POST", rec }));
     }
     syncBadge();
   }
@@ -293,6 +387,91 @@
         PHONE.byKey.get(r.key).push(r);
       }
     }catch(e){ PHONE.ok=false; PHONE.reason="unreachable"; }
+  }
+
+  /* ---- the audit trail, from /api/audit ----
+     Stage 1 has been filling D1's `audit` table since the migration and nothing read it. This
+     is the read.
+
+     Two shapes, because the edge serves two permissions off one table (see functions/api/
+     audit.js): a per account strip that any login may see, and the whole log that only an
+     admin may. Both are fetched ON DEMAND rather than on load — the strip when an account
+     profile opens, the log when the admin view opens — because neither is on the critical
+     path of any screen and hydrating them at boot would put two more requests in front of
+     first paint to render something nobody has asked to see yet.
+
+     Cached per account for the life of the render pass. Opening three accounts is three
+     fetches; re-rendering one account ten times is still one. */
+  const AUDIT={ byEntity:new Map(), all:null, state:new Map() };
+  const auditKey=(entity,id)=>`${entity}:${id}`;
+  async function loadAudit(entity,entityId){
+    const k=auditKey(entity,entityId);
+    if(AUDIT.byEntity.has(k)) return AUDIT.byEntity.get(k);
+    if(AUDIT.state.get(k)==="loading") return null;
+    AUDIT.state.set(k,"loading");
+    try{
+      const r=await fetch(`/api/audit?entity=${encodeURIComponent(entity)}&entityId=${encodeURIComponent(entityId)}`,{credentials:"same-origin"});
+      const d=await r.json();
+      /* A 403 is stored as a refusal, NOT as an empty list. "You may not see this" and "there
+         is nothing here" are different facts and the strip renders them differently; folding
+         them together is how an audit trail quietly becomes decorative. */
+      AUDIT.byEntity.set(k, r.status===403 ? {ok:false,reason:"forbidden"} : d);
+    }catch(e){ AUDIT.byEntity.set(k,{ok:false,reason:"unreachable"}); }
+    AUDIT.state.set(k,"done");
+    return AUDIT.byEntity.get(k);
+  }
+  async function loadAuditAll(actor){
+    const k="all:"+(actor||"");
+    if(AUDIT.state.get(k)==="loading") return null;
+    AUDIT.state.set(k,"loading");
+    try{
+      const r=await fetch(`/api/audit?limit=200${actor?`&actor=${encodeURIComponent(actor)}`:""}`,{credentials:"same-origin"});
+      const d=await r.json();
+      AUDIT.all = r.status===403 ? {ok:false,reason:"forbidden"} : d;
+    }catch(e){ AUDIT.all={ok:false,reason:"unreachable"}; }
+    AUDIT.state.set(k,"done");
+    return AUDIT.all;
+  }
+
+  /* Deal and contact ids, so the strip can ask about the records this account is made of.
+     An account is not itself a row in D1 — it is the fold of a name across deals, contacts
+     and the roster — so "the history of this account" is the union of the histories of its
+     records, which is what this collects. */
+  function auditTargetsFor(name){
+    const n=norm(name);
+    const out=[];
+    for(const d of liveDeals()) if(norm(d.customer||"")===n && d.id) out.push(["deals",d.id]);
+    for(const c of allContacts()) if(norm(c.account||"")===n && c.id) out.push(["contacts",c.id]);
+    return out.slice(0,12);      // a strip, not a log. The admin view is the log.
+  }
+  window.pipeAuditLoad = async name => {
+    const targets=auditTargetsFor(name);
+    await Promise.all(targets.map(([e,i])=>loadAudit(e,i)));
+    remount({keep:true});
+  };
+  const AUDIT_ACTION={ upsert:"changed", patch:"edited", delete:"deleted", create:"created", update:"changed" };
+  function auditStrip(name){
+    const targets=auditTargetsFor(name);
+    if(!targets.length) return `<div class="av3-empty">No records with a shared-store id, so there is nothing to trace. Rows imported before stage 1 and anything still local only carry no history.</div>`;
+    const loaded=targets.filter(([e,i])=>AUDIT.byEntity.has(auditKey(e,i)));
+    if(loaded.length<targets.length){
+      return `<div class="av3-empty">Loading who changed what… <button type="button" class="btn sm" onclick="pipeAuditLoad('${esc(String(name)).replace(/'/g,"\\'")}')">Load history</button></div>`;
+    }
+    const packs=loaded.map(([e,i])=>AUDIT.byEntity.get(auditKey(e,i)));
+    const refused=packs.find(p=>p&&p.reason==="forbidden");
+    if(refused) return `<div class="av3-empty">Your account may not read the change history.</div>`;
+    const broken=packs.find(p=>p&&p.ok===false);
+    const rows=packs.filter(p=>p&&p.ok).flatMap(p=>p.rows||[])
+      .sort((a,b)=>String(b.at).localeCompare(String(a.at))).slice(0,8);
+    if(!rows.length) return `<div class="av3-empty">${broken?`The history could not be read: ${esc(broken.reason||"unknown")}.`:"No recorded changes to this account's records."}</div>`;
+    return rows.map(r=>`<div class="aud-row">
+      <span class="aud-who">${esc(r.actor||"unattributed")}</span>
+      <span class="aud-act">${esc(AUDIT_ACTION[r.action]||r.action)}</span>
+      <span class="aud-what">${esc(r.entity)}${r.kind?` · ${esc(r.kind)}`:""}</span>
+      <span class="aud-when">${esc(fmtTs(r.at))}</span>
+      ${r.detail?`<span class="aud-fields">${esc(r.detail)}</span>`:""}
+    </div>`).join("")
+    + `<p class="aud-note">Field names only. The trail never records values, so it says what changed and not what it was.</p>`;
   }
 
   /* ---- Instantly mail, from /api/email ----
@@ -840,10 +1019,15 @@
      moment the phone creates one, and claiming one there turns it into a contact in a single
      step. A separate tab listing the same rows a second time meant two places to work the same
      queue and no rule for which was authoritative. tLeads stays in git history. */
+  /* Reports left this strip on 2026-09-08 and became a top level section (reports.js).
+     It was four KPIs and two bar charts filed as the seventh tab of the Pipeline page, which
+     is where a thing goes when nobody has decided it matters. The client asked for reporting
+     by name; a report nobody can find from the nav is not delivered. The tab id "reports" is
+     still normalised away below so an old localStorage value does not land on a dead tab. */
   const TABS = [
     ["pipeline","Pipeline"],["deals","Deals"],["people","People"],
     ["offtake","Offtake Pipeline"],["production","Production Plan"],
-    ["exec","Executive Dashboard"],["reports","Reports"],
+    ["exec","Executive Dashboard"],
   ];
   const TAB_KEY = "vej_pipe_tab";
   /* Falls back to pipeline, and also catches the retired "prospects"/"contacts"/"companies"
@@ -943,6 +1127,7 @@
     pipeModalClose(); rr();
   };
   window.pipeDealDelete=ci=>{
+    if(!guardDelete()) return;
     const arr=lsGet(D_KEY,[]); const d=arr[ci];
     if(!d) return; if(!confirm(`Delete deal "${d.deal}"?`)) return;
     arr.splice(ci,1); lsSet(D_KEY,arr); removeRecord("deals",d.id); rr();
@@ -963,7 +1148,7 @@
     <td class="t-num">${fmtDate(d)}</td><td>${stBadge(d)}</td><td>${cfBadge(d)}</td>
     <td class="t-num">${money(value(d))}</td><td class="t-num pwt">${money(weighted(d))}</td>
     <td class="t-num">${quarterOf(d)}</td><td class="pnote" title="${esc(d.notes||"")}">${esc(d.notes||"—")}</td>
-    <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">✎</span><span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">🗑</span>`:""}</td></tr>`;
+    <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">✎</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">🗑</span>`:""}`:""}</td></tr>`;
   /* Companies that have crossed from prospecting into the pipeline but have no deal yet.
      The rule: a prospect enters the pipeline the moment someone actually talks to them, which
      is exactly what Engaged means. Before that they are research and belong on Prospects.
@@ -1216,7 +1401,7 @@
         return `<td class="t-num">${v==null?'<span class="pdim">—</span>':num(v)}${c?`<div class="pconf-sub">✓ ${num(c)} confirmed</div>`:""}</td>`; }).join("")}
       <td class="t-num">$${r.price}</td><td><span class="pbadge pfreq">${esc(r.freq)}</span></td>
       <td class="t-num pannual">${money(annual(r))}</td>
-      <td class="pact-cell">${r.base?"":`<span class="pc-act" onclick="pipeOfftakeModal(${r.ci})" title="Edit">✎</span><span class="pc-act pc-del" onclick="pipeOfftakeDelete(${r.ci})" title="Delete">🗑</span>`}</td></tr>`;
+      <td class="pact-cell">${r.base?"":`<span class="pc-act" onclick="pipeOfftakeModal(${r.ci})" title="Edit">✎</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeOfftakeDelete(${r.ci})" title="Delete">🗑</span>`:""}`}</td></tr>`;
     let body;
     if(grouped){
       const prods=[...new Set(rows.map(r=>r.product))];
@@ -1275,6 +1460,7 @@
     lsSet(O_KEY,arr); pipeModalClose(); rr();
   };
   window.pipeOfftakeDelete=ci=>{
+    if(!guardDelete()) return;
     const arr=lsGet(O_KEY,[]); const r=arr[ci];
     if(!r) return; if(!confirm(`Delete offtake row for "${r.customer}" (${r.product})?`)) return;
     arr.splice(ci,1); lsSet(O_KEY,arr); rr();
@@ -1298,7 +1484,7 @@
         <td class="t-num">${money(value(d))}</td><td class="t-num">${fmtDate(d)}</td>
         <td><span class="pbadge ${d.status==="won"?"st-won":d.status==="lost"?"cf-low":"pfreq"}">${esc(d.status)}</span></td>
         <td>${esc(d.owner)}</td>
-        <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">✎</span><span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">🗑</span>`:`<span class="pdim" title="Imported from the SIBRA snapshot — read-only">—</span>`}</td></tr>`).join("")}</tbody>`)}`;
+        <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">✎</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">🗑</span>`:""}`:`<span class="pdim" title="Imported from the SIBRA snapshot — read-only">—</span>`}</td></tr>`).join("")}</tbody>`)}`;
   }
   window.pipeDealFilter = () => {
     const q=(V("pipeDealSearch")).toLowerCase();
@@ -2059,7 +2245,7 @@
         <td class="pact-cell">${readOnlyContact(c)
           ? `<span class="pdim" title="${esc(readOnlyWhy(c))}">—</span>`
           : `<span class="pc-act" onclick="pipeContactModal(${c.ci})" title="Edit">✎</span>
-             <span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">🗑</span>`}</td></tr>`).join("")}</tbody>`)}
+             ${canDelete()?`<span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">🗑</span>`:""}`}</td></tr>`).join("")}</tbody>`)}
       ${periodNote("A contact has no close date, so there is nothing here for a date range to select on. Filter the list with the search and the ICP and account pickers above.")}`;
   }
   window.pipeContactExport=()=>downloadCSV("contacts.csv",["Name","Job Title","ICP","Account","Email","Phone","Mobile","Drop-off Address","Notes"],
@@ -2153,6 +2339,7 @@
     pipeModalClose(); rr();
   };
   window.pipeContactDelete=idx=>{
+    if(!guardDelete()) return;
     const arr=getCustom(); const c=arr[idx];
     if(!c) return; if(!confirm(`Delete contact "${c.name}"?`)) return;
     arr.splice(idx,1); saveCustom(arr); removeRecord("contacts",c.id); rr();
@@ -2182,7 +2369,7 @@
         <td><span class="pbadge ${LEAD_ST[l.status]||"pfreq"}">${esc(l.status)}</span>${l.converted?`<div class="pconf-sub">✓ ${esc(l.convertedTo)}${l.convertedDate?" ("+l.convertedDate+")":""}</div>`:""}</td>
         <td class="pact-cell">${l.converted?"":`<span class="pc-act pc-conv" onclick="pipeLeadConvert(${l.base?-1:l.ci},'${esc(l.company).replace(/'/g,"\\'")}','${esc(l.contact).replace(/'/g,"\\'")}')" title="Convert to deal">➜</span>`}
           ${l.base?`<span class="pdim" title="From the SIBRA snapshot">—</span>`
-          :`<span class="pc-act" onclick="pipeLeadModal(${l.ci})" title="Edit">✎</span><span class="pc-act pc-del" onclick="pipeLeadDelete(${l.ci})" title="Delete">🗑</span>`}</td></tr>`).join("")}</tbody>`)}`;
+          :`<span class="pc-act" onclick="pipeLeadModal(${l.ci})" title="Edit">✎</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeLeadDelete(${l.ci})" title="Delete">🗑</span>`:""}`}</td></tr>`).join("")}</tbody>`)}`;
   }
   window.pipeLeadExport=()=>downloadCSV("leads.csv",["Contact","Company","ICP","Email","Phone","Source","Status","Converted To","Converted Date"],
     allLeads().map(l=>({...l,_icp:icpFor(l)})).sort(byIcpThen("contact")).map(l=>[l.contact,l.company,l._icp,l.email,l.phone,l.source,l.status,l.convertedTo||"",l.convertedDate||""]));
@@ -2225,43 +2412,18 @@
     lsSet(L_KEY,arr); pipeModalClose(); rr();
   };
   window.pipeLeadDelete=ci=>{
+    if(!guardDelete()) return;
     const arr=lsGet(L_KEY,[]); const l=arr[ci];
     if(!l) return; if(!confirm(`Delete lead "${l.contact}" (${l.company})?`)) return;
     arr.splice(ci,1); lsSet(L_KEY,arr); rr();
   };
 
-  /* ================= TAB 8 · REPORTS ================= */
-  function tReports(){
-    const ds=periodDeals();
-    const won=ds.filter(d=>d.status==="won"), lost=ds.filter(d=>d.status==="lost");
-    const closed=won.length+lost.length;
-    const wonV=sum(won,value);
-    const open=ds.filter(d=>d.status==="open");
-    const maxSt=Math.max(...P.stages.map(s=>sum(open.filter(d=>d.stage===s.k),value)),1);
-    const stageBars=P.stages.map((s,i)=>{ const v=sum(open.filter(d=>d.stage===s.k),value);
-      return `<div class="phrow"><span class="phl">${esc(s.label)}</span><div class="phtrack"><span class="phfill" style="width:${v/maxSt*100}%;background:${CAT[i%CAT.length]}"></span></div><span class="phv">${v?money(v):"—"}</span></div>`; }).join("");
-    const srcOf=d=>{ const l=allLeads().find(l=>l.converted&&l.convertedTo===d.deal); return l?l.source:"Direct"; };
-    const sources=[...new Set(ds.map(srcOf))];
-    const maxSrc=Math.max(...sources.map(s=>sum(ds.filter(d=>srcOf(d)===s&&d.status==="won"),value)),1);
-    const srcBars=sources.map((s,i)=>{
-      const g=ds.filter(d=>srcOf(d)===s), w=g.filter(d=>d.status==="won");
-      return `<div class="phrow"><span class="phl">${esc(s)}</span><div class="phtrack"><span class="phfill" style="width:${sum(w,value)/maxSrc*100}%;background:${CAT[i%CAT.length]}"></span></div><span class="phv">${money(sum(w,value))}</span></div>
-        <div class="pdim" style="font-size:11px;margin:-4px 0 6px 148px">${g.length} deals · ${w.length} won</div>`; }).join("");
-    const ls=allLeads();
-    const convLeads=ls.filter(l=>l.converted).length;
-    return `
-      <div class="grid g4">
-        ${kpi("Win Rate",closed?Math.round(won.length/closed*100)+"%":"—",`${won.length} won / ${closed} closed`)}
-        ${kpi("Revenue Won",money(wonV),`${won.length} deals`)}
-        ${kpi("Avg Deal Size",won.length?money(wonV/won.length):"—","won deals")}
-        ${kpi("Lead Conversion",ls.length?Math.round(convLeads/ls.length*100)+"%":"—",`${convLeads} / ${ls.length} leads`)}
-      </div>
-      <div class="grid g2" style="margin-top:15px">
-        <div class="card"><h4>Open Pipeline by Stage ($)</h4>${stageBars}</div>
-        <div class="card"><h4>Performance by Source</h4>${srcBars}</div>
-        <div class="card"><h4>Activity Summary</h4><p class="pdim" style="font-size:12.5px">No activity data</p></div>
-      </div>`;
-  }
+  /* TAB 8 · REPORTS was here and is deleted. It is now a top level section, reports.js,
+     built off the PIPELIVE.data seam at the foot of this file. What it was: four KPIs, an
+     open-pipeline-by-stage bar chart, a by-source bar chart, and a card that said
+     "No activity data" in prose while the D1 activity table held hundreds of rows. Nothing
+     in it filtered by anything except the period, nothing drilled through to a row, and
+     nothing exported. The replacement is not a port; none of this code survives. */
 
   /* ================= CLIENT PROFILE (the "epicenter") =================
      One unified account record — contacts + deals + offtake + activity in a
@@ -2276,6 +2438,10 @@
   let PROFILE_HOST="crm";
   window.pipeOpenAccount = name => {
     PROFILE=canonAcct(name); PROFILE_TAB="activity"; PROFILE_FILTER="all";
+    /* Fetched on open rather than on load: it is one request per account actually looked at,
+       instead of one at boot for an account nobody opened. Not awaited, so the profile paints
+       from the records it already has and the strip fills in. */
+    try{ window.pipeAuditLoad(PROFILE); }catch(_){}
     const here=(location.hash||"").slice(1);
     PROFILE_HOST = here==="leads" ? "leads" : "crm";
     /* Clicking an account in the Inbox or in Today used to rewrite a section the person was
@@ -2291,7 +2457,7 @@
     const ta=document.getElementById("acctComposerInput"); if(!ta||!ta.value.trim()) return;
     addAcctNote(name, ta.value.trim()); remount();
   };
-  window.pipeAcctActDelete = (name,i) => { delAcctActivity(name,i); remount(); };
+  window.pipeAcctActDelete = (name,i) => { if(!guardDelete()) return; delAcctActivity(name,i); remount(); };
 
   /* ---- the 6 comm modals — reuse the app's openModal() shell ---- */
   const CH_META = {
@@ -2640,7 +2806,7 @@
       const dk=dayKey(a.ts);
       if(dk!==lastDay){ tl+=`<div class="date-sep"><span>${esc(dk)}</span></div>`; lastDay=dk; }
       const st=a.status?`&middot; <span class="badge ${STATUS_CLS[a.status]||""}">${esc(a.status)}</span>`:"";
-      const del=a._idx!=null?`<button type="button" class="av3-del" title="Delete" aria-label="Delete activity" onclick="pipeAcctActDelete('${safe}',${a._idx})">🗑</button>`:"";
+      const del=(a._idx!=null&&canDelete())?`<button type="button" class="av3-del" title="Delete" aria-label="Delete activity" onclick="pipeAcctActDelete('${safe}',${a._idx})">🗑</button>`:"";
       tl+=`<div class="item" data-ch="${esc(a.ch)}">
         <div class="ico">${iconSvg(a.ch)}</div>
         <div class="bubble">
@@ -2736,6 +2902,11 @@
       </div>
       ${header}
       <div class="main-grid">${left}${middle}${right}</div>
+      <div class="tile aud-tile">
+        <div class="tile-head"><h4>Who changed what</h4>
+          <span class="pdim">The shared store's own record of every write to this account's rows.</span></div>
+        <div class="tile-body">${auditStrip(name)}</div>
+      </div>
     </div>`;
   }
 
@@ -2743,7 +2914,7 @@
   function sectionInner(){
     if(PROFILE && PROFILE_HOST==="crm") return renderProfile(PROFILE);
     const at=activeTab();
-    const panes=[["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["offtake",tOfftake],["production",tProduction],["exec",tExec],["reports",tReports]];
+    const panes=[["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["offtake",tOfftake],["production",tProduction],["exec",tExec]];
     /* The deal book's provenance, stated where the KPIs are read. Companies, contacts and
        ICPs on this page come off the live roster join, but every DEAL number (pipeline,
        weighted, confirmed revenue, win rate) is computed from the SIBRA snapshot plus
@@ -2852,11 +3023,13 @@
      show them. The table came back; what changed is that it is a top level section rather than
      a tab, and that leads added or imported here appear in it beside the researched rows.
 
-     STORE. Added and imported leads live in localStorage under POOL_KEY, which means THIS
-     BROWSER ONLY — they are not in the shared D1 store the deals, contacts and notes use. To
-     make them shared: add POOL_KEY:"pool" to RECORD_KEYS() above, and deploy allo-hooks with
-     'pool' in the KINDS set in src/crm.js (already added there). Doing the first without the
-     second is the bug commit 850a1aa fixed: every write fails and the sync badge goes red. */
+     STORE. Added and imported leads are SHARED as of 2026-09-08: POOL_KEY is in RECORD_KEYS()
+     above, so every add, edit and CSV import writes through to D1 under kind "pool" and comes
+     back down on hydrate, the same contract as deals, contacts and notes. Before that they
+     were localStorage only, which meant a rep who imported two hundred companies had them on
+     exactly one laptop and "clear site data" deleted the import with no warning and no copy.
+     The Worker side was deployed and verified answering kind=pool first; see the note on
+     RECORD_KEYS for why that order is not optional. */
   function leadsInner(){
     if(PROFILE && PROFILE_HOST==="leads") return renderProfile(PROFILE);
     return `<h1 class="pipe-h">Leads</h1>
@@ -2884,7 +3057,9 @@
         <div class="pcf"><label>ICP</label><input class="pinput" id="plnIcp" list="plnIcpList" value="${esc(cur.icp||"")}" placeholder="e.g. AB.OG"><datalist id="plnIcpList">${icps.map(i=>`<option value="${esc(i)}">`).join("")}</datalist></div>
       </div>
       <div class="pcf"><label>What they do / why they fit</label><textarea class="pinput" id="plnWhat" rows="3">${esc(cur.what||"")}</textarea></div>
-      ${pi!=null&&pi>=0?`<div class="note" style="margin-top:10px;font-size:12.5px">Added by hand, so it can be removed. <a href="#" onclick="pipePoolDelete(${pi});return false">Delete this lead</a>.</div>`:""}`;
+      ${pi!=null&&pi>=0?(canDelete()
+        ? `<div class="note" style="margin-top:10px;font-size:12.5px">Added by hand, so it can be removed. <a href="#" onclick="pipePoolDelete(${pi});return false">Delete this lead</a>.</div>`
+        : `<div class="note" style="margin-top:10px;font-size:12.5px">Added by hand. ${roleNote("Removing it")}.</div>`):""}`;
     openModal((pi!=null&&pi>=0?"Edit":"Add")+" lead", body, pi!=null&&pi>=0?"Save changes":"Add lead", `pipePoolSave(${pi!=null&&pi>=0?pi:-1})`);
   };
   /* One place that turns the form's flat fields into a roster shaped record, shared with the
@@ -2902,6 +3077,12 @@
      them shows the new lead in the table and nowhere else — not on its own profile, not in the
      ICP join, not in the account list. */
   function poolBust(){ ROSTER_BY=null; ROSTER_BY_DOM=null; CO_BLOB.clear(); }
+  /* The roster now arrives after first paint (see ROSTER, LOADED LATE in app.js). Every index
+     built before it lands was built from the pool alone and is missing 1,145 companies, so
+     app.js calls this the moment the file executes. Without it Leads, the account fold and
+     global search would all keep answering from a roster-shaped hole for the rest of the
+     session, and nothing on screen would say why. */
+  window.pipeRosterBust = poolBust;
   window.pipePoolSave = pi => {
     const name=V("plnName");
     if(!name){ alert("A company name is required — it is the only thing every other join hangs off."); return; }
@@ -2913,6 +3094,7 @@
     lsSet(POOL_KEY,arr); poolBust(); pipeModalClose(); rr();
   };
   window.pipePoolDelete = pi => {
+    if(!guardDelete()) return;
     const arr=lsGet(POOL_KEY,[]); const l=arr[pi]; if(!l) return;
     if(!confirm(`Remove "${l.name}" from the pool? Notes and status set on it stay on the account.`)) return;
     arr.splice(pi,1); lsSet(POOL_KEY,arr); poolBust(); pipeModalClose(); rr();
@@ -3330,6 +3512,7 @@
     t.done=!t.done; t.updated_at=nowISO(); lsSet(T_KEY,arr); remountToday();
   };
   window.pipeTodoDelete=id=>{
+    if(!guardDelete()) return;
     const arr=todos(); const i=arr.findIndex(x=>x.id===id); if(i<0) return;
     const [gone]=arr.splice(i,1); lsSet(T_KEY,arr);
     removeGeneric("todo",gone.id); remountToday();
@@ -3375,7 +3558,7 @@
     const todoRow=t=>`<div class="tdy-todo${t.done?" done":""}">
       <button type="button" class="tdy-check" onclick="pipeTodoToggle('${esc(t.id)}')" aria-label="${t.done?"Mark not done":"Mark done"}">${t.done?"&#10003;":""}</button>
       <span class="tdy-text">${esc(t.what)}</span>
-      <button type="button" class="tdy-x" onclick="pipeTodoDelete('${esc(t.id)}')" title="Delete">&times;</button>
+      ${canDelete()?`<button type="button" class="tdy-x" onclick="pipeTodoDelete('${esc(t.id)}')" title="Delete">&times;</button>`:""}
     </div>`;
 
     return `${AV3_SPRITE}<div class="sec-head">
@@ -3393,7 +3576,125 @@
       <div class="tdy-list">${body}</div>`;
   }
 
-  window.PIPELIVE = { rCRM, rLeads, rInbox, rToday, inboxCount:()=>{ const r=readSet(); return inboxItems().filter(i=>!r.has(i.sig)).length; }, stats, sync:{ hydrate, drainQueue, state:()=>({...SYNC_STATE}),
+  /* ================= THE DATA SEAM =================
+     Everything above lives inside this IIFE and is unreachable from another file. reports.js
+     needs the same book of business the panes read, and there are exactly two ways to give it
+     one: copy the accessors, or export them. Copying is how a reporting screen ends up
+     disagreeing with the pipeline screen it claims to summarise — two definitions of "value",
+     two notions of which deals are live, and no way to tell from the numbers which one you
+     are reading. So: one export, read at call time, never cached.
+
+     READ ONLY, ON PURPOSE. Nothing here writes. Reports is a lens, and a lens that can
+     mutate the record is a second, undocumented write path into D1.
+
+     UNFILTERED, ALSO ON PURPOSE. deals() hands back the whole book, not periodDeals(). The
+     Reports filter bar is its own thing with its own basis selector and its own compare
+     window, and it must be able to reach a deal outside the Pipeline page's period in order
+     to compute "same period last year". Layering the two filters would give a screen whose
+     numbers depend on a control that is not on it. */
+  /* ================= GLOBAL SEARCH =================
+     One box, four record kinds, reachable from every section.
+
+     THE PROBLEM IT SOLVES. There were four separate search boxes: one over the roster in
+     Leads, one over deals, one over contacts, one over the lead list. Each searched its own
+     table and nothing searched across them, so the single most common thing a person does
+     here, type a company name and go to it, had no answer. With 1,145 companies on the
+     roster and 72 contacts, "find Rose Acres" meant guessing which of four tables it was
+     filed in and then finding that table's box.
+
+     WHY IT LIVES IN pipeline.js AND NOT app.js. Every accessor it searches is inside this
+     IIFE, and identity, the norm() fold that decides two spellings are one company, is in
+     here too. Searching in app.js would need a second copy of that fold, and a search that
+     folds names differently from the app it searches is a search that cannot find things
+     the app can see.
+
+     RANKING is deliberately dumb and explainable: exact name, then name starts with, then
+     name contains, then a match somewhere else on the record. A relevance score nobody can
+     predict is worse than an order somebody can, because the person searching already knows
+     what they are looking for. */
+  const SEARCH_MAX = 8;      // per group. The list is for going somewhere, not for browsing.
+  function searchAll(qRaw){
+    const q=String(qRaw||"").trim().toLowerCase();
+    if(q.length<2) return null;
+    const rank=(name,extra)=>{
+      const n=String(name||"").toLowerCase();
+      if(n===q) return 0;
+      if(n.startsWith(q)) return 1;
+      if(n.includes(q)) return 2;
+      return String(extra||"").toLowerCase().includes(q) ? 3 : -1;
+    };
+    const take=list=>list.filter(x=>x.r>=0).sort((a,b)=>a.r-b.r||String(a.label).localeCompare(String(b.label)));
+
+    const accounts=take(liveAccounts().map(a=>({
+      r:rank(a.name,[a.industry,a.type,a.r&&a.r.icp,a.r&&a.r.city,a.r&&a.r.state].join(" ")),
+      label:a.name, sub:[a.r&&a.r.icp,a.r&&a.r.city,a.r&&a.r.state].filter(Boolean).join(" · ")||a.industry||a.type||"account",
+      act:a.name })));
+    const contacts=take(allContacts().map(c=>({
+      r:rank(c.name,[c.email,c.phone,c.mobile,c.title,c.account].join(" ")),
+      label:c.name, sub:[c.title,c.account,c.email].filter(Boolean).join(" · ")||"contact",
+      act:c.account||c.name })));
+    const deals=take(liveDeals().map(d=>({
+      r:rank(d.deal,[d.customer,d.product,d.owner,d.notes].join(" ")),
+      label:d.deal, sub:[d.customer,d.product,money(value(d)),stageOf(d.stage).label].filter(Boolean).join(" · "),
+      act:d.customer })));
+    const leads=take(allLeads().map(l=>({
+      r:rank(l.contact||l.company,[l.company,l.email,l.phone,l.source].join(" ")),
+      label:l.contact||l.company||"(unnamed lead)",
+      sub:[l.company,l.source,l.status].filter(Boolean).join(" · ")||"lead",
+      act:l.company||l.contact })));
+
+    const groups=[["Accounts",accounts],["Contacts",contacts],["Deals",deals],["Leads",leads]];
+    return { q, groups, total:groups.reduce((a,[,g])=>a+g.length,0),
+      /* The roster is 1,145 of the ~1,200 searchable names and it now loads lazily, so a
+         search run in the first seconds of a session can legitimately be missing almost
+         everything. Say so rather than answering "no results" for a company that is there. */
+      partial: !(window.ROSTER && window.ROSTER.companies) };
+  }
+
+  window.pipeSearchGo = name => {
+    window.pipeSearchClose();
+    if(name) window.pipeOpenAccount(name);
+  };
+  window.pipeSearchResults = qRaw => {
+    const res=searchAll(qRaw);
+    if(!res) return `<p class="gs-hint">Type at least two characters. Searches accounts, contacts, deals and leads at once.</p>`;
+    if(!res.total) return `<p class="gs-hint">Nothing matches "${esc(res.q)}".${res.partial?" The company roster has not finished loading, so this is not the whole list yet.":""}</p>`;
+    return (res.partial?`<p class="gs-hint">The company roster is still loading, so accounts may be missing from this list.</p>`:"")
+      + res.groups.filter(([,g])=>g.length).map(([label,g])=>`
+        <div class="gs-group"><div class="gs-gh">${esc(label)}${g.length>SEARCH_MAX?` · showing ${SEARCH_MAX} of ${g.length}`:""}</div>
+        ${g.slice(0,SEARCH_MAX).map(i=>`<button type="button" class="gs-row" onclick="pipeSearchGo('${esc(String(i.act)).replace(/'/g,"\\'")}')">
+          <span class="gs-l">${esc(i.label)}</span><span class="gs-s">${esc(i.sub)}</span></button>`).join("")}</div>`).join("");
+  };
+
+  const REPORT_SEAM = {
+    /* the records */
+    deals: () => liveDeals(),
+    contacts: () => allContacts(),
+    leads: () => allLeads(),
+    accounts: () => liveAccounts(),
+    /* the phone feed, already matched to a ten digit key by /api/activity */
+    phone: () => ({ ok:PHONE.ok, reason:PHONE.reason, rows:PHONE.rows.slice() }),
+    mail: () => ({ ok:MAIL.ok, reason:MAIL.reason, rows:MAIL.rows.slice(), replies:MAIL.replies }),
+    /* the vocabulary: stages carry the probability the weighting is computed from */
+    stages: () => P.stages.slice(),
+    confidence: () => ({...P.confidence}),
+    snapshot: () => P.snapshot || null,
+    /* the arithmetic, so a report cannot invent its own */
+    value, weighted, stageOf, closeDate, quarterOf, phoneKey,
+    /* identity: two spellings of one company must fold the same way here as everywhere else */
+    norm, canonAcct,
+    /* presentation, shared so a report looks like the rest of the app rather than beside it */
+    esc, money, num, sum, kpi, fmtDate, fmtTs, acctLink, downloadCSV, CAT,
+    /* navigation, so a chart can drill through to the rows behind it */
+    openAccount: name => window.pipeOpenAccount(name),
+    /* who is looking, for the screen only. See the ROLE block at the top of this file. */
+    role: () => ROLE, can,
+    /* the audit trail, for the admin view in Reports. loadAll() is a no-op after the first
+       call for a given actor filter; the render reads whatever has arrived. */
+    audit: { load: actor => loadAuditAll(actor), get: () => AUDIT.all, ACTIONS: AUDIT_ACTION },
+  };
+
+  window.PIPELIVE = { rCRM, rLeads, rInbox, rToday, data: REPORT_SEAM, inboxCount:()=>{ const r=readSet(); return inboxItems().filter(i=>!r.has(i.sig)).length; }, stats, sync:{ hydrate, drainQueue, state:()=>({...SYNC_STATE}),
     queued:()=>lsGet(SYNC_KEY,[]).length, phone:()=>({ok:PHONE.ok,reason:PHONE.reason,rows:PHONE.rows.length}),
     mail:()=>({ok:MAIL.ok,reason:MAIL.reason,rows:MAIL.rows.length,replies:MAIL.replies}) } };
 

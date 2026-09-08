@@ -24,8 +24,16 @@ const CHECK = process.argv.includes("--check");
 // how sales/build-later.html shipped without tokens.css.
 const PAGES = ["index.html", "sales/index.html", "sales/brandkit.html"];
 
-// href/src="<local path>?v=<token>" -> capture path and token.
-const REF = /(\s(?:href|src)=")([^"?#:]+\.(?:css|js))\?v=([^"#]*)"/g;
+// href/src/data-src="<local path>?v=<token>" -> capture path and token.
+//
+// data-src is here for ONE ref and it is load bearing: sales/index.html no longer loads
+// roster-data.js with a script tag, it carries the stamped URL on a placeholder and app.js
+// injects the script on demand. Without data-src in this pattern that URL would keep
+// whatever token was typed, and _headers serves /*.js immutable for a year, so every
+// browser that ever loaded the roster would be pinned to that build of it forever. The
+// alternation cannot mis-fire on the "src" inside "data-src": the \s requires whitespace
+// immediately before, and there is a hyphen there.
+const REF = /(\s(?:href|src|data-src)=")([^"?#:]+\.(?:css|js))\?v=([^"#]*)"/g;
 
 /* An unstamped local asset is worse than a stale stamp, and silently so. _headers ships
    /*.js and /*.css as immutable for a year, and this stamper only rewrites refs that
@@ -34,7 +42,7 @@ const REF = /(\s(?:href|src)=")([^"?#:]+\.(?:css|js))\?v=([^"#]*)"/g;
    apollo-data.js — the three generated snapshots the Sales OS renders — would have gone
    permanently stale on the first load, defeating the entire point of regenerating them.
    Seed a new ref with ?v=0 and this stamper will hash it from then on. */
-const UNSTAMPED = /\s(?:href|src)="([^"?#:]+\.(?:css|js))"/g;
+const UNSTAMPED = /\s(?:href|src|data-src)="([^"?#:]+\.(?:css|js))"/g;
 
 const hashes = new Map();
 function hashOf(file) {

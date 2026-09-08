@@ -46,6 +46,12 @@
     }
     return R.byIcp || {};
   };
+  /* Cleared by app.js when the lazily loaded roster lands. LIVE_BY_ICP is computed on first
+     call and cached for the session; a render that happened before the roster arrived would
+     otherwise pin this page to the byIcp fallback permanently, showing campaign list sizes
+     that disagree with the Launchpad and the Instantly map with nothing saying so. */
+  window.outreachRosterBust = () => { LIVE_BY_ICP = null; };
+
   const rosterTotals = () => {
     const R = window.ROSTER || {};
     return { count: R.count || 0, live: R.live || 0, needsWork: R.needsWork || 0, empty: R.emptyIcps || [] };
