@@ -2126,7 +2126,12 @@
   };
   window.pipeCoRemount = () => remount();
 
-  function tCompanies(){
+  /* filtersOnly is the Board view asking for the controls without the table. The filter bar
+     is shared: it is the one place the roster is narrowed, and duplicating it above the board
+     would give Leads two filter bars that could disagree, which is the bug stage 2 spent a
+     commit removing from the deal panes. So the board renders above, this renders the bar
+     below it, and both read coFiltered(). */
+  function tCompanies(filtersOnly){
     const R = window.ROSTER;
     if(!R) return `<div class="note warn"><b>Roster not loaded.</b> roster-data.js is missing from this deployment. Run <code>node scripts/build-roster.mjs</code> and redeploy.</div>`;
     const rows = coFiltered();
@@ -2181,7 +2186,7 @@
         <span class="pcount-lbl">${num(rows.length)} shown</span>
       </div>
       ${rows.length?"":`<div class="note" style="margin-top:12px">No company matches these filters. <a href="#" onclick="pipeCoReset();return false">Clear them</a>.</div>`}
-      ${tblWrap(`<thead><tr>${cols.map(col=>{
+      ${filtersOnly?"":tblWrap(`<thead><tr>${cols.map(col=>{
           const active = CO_F.sort===col.key;
           const arrow = active ? (CO_F.dir==="desc"?"↓":"↑") : "";
           return `<th class="co-th${col.num?" num":""}${active?" sorted":""}"
@@ -2197,7 +2202,7 @@
             </button></th>`;
         }).join("")}</tr></thead>
         <tbody>${page.map(c=>`<tr class="${c.dead?"co-dead":""}">${cols.map(col=>col.cell(c)).join("")}</tr>`).join("")}</tbody>`)}
-      ${rows.length>coShown?`<div class="co-more"><button class="btn btn-ghost" onclick="pipeCoMore()">Show ${num(Math.min(CO_PAGE,rows.length-coShown))} more (${num(rows.length-coShown)} remaining)</button></div>`:""}
+      ${(!filtersOnly&&rows.length>coShown)?`<div class="co-more"><button class="btn btn-ghost" onclick="pipeCoMore()">Show ${num(Math.min(CO_PAGE,rows.length-coShown))} more (${num(rows.length-coShown)} remaining)</button></div>`:""}
     `;
   }
 
@@ -3030,12 +3035,262 @@
      exactly one laptop and "clear site data" deleted the import with no warning and no copy.
      The Worker side was deployed and verified answering kind=pool first; see the note on
      RECORD_KEYS for why that order is not optional. */
+  /* ================= THE LEAD BOARD =================
+     Leads as a drag and drop pipeline instead of a 1,145 row table.
+
+     WHY A BOARD AT ALL. The table answers "show me every company matching these filters",
+     which is the right question when you are building a call list and the wrong one when you
+     are working it. Working a list is a sequence of small state changes: this one replied,
+     this one is dead, this one has a deal now. In the table that is a click into a profile, a
+     dropdown, and a click back, per company. On a board it is one drag, and the shape of the
+     work is visible: a Working column with two hundred cards and an Engaged column with four
+     is a fact about the business that the table can only express as a number nobody reads.
+
+     THE COLUMNS ARE THE STATUS LADDER THAT ALREADY EXISTED. STATUS has carried rank, label
+     and hint since long before this screen, statusOf() already derives a status from evidence
+     and lets a manual override win, and those overrides already write through to D1 under
+     kind "status". So a drop here is not a new kind of state: it is the same override the
+     profile dropdown has always set, and it syncs to everyone the same way. Nothing about
+     persistence had to be invented, which is the whole reason this was worth building rather
+     than a second, parallel notion of where a company has got to.
+
+     DERIVED VERSUS SET, and why a card says which. Most cards are in their column because
+     something is true (a deal exists, a conversation was logged), not because anybody put
+     them there. Dragging such a card pins it, and pinning it means it will STOP following the
+     evidence: a company manually parked in Working will stay in Working after it signs. That
+     is occasionally what you want and usually not, so a pinned card is marked and can be
+     unpinned back to derived. A board that silently converts every drag into a permanent
+     override is a board that is wrong within a fortnight.
+
+     CAPPED, NOT VIRTUALISED. A column renders at most BOARD_PAGE cards with a "show more"
+     under it, and its header always states the true total. 1,145 draggable nodes is somewhere
+     between slow and unusable on the phones Victor and Daniel are asked to test on, and a
+     board is a working surface: if a column has four hundred cards, the answer is a filter,
+     not a longer scroll. */
+  const BOARD_KEY="vej_leads_board_v1";
+  const BOARD_PAGE=40;
+  /* Flow order, which is NOT rank order. Disqualified is rank 0 but it is a sink rather than
+     a beginning: nothing starts there and nothing leaves it except by correction, so it goes
+     at the end where a dead lead is out of the way of the live ones. */
+  const BOARD_COLS=[
+    { k:"new_lead",     code:"NEW", next:"Get them into a sequence, or call. Anything that starts a conversation." },
+    { k:"working",      code:"WRK", next:"A reply, or a real conversation on the phone. Sends alone do not move a card." },
+    { k:"engaged",      code:"ENG", next:"An opportunity worth a deal record: a volume, a product and a date." },
+    { k:"customer",     code:"CUS", next:"Nothing. This is the end of this board. The deal stages take over in Pipeline." },
+    { k:"disqualified", code:"DQ",  next:"Correction only. Drag back out if the company was killed by mistake." },
+  ];
+  const boardCfg=()=>{
+    const d={ density:"comfortable", colorBy:"icp", showDead:true, view:"board" };
+    try{ const v=JSON.parse(localStorage.getItem(BOARD_KEY)||"{}"); return {...d,...(v&&typeof v==="object"?v:{})}; }
+    catch(_){ return d; }
+  };
+  let BOARD=boardCfg();
+  const boardSave=()=>{ try{ localStorage.setItem(BOARD_KEY,JSON.stringify(BOARD)); }catch(_){} };
+  window.pipeBoardSet=(k,v)=>{ BOARD[k]=(v==="true"?true:v==="false"?false:v); boardSave(); remount({keep:true}); };
+  window.pipeLeadsView=v=>{ BOARD.view=v; boardSave(); remount(); };
+
+  /* ---- identity colour ----
+     The roster carries a website for most companies and no logo for any of them, so a real
+     logo would mean an external favicon request per card: 1,145 requests, a dependency on a
+     third party to render our own prospect list, and the whole roster handed to whoever
+     serves them. A deterministic monogram is the honest version of the same affordance. It
+     is stable per company, needs no network, and gives the eye something to lock onto when
+     scanning a column, which is all the logo was ever for here.
+
+     Hue comes from the name, so a company is the same colour forever and in every column.
+     Saturation and lightness are fixed and deliberately muted: these sit behind text and next
+     to status colours that MUST stay louder than decoration. */
+  function monoHue(name){
+    let h=0; const s=String(name||"");
+    for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0;
+    return h%360;
+  }
+  const monogram=name=>String(name||"?").replace(/^(the|a)\s+/i,"").split(/[\s.\-]+/)
+    .filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase().slice(0,2)||"?";
+
+  /* The rail colour, by whichever dimension the reader chose. Three, because three different
+     questions get asked of the same board: which campaign is this (icp), is it worth calling
+     (score), and which product line (line). */
+  function railColor(c){
+    if(BOARD.colorBy==="score"){
+      const v=Number(c.score)||0;
+      return v>=14?"var(--green)":v>=9?"var(--gold)":v>=5?"var(--brand)":"var(--text-mute)";
+    }
+    if(BOARD.colorBy==="line"){
+      const l=String(c.line||"").toLowerCase();
+      return l.includes("biochar")?"var(--green)":l.includes("absorbent")?"var(--brand)":
+             l.includes("crumble")?"var(--gold)":"var(--text-mute)";
+    }
+    /* Memoised. This ran per CARD, and each run walked the whole 1,145 row pool to build the
+       ICP list and then indexOf'd into it: 80 cards on screen is ninety thousand iterations
+       per render, and a render happens on every drag, every toggle and every keystroke in the
+       filter box. Cached as a name to index map and cleared by poolBust() alongside the other
+       roster indexes, so an imported lead with a new ICP still gets a colour. */
+    if(!ICP_COLOR){
+      ICP_COLOR=new Map();
+      [...new Set(poolList().map(x=>x.icp).filter(Boolean))].sort()
+        .forEach((k,i)=>ICP_COLOR.set(k,CAT[i%CAT.length]));
+    }
+    return ICP_COLOR.get(c.icp) || "var(--text-mute)";
+  }
+  let ICP_COLOR=null;
+
+  window.pipeBoardDragStart=(ev,name)=>{
+    try{ ev.dataTransfer.setData("text/plain",name); ev.dataTransfer.effectAllowed="move"; }catch(_){}
+    const el=ev.currentTarget; if(el) el.classList.add("dragging");
+    BOARD_DRAG=name;
+  };
+  window.pipeBoardDragEnd=ev=>{
+    const el=ev.currentTarget; if(el) el.classList.remove("dragging");
+    BOARD_DRAG=null;
+    document.querySelectorAll(".lb-col.over").forEach(c=>c.classList.remove("over"));
+  };
+  let BOARD_DRAG=null;
+  window.pipeBoardOver=ev=>{
+    ev.preventDefault();
+    try{ ev.dataTransfer.dropEffect="move"; }catch(_){}
+    ev.currentTarget.classList.add("over");
+  };
+  window.pipeBoardLeave=ev=>{ ev.currentTarget.classList.remove("over"); };
+  window.pipeBoardDrop=(ev,status)=>{
+    ev.preventDefault();
+    ev.currentTarget.classList.remove("over");
+    let name="";
+    try{ name=ev.dataTransfer.getData("text/plain"); }catch(_){}
+    if(!name) name=BOARD_DRAG||"";
+    BOARD_DRAG=null;
+    if(!name) return;
+    /* Dropped back where it came from. This is an early return, NOT a correctness guard:
+       pipeSetStatus already deletes the override when the value equals derivedStatus, so an
+       accidental drag onto the same column cannot pin a card either way. What it saves is a
+       pointless write to the shared store and the re-render behind it, which on a board of a
+       thousand cards is the difference between a no-op and a visible stutter. The behaviour
+       it protects is asserted end to end in test-reports.mjs regardless of which layer
+       provides it, because that is the fact worth pinning. */
+    if(statusOf(name)===status) return;
+    /* Goes through the SAME setter the profile dropdown uses, which writes the override,
+       schedules the D1 sync and re-renders. Writing localStorage directly here would be one
+       line shorter and would not sync, which is the bug this codebase has already fixed once
+       for every other store. */
+    window.pipeSetStatus(name,status);
+  };
+  /* Unpin: hand the card back to the evidence. Sets the status to whatever the data derives,
+     which pipeSetStatus stores as "no override". */
+  window.pipeBoardUnpin=name=>{ window.pipeSetStatus(name,derivedStatus(name)); };
+  window.pipeBoardMore=k=>{ BOARD_SHOWN[k]=(BOARD_SHOWN[k]||BOARD_PAGE)+BOARD_PAGE; remount({keep:true}); };
+  let BOARD_SHOWN={};
+
+  /* THE NEXT ACTION LINE. The one thing on a card that says what to DO rather than what is
+     true, and the reason a board beats a table for working a list: a card you cannot act on
+     without opening it is a row with rounded corners.
+
+     Every branch is read from the roster, never invented. The order is the order a rep would
+     hit the obstacles in: a dead company is not worked at all, a company with no number
+     cannot be called, an unverified contact should not be called yet, and a company that
+     passes all three is simply ready. `needs` is the research generator's own list of what a
+     row is missing, so this stays true as the roster improves without anyone editing it.
+
+     No fake dates. The reference board this was modelled on shows a due date per card; we
+     hold no due dates for roster companies, and inventing one from lastContacted plus a
+     guess would put a number on screen that means nothing. When a company has been
+     contacted, the date it was is shown, and when it has not, that is what it says. */
+  function nextAction(c){
+    if(c.dead) return `<div class="lb-act dead">✕ ${esc((c.scoreWhy||c.why||"Disqualified").slice(0,64))}</div>`;
+    const phones=(c.phones||[]).filter(Boolean);
+    const needs=(c.needs||[]);
+    if(!phones.length) return `<div class="lb-act warn">⌕ No number on file${needs.length?` · needs ${esc(needs.slice(0,2).join(", "))}`:""}</div>`;
+    if(c.verify && c.verify!=="verified") return `<div class="lb-act warn">⌕ Verify the contact before calling</div>`;
+    if(c.lastContacted) return `<div class="lb-act">✓ Last contacted ${esc(c.lastContacted)}</div>`;
+    return `<div class="lb-act go">☎ Ready to call · ${esc(phones[0])}</div>`;
+  }
+
+  function boardCard(c,i){
+    const name=c.name;
+    const safe=esc(String(name)).replace(/'/g,"\\'");
+    const pinned=!!statusOverrides()[norm(name)];
+    const compact=BOARD.density==="compact";
+    const hue=monoHue(name);
+    const chips=[];
+    if(c.score!=null&&c.score!=="") chips.push(`<span class="lb-chip" title="Research score">${esc(c.score)}</span>`);
+    if(c.verify) chips.push(`<span class="lb-chip lb-v-${esc(c.verify)}" title="Contact verification">${esc((VERIFY[c.verify]||{}).label||c.verify)}</span>`);
+    if(c.driveMi) chips.push(`<span class="lb-chip" title="Drive distance from the plant">${esc(Math.round(c.driveMi))} mi</span>`);
+    const sub=[c.icp,[c.city,c.state].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
+    return `<article class="lb-card${compact?" compact":""}" draggable="true"
+        style="--rail:${railColor(c)}"
+        ondragstart="pipeBoardDragStart(event,'${safe}')" ondragend="pipeBoardDragEnd(event)"
+        onclick="pipeOpenAccount('${safe}')" title="${esc(name)} — drag to move, click to open">
+      <div class="lb-top">
+        <span class="lb-mono" style="--h:${hue}" aria-hidden="true">${esc(monogram(name))}</span>
+        <span class="lb-name">${esc(name)}</span>
+        ${pinned?`<button type="button" class="lb-pin" title="Moved by hand, so it no longer follows the data. Click to unpin." onclick="event.stopPropagation();pipeBoardUnpin('${safe}')">📌</button>`:`<span class="lb-rank">#${i+1}</span>`}
+      </div>
+      ${sub?`<div class="lb-sub">${esc(sub)}</div>`:""}
+      ${compact||!chips.length?"":`<div class="lb-chips">${chips.join("")}</div>`}
+      ${compact?"":nextAction(c)}
+    </article>`;
+  }
+
+  function boardInner(){
+    const all=coFiltered();
+    const cols=BOARD_COLS.filter(c=>BOARD.showDead||c.k!=="disqualified");
+    const byCol={}; for(const c of cols) byCol[c.k]=[];
+    let dropped=0;
+    for(const c of all){
+      const st=statusOf(c.name);
+      if(byCol[st]) byCol[st].push(c); else dropped++;
+    }
+    const tg=(key,label,opts)=>`<div class="lb-tg"><span>${esc(label)}</span><div class="lb-tgb">
+      ${opts.map(([v,l])=>`<button type="button" class="${String(BOARD[key])===String(v)?"on":""}" onclick="pipeBoardSet('${key}','${v}')">${esc(l)}</button>`).join("")}</div></div>`;
+
+    const columns=cols.map(col=>{
+      const meta=STATUS[col.k];
+      const list=byCol[col.k];
+      const shown=Math.min(list.length, BOARD_SHOWN[col.k]||BOARD_PAGE);
+      return `<section class="lb-col" data-col="${col.k}"
+          ondragover="pipeBoardOver(event)" ondragleave="pipeBoardLeave(event)"
+          ondrop="pipeBoardDrop(event,'${col.k}')">
+        <header class="lb-head">
+          <span class="lb-code ${meta.cls}">${col.code}</span>
+          <h3>${esc(meta.label)}</h3>
+          <span class="lb-n">${num(list.length)}</span>
+        </header>
+        <p class="lb-next"><b>Next:</b> ${esc(col.next)}</p>
+        <div class="lb-list">
+          ${list.slice(0,shown).map(boardCard).join("")}
+          ${list.length?"":`<div class="lb-drop">Drop here</div>`}
+        </div>
+        ${list.length>shown?`<button type="button" class="lb-more" onclick="pipeBoardMore('${col.k}')">Show ${Math.min(BOARD_PAGE,list.length-shown)} more of ${num(list.length-shown)}</button>`:""}
+      </section>`;
+    }).join("");
+
+    return `<div class="lb-bar">
+        ${tg("density","Density",[["comfortable","Comfortable"],["compact","Compact"]])}
+        ${tg("colorBy","Colour by",[["icp","ICP"],["score","Score"],["line","Line"]])}
+        ${tg("showDead","Disqualified",[[true,"Show"],[false,"Hide"]])}
+        <span class="lb-count">${num(all.length)} of ${num(poolList().length)} companies, after the filters above.</span>
+      </div>
+      ${dropped?`<div class="note" style="margin:0 0 10px">${dropped} ${dropped===1?"company is":"companies are"} filed under a status this board has no column for, and ${dropped===1?"is":"are"} not shown. Turn Disqualified back on if you hid it.</div>`:""}
+      <div class="lb-board">${columns}</div>
+      <p class="pdim lb-foot">Dragging a card pins it: it stops following the evidence and keeps the status you gave it until you unpin it with the 📌. Everything else is derived from deals, logged conversations and the research verdict, so it updates itself. Drops write to the shared store and everyone sees them.</p>`;
+  }
+
   function leadsInner(){
     if(PROFILE && PROFILE_HOST==="leads") return renderProfile(PROFILE);
+    /* Board and table are two views of ONE list. Both render coFiltered(), so the filter bar
+       in the table controls the board as well and the two can never disagree about which
+       companies are in scope. The table keeps its own reasons to exist that a board is bad
+       at: thirty sortable columns, and the CSV export. */
+    const board=BOARD.view==="board";
+    const sw=(v,l,hint)=>`<button type="button" class="pill${BOARD.view===v?" active":""}" title="${esc(hint)}" onclick="pipeLeadsView('${v}')">${esc(l)}</button>`;
     return `<h1 class="pipe-h">Leads</h1>
       <p class="page-sub">Every company on file, researched or added. Filter to the list you want to
-      work, then click a name to open its full record and start the engagement.</p>
-      ${tCompanies()}`;
+      work, then drag a card as it moves, or switch to the table to sort, scan and export.</p>
+      <div class="pipe-tabs lb-switch">
+        ${sw("board","Board","Companies as cards in their status column. Drag to move one.")}
+        ${sw("table","Table","Every column, sortable, exportable.")}
+      </div>
+      ${tCompanies(board)}
+      ${board?boardInner():""}`;
   }
   function rLeads(){ return `<section class="section" id="sec-leads">${leadsInner()}</section>`; }
 
@@ -3076,7 +3331,7 @@
   /* Every index is derived and cached for the life of the page, so a write that does not clear
      them shows the new lead in the table and nowhere else — not on its own profile, not in the
      ICP join, not in the account list. */
-  function poolBust(){ ROSTER_BY=null; ROSTER_BY_DOM=null; CO_BLOB.clear(); }
+  function poolBust(){ ROSTER_BY=null; ROSTER_BY_DOM=null; CO_BLOB.clear(); ICP_COLOR=null; }
   /* The roster now arrives after first paint (see ROSTER, LOADED LATE in app.js). Every index
      built before it lands was built from the pool alone and is missing 1,145 companies, so
      app.js calls this the moment the file executes. Without it Leads, the account fold and

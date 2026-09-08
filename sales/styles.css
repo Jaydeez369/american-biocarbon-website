@@ -10,6 +10,27 @@
   --bg:var(--paper);            /* app canvas */
   --slate-950:#ffffff; --slate-900:#ffffff; --slate-850:#ffffff;  /* card whites */
   --slate-800:var(--paper-2);  /* subtle raised / pill / hover fill */
+  /* THE SURFACE ROLES. Added 2026-09-08 with the theme switch, and they are the reason it
+     was possible at all. Before this, "a card is white" was written as the literal #fff in
+     48 places across four stylesheets, so there was no single thing to change: a dark theme
+     meant finding every one of them and hoping. These four name what a surface IS rather
+     than what colour it happens to be, and the dark block below re-points them.
+
+       --surface         a card, an input, a modal. The thing content sits ON.
+       --surface-2       a raised or recessed strip inside a card: a pill track, a tab rail.
+       --surface-3       hover fill, one step further from the page.
+       --surface-sunken  the well a scrollable list or a board column sits in.
+
+     NOT the same as --bg, which is the page canvas behind all of them. On light they are
+     nearly the same colour and the distinction looks pedantic; on dark the canvas is darker
+     than the cards and the two cannot be one token. */
+  --surface:#ffffff;
+  --surface-2:var(--paper-2);
+  --surface-3:#e6eaf1;
+  --surface-sunken:var(--paper-2);
+  /* The mono code chip. Dark ink on light; on dark it has to invert or it disappears into
+     the card it sits on, which is the failure mode of every hardcoded dark chip. */
+  --chip-fill:#1f2733; --chip-ink:#ffffff;
   --slate-700:#e6eaf1; --slate-600:var(--line-2);
   --line:#e2e6ee; --line-soft:#eef1f5;
   --ink:#1a1a1a;               /* darkest text */
@@ -42,6 +63,87 @@
   --sb-bg-1:var(--navy-800); --sb-bg-2:var(--navy-900);
   --sb-line:rgba(255,255,255,.09); --sb-line-soft:rgba(255,255,255,.05);
   --sb-text:#c9d5ea; --sb-text-dim:#8ea2c4; --sb-text-mute:#64769a;
+}
+
+/* ================= DARK =================
+   Only the ROLE aliases are redefined. Every primitive is already in tokens.css (the --d-*
+   ramp), nothing below invents a colour, and no rule anywhere else in the app is duplicated
+   for a theme. That is the whole reason the roles above were introduced first: if a
+   stylesheet says `background:var(--surface)` there is nothing a theme can do about it, and this file
+   would have needed a dark copy of every rule in it.
+
+   THREE STATES, not two. An explicit choice writes data-theme on <html>; the default,
+   "match my system", writes nothing at all and is resolved by prefers-color-scheme. So the
+   media query is guarded with :not([data-theme="light"]) — without that guard, a person on a
+   dark OS who explicitly chooses light gets dark anyway, because the media query would win
+   on source order. The [data-theme="dark"] block after it makes the explicit choice win in
+   the other direction.
+
+   WHAT DELIBERATELY DOES NOT CHANGE. The sidebar. It is navy in both themes because it is
+   the app's identity rather than a surface, it already reads as dark, and flipping it would
+   leave the light theme with a white spine that no longer separates nav from content. The
+   --sb-* roles are therefore absent from both blocks below.
+
+   STATUS COLOURS ARE RE-TUNED, not reused. The light theme uses deep variants because they
+   have to read on white; on a near black card those same greens and reds go muddy and lose
+   most of their contrast. The bright variants from tokens.css are what dark needs. Keeping
+   one set for both is the single most common way a dark theme ends up unreadable. */
+:root[data-theme="dark"],
+:root:not([data-theme="light"]) { color-scheme: light; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:var(--d-bg);
+    --chip-fill:var(--d-700); --chip-ink:var(--d-text);
+    --surface:var(--d-900); --surface-2:var(--d-850); --surface-3:var(--d-800);
+    --surface-sunken:var(--d-950);
+    --slate-950:var(--d-950); --slate-900:var(--d-900); --slate-850:var(--d-850);
+    --slate-800:var(--d-800); --slate-700:var(--d-700); --slate-600:var(--d-600);
+    --line:var(--d-line); --line-soft:var(--d-line-soft); --line-2:var(--d-700);
+    --paper:var(--d-bg); --paper-2:var(--d-850);
+    --ink:var(--d-text);
+    --text:var(--d-text); --text-dim:var(--d-text-dim); --text-mute:var(--d-text-mute);
+    --brand:var(--navy-400); --brand-bright:var(--navy-300); --brand-deep:var(--navy-500);
+    --brand-rgb:var(--navy-400-rgb); --brand-rgb-base:var(--navy-400-rgb);
+    --accent:var(--crimson-400); --accent-deep:var(--crimson-500);
+    --green:var(--success-bright); --green-bright:var(--success-bright); --green-deep:var(--success);
+    --green-rgb:var(--success-rgb);
+    --gold:var(--warning-soft); --gold-soft:var(--warning); --gold-rgb:var(--warning-rgb);
+    --red:var(--danger-soft); --red-soft:var(--danger); --red-rgb:var(--danger-rgb);
+    --blue:var(--info-soft); --blue-soft:var(--info); --blue-rgb:var(--info-rgb);
+    --purple:#b9a3e0; --purple-rgb:185,163,224;
+    --sh-1:var(--sh-dark-1); --sh-2:var(--sh-dark-2); --sh-3:var(--sh-dark-3);
+    --ring:0 0 0 3px rgba(var(--navy-400-rgb),.35);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:var(--d-bg);
+  --chip-fill:var(--d-700); --chip-ink:var(--d-text);
+  --surface:var(--d-900); --surface-2:var(--d-850); --surface-3:var(--d-800);
+  --surface-sunken:var(--d-950);
+  --slate-950:var(--d-950); --slate-900:var(--d-900); --slate-850:var(--d-850);
+  --slate-800:var(--d-800); --slate-700:var(--d-700); --slate-600:var(--d-600);
+  --line:var(--d-line); --line-soft:var(--d-line-soft); --line-2:var(--d-700);
+  --paper:var(--d-bg); --paper-2:var(--d-850);
+  --ink:var(--d-text);
+  --text:var(--d-text); --text-dim:var(--d-text-dim); --text-mute:var(--d-text-mute);
+  --brand:var(--navy-400); --brand-bright:var(--navy-300); --brand-deep:var(--navy-500);
+  --brand-rgb:var(--navy-400-rgb); --brand-rgb-base:var(--navy-400-rgb);
+  --accent:var(--crimson-400); --accent-deep:var(--crimson-500);
+  --green:var(--success-bright); --green-bright:var(--success-bright); --green-deep:var(--success);
+  --green-rgb:var(--success-rgb);
+  --gold:var(--warning-soft); --gold-soft:var(--warning); --gold-rgb:var(--warning-rgb);
+  --red:var(--danger-soft); --red-soft:var(--danger); --red-rgb:var(--danger-rgb);
+  --blue:var(--info-soft); --blue-soft:var(--info); --blue-rgb:var(--info-rgb);
+  --purple:#b9a3e0; --purple-rgb:185,163,224;
+  --sh-1:var(--sh-dark-1); --sh-2:var(--sh-dark-2); --sh-3:var(--sh-dark-3);
+  --ring:0 0 0 3px rgba(var(--navy-400-rgb),.35);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -281,7 +383,7 @@ td strong,th strong{color:var(--navy-800);font-weight:700}
   /* Print only the section you're on, not all seven at once. */
   .section{display:none!important}
   .section.active{display:block!important}
-  body{background:#fff;color:#111}
+  body{background:var(--surface);color:#111}
   .card,.script,.tbl-wrap{break-inside:avoid;box-shadow:none}
 }
 
@@ -422,3 +524,9 @@ table.cb-tbl tr:last-child td{border-bottom:0}
 .cb-angle-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;padding:1px 6px;
   border-radius:999px;border:1px solid currentColor;font-weight:600}
 .cb-tel-cell{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--navy-800);font-weight:600}
+
+/* The theme switch. A single button cycling system, light, dark rather than three radio
+   buttons or a slider: it is a preference someone sets once, and three visible controls for
+   it in a topbar that already carries search, a role chip and print is three too many. The
+   current state is the glyph and the full sentence is the tooltip. */
+.theme-btn{padding:6px 10px;font-size:15px;line-height:1;min-width:34px}

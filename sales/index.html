@@ -2,18 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- THEME, BEFORE THE FIRST STYLESHEET. This has to be an inline blocking script in the
+       head and it has to be here, above the CSS: the browser paints as soon as it can, so a
+       theme applied from app.js at the bottom of the body gives every dark-mode user a white
+       flash on every single page load. Reading one localStorage key and setting one
+       attribute costs well under a millisecond and is the standard cure.
+       No stored value means no attribute, which is the "match my system" state and is
+       resolved by prefers-color-scheme in styles.css. try/catch because a browser with site
+       data blocked throws on the read, and a theme preference is not worth a blank page. -->
+  <script>
+    try {
+      var t = localStorage.getItem('vej_theme');
+      if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VEJ Sales OS — Biochar Sales Department</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="tokens.css?v=65742628" />
-  <link rel="stylesheet" href="styles.css?v=d0632f73" />
+  <link rel="stylesheet" href="styles.css?v=2025aaa5" />
   <link rel="stylesheet" href="gtm-command-center.css?v=8796ece6" />
   <link rel="stylesheet" href="outreach.css?v=bc896f6a" />
   <link rel="stylesheet" href="engine.css?v=84bab8db" />
-  <link rel="stylesheet" href="pipeline.css?v=b296cdbb" />
-  <link rel="stylesheet" href="reports.css?v=9cfa47c5" />
+  <link rel="stylesheet" href="pipeline.css?v=776827ae" />
+  <link rel="stylesheet" href="reports.css?v=156fcae8" />
 </head>
 <body>
   <div class="app">
@@ -41,6 +55,8 @@
             <span class="gs-ic">⌕</span><span class="gs-t">Search</span><kbd>/</kbd>
           </button>
           <span class="role-chip" id="roleChip" hidden></span>
+          <button class="btn btn-ghost theme-btn" id="themeBtn" onclick="cycleTheme()"
+                  aria-label="Switch between light, dark and system theme"><span id="themeIc">◐</span></button>
           <button class="btn btn-ghost" onclick="window.print()">Print / Export</button>
         </div>
       </header>
@@ -64,7 +80,7 @@
   <span id="rosterSrc" hidden data-src="roster-data.js?v=58996685"></span>
   <script src="hubspot-data.js?v=2b77b695"></script>
   <script src="hubspot-comms.js?v=c969930f"></script>
-  <script src="pipeline.js?v=06635554"></script>
+  <script src="pipeline.js?v=0cdd194c"></script>
   <script src="outreach-data.js?v=99d57e78"></script>
   <script src="outreach.js?v=815780b5"></script>
   <script src="phone-data.js?v=4a650573"></script>
@@ -73,6 +89,6 @@
   <script src="engine-data.js?v=e7b0e5e7"></script>
   <script src="engine.js?v=8d9d5535"></script>
   <script src="reports.js?v=187748a3"></script>
-  <script src="app.js?v=cf2d14ee"></script>
+  <script src="app.js?v=58125a2f"></script>
 </body>
 </html>

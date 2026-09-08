@@ -627,6 +627,53 @@ document.addEventListener("keydown", e => {
   if(e.key==="k" && (e.metaKey||e.ctrlKey)){ e.preventDefault(); openSearch(); }
 });
 
+/* ================= THEME =================
+   Three states, cycled in this order: system, light, dark.
+
+   SYSTEM IS THE DEFAULT AND IS A REAL STATE, not the absence of one. A person whose laptop
+   flips to dark at sunset should get a dark Sales OS at sunset without touching anything, and
+   that only works if "I have not chosen" is distinguishable from "I chose light". So: no
+   stored value and no data-theme attribute means system, and styles.css resolves it with
+   prefers-color-scheme. Storing a resolved value at first load would freeze whatever the OS
+   happened to be at that moment and quietly break the automatic switch forever.
+
+   The attribute is applied by the inline script in index.html, not here. Read the comment
+   there for why; the short version is that doing it in this file paints white first.
+
+   No re-render on change. Every colour in the app comes from a role token, so switching the
+   attribute restyles the whole document in one repaint and the DOM is untouched. That is the
+   payoff for the surface roles: if a card colour were still a literal in a template string,
+   a theme change would mean rebuilding the page and losing scroll, focus and any half typed
+   filter. */
+const THEMES = [
+  ["system", "◐", "Theme: matching your system. Click for light."],
+  ["light",  "☀", "Theme: light. Click for dark."],
+  ["dark",   "☾", "Theme: dark. Click to match your system."],
+];
+const themeStored = () => {
+  try { const v = localStorage.getItem("vej_theme"); return v === "dark" || v === "light" ? v : "system"; }
+  catch (e) { return "system"; }
+};
+function applyTheme(mode){
+  const root = document.documentElement;
+  if (mode === "system") root.removeAttribute("data-theme");
+  else root.setAttribute("data-theme", mode);
+  try {
+    if (mode === "system") localStorage.removeItem("vej_theme");
+    else localStorage.setItem("vej_theme", mode);
+  } catch (e) { /* site data blocked: the theme still applies for this page */ }
+  const entry = THEMES.find(t => t[0] === mode) || THEMES[0];
+  const ic = document.getElementById("themeIc");
+  const btn = document.getElementById("themeBtn");
+  if (ic) ic.textContent = entry[1];
+  if (btn) btn.title = entry[2];
+}
+window.cycleTheme = () => {
+  const i = THEMES.findIndex(t => t[0] === themeStored());
+  applyTheme(THEMES[(i + 1) % THEMES.length][0]);
+};
+applyTheme(themeStored());
+
 /* ================= WHO IS LOOKING, in the corner =================
    Reads the same sales_os_role cookie pipeline.js reads, with the same standing: a hint for
    the screen. It is shown because a person who cannot see a Delete button should be able to
