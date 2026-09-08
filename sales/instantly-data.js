@@ -12,15 +12,12 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-09-02 05:46 UTC",
-  "readDate": "2026-09-02",
+  "read": "2026-09-08 01:56 UTC",
+  "readDate": "2026-09-08",
   "source": "snapshot",
   "inWorkspace": 15,
-  "launched": 4,
+  "launched": 1,
   "launchedNames": [
-    "AB.CIVIL",
-    "AB.DIST",
-    "AB.ENV",
     "AB.OG"
   ],
   "paused": 2,
@@ -35,8 +32,8 @@ window.INSTANTLY_LIVE = {
   "totals": {
     "campaigns": 15,
     "leads": 595,
-    "contacted": 1000,
-    "sent": 1007,
+    "contacted": 1140,
+    "sent": 1140,
     "replies": 10,
     "bounced": 5,
     "unsubscribed": 0
@@ -45,8 +42,8 @@ window.INSTANTLY_LIVE = {
     "absorbent": {
       "campaigns": 9,
       "leads": 367,
-      "contacted": 582,
-      "sent": 583,
+      "contacted": 716,
+      "sent": 716,
       "replies": 3,
       "bounced": 1,
       "unsubscribed": 0
@@ -54,7 +51,7 @@ window.INSTANTLY_LIVE = {
     "biochar": {
       "campaigns": 6,
       "leads": 228,
-      "contacted": 418,
+      "contacted": 424,
       "sent": 424,
       "replies": 7,
       "bounced": 4,
@@ -67,7 +64,7 @@ window.INSTANTLY_LIVE = {
     "getamericanbiocarbon.com": 2
   },
   "dailyCeiling": 120,
-  "requestedDaily": 80,
+  "requestedDaily": 20,
   "campaigns": [
     {
       "name": "AB.BED.SUP · Bedding Channel · R1",
@@ -84,10 +81,10 @@ window.INSTANTLY_LIVE = {
       "name": "AB.CIVIL · Heavy Civil, Dredging and Slurry · R1",
       "icp": "AB.CIVIL",
       "line": "absorbent",
-      "status": "live",
+      "status": "completed",
       "parked": false,
       "leads": 48,
-      "sent": 119,
+      "sent": 144,
       "replies": 0,
       "bounced": 0
     },
@@ -95,10 +92,10 @@ window.INSTANTLY_LIVE = {
       "name": "AB.DIST · Absorbent Distributors and Safety Supply · R1",
       "icp": "AB.DIST",
       "line": "absorbent",
-      "status": "live",
+      "status": "completed",
       "parked": false,
       "leads": 52,
-      "sent": 127,
+      "sent": 154,
       "replies": 1,
       "bounced": 0
     },
@@ -106,10 +103,10 @@ window.INSTANTLY_LIVE = {
       "name": "AB.ENV · Spill Response and Remediation · R1",
       "icp": "AB.ENV",
       "line": "absorbent",
-      "status": "live",
+      "status": "completed",
       "parked": false,
       "leads": 26,
-      "sent": 76,
+      "sent": 78,
       "replies": 0,
       "bounced": 0
     },
@@ -164,7 +161,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 191,
-      "sent": 161,
+      "sent": 240,
       "replies": 1,
       "bounced": 1
     },

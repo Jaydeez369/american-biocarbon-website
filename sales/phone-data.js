@@ -6,10 +6,10 @@
    Re-stamp after any outbound activity:
      NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem node build-phone-snapshot.mjs
 
-   Read on 2026-08-28, 2026-07-29 to 2026-08-28. Reads only; nothing here writes to Allo.
+   Read on 2026-09-08, 2026-08-09 to 2026-09-08. Reads only; nothing here writes to Allo.
    FORMATTING RULE: no hyphens, en dashes or em dashes in any visible string. */
 window.PHONE = {
-  "read": "2026-08-28, 2026-07-29 to 2026-08-28",
+  "read": "2026-09-08, 2026-08-09 to 2026-09-08",
   "window": "30 days",
   "salesLine": "+12253989286",
   "outboundLine": "+17867519983",
@@ -20,13 +20,13 @@ window.PHONE = {
   "agentTransferRules": 4,
   "flowStatus": "PUBLISHED",
   "ringsAPerson": true,
-  "dials": 18,
-  "connected": 6,
-  "connectRate": 0.333,
-  "conversations": 5,
-  "conversationRate": 0.278,
-  "conversions": 4,
-  "conversionRate": 0.222,
+  "dials": 17,
+  "connected": 4,
+  "connectRate": 0.235,
+  "conversations": 3,
+  "conversationRate": 0.176,
+  "conversions": 0,
+  "conversionRate": 0,
   "conversionTags": [
     "meeting_booked",
     "sample_requested",
@@ -34,17 +34,9 @@ window.PHONE = {
     "demo"
   ],
   "queueName": "CRUMBLE 80 - personal mobiles - 2026-08-28",
-  "queueSize": 59,
+  "queueSize": 73,
   "queueStarted": false,
   "series": [
-    {
-      "date": "2026-07-27",
-      "dials": 1
-    },
-    {
-      "date": "2026-08-03",
-      "dials": 5
-    },
     {
       "date": "2026-08-17",
       "dials": 6
@@ -52,6 +44,10 @@ window.PHONE = {
     {
       "date": "2026-08-24",
       "dials": 6
+    },
+    {
+      "date": "2026-08-31",
+      "dials": 5
     }
   ],
   "totalCalls": null

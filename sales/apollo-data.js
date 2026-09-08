@@ -13,8 +13,8 @@
      sales-department/refresh-snapshots.sh
    ================================================================== */
 window.APOLLO_LIVE = {
-  "read": "2026-08-28 18:42 UTC",
-  "readDate": "2026-08-28",
+  "read": "2026-09-08 01:56 UTC",
+  "readDate": "2026-09-08",
   "generator": "sales-department/apollo-analytics/build-apollo-snapshot.mjs",
   "spendsCredits": false,
   "source": "local reveal receipts (handoff/enrichment/api-revealed-*.csv) plus a free key health check",
@@ -24,7 +24,7 @@ window.APOLLO_LIVE = {
   "accountCredits": 2620,
   "operatorCeiling": 1183,
   "ceilingSet": "2026-08-17",
-  "spent": 1339,
+  "spent": 1338,
   "contactsObtained": 949,
   "remainingUnderCeiling": 0,
   "remainingOnAccount": 897,
@@ -43,9 +43,9 @@ window.APOLLO_LIVE = {
       "email": 95
     }
   },
-  "unreceiptedSpend": 384,
+  "unreceiptedSpend": 385,
   "byLine": {
-    "absorbent": 1281,
+    "absorbent": 1280,
     "biochar": 58
   },
   "byIcp": {
@@ -66,7 +66,7 @@ window.APOLLO_LIVE = {
     "absorbent-run4": 464,
     "absorbent-run5": 737,
     "biochar-run5": 58,
-    "phones-crumble": 80
+    "phones-crumble": 79
   },
   "receiptFiles": [
     "api-revealed-absorbent-run4.csv",
@@ -76,5 +76,5 @@ window.APOLLO_LIVE = {
   ],
   "gate": "Aug 20 list item 03: Victor reviews the target list BEFORE any further Apollo credits are spent.",
   "note": "The written ceiling of 1183 is fully spent. A new tranche needs a new written number from the operator before another reveal.",
-  "balanceNote": "Apollo itself shows 897 of 2620 left on 2026-08-28, renewing 2026-09-10. That is 384 credits further along than these receipts record, because 1368 of the spend went through Exports, which this ledger never watched. Money left is not the same as permission to spend it: the operator's authorisation is 0."
+  "balanceNote": "Apollo itself shows 897 of 2620 left on 2026-08-28, renewing 2026-09-10. That is 385 credits further along than these receipts record, because 1368 of the spend went through Exports, which this ledger never watched. Money left is not the same as permission to spend it: the operator's authorisation is 0."
 };
