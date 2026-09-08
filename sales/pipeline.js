@@ -481,9 +481,32 @@
   }
 
   const customDeals=()=>lsGet(D_KEY,[]).map((d,ci)=>({...d,qty:+d.qty||0,price:+d.price||0,ci,custom:true}));
-  const liveDeals=()=>P.deals.map(d=>({...d,base:true})).concat(customDeals());
-  const hsContacts=()=>((window.HUBSPOT&&window.HUBSPOT.contacts)||[]).map(c=>({...c,hubspot:true}));
-  const allContacts=()=>P.contacts.map(c=>({...c,base:true})).concat(lsGet(C_KEY,[]).map((c,ci)=>({...c,ci}))).concat(hsContacts());
+
+  /* ONE SOURCE, as of 2026-09-08.
+   *
+   * This used to be `P.deals.concat(customDeals())` — the July seed export prepended to
+   * whatever the browser had typed. That is why a seed deal could not be edited (the edit
+   * became a second row), could not be deleted, had no id and no history, and why the totals
+   * depended on which browser you opened.
+   *
+   * The 18 seed rows now live in D1 with stable ids, imported by
+   * sales-department/salesos-tests/migrate-canonical.mjs and labelled origin:"seed".
+   * hydrate() pulls every D1 row into D_KEY, so customDeals() already returns them. Leaving
+   * the concat in place would render all 18 TWICE and double every figure on the dashboard.
+   *
+   * The cost of this, stated plainly: before the first successful hydrate — a cold browser
+   * with no network — the pipeline is empty rather than showing stale July numbers. That is
+   * the right failure. A screen that silently serves a two-month-old book of business as if
+   * it were current is worse than one that says it has not synced, which the sync badge
+   * does. */
+  const liveDeals=()=>customDeals();
+  /* Same change, same date, same reason. The two seed contacts and all 71 HubSpot rows were
+     imported into D1 (origin "seed" and "hubspot"), so hydrate() brings them down into C_KEY
+     and the two extra sources here would triple-count the HubSpot book. The hsContacts()
+     helper that used to supply the third source is deleted with this change: it had exactly
+     one caller and this was it. window.HUBSPOT is still loaded and still read elsewhere for
+     the company layer, which is account-level and was never part of the contact list. */
+  const allContacts=()=>lsGet(C_KEY,[]).map((c,ci)=>({...c,ci}));
   /* Leads the PHONE created, from /api/lead. A call from a number nobody had on file used to
      produce an activity row and nothing else — it matched no contact, rendered on no account,
      and the caller existed nowhere a rep would look. These are read-only here: the row is a

@@ -102,7 +102,16 @@ export async function proxyCrm(context, kind) {
   try {
     upstream = await fetch(target.toString(), {
       method,
-      headers: { 'x-export-token': token, 'Content-Type': 'application/json' },
+      headers: {
+        'x-export-token': token,
+        'Content-Type': 'application/json',
+        /* Who this is, taken from the session the gate verified rather than from anything the
+           browser sent. The Worker stamps created_by / updated_by and the audit trail from
+           this header and from nothing else, so a client cannot write under another name.
+           Absent only if middleware somehow did not run, and the Worker records that as an
+           unknown actor rather than guessing. */
+        ...(context?.data?.user?.username ? { 'x-actor': context.data.user.username } : {}),
+      },
       body,
       signal: abort.signal,
     });
