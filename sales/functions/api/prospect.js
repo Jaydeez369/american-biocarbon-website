@@ -39,6 +39,8 @@ import { createProspect, readBack, validate } from '../_lib/prospect.js';
 const API = 'https://api.withallo.com';
 const TIMEOUT_MS = 12000; // three sequential writes on a cold edge, still bounded
 
+import { requireCapability } from '../_lib/authz.js';
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -47,6 +49,12 @@ const json = (body, status = 200) =>
 
 export async function onRequestPost(context) {
   const { env, request } = context;
+
+  /* outbound.send, not record.write: this route does not write to our own store, it
+     creates a person and a company inside Allo, which other systems and other people then
+     act on. Allo has no delete for CRM records, so it is one way. */
+  const denied = requireCapability(context, 'outbound.send');
+  if (denied) return denied;
 
   const key = typeof env.ALLO_API_KEY === 'string' ? env.ALLO_API_KEY.trim() : '';
   if (!key) return json({ ok: false, reason: 'not-configured', error: 'ALLO_API_KEY is unset on this deployment' });

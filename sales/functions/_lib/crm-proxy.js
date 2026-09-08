@@ -41,6 +41,8 @@ const DEFAULT_WORKER = 'https://allo-hooks.csopsmarketing.workers.dev';
    well under the point where a rep assumes the button did nothing and clicks it again. */
 const TIMEOUT_MS = 8000;
 
+import { requireCapability, crmCapability } from './authz.js';
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -75,14 +77,23 @@ export async function proxyCrm(context, kind) {
   const recordKind = incoming.searchParams.get('kind');
   if (recordKind) target.searchParams.set('kind', recordKind);
 
+  /* The body is read BEFORE the permission check, not after, because a soft delete arrives
+     as a PATCH carrying {deleted:true} and is indistinguishable from an edit until it has
+     been parsed. Checking on the method alone would let a manager delete by spelling it as
+     an edit, which is the kind of gap that only shows up once somebody looks for it. */
+  let parsed;
   let body;
   if (method === 'POST' || method === 'PATCH') {
     try {
-      body = JSON.stringify(await request.json());
+      parsed = await request.json();
+      body = JSON.stringify(parsed);
     } catch {
       return json({ ok: false, reason: 'bad-request', error: 'body was not JSON' }, 400);
     }
   }
+
+  const denied = requireCapability(context, crmCapability(method, parsed));
+  if (denied) return denied;
 
   const abort = new AbortController();
   const timer = setTimeout(() => abort.abort(), TIMEOUT_MS);

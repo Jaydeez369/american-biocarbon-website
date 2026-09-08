@@ -28,6 +28,39 @@
 const API = 'https://api.instantly.ai/api/v2';
 const TIMEOUT_MS = 12000;
 
+/* THE REPLY SIGNATURE, and why it differs from the cold one.
+ *
+ * outreach-data.js carries the canonical COLD signature: three lines, named human, company,
+ * phone, and deliberately NO website URL. That rule is not stylistic — a link in a cold email
+ * is a deliverability cost, and a signature URL is still a link. Nothing here changes it, and
+ * nothing here should be copied back into a campaign step.
+ *
+ * A reply is a different context and the operator called it correctly on 2026-08-31: the
+ * recipient has already written to us, so the message is expected, the domain reputation
+ * question is largely settled for that thread, and making them search for the website to check
+ * we are real costs more than the link does.
+ *
+ * Owned HERE, on the edge, rather than in the browser, for two reasons: it cannot be edited or
+ * dropped by whoever is typing, and there is exactly one copy of it. The composer fetches this
+ * same block for its preview (GET below), so what a rep sees and what goes out cannot drift.
+ *
+ * Phone written with spaces, never hyphens, matching every other piece of outreach copy here. */
+const SIGNATURE = {
+  name: 'Victor Jehle',
+  company: 'American BioCarbon',
+  phone: '(225) 398 9286',
+  site: 'americanbiocarbon.com',
+};
+
+const signatureText = () =>
+  `${SIGNATURE.name}\n${SIGNATURE.company}\n${SIGNATURE.phone}\n${SIGNATURE.site}`;
+
+const signatureHtml = () =>
+  `<p>${SIGNATURE.name}<br>${SIGNATURE.company}<br>${SIGNATURE.phone}<br>` +
+  `<a href="https://${SIGNATURE.site}">${SIGNATURE.site}</a></p>`;
+
+import { requireCapability } from '../_lib/authz.js';
+
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -43,6 +76,10 @@ const escapeHtml = (s) => String(s)
 
 export async function onRequestPost(context) {
   const { env, request } = context;
+
+  /* The least reversible thing this application can do. */
+  const denied = requireCapability(context, 'outbound.send');
+  if (denied) return denied;
 
   const key = typeof env.INSTANTLY_API_KEY === 'string' ? env.INSTANTLY_API_KEY.trim() : '';
   if (!key) return json({ ok: false, reason: 'not-configured', error: 'INSTANTLY_API_KEY is unset on this deployment' }, 503);
@@ -82,8 +119,12 @@ export async function onRequestPost(context) {
         eaccount,
         subject: /^re:/i.test(subject) ? subject : `Re: ${subject}`,
         body: {
-          text,
-          html: text.split(/\n{2,}/).map((p) => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`).join(''),
+          /* The signature is appended here, after validation, so a rep cannot send without one
+             and cannot accidentally send two by pasting their own. */
+          text: `${text}\n\n${signatureText()}`,
+          html: text.split(/\n{2,}/)
+            .map((p) => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+            .join('') + signatureHtml(),
         },
       }),
       signal: abort.signal,
@@ -111,10 +152,13 @@ export async function onRequestPost(context) {
   return json({ ok: true, id: data?.id || null, sentAt: new Date().toISOString() });
 }
 
+/* The composer reads this to render its live preview. Serving the block rather than
+   duplicating it in pipeline.js is what stops the preview and the sent mail drifting apart —
+   the failure there is quiet and embarrassing: a rep proofreads one thing and sends another. */
 export function onRequestGet() {
   return json({
-    ok: false,
-    reason: 'method',
-    error: 'POST a reply to this route. It answers an existing Instantly thread; it cannot compose new mail.',
-  }, 405);
+    ok: true,
+    note: 'POST a reply to this route. It answers an existing Instantly thread; it cannot compose new mail.',
+    signature: { text: signatureText(), html: signatureHtml() },
+  });
 }

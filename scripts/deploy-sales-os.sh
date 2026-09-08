@@ -18,7 +18,12 @@
 #
 #   CLOUDFLARE_API_TOKEN   required. Dashboard > My Profile > API Tokens, template
 #                          "Edit Cloudflare Workers", scoped to the Csopsmarketing account.
-#   SALES_OS_PASSWORD      required. The shared team password for the gate.
+#   SALES_OS_USERS         required. The named accounts for the gate, comma separated:
+#                          username:password:role:Display Name. Roles are defined in
+#                          sales/functions/_lib/authz.js. This replaced SALES_OS_PASSWORD,
+#                          the single shared word, on 2026-09-08; the middleware still
+#                          accepts that variable as the account "team" if it is ever set
+#                          again, but this script no longer writes it.
 #   INSTANTLY_API_KEY      optional. /api/instantly goes live when set.
 #   APOLLO_API_KEY         optional. /api/apollo goes live when set.
 #   ALLO_EXPORT_TOKEN      optional. The Launchpad live call row appears when set.
@@ -37,10 +42,16 @@ cd "$(dirname "$0")/.."
 # the repo root, shell winning. Putting them in .env is the norm here — the live-data keys
 # already live there — and it means a deploy is one command with no exports to remember.
 ENV_FILE="$(cd .. && pwd)/.env"
-read_env() { [ -f "$ENV_FILE" ] && sed -n "s/^$1=//p" "$ENV_FILE" | head -1 | tr -d '\r'; }
+# Surrounding quotes are stripped, so a value containing spaces can be written quoted and
+# .env stays safe to `source` as well as to read line by line. SALES_OS_USERS carries
+# display names, so it is the first value here that needs it.
+read_env() {
+  [ -f "$ENV_FILE" ] || return 0
+  sed -n "s/^$1=//p" "$ENV_FILE" | head -1 | tr -d '\r' | sed -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'\$/\1/"
+}
 
 CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN:-$(read_env CLOUDFLARE_API_TOKEN)}"
-SALES_OS_PASSWORD="${SALES_OS_PASSWORD:-$(read_env SALES_OS_PASSWORD)}"
+SALES_OS_USERS="${SALES_OS_USERS:-$(read_env SALES_OS_USERS)}"
 export CLOUDFLARE_API_TOKEN
 
 : "${CLOUDFLARE_API_TOKEN:?set CLOUDFLARE_API_TOKEN in the shell or in .env. Cloudflare dashboard > My Profile > API Tokens, template \"Edit Cloudflare Workers\", scoped to the Csopsmarketing account.}"
@@ -64,9 +75,12 @@ node scripts/build.mjs
 $WRANGLER pages project create "$PROJECT" --production-branch main || true
 
 # Fail closed. The middleware returns 503 for every route while this is unset, so set it
-# BEFORE the first deploy rather than after.
-printf '%s' "${SALES_OS_PASSWORD:?set SALES_OS_PASSWORD in the shell or in .env}" \
-  | $WRANGLER pages secret put SALES_OS_PASSWORD --project-name "$PROJECT"
+# BEFORE the deploy rather than after. Setting it ahead of the upload is also what makes
+# this safe to run against a project still serving the OLD single-password middleware:
+# that build ignores SALES_OS_USERS entirely, so the variable lands harmlessly and only
+# starts being read once the new bundle is live.
+printf '%s' "${SALES_OS_USERS:?set SALES_OS_USERS in the shell or in .env, as username:password:role:Display Name, comma separated}" \
+  | $WRANGLER pages secret put SALES_OS_USERS --project-name "$PROJECT"
 
 # ---------------------------------------------------------------- live-data secrets
 # sales/functions/api/*.js hold these server side so the browser never sees a key. Each route
@@ -113,7 +127,7 @@ echo "==> deploy"
 cat <<NOTE
 
 Deployed. Verify, in this order:
-  1. open the project URL, log in with SALES_OS_PASSWORD
+  1. open the project URL, log in with a username and password from SALES_OS_USERS
   2. the Launchpad Instantly tile should say the campaign count, not "no live read"
   3. a live row appears under the phone tiles only if ALLO_EXPORT_TOKEN was set
 Any route whose secret was skipped above answers ok:false by design; the page still renders
