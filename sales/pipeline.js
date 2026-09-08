@@ -365,9 +365,10 @@
     if(await hydrateGeneric()) changed=true;
     await loadPhoneActivity();
     await loadPhoneLeads();
+    await loadWebLeads();
     await loadMail();
     syncBadge();
-    if(changed||PHONE.rows.length||PHONE_LEADS.length||MAIL.rows.length) rr();
+    if(changed||PHONE.rows.length||PHONE_LEADS.length||WEBLEADS.length||MAIL.rows.length) rr();
   }
 
   /* ---- phone activity, from /api/activity (allo-hooks D1, live) ----
@@ -574,6 +575,62 @@
       const data=await res.json();
       PHONE_LEADS=Array.isArray(data.records)?data.records:[];
     }catch(e){ PHONE_LEADS=[]; }
+  }
+
+  /* ---- leads the WEBSITE created, from /api/record?kind=weblead ----
+     Written by the marketing site's /api/lead, which posts them to allo-hooks before it mails
+     the desk. Before that a form submission became two emails and nothing else: it reached no
+     screen here, and if both recipients missed the mail there was no second copy. Read only on
+     this side, the same contract phone leads have, because the record is what a visitor
+     actually typed and a rep correcting it would be editing history. */
+  let WEBLEADS=[];
+  async function loadWebLeads(){
+    try{
+      const res=await fetch("/api/record?kind=weblead",{credentials:"same-origin"});
+      const data=await res.json();
+      WEBLEADS=Array.isArray(data.records)?data.records:[];
+    }catch(e){ WEBLEADS=[]; }
+  }
+  /* Newest first, and refusals last. A submission nobody could answer is recorded so the number
+     exists, but it is not what a rep is looking at this screen for. */
+  const webLeads=()=>WEBLEADS.slice().sort((a,b)=>
+    (a.rejected?1:0)-(b.rejected?1:0) || String(b.receivedAt||"").localeCompare(String(a.receivedAt||"")));
+
+  /* Website leads belonging to an account. Matched on the company the visitor typed, folded
+     through the same norm() every other join here uses, and then on the email domain, which is
+     how a lead reaches the right account when somebody typed their company name differently
+     from the way we hold it. */
+  function webLeadsFor(name){
+    if(!WEBLEADS.length) return [];
+    const doms=domainsFor(name);
+    return webLeads().filter(w=>{
+      if(w.rejected) return false;
+      if(w.company && norm(w.company)===norm(name)) return true;
+      const d=String(w.email||"").toLowerCase().split("@")[1];
+      return Boolean(d && doms.has(d));
+    });
+  }
+
+  /* A website lead as a timeline entry. No `_idx`, so no delete button: this is what a visitor
+     submitted, not a note the team typed. The form's own answers are included because they ARE
+     the lead: the volume, the use case and which product they clicked through from say more
+     than the fact that a form was sent. */
+  function webLeadToActivity(w){
+    const FORM_LABEL={ bedding:"Animal bedding", sample:"Sample request", quote:"Quote request",
+      biochar:"Biochar sample", distributor:"Distributor enquiry", carbon:"Carbon removal",
+      docs:"Document request", contact:"General enquiry" };
+    const SKIP=new Set(["name","firstName","lastName","first","last","company","email","phone",
+      "_gotcha","website_url","smsConsent","product_id","preorder"]);
+    const answers=Object.entries(w.fields||{})
+      .filter(([k,v])=>!SKIP.has(k) && typeof v==="string" && v.trim())
+      .map(([k,v])=>`${k}: ${v}`).join("\n");
+    const reach=[w.email||"", w.phone||""].filter(Boolean).join(" \u00b7 ");
+    const gap=(w.missing||[]).length ? `\nNo ${(w.missing||[]).join(" and ")} on this one.` : "";
+    const mail=w.mailed===false ? "\nThe desk was NOT emailed about this one; it is here only because it was stored." : "";
+    return { ch:"web", who:w.name||"(no name given)",
+      title:`Website form \u2014 ${FORM_LABEL[w.form]||w.form||"enquiry"}`,
+      body:`${reach}${answers?`\n${answers}`:""}${gap}${mail}`,
+      status:"received", ts:w.receivedAt||w.submittedAt, _web:true };
   }
 
   /* Claim a lead. The phone stops writing to it, and its status changes so it stops reading as
@@ -2801,6 +2858,9 @@
        — the one system meant to be the book of business was the one place the correspondence
        was not. */
     mailFor(name).forEach(r=>derived.push(mailToActivity(r)));
+    /* Website form submissions. The last of the four intake paths to reach this timeline, and
+       the one that had never reached any screen at all. */
+    webLeadsFor(name).forEach(w=>derived.push(webLeadToActivity(w)));
     const all = stored.concat(derived).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
     const filterSet = PROFILE_FILTER==="all" ? null : PROFILE_FILTER.split(",");
     const shown = filterSet ? all.filter(a=>filterSet.includes(a.ch)) : all;
@@ -3274,6 +3334,54 @@
       <p class="pdim lb-foot">Dragging a card pins it: it stops following the evidence and keeps the status you gave it until you unpin it with the 📌. Everything else is derived from deals, logged conversations and the research verdict, so it updates itself. Drops write to the shared store and everyone sees them.</p>`;
   }
 
+  /* ---- WHAT THE WEBSITE SENT US ----
+     Above the company pool deliberately, because these are the only rows on this screen where
+     somebody is waiting for a reply. The pool is a list you work through; this is a list that
+     goes stale.
+
+     Every one of these was invisible until 2026-09-08. The marketing site mailed two inboxes
+     and kept no record, so a prospect who filled in the sample form and never phoned existed
+     on no screen in this app. The rows that say "no phone" are the ones that used to be
+     refused outright, with the visitor shown a tick and nothing written down anywhere. */
+  function webLeadPanel(){
+    const rows=webLeads();
+    if(!rows.length) return "";
+    const live=rows.filter(w=>!w.rejected);
+    const refused=rows.filter(w=>w.rejected);
+    const FORM_LABEL={ bedding:"Animal bedding", sample:"Sample request", quote:"Quote request",
+      biochar:"Biochar sample", distributor:"Distributor enquiry", carbon:"Carbon removal",
+      docs:"Document request", contact:"General enquiry" };
+    const when=iso=>{ const d=new Date(iso); return isNaN(d)?"":d.toLocaleDateString("en-US",{month:"short",day:"numeric"}); };
+    const acct=w=>{
+      if(!w.company) return `<span class="pdim">no company given</span>`;
+      const hit=liveAccounts().find(a=>norm(a.name)===norm(w.company));
+      return hit
+        ? `<a href="#" onclick="pipeOpenAccount('${esc(String(hit.name).replace(/'/g,"\\'"))}');return false">${esc(w.company)}</a>`
+        : esc(w.company);
+    };
+    const row=w=>`<tr class="${w.rejected?"wl-refused":""}">
+      <td class="pdim">${esc(when(w.receivedAt))}</td>
+      <td>${esc(FORM_LABEL[w.form]||w.form||"enquiry")}</td>
+      <td><b>${esc(w.name||"(no name)")}</b></td>
+      <td>${acct(w)}</td>
+      <td>${w.email?esc(w.email):`<span class="pdim">none</span>`}</td>
+      <td>${w.phone?esc(w.phone):`<span class="pdim">none</span>`}</td>
+      <td>${(w.missing||[]).length?`<span class="badge b-pend">no ${esc((w.missing||[]).join(" or "))}</span>`:`<span class="badge b-ok">complete</span>`}
+          ${w.mailed===false&&!w.rejected?`<span class="badge b-risk">not emailed</span>`:""}
+          ${w.rejected?`<span class="badge b-risk">refused</span>`:""}</td>
+    </tr>`;
+    return `<section class="wl-panel">
+      <h4 class="rpt-h">From the website &middot; ${live.length} ${live.length===1?"lead":"leads"}${refused.length?` &middot; ${refused.length} refused`:""}</h4>
+      <p class="pdim wl-sub">Form submissions from americanbiocarbon.com, stored as they arrive. A lead
+      marked "no phone" is one the site used to refuse outright, with the visitor shown a confirmation
+      and nothing kept. Read only here: this is what the visitor typed.</p>
+      <div class="tbl-wrap"><table class="rpt-tbl">
+        <thead><tr><th>Received</th><th>Form</th><th>Who</th><th>Company</th><th>Email</th><th>Phone</th><th>State</th></tr></thead>
+        <tbody>${rows.map(row).join("")}</tbody>
+      </table></div>
+    </section>`;
+  }
+
   function leadsInner(){
     if(PROFILE && PROFILE_HOST==="leads") return renderProfile(PROFILE);
     /* Board and table are two views of ONE list. Both render coFiltered(), so the filter bar
@@ -3285,6 +3393,7 @@
     return `<h1 class="pipe-h">Leads</h1>
       <p class="page-sub">Every company on file, researched or added. Filter to the list you want to
       work, then drag a card as it moves, or switch to the table to sort, scan and export.</p>
+      ${webLeadPanel()}
       <div class="pipe-tabs lb-switch">
         ${sw("board","Board","Companies as cards in their status column. Drag to move one.")}
         ${sw("table","Table","Every column, sortable, exportable.")}

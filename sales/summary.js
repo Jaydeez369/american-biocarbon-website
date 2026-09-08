@@ -144,6 +144,9 @@
       one("activity","/api/activity?limit=1000",d=>({ok:d.ok,n:(d.rows||[]).length,reason:d.reason,
         named:(d.rows||[]).filter(r=>r.who).length, companied:(d.rows||[]).filter(r=>r.company).length})),
       one("leads","/api/lead",d=>({ok:d.ok!==false,n:(d.records||[]).length,reason:d.reason})),
+      one("weblead","/api/record?kind=weblead",d=>({ok:d.ok!==false,n:(d.records||[]).length,reason:d.reason,
+        refused:(d.records||[]).filter(r=>r.rejected).length,
+        incomplete:(d.records||[]).filter(r=>r.incomplete&&!r.rejected).length})),
       one("deals","/api/deal",d=>({ok:d.ok!==false,n:(d.records||[]).length,reason:d.reason})),
       one("contacts","/api/contact",d=>({ok:d.ok!==false,n:(d.records||[]).length,reason:d.reason})),
       one("audit","/api/audit?limit=1",d=>({ok:d.ok!==false,reason:d.reason})),
@@ -158,6 +161,13 @@
   const HEALTH={
     live:   { label:"Live",     cls:"h-live" },
     dated:  { label:"Snapshot", cls:"h-dated" },
+    /* WRITTEN AND NOT LIVE is its own state, and it earns a colour of its own because it is the
+       one most likely to be misread. Calling it "Live" because the code is merged would make
+       this map lie in exactly the way the caveat at the bottom warns about, and calling it
+       "Broken" would hide that the work is done and waiting on one action. The americanbiocarbon
+       Pages project builds from a git push, so a fix in the tree changes nothing a visitor
+       touches until somebody pushes. */
+    pending:{ label:"Built, not deployed", cls:"h-pending" },
     broken: { label:"Broken",   cls:"h-broken" },
     missing:{ label:"No link",  cls:"h-missing" },
     unknown:{ label:"Unknown",  cls:"h-unknown" },
@@ -168,26 +178,26 @@
     const n=k=>A[k]&&A[k].n!=null?num(A[k].n):"—";
     const act=A.activity||{};
     return [
-      { from:"American BioCarbon website", via:"8 forms · /api/lead · Resend",
-        to:"Two inboxes", surface:"Nowhere in the Sales OS",
-        health:"missing", count:"0 in D1",
-        why:`A website lead becomes two emails and nothing else. website/functions/api/lead.js posts to Resend and returns 204: it has no D1 binding, writes no record, and issues no id. Nothing in allo-hooks ingests it. A prospect who fills in the sample form and never phones is invisible here, and if both recipients miss the mail there is no second copy.`,
-        fix:"Give the marketing Function the D1 binding and write the lead before it mails, or have it POST to the Worker. Until then the two inboxes ARE the database." },
-      { from:"Website form validation", via:"contactError() gate",
-        to:"400, discarded", surface:"Nobody is told",
-        health:"broken", count:"unknown",
-        why:`lead.js requires BOTH a valid email and a 10 to 15 digit phone, and rejects anything else with a 400. The browser sends the form fire and forget and paints the success message before the response arrives, so a rejected lead is invisible to the visitor AND to the business. Nobody can say how many have been lost because nothing counts them.`,
-        fix:"Accept the lead, then flag it as missing a phone. A lead with an email and no phone is a lead, not an error." },
+      { from:"American BioCarbon website", via:"8 forms · /api/lead · POST to allo-hooks, then Resend",
+        to:"D1 records, kind weblead", surface:"Leads screen, account timeline",
+        health:"pending", count:`${n("weblead")} stored${(A.weblead&&A.weblead.refused)?` · ${A.weblead.refused} refused`:""}`,
+        why:`The Worker end is live: /intake/web-lead accepts a submission, writes it as kind "weblead" with the company as its scope, and is idempotent on the submission id. The Sales OS end is live: the Leads screen lists them and they land on the account timeline with the answers the visitor typed. The MARKETING end is written and not deployed. website/functions/api/lead.js now stores the lead before it mails the desk, so a mail that fails no longer loses it, but that Pages project builds from a git push and the tree is ahead of its remote, so americanbiocarbon.com is still running the version that mails two inboxes and keeps nothing. Any count above came from a test post, not from a visitor.`,
+        fix:"Push the website repo. The ALLO_EXPORT_TOKEN secret is already set on the Pages project and takes effect on that deploy." },
+      { from:"Website form validation", via:"contactState() gate · one channel is enough",
+        to:"Stored and flagged, or refused and counted", surface:"Leads screen, with what is missing",
+        health:"pending", count:(A.weblead&&A.weblead.n!=null)?`${A.weblead.incomplete||0} incomplete · ${A.weblead.refused||0} refused`:"—",
+        why:`The gate used to demand BOTH a valid email and a phone and answer 400 otherwise, while the browser painted the tick before the response arrived, so a lead with a real address and no number vanished with nobody on either side knowing. It now refuses only a submission nobody could answer, records which channel is missing, and writes the refusals down so the number exists. The browser waits for the answer and keeps the form on screen when it fails. All of that is written and NOT DEPLOYED, for the same git push reason as the card above: today the live site still discards them.`,
+        fix:"Push the website repo. Until then the number of leads being turned away is still unknown." },
       { from:"Allo phone", via:"POST /hooks/allo · HMAC verified · 11 topics",
         to:"D1 events, activity, leads", surface:"Inbox, account timeline, Reports",
         health:"live", count:`${n("activity")} timeline rows · ${n("leads")} phone leads`,
         why:`Verified and deduped on webhook id, then fanned out to five consumers. This is the one intake path that is fully wired end to end: a call lands in D1 within seconds and appears on the account timeline and in the Activity report.`,
         fix:"" },
-      { from:"Allo call", via:"no enrichment step",
-        to:"activity.contact_name and .company", surface:"Timeline says who called, usually not",
-        health:"broken", count:`${act.named!=null?act.named:"—"} of ${n("activity")} named · ${act.companied!=null?act.companied:"—"} with a company`,
-        why:`Those two columns are filled only from what Allo happened to put in the payload, and nothing ever backfills them. There is no server side join to contacts: grepping the consumers for "contacts" returns nothing. So a call from a number nobody has saved lands with no name and no company, permanently, and the browser can only match it back by phone number against the contact book.`,
-        fix:"On an unknown inbound number, create or update a contact rather than only a lead, and backfill the activity row." },
+      { from:"Allo conversation", via:"salesos consumer · contact upsert · timeline backfill",
+        to:"contacts, and activity.contact_name / .company", surface:"Account timeline, contact book",
+        health:"live", count:`${act.named!=null?act.named:"—"} of ${n("activity")} named · ${act.companied!=null?act.companied:"—"} with a company`,
+        why:`A conversation now files a contact, which is what lets it reach an account: the timeline matches a call to an account through the contact book, and the phone had never written to it. The rule is evidence of a person on the other end, so a text either way, an AI summary, an outbound call, an answered inbound call or a voicemail with a summary all qualify, and a single unanswered ring does not. A conversation carrying no name and no company also stays a lead: a contact holding only a number attaches to no account, so it would improve nothing and duplicate the callback queue. THE LIMIT IS THE DATA, not the wiring. Of 17 numbers in the log, 15 carry no name and no company and none of them match a phone in the roster, HubSpot, Apollo or the outreach lists, so who called cannot be worked out from anything we hold. The historical backfill moved rows reaching an account from 5 of 71 to 8.`,
+        fix:"Nothing here. Getting past 8 needs identity at the point of the call, which means a caller saying who they are, or Allo carrying a CRM record for them." },
       { from:"Instantly", via:"build-instantly-snapshot.mjs, run by hand",
         to:"instantly-data.js in the bundle", surface:"Campaigns, Instantly Logic, Reports",
         health:"dated", count:(window.INSTANTLY_LIVE&&window.INSTANTLY_LIVE.read)?`read ${esc(window.INSTANTLY_LIVE.read)}`:"no snapshot",
@@ -245,7 +255,7 @@
       ${f.fix?`<p class="sys-fix"><b>What would fix it:</b> ${esc(f.fix)}</p>`:""}
     </article>`;
 
-    const order=["missing","broken","dated","live"];
+    const order=["missing","broken","pending","dated","live"];
     const sorted=[...rows].sort((a,b)=>order.indexOf(a.health)-order.indexOf(b.health));
 
     return `<h1 class="pipe-h">Systems map</h1>

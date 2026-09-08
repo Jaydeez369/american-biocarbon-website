@@ -226,6 +226,10 @@
 .sys-flow.h-dated{border-left-color:var(--gold)}
 .sys-flow.h-broken{border-left-color:var(--red)}
 .sys-flow.h-missing{border-left-color:var(--red)}
+/* Built and not deployed. Gold rather than red or green, because the work is done and the link
+   still does not exist for anybody outside this repo. Sitting between "Snapshot" and "Broken" in
+   the sort order is the point: it is not a fault, it is an action nobody has taken yet. */
+.sys-flow.h-pending{border-left-color:var(--gold)}
 .sys-flow.h-unknown{border-left-color:var(--text-mute)}
 
 .sys-chain{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:8px}
@@ -240,6 +244,7 @@
 .sys-h.h-live{color:var(--green);border-color:rgba(var(--green-rgb),.4);background:rgba(var(--green-rgb),.08)}
 .sys-h.h-dated{color:var(--gold);border-color:rgba(var(--gold-rgb),.4);background:rgba(var(--gold-rgb),.08)}
 .sys-h.h-broken,.sys-h.h-missing{color:var(--red);border-color:rgba(var(--red-rgb),.4);background:rgba(var(--red-rgb),.08)}
+.sys-h.h-pending{color:var(--gold);border-color:rgba(var(--gold-rgb),.4);background:rgba(var(--gold-rgb),.08)}
 .sys-h.h-unknown{color:var(--text-mute);border-color:var(--line)}
 .sys-count{font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
 .sys-surface{color:var(--text-dim)}
