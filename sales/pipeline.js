@@ -947,9 +947,11 @@
     if(!d) return; if(!confirm(`Delete deal "${d.deal}"?`)) return;
     arr.splice(ci,1); lsSet(D_KEY,arr); removeRecord("deals",d.id); rr();
   };
+  /* Exports what the screen is showing, not everything. A CSV that silently disagrees with
+     the table above it is the version of this bug that leaves the building in an email. */
   window.pipeDealExport=()=>downloadCSV("sales-pipeline.csv",
     ["Deal Name","Customer","Product","Sector","Qty","UOM","Price/Unit","Order Type","Close Date","Stage","Confidence","Status","Deal Value","Weighted Value","Quarter","Assigned To","Notes"],
-    liveDeals().map(d=>[d.deal,d.customer,d.product,d.sector,d.qty,d.uom,d.price,d.order,fmtDate(d),stageOf(d.stage).label,(P.confidence[d.conf]||{}).label||d.conf,d.status,value(d),Math.round(weighted(d)),quarterOf(d),d.owner,d.notes]));
+    periodDeals().map(d=>[d.deal,d.customer,d.product,d.sector,d.qty,d.uom,d.price,d.order,fmtDate(d),stageOf(d.stage).label,(P.confidence[d.conf]||{}).label||d.conf,d.status,value(d),Math.round(weighted(d)),quarterOf(d),d.owner,d.notes]));
 
   /* ================= TAB 1 · PIPELINE (deal tracker) ================= */
   const VIEW_KEY="vej_pipe_view";
@@ -995,7 +997,7 @@
   }
 
   function tPipeline(){
-    const ds = liveDeals();
+    const ds = periodDeals();
     const total = sum(ds,value), wtd = sum(ds,weighted);
     const confirmed = sum(ds.filter(d=>d.status==="won"),value);
     const mtTotal = sum(ds.filter(d=>d.uom==="MT"),d=>d.qty);
@@ -1090,7 +1092,8 @@
           const v=r.mt[q]; return `<td class="t-num">${v==null?'<span class="pdim">—</span>':num(v)+' <span class="uom">MT</span>'}</td>`;
         }).join("")}</tr>`).join("")}
         <tr class="ptotal"><td><strong>TOTAL CAPACITY</strong></td>${totals.map(t=>`<td class="t-num"><strong>${num(t)} MT</strong></td>`).join("")}</tr></tbody>`)}
-      <div class="note">This grid feeds the Executive Dashboard's Sales vs. Production chart and the Offtake coverage view. Update it as ops confirms quarterly capacity.</div>`;
+      <div class="note">This grid feeds the Executive Dashboard's Sales vs. Production chart and the Offtake coverage view. Update it as ops confirms quarterly capacity.</div>
+      ${periodNote("Production capacity is planned per quarter and carries no deal dates.")}`;
   }
   window.pipeProductionExport=()=>{ const qs=prodQuarters(); downloadCSV("production-plan.csv",["Product Type",...qs],
     P.production.products.map(r=>[r.p,...qs.map(q=>r.mt[q]??"")])); };
@@ -1106,14 +1109,23 @@
   const EXECF_KEY="vej_pipe_exec_product";
   function tExec(){
     const filter=lsGet(EXECF_KEY,"");
-    const allDs=liveDeals();
+    const allDs=periodDeals();
     const ds=filter?allDs.filter(d=>d.product===filter):allDs;
     const total=sum(ds,value), wtd=sum(ds,weighted), qty=sum(ds.filter(d=>d.uom==="MT"),d=>d.qty);
     const confirmed=sum(ds.filter(d=>d.status==="won"),value);
     const sc=P.sampleConversions;
     const qs=prodQuarters();
-    const confMT=qs.map(q=>sum(ds.filter(d=>d.uom==="MT"&&d.status==="won"&&quarterOf(d)===q),d=>d.qty));
-    const wtdMT=qs.map(q=>sum(ds.filter(d=>d.uom==="MT"&&quarterOf(d)===q),d=>d.qty*stageOf(d.stage).prob/100));
+    /* THE CHART DELIBERATELY IGNORES THE PERIOD FILTER, and says so below.
+     *
+     * Two of its four series — Offtake Expected and Production Capacity — are planned per
+     * quarter and carry no deal dates, so they cannot be filtered at all. Filtering the two
+     * deal series and not the other two would produce a chart where half the bars shrank and
+     * half did not, which reads as a real change in coverage and is not one. A plan against
+     * pipeline comparison is a full horizon question; the KPI tiles above it are the ones
+     * that answer "in this period". */
+    const chartDs=filter?liveDeals().filter(d=>d.product===filter):liveDeals();
+    const confMT=qs.map(q=>sum(chartDs.filter(d=>d.uom==="MT"&&d.status==="won"&&quarterOf(d)===q),d=>d.qty));
+    const wtdMT=qs.map(q=>sum(chartDs.filter(d=>d.uom==="MT"&&quarterOf(d)===q),d=>d.qty*stageOf(d.stage).prob/100));
     const offRows=filter?offRowsAll().filter(r=>r.product===filter):offRowsAll();
     const prodRows=filter?P.production.products.filter(r=>r.p===filter):P.production.products;
     const offMT=qs.map(q=>sum(offRows,r=>+(r.vols[q]||0)));
@@ -1123,7 +1135,8 @@
     const svp=`<div class="pchart">${qs.map((q,i)=>`<div class="pcol">
         <div class="pbars">${series.map(([n,c,arr])=>`<span class="pbar" style="height:${Math.max(arr[i]/maxMT*100,arr[i]?1.5:0)}%;background:${c}" title="${esc(n)}: ${num(arr[i])} MT"></span>`).join("")}</div>
         <div class="plabel">${q}</div></div>`).join("")}</div>
-      <div class="plegend">${series.map(([n,c])=>`<span><i style="background:${c}"></i>${esc(n)}</span>`).join("")}</div>`;
+      <div class="plegend">${series.map(([n,c])=>`<span><i style="background:${c}"></i>${esc(n)}</span>`).join("")}</div>
+      ${period()==="all"?"":`<div class="note pdim" style="margin-top:8px">This chart spans every quarter regardless of the period filter: two of its four series are planned per quarter and have no deal dates to filter on. The tiles above honour the filter.</div>`}`;
     const maxCnt=Math.max(...P.stages.map(s=>ds.filter(d=>d.stage===s.k).length),1);
     const flow=P.stages.map((s,i)=>{ const c=ds.filter(d=>d.stage===s.k).length;
       return `<div class="phrow"><span class="phl">${esc(s.label)}</span><div class="phtrack"><span class="phfill" style="width:${c/maxCnt*100}%;background:${CAT[i%CAT.length]}">${c||""}</span></div></div>`; }).join("");
@@ -1227,7 +1240,8 @@
       <tr class="prev"><td colspan="4">Revenue (MT × Price/MT)</td>${revQ.map(t=>`<td class="t-num">${t?money(t):"—"}</td>`).join("")}<td colspan="4"></td></tr>
       <tr class="pconf-row"><td colspan="4">✓ Confirmed Sales (Won Deals)</td>${cfQ.map(t=>`<td class="t-num">${t?num(t)+" MT":"—"}</td>`).join("")}<td colspan="4"></td></tr>
       </tbody>`)}
-      <div class="note">Row notes worth keeping in view: ${offRowsAll().filter(r=>r.notes).map(r=>`<b>${esc(r.customer)} (${esc(r.product)})</b> — ${esc(r.notes).replace(/\n/g,"<br>")}`).join(" · ")}</div>`;
+      <div class="note">Row notes worth keeping in view: ${offRowsAll().filter(r=>r.notes).map(r=>`<b>${esc(r.customer)} (${esc(r.product)})</b> — ${esc(r.notes).replace(/\n/g,"<br>")}`).join(" · ")}</div>
+      ${periodNote("Offtake is planned volume per quarter, so the quarter columns are its time axis. There is no close date here to filter on.")}`;
   }
   window.pipeOfftakeGroup=on=>{ lsSet(OGRP_KEY,!!on); rr(); };
   window.pipeOfftakeExport=()=>{ const qs=offtakeQuarters(); downloadCSV("offtake-pipeline.csv",
@@ -1270,7 +1284,7 @@
   function tDeals(){
     /* Honours the same period as the strip, so the tile and the table can never disagree —
        a header saying 6 open deals above a list of 40 is how people stop trusting both. */
-    const ds=[...liveDeals()].filter(inPeriod).sort((a,b)=>closeDate(b)-closeDate(a));
+    const ds=[...periodDeals()].sort((a,b)=>closeDate(b)-closeDate(a));
     return `
       <div class="pdeals-bar"><input class="pinput" id="pipeDealSearch" placeholder="Search deals…" oninput="pipeDealFilter()">
         <select class="pinput" id="pipeDealStatus" onchange="pipeDealFilter()"><option value="">All Status</option><option>open</option><option>won</option><option>lost</option></select>
@@ -2045,7 +2059,8 @@
         <td class="pact-cell">${readOnlyContact(c)
           ? `<span class="pdim" title="${esc(readOnlyWhy(c))}">—</span>`
           : `<span class="pc-act" onclick="pipeContactModal(${c.ci})" title="Edit">✎</span>
-             <span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">🗑</span>`}</td></tr>`).join("")}</tbody>`)}`;
+             <span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">🗑</span>`}</td></tr>`).join("")}</tbody>`)}
+      ${periodNote("A contact has no close date, so there is nothing here for a date range to select on. Filter the list with the search and the ICP and account pickers above.")}`;
   }
   window.pipeContactExport=()=>downloadCSV("contacts.csv",["Name","Job Title","ICP","Account","Email","Phone","Mobile","Drop-off Address","Notes"],
     allContacts().map(c=>({...c,_icp:icpFor(c)})).sort(byIcpThen("name")).map(c=>[c.name,c.title,c._icp,c.account,c.email,c.phone,c.mobile,c.dropOff,c.notes]));
@@ -2217,7 +2232,7 @@
 
   /* ================= TAB 8 · REPORTS ================= */
   function tReports(){
-    const ds=liveDeals();
+    const ds=periodDeals();
     const won=ds.filter(d=>d.status==="won"), lost=ds.filter(d=>d.status==="lost");
     const closed=won.length+lost.length;
     const wonV=sum(won,value);
@@ -2390,6 +2405,11 @@
 
   function renderProfile(name){
     const acct = liveAccounts().find(a=>norm(a.name)===norm(name)) || {name,type:"",industry:""};
+    /* UNFILTERED ON PURPOSE, and the header says so when a period is set. An account profile
+       is a record, not a report: opening EMS to see what we have done with EMS and being shown
+       three of its nine deals because a filter was left on last week is how somebody calls a
+       customer with half the story. The period control stays visible above this screen, so
+       saying nothing would be the same silent-ignore this stage exists to remove. */
     const deals = liveDeals().filter(d=>norm(d.customer)===norm(name));
     const contacts = allContacts().filter(c=>norm(c.account)===norm(name));
     const offs = offRowsAll().filter(r=>norm(r.customer)===norm(name));
@@ -2432,7 +2452,7 @@
       </div>
       <div class="tile metric-tile accent">
         <div class="lbl">Lifetime Value</div><div class="val">${money(ltv)}</div>
-        <div class="sub">${deals.length} deal${deals.length===1?"":"s"} total</div>
+        <div class="sub">${deals.length} deal${deals.length===1?"":"s"} total${period()==="all"?"":" — the whole history, not the selected period"}</div>
       </div>
       <div class="tile metric-tile">
         <div class="lbl">Win Rate</div><div class="val">${winRate}</div>
@@ -2749,6 +2769,25 @@
   const PERIODS=[["all","All time"],["month","This month"],["quarter","This quarter"],["year","This year"]];
   const period=()=>{ const p=lsGet(PERIOD_KEY,"all"); return PERIODS.some(x=>x[0]===p)?p:"all"; };
   window.pipePeriod=p=>{ lsSet(PERIOD_KEY,p); rr(); };
+
+  /* THE ONE ACCESSOR. Every pane that counts deals goes through this, so a pane cannot be
+     added later that forgets to filter — the only way to get a deal list is to get a filtered
+     one. Before 2026-09-08 `inPeriod` was applied in exactly two places out of seven, so
+     setting "This quarter" left the board, offtake, production, the executive dashboard and
+     reports all silently showing all time. A filter obeyed in some panes and ignored in
+     others is worse than no filter, because nothing on the screen tells you which kind of
+     number you are reading. */
+  function periodDeals(){ return liveDeals().filter(inPeriod); }
+
+  /* Some panes genuinely cannot honour a date range, and they have to SAY so rather than
+     quietly ignore it. Offtake and Production are grids of planned volume per quarter: the
+     quarter columns are their time dimension, and there is no close date to filter on.
+     People have no date at all. Rendering this line costs nothing and is the difference
+     between a pane that is unfiltered and a pane that looks filtered and is not. */
+  function periodNote(why){
+    if(period()==="all") return "";
+    return `<div class="note pdim" style="margin-top:10px">Showing all time. ${esc(why)}</div>`;
+  }
 
   function inPeriod(d){
     const p=period(); if(p==="all") return true;
