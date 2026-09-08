@@ -81,6 +81,44 @@ const NAME_COOKIE = 'sales_os_user';
 const ROLE_COOKIE = 'sales_os_role';
 const SESSION_SECONDS = 60 * 60 * 12; // one working day, then log in again
 const LOGIN_PATH = '/__login';
+
+/* THE LOGIN PAGE'S IMAGERY, AND WHY IT IS NOT LOCAL.
+ *
+ * This middleware runs in front of every path on this project, so the login page is served
+ * BEFORE any asset from this origin is reachable. A local /assets/... reference would 302 back
+ * to the login page and render as a broken image to somebody who is not signed in yet, which is
+ * the first thing they would ever see of this system.
+ *
+ * So both come from the Shopify CDN that already serves the marketing site's imagery: the same
+ * files, the same cache, nothing new to host and nothing added to this project's bundle. They
+ * are public assets on a public storefront, so serving them here reveals nothing that
+ * americanbiocarbon.com does not already show anyone.
+ *
+ * Inlining them as data URIs was the alternative and is worse: the photograph is ~850KB, and it
+ * would be re-sent inside the HTML on every unauthenticated request, including every bot that
+ * knocks on this door.
+ *
+ * The page is built to survive both of these 404ing. The body keeps a solid warm ground under
+ * the photograph, and the logo has real alt text, so a failed load degrades to a plain dark card
+ * with the company name in words rather than to a broken layout. */
+const CDN = 'https://cdn.shopify.com/s/files/1/0773/9270/7876/files/';
+
+/* Pellets coming off the conveyor at the mill.
+ *
+ * SIZED PROPERLY, because this is a page people wait on before they can do anything and the
+ * original is 1365x2048 at ~850KB. Shopify's CDN resizes on the `width` parameter, and measured:
+ * 900 -> 375KB, 1100 -> 608KB, 1365 -> 871KB. Asking for more than 1365 does nothing, which is
+ * why the first version at width=1600 saved nothing at all.
+ *
+ * So the page ships a srcset and lets the browser choose. A phone takes the 375KB frame, a wide
+ * monitor takes the full one, and nobody downloads a 2K-wide file to look at it through a
+ * vignette on a laptop. `sizes="100vw"` because the image is full bleed by definition. */
+const SHOT_BASE = CDN + 'AmericanBiocarbon2021-292.jpg?v=1699280021';
+const SHOT_SRC = SHOT_BASE + '&width=1365';
+const SHOT_SRCSET = [900, 1100, 1365].map((w) => `${SHOT_BASE}&width=${w} ${w}w`).join(', ');
+
+/* The reversed (white) horizontal wordmark, which is the one that works on a dark ground. */
+const LOGO_SRC = CDN + 'abc-logo-horiz_rev_38e8f78a-b79f-4c53-8b36-d10683e943cf.webp?v=1710182358';
 const LOGOUT_PATH = '/__logout';
 
 /* Constant-time compare. A plain === leaks the length of the matching prefix through
@@ -237,77 +275,172 @@ function loginPage(error, username) {
 <title>Sales OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="${CDN}" crossorigin />
+<link rel="preload" as="image" href="${SHOT_SRC}" imagesrcset="${SHOT_SRCSET}" imagesizes="100vw" fetchpriority="high" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
+  /* ---------------------------------------------------------------------------
+     THE PALETTE IS TAKEN FROM THE PHOTOGRAPH, not from the app's dark theme.
+     The shot is pellets coming off the conveyor at the mill: warm khaki through
+     bronze, sampled at #9a8f77 overall, #7e6e52 through the pellets and #bbb5a4 up
+     at the machinery. The old card was cold navy (#111621) on a flat void, which
+     read as a different product sitting on top of the picture. Everything below is
+     warmed to sit IN the photograph instead: bark browns for the surfaces, a khaki
+     dim text lifted straight out of the image, and crimson kept as the one brand
+     colour, which is close to complementary against that khaki and so stays the
+     only thing on screen asking to be clicked.
+     --------------------------------------------------------------------------- */
   :root {
     color-scheme: dark;
-    --d-bg:#0a0d12; --d-900:#111621; --d-800:#1b222e;
-    --d-line:#232c39; --d-text:#e6ecf5; --d-text-dim:#9aa7bd;
-    --crimson-500:#d7153f; --crimson-600:#b91237; --crimson-300:#f08aa0;
-    --navy-600:#24478a;
+    --bark-900:#0d0a06; --bark-800:#171208; --bark-700:#241c11;
+    --bronze-line:rgba(219,199,158,.26); --bronze-line-2:rgba(226,208,170,.55);
+    --text:#f4efe4; --text-dim:#bcae94;
+    --crimson-500:#d7153f; --crimson-600:#b91237; --crimson-300:#f4a0b2;
     --f-sans:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     --f-serif:"DM Serif Display",Georgia,serif;
   }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
-    margin: 0; min-height: 100vh; min-height: 100dvh;
-    display: grid; place-items: center; padding: 24px;
-    background: var(--d-bg); color: var(--d-text);
-    font: 400 14px/1.5 var(--f-sans);
-    /* A single wide navy wash behind the card so the page reads as a surface, not a void. */
-    background-image: radial-gradient(120% 80% at 50% 0%, rgba(36,71,138,.22) 0%, transparent 60%);
+    margin: 0; color: var(--text); font: 400 14px/1.5 var(--f-sans);
+    /* The solid ground is the fallback: if the photograph never arrives, the page
+       is still a warm dark surface rather than a white flash or a broken frame. */
+    background: var(--bark-900);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- the photograph ---- */
+  .stage { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+  .shot {
+    width: 100%; height: 100%; object-fit: cover;
+    /* The frame is portrait and the conveyor runs to a vanishing point just above
+       centre. Holding the crop at 42% keeps that line in shot on a wide monitor
+       instead of filling the screen with the near pellets. */
+    object-position: 50% 38%;
+    transform: scale(1.04);
+    animation: settle 1.2s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .scrim {
+    position: absolute; inset: 0;
+    /* TUNED AGAINST THE PICTURE, not picked from a scale. The first attempt sat at
+       .70/.90 and flattened the mill to grey, which is the exact thing this redesign
+       was meant to stop: a photograph you cannot see is just a dark background with a
+       download attached. These values keep the khaki and the steel legible and lean on
+       the card's own blur and fill for text contrast instead of on darkening the whole
+       frame. The vignette still closes the corners so the card has something to sit in. */
+    background:
+      radial-gradient(82% 62% at 50% 44%, rgba(16,11,5,.04) 0%, rgba(14,10,5,.34) 56%, rgba(9,7,3,.72) 100%),
+      linear-gradient(180deg, rgba(10,8,4,.42) 0%, rgba(10,8,4,.02) 36%, rgba(9,7,3,.56) 100%);
+  }
+  @keyframes settle { from { transform: scale(1.10); opacity: 0 } to { transform: scale(1.04); opacity: 1 } }
+
+  /* ---- the card ---- */
+  .wrap {
+    position: relative; z-index: 1;
+    min-height: 100vh; min-height: 100dvh;
+    display: grid; place-items: center; padding: 28px;
+    grid-template-rows: 1fr auto;
   }
   .card {
-    width: min(380px, 100%);
-    background: var(--d-900);
-    border: 1px solid var(--d-line);
-    border-radius: 16px;
-    padding: 40px 36px 36px;
-    box-shadow: 0 8px 40px -8px rgba(0,0,0,.55);
+    grid-row: 1; align-self: center;
+    width: min(392px, 100%);
+    background: linear-gradient(180deg, rgba(44,35,24,.74) 0%, rgba(20,15,10,.86) 100%);
+    -webkit-backdrop-filter: blur(20px) saturate(1.15);
+    backdrop-filter: blur(20px) saturate(1.15);
+    border: 1px solid var(--bronze-line);
+    border-radius: 18px;
+    padding: 34px 34px 30px;
     text-align: center;
+    box-shadow:
+      0 34px 90px -22px rgba(0,0,0,.80),
+      inset 0 1px 0 rgba(255,255,255,.07);
+    animation: rise .7s cubic-bezier(.2,.7,.3,1) both .12s;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+
+  /* The company mark first, the product second: this is American BioCarbon's
+     system, and Sales OS is the thing inside it. */
+  .logo { display: block; width: 178px; max-width: 72%; height: auto; margin: 2px auto 0; }
+  .rule {
+    width: 46px; height: 1px; margin: 20px auto 16px; border: 0;
+    background: linear-gradient(90deg, transparent, var(--bronze-line-2), transparent);
   }
   .mark {
-    font-family: var(--f-serif); font-size: 30px; line-height: 1.1;
-    margin: 0 0 6px; letter-spacing: -0.01em;
+    font-family: var(--f-serif); font-size: 31px; line-height: 1.05;
+    margin: 0 0 26px; letter-spacing: -.01em; color: var(--text);
   }
   .mark span { color: var(--crimson-500); }
-  .sub {
-    margin: 0 0 28px; color: var(--d-text-dim); font-size: 12.5px;
-    text-transform: uppercase; letter-spacing: .08em;
-  }
+
+  .fields { display: grid; gap: 10px; }
   input {
     width: 100%; padding: 13px 15px; font: 400 16px/1.2 var(--f-sans);
     text-align: center; letter-spacing: .04em;
-    color: var(--d-text); background: var(--d-800);
-    border: 1px solid var(--d-line); border-radius: 10px;
-    transition: border-color .15s ease;
+    color: var(--text); background: rgba(11,8,5,.55);
+    border: 1px solid var(--bronze-line); border-radius: 11px;
+    transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
   }
-  input + input { margin-top: 10px; }
-  input::placeholder { color: var(--d-text-dim); letter-spacing: normal; }
-  input:focus { outline: none; border-color: var(--crimson-500); }
+  input::placeholder { color: var(--text-dim); letter-spacing: normal; }
+  input:hover { border-color: var(--bronze-line-2); }
+  input:focus {
+    outline: none; background: rgba(11,8,5,.72);
+    border-color: var(--crimson-500);
+    box-shadow: 0 0 0 3px rgba(215,21,63,.22);
+  }
   button {
-    width: 100%; margin-top: 12px; padding: 13px 15px;
-    font: 700 14px/1.2 var(--f-sans); letter-spacing: .02em;
-    color: #fff; background: var(--crimson-500);
-    border: 0; border-radius: 10px; cursor: pointer;
-    transition: background .15s ease;
+    width: 100%; margin-top: 14px; padding: 14px 15px;
+    font: 700 14px/1.2 var(--f-sans); letter-spacing: .03em;
+    color: #fff; border: 0; border-radius: 11px; cursor: pointer;
+    background: linear-gradient(180deg, var(--crimson-500), var(--crimson-600));
+    box-shadow: 0 8px 22px -8px rgba(215,21,63,.65);
+    transition: filter .16s ease, transform .16s ease, box-shadow .16s ease;
   }
-  button:hover { background: var(--crimson-600); }
-  .error { margin: 18px 0 0; color: var(--crimson-300); font-size: 13px; }
+  button:hover { filter: brightness(1.08); box-shadow: 0 12px 28px -8px rgba(215,21,63,.75); }
+  button:active { transform: translateY(1px); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--crimson-300); outline-offset: 2px; }
+
+  .error {
+    margin: 16px 0 0; color: var(--crimson-300); font-size: 13px; line-height: 1.45;
+    background: rgba(215,21,63,.10); border: 1px solid rgba(215,21,63,.30);
+    border-radius: 9px; padding: 9px 12px;
+  }
+  .foot {
+    grid-row: 2; margin: 22px 0 0; font-size: 11.5px; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--text-dim); opacity: .75;
+  }
+
+  @media (max-width: 420px) {
+    .card { padding: 28px 22px 26px; border-radius: 15px; }
+    .mark { font-size: 27px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .shot, .card { animation: none; }
+    .shot { transform: none; }
+  }
 </style>
 </head>
 <body>
-  <form class="card" method="POST" action="${LOGIN_PATH}">
-    <h1 class="mark">Sales<span>OS</span></h1>
-    <p class="sub">American BioCarbon</p>
-    <input name="username" type="text" autocomplete="username" autocapitalize="none"
-           spellcheck="false" placeholder="Username" aria-label="Username"
-           value="${safeName(username || '')}" autofocus required />
-    <input name="password" type="password" autocomplete="current-password"
-           placeholder="Password" aria-label="Password" required />
-    <button type="submit">Enter</button>
-    ${error ? `<p class="error">${error}</p>` : ''}
-  </form>
+  <div class="stage">
+    <img class="shot" src="${SHOT_SRC}" srcset="${SHOT_SRCSET}" sizes="100vw"
+         alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
+    <div class="scrim"></div>
+  </div>
+  <main class="wrap">
+    <form class="card" method="POST" action="${LOGIN_PATH}">
+      <img class="logo" src="${LOGO_SRC}" alt="American BioCarbon" />
+      <hr class="rule" />
+      <h1 class="mark">Sales<span>OS</span></h1>
+      <div class="fields">
+        <input name="username" type="text" autocomplete="username" autocapitalize="none"
+               spellcheck="false" placeholder="Username" aria-label="Username"
+               value="${safeName(username || '')}" autofocus required />
+        <input name="password" type="password" autocomplete="current-password"
+               placeholder="Password" aria-label="Password" required />
+      </div>
+      <button type="submit">Enter</button>
+      ${error ? `<p class="error" role="alert">${error}</p>` : ''}
+    </form>
+    <p class="foot">Internal system &middot; authorised users only</p>
+  </main>
 </body>
 </html>`;
 }
