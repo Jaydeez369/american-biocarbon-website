@@ -610,36 +610,71 @@ function buildForm(kind, mountSel, qs){
     if(btn){ btn.disabled=true; btn.textContent="Sending…"; }
     // event only, no field values; product id is catalog context, not PII
     track("lead_submit", { form: kind, routing: (f.routing||"").split(".")[0], ...(ctx.productId?{product:ctx.productId}:{}) });
-    deliverLead(kind, form);
-    mount.innerHTML = `<div class="form-success" role="status" tabindex="-1">✓ ${raw(f.confirm)}</div>`;
-    const ok = mount.querySelector(".form-success"); if(ok) ok.focus();
-    window.scrollTo({top:mount.getBoundingClientRect().top+window.scrollY-120,behavior:"smooth"});
+    /* WAIT FOR THE ANSWER BEFORE THANKING ANYBODY.
+       This used to paint the confirmation on the line after deliverLead() and never look at the
+       result, so a submission the endpoint refused showed the visitor a tick. That is how a lead
+       disappears with nobody, on either side, knowing it existed. The endpoint now accepts
+       anything it can reach a person by, so a failure here is a real failure and worth showing. */
+    deliverLead(kind, form).then(res=>{
+      if(res.ok){
+        mount.innerHTML = `<div class="form-success" role="status" tabindex="-1">✓ ${raw(f.confirm)}</div>`;
+        const ok = mount.querySelector(".form-success"); if(ok) ok.focus();
+      } else {
+        /* Kept on screen with everything they typed still in it, and given a way through that
+           does not depend on the thing that just failed. Re-armed, because the whole point is
+           that they can try again. */
+        form.dataset.submitted="";
+        if(btn){ btn.disabled=false; btn.textContent="Submit"; }
+        let note = form.querySelector(".form-error");
+        if(!note){ note=document.createElement("p"); note.className="form-error"; note.setAttribute("role","alert"); note.tabIndex=-1; form.appendChild(note); }
+        note.innerHTML = res.reason==="refused"
+          ? `We could not read that submission. Check the email address and phone number, then send it again.`
+          : `Something went wrong sending that. Please try again, or reach us on <a href="tel:+12253989286">(225) 398 9286</a> and we will pick it up from there.`;
+        note.focus();
+      }
+      window.scrollTo({top:mount.getBoundingClientRect().top+window.scrollY-120,behavior:"smooth"});
+    });
   });
 }
-/* Deliver a submitted lead to the addresses configured in data.js LEAD_RECIPIENTS.
-   Fire-and-forget: the visitor already has their confirmation, so a delivery failure must
-   never surface as an error to them - it is logged for us instead. If LEAD_ENDPOINT is
-   empty nothing is sent and a warning is logged, which is the pre-launch state. */
+/* Deliver a submitted lead. Resolves {ok, reason} and NEVER rejects, so the caller has exactly
+   one branch to write and a thrown error cannot leave the form stuck on "Sending…".
+ *
+ * NO LONGER FIRE AND FORGET. It used to return immediately while the caller painted the
+ * confirmation, which meant a refused submission was invisible to the visitor and to us. The
+ * one thing that must never happen quietly is the endpoint disagreeing with the browser about
+ * whether a lead is usable, and that is precisely what was happening: the endpoint demanded a
+ * phone and any submission arriving without one was dropped after the visitor had been thanked.
+ *
+ * `keepalive` stays on. It is what lets the request survive the visitor navigating away
+ * mid-send, and awaiting the promise does not change that.
+ *
+ * A submissionId is minted here so a retry is recognisable as the same lead rather than a
+ * second one. If LEAD_ENDPOINT is empty nothing is sent and a warning is logged, which is the
+ * pre-launch state and is reported as a failure rather than as a silent success. */
 function deliverLead(kind, form){
   const to = (typeof LEAD_RECIPIENTS!=="undefined" && (LEAD_RECIPIENTS[kind]||LEAD_RECIPIENTS.DEFAULT)) || [];
   if(typeof LEAD_ENDPOINT==="undefined" || !LEAD_ENDPOINT){
     console.warn(`[lead] ${kind}: LEAD_ENDPOINT is not set - submission was NOT delivered. Intended recipients: ${to.join(", ")}`);
-    return;
+    return Promise.resolve({ ok:false, reason:"no-endpoint" });
   }
   const fields = {};
   new FormData(form).forEach((v,k)=>{ fields[k]=v; });
-  fetch(LEAD_ENDPOINT, {
+  const submissionId = (form.dataset.submissionId ||= `web_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,10)}`);
+  return fetch(LEAD_ENDPOINT, {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ form:kind, recipients:to, fields, page:location.pathname+location.hash, ts:new Date().toISOString() }),
+    body: JSON.stringify({ form:kind, recipients:to, fields, submissionId, page:location.pathname+location.hash, ts:new Date().toISOString() }),
     keepalive:true
-  }).then(res=>{
-    /* The visitor has already been thanked, so a failure here is invisible to them and can
-       only be caught in the console. A 400 specifically means the endpoint disagreed with
-       the validation above about whether this lead is contactable, which is the one thing
-       that must never happen quietly. */
-    if(!res.ok) console.error(`[lead] ${kind}: endpoint refused the submission`, res.status);
-  }).catch(err=>console.error(`[lead] ${kind}: delivery failed`, err));
+  }).then(async res=>{
+    if(res.ok) return { ok:true };
+    /* A 400 means the endpoint could not reach this person on any channel, which is a fixable
+       mistake in the form and worth saying so. Anything else is ours, not theirs. */
+    console.error(`[lead] ${kind}: endpoint refused the submission`, res.status);
+    return { ok:false, reason: res.status===400 ? "refused" : "error" };
+  }).catch(err=>{
+    console.error(`[lead] ${kind}: delivery failed`, err);
+    return { ok:false, reason:"network" };
+  });
 }
 /* Express written consent for SMS, captured at the point the number is collected.
    This checkbox IS our opt-in evidence for A2P 10DLC: it must stay unchecked by

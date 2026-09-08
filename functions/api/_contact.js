@@ -49,15 +49,54 @@ export const emailFrom = (fields) => {
   return isValidEmail(v) ? v : null;
 };
 
-/* Returns a human readable reason the lead is not contactable, or null if it is.
-   Names the field rather than saying "invalid input", so a rejection in the logs points
-   straight at what the visitor's browser should have caught first. */
-export function contactError(fields) {
+/* WHAT WE CAN DO WITH THIS LEAD, which is a different question from whether the form was
+   filled in perfectly.
+ *
+ * THE RULE CHANGED ON 2026-09-08 and this is why. It used to demand BOTH a valid email and a
+ * valid phone and answer 400 otherwise, and the browser posts fire and forget and paints the
+ * confirmation before the response arrives. So a submission carrying a real email and no usable
+ * phone was thrown away, the visitor was thanked for it, and nobody could say how many there had
+ * been, because the only trace was a console.warn in a log nobody reads.
+ *
+ * A lead with an address and no phone is a lead. You email it. Refusing it is refusing business
+ * to keep a field tidy.
+ *
+ * So the gate is now the honest one: can we reach this person AT ALL. One good channel is
+ * enough, and which channel is missing is recorded rather than punished. `missing` reaches the
+ * Sales OS and shows on the lead, so a rep knows before they pick up the handset.
+ *
+ * Every form still ASKS for both and still marks both required, and the browser still enforces
+ * that. Nothing here changes what a visitor is asked for; it changes what we do with a
+ * submission that arrives without it anyway, which is a replayed POST, a browser told to skip
+ * validation, or a field named something this file does not recognise.
+ */
+export function contactState(fields) {
   const email = firstValue(fields, EMAIL_KEYS);
   const phone = firstValue(fields, PHONE_KEYS);
-  if (!email) return "email is required";
-  if (!isValidEmail(email)) return "email is not a valid address";
-  if (!phone) return "phone is required";
-  if (!isValidPhone(phone)) return `phone must contain ${PHONE_MIN_DIGITS} to ${PHONE_MAX_DIGITS} digits`;
-  return null;
+  const goodEmail = Boolean(email) && isValidEmail(email);
+  const goodPhone = Boolean(phone) && isValidPhone(phone);
+
+  const missing = [];
+  if (!goodEmail) missing.push("email");
+  if (!goodPhone) missing.push("phone");
+
+  /* Reachable on at least one channel. The reason names the field so a rejection in the logs
+     still points at what the browser should have caught first. */
+  const reachable = goodEmail || goodPhone;
+  let reason = null;
+  if (!reachable) {
+    if (!email && !phone) reason = "no email and no phone were submitted";
+    else if (email && !goodEmail && !phone) reason = "email is not a valid address";
+    else if (phone && !goodPhone && !email) reason = `phone must contain ${PHONE_MIN_DIGITS} to ${PHONE_MAX_DIGITS} digits`;
+    else reason = "neither the email nor the phone is usable";
+  }
+
+  return { reachable, missing, reason, goodEmail, goodPhone };
+}
+
+/* The reason nothing can be done with this lead, or null. Kept as the name the rest of the code
+   and the build gate already use. It now means "not reachable on any channel" rather than "not
+   perfectly filled in". See contactState above for why. */
+export function contactError(fields) {
+  return contactState(fields).reason;
 }
