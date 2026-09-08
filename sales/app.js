@@ -84,6 +84,11 @@ const LEAN_NAV=[
      Campaigns & ICP moved to Execute, where the operator asked for it: it belongs beside the
      copy and the send, not in a "Launch" group that no longer exists. */
   {group:"Work",items:[
+    /* Leads leads. It is where a rep starts a day of calling: the whole pool of companies,
+       filtered down to the list they are about to work, with a click into the full record.
+       Pipeline is the book of business you already have; Leads is where the next one comes
+       from, so it sits above it. */
+    {id:"leads",ic:"◎",t:"Leads"},
     {id:"crm",ic:"◉",t:"Pipeline"},
     {id:"inbox",ic:"✉",t:"Inbox"},
     {id:"today",ic:"✓",t:"Today"},
@@ -428,6 +433,7 @@ const LEAN_SECTIONS=[
 
      rLaunchpad is gone with the Launchpad section. Its live counts moved into the Pipeline
      header strip, where they sit next to the thing they describe. */
+  ["leads",    [PL("rLeads")]],
   ["crm",      [PL("rCRM")]],
   ["inbox",    [PL("rInbox")]],
   ["today",    [PL("rToday")]],
