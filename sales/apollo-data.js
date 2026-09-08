@@ -13,7 +13,7 @@
      sales-department/refresh-snapshots.sh
    ================================================================== */
 window.APOLLO_LIVE = {
-  "read": "2026-09-08 01:56 UTC",
+  "read": "2026-09-08 12:58 UTC",
   "readDate": "2026-09-08",
   "generator": "sales-department/apollo-analytics/build-apollo-snapshot.mjs",
   "spendsCredits": false,
