@@ -44,11 +44,11 @@ document.addEventListener("click", e=>{
 /* ---- spec sheet downloads ---- */
 const SPEC_SHEETS = {
   "absorbent-pellets": {
-    file: "assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf",
+    file: "assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf?v=ddc12f6f",
     name: "Absorbent-Pellets-Spec-Sheet.pdf"
   },
   "biochar": {
-    file: "assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf",
+    file: "assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf?v=77726f46",
     name: "American-BioCarbon-Bagasse-Biochar-Technical-Report.pdf"
   }
 };

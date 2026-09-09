@@ -143,11 +143,44 @@ for (const file of walkAssets(join(ROOT, "assets"))) {
   missing++;
 }
 
+/* The spec-sheet PDFs are the ONLY customer-facing download, and _headers ships /assets/*
+   immutable for a year. That is safe for .js/.css because the stamper above changes their
+   URL whenever the bytes change - the PDFs had no such stamp, so their URL was stable and
+   a corrected sheet could never reach anyone who had already downloaded the old one, or
+   any edge that had cached it. Found live on 2026-09-09: the absorbent sheet on the CDN
+   still quoted "$250 to $350/MT" and "1-ton super sacks" hours after the corrected PDF
+   was deployed, because the URL had not changed and nothing was going to revalidate it
+   for a year. The href carries the hash now; the saved filename comes from `name`, so the
+   query string never reaches the user's disk. */
+const PDFREF = /(file:\s*")(assets\/spec-sheets\/[^"?]+\.pdf)(?:\?v=([a-f0-9]+))?(")/g;
+{
+  const appPath = join(ROOT, "app.js");
+  const text = readFileSync(appPath, "utf8");
+  const next = text.replace(PDFREF, (whole, pre, ref, token, post) => {
+    const target = join(ROOT, ref);
+    if (!existsSync(target)) {
+      console.error(`✗ Cache stamp: app.js references a missing spec sheet: ${ref}`);
+      missing++;
+      return whole;
+    }
+    const want = hashOf(target);
+    if (token !== want) {
+      stale++;
+      console.error(`${CHECK ? "✗" : "•"} app.js: ${ref} ?v=${token ?? "(none)"} -> ?v=${want}`);
+    }
+    return `${pre}${ref}?v=${want}${post}`;
+  });
+  if (!CHECK && next !== text) writeFileSync(appPath, next);
+}
+
 /* Referenced files must exist. data.js paths are plain strings, so a typo (a space instead
    of a hyphen) is invisible until a customer clicks it - and the SPA fallback masks the
    404 as a 200 serving index.html, which the `download` attribute then saves as a .pdf.
    Interpolated paths are skipped: they cannot be resolved without executing the renderer. */
-const DOCREF = /["'](assets\/[^"'?]+\.(?:pdf|svg|webp|png|jpe?g))["']/gi;
+/* The optional ?v= is not decoration: the spec-sheet PDFs are stamped just above, and a
+   pattern that demanded a quote straight after the extension stopped matching them the
+   moment they were - silently narrowing this check instead of failing loudly. */
+const DOCREF = /["'](assets\/[^"'?]+\.(?:pdf|svg|webp|png|jpe?g))(?:\?v=[a-f0-9]*)?["']/gi;
 for (const src of ["data.js", "app.js"]) {
   const p = join(ROOT, src);
   if (!existsSync(p)) continue;
