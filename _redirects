@@ -22,5 +22,15 @@
 /cart/*         https://shop.americanbiocarbon.com/cart/:splat       302
 /checkouts/*    https://shop.americanbiocarbon.com/checkouts/:splat  302
 /checkout       https://shop.americanbiocarbon.com/checkout          302
+# The absorbent bulk SKUs moved from the metric ton to the US ton on 2026-09-09, so their
+# ids (and therefore /shop/<id>) went from "-mt" to "-ton". Biochar keeps "-mt" because it
+# really is sold by the metric ton. These MUST stay above the /* fallback.
+# The bulk SKUs are SPA-only (prerender.mjs snapshots the three
+# SAMPLE shop pages, not these), so there is no shop/absorbent-*-mt/ directory to strip.
+# If one is ever added, delete it when renaming: per the note at the top of this file a
+# static file that exists is served before _redirects is consulted, so an orphaned
+# snapshot would keep serving the metric-ton page and this rule would never run.
+/shop/absorbent-pellets-mt    /shop/absorbent-pellets-ton    301
+/shop/absorbent-crumble-mt    /shop/absorbent-crumble-ton    301
 # Marketing site hash-router SPA fallback
 /*    /index.html    200

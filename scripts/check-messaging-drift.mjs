@@ -106,29 +106,52 @@ if (flat.length) {
   flat.slice(0, 5).forEach(s => console.error(`    ${s.replace(/\s+/g, " ").slice(0, 130)}`));
 } else ok("No unqualified 5x claims.");
 
-/* ---- 3. the unit of sale must not disagree between the screen and the sent email ----
-   OPEN DECISION as of 2026-08-24, logged in sales-department/AUG20-EXECUTION.md.
-   The approved copy from the 2026-08-20 call says the US ton, and Victor typed
-   "sold in US ton super sacks" into AB.DIST himself, so that is what the live absorbent
-   campaigns now send. Everything else still says metric ton: the live Shopify checkout
-   (website/data.js), OUTREACH.facts, and roughly 25 strings in outreach-data.js including
-   "$275 per metric ton", which check-sales-canon asserts against the checkout.
-   A US ton is 2,000 lb, a metric ton is 2,205 lb, and the sack we ship is 1,650 lb. Those
-   are three different numbers and only Victor can say which is true.
-   This warns rather than fails: it is a pricing decision, not a code defect, and it should
-   stay visible on every run until somebody settles it. */
-const campaignsSayUsTon = /US ton super sacks/i.test(paste);
-const screenSaysMetricTon = /metric ton/i.test(blob);
-if (campaignsSayUsTon && screenSaysMetricTon) {
-  soft("UNIT OF SALE DISAGREES. Campaigns say 'US ton in US ton super sacks'; the Sales OS and\n" +
-       "  the live checkout still say 'metric ton' at $275. Three different weights are in play\n" +
-       "  (US ton 2,000 lb, metric ton 2,205 lb, actual sack 1,650 lb). Needs Victor. See\n" +
-       "  sales-department/AUG20-EXECUTION.md, item 01. Do not 'fix' this by editing one side.");
-} else if (!campaignsSayUsTon && !screenSaysMetricTon) {
-  ok("Unit of sale is consistent between the campaigns and the Sales OS.");
-} else {
-  ok("Unit of sale: no disagreement detected.");
-}
+/* ---- 3. absorbents are sold by the US ton, biochar by the metric ton ----
+   SETTLED 2026-09-09 by the operator: an absorbent US ton is 2,000 lb and that is the sack
+   we ship; biochar stays on the metric ton at $450. This replaces the open "UNIT OF SALE
+   DISAGREES" warning that stood here from 2026-08-24, when the campaigns had moved to the
+   US ton and the site, the Sales OS and the checkout had not.
+
+   The warning could not become an assertion in its old shape, because it tested the whole
+   Sales OS blob for the words "metric ton" and biochar says those words legitimately. So
+   the check is per string instead: any string that names an absorbent must not carry the
+   metric ton or the old 1,650 lb sack, and any string that prices absorbents must say the
+   US ton. Biochar is checked the other way round, so the two lines cannot swap units. */
+/* $275 is an absorbent signal in its own right, and it is the one that matters most:
+   "$275 per metric ton" names no product, so a product-word-only test walks straight past
+   the single most damaging string in the file. $450 plays the same role for biochar. */
+const ABSORBENT = /absorb|pellet|crumble|\$275/i;
+const strings = [];
+(function walk(v){
+  if (typeof v === "string") strings.push(v);
+  else if (Array.isArray(v)) v.forEach(walk);
+  else if (v && typeof v === "object") Object.values(v).forEach(walk);
+})(OUTREACH);
+
+const sacks = strings.filter(t => /1,?650\s*lb/i.test(t));
+if (sacks.length) bad(`outreach-data.js still ships the retired 1,650 lb sack in ${sacks.length} string(s). An absorbent super sack is 2,000 lb (1 US ton).`);
+else ok(`The retired 1,650 lb sack is gone from the Sales OS.`);
+
+const mixed = strings.filter(t => ABSORBENT.test(t) && /metric ton/i.test(t) && !/biochar|\$450/i.test(t));
+if (mixed.length) bad(`${mixed.length} absorbent string(s) in outreach-data.js still say "metric ton": ${mixed.map(t => JSON.stringify(t.slice(0, 70))).join("; ")}`);
+else ok(`No absorbent string in the Sales OS is priced or packaged in metric tons.`);
+
+const pasteSacks = /1,?650\s*lb/i.test(paste);
+/* Scoped to the surrounding paragraph, not the line: an email body wraps at ~75 chars, so
+   "priced at $450 a metric ton" can land a full line away from the word "biochar" that
+   makes it correct. $450 is itself a biochar signal - absorbents are $275. */
+const pasteMetric = [...paste.matchAll(/metric ton/gi)]
+  .map(m => paste.slice(Math.max(0, m.index - 300), m.index + 100))
+  .filter(ctx => !/biochar/i.test(ctx) || /\$275/.test(ctx))
+  .filter(ctx => !/\$450/.test(ctx) || /\$275/.test(ctx));
+if (pasteSacks) bad(`INSTANTLY-PASTE.md still says 1,650 lb. The absorbent sack is 2,000 lb (1 US ton).`);
+else if (pasteMetric.length) bad(`INSTANTLY-PASTE.md has ${pasteMetric.length} non-biochar "metric ton" line(s): ${pasteMetric.map(t => JSON.stringify(t.trim().slice(-70))).join("; ")}`);
+else ok(`The campaigns sell absorbents by the US ton and reserve the metric ton for biochar.`);
+
+/* Biochar must keep its own unit: a well-meaning find-and-replace in the other direction
+   is exactly as wrong, and would silently reprice 80 MT of finished inventory. */
+if (!/\$450 per metric ton/i.test(blob)) bad(`outreach-data.js no longer prices biochar per METRIC ton. Biochar is $450 / metric ton; only absorbents moved to the US ton.`);
+else ok(`Biochar still prices per metric ton ($450), unchanged by the absorbent move.`);
 
 console.log(fail ? `\n${fail} drift check(s) failed.` : `\nNo blocking messaging drift.${warn ? ` ${warn} open decision(s) flagged above.` : ""}`);
 process.exit(fail ? 1 : 0);

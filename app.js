@@ -857,16 +857,22 @@ const SHOPIFY_CHECKOUT = {
   "absorbent-crumble":   SHOP_DOMAIN + "/cart/55922925175076:1",
   // Absorbents sell BY THE US TON, packaged in 2,000 lb super sacks; biochar sells by the
   // METRIC TON. The priced unit and the package are distinct - keep both distinct in copy.
-  "absorbent-pellets-mt":   SHOP_DOMAIN + "/cart/54182475170084:1",
+  "absorbent-pellets-ton":   SHOP_DOMAIN + "/cart/54182475170084:1",
   "agricultural-biochar-mt": SHOP_DOMAIN + "/cart/54184340914468:1",
   // Standalone Shopify product "Absorbent Crumble" (10749467459876), $275 / US ton.
-  "absorbent-crumble-mt": SHOP_DOMAIN + "/cart/55923046023460:1",
+  "absorbent-crumble-ton": SHOP_DOMAIN + "/cart/55923046023460:1",
 };
-/* Bulk SKUs are priced per ton (US ton for absorbents, metric ton for biochar) and buyers
+/* The "-ton" / "-mt" suffix on a bulk id is the UNIT, not decoration: absorbents are
+   "-ton" (US ton) and biochar is "-mt" (metric ton). /shop/<id> is built from it, so the
+   suffix is customer visible in the URL and must not be renamed without a 301 in
+   _redirects AND deletion of the old prerendered directory - on Pages a file that exists
+   beats a redirect, so an orphaned snapshot keeps serving the old page forever.
+
+   Bulk SKUs are priced per ton (US ton for absorbents, metric ton for biochar) and buyers
    routinely order several, so their PDP gets a quantity stepper. The unit noun comes from
    the product's own `unit` field - never hardcode one, the two lines do not share it.
    Sample bags stay one-per-order (free, one to a customer). */
-const BULK_QTY_IDS = new Set(["absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble-mt"]);
+const BULK_QTY_IDS = new Set(["absorbent-pellets-ton","agricultural-biochar-mt","absorbent-crumble-ton"]);
 /* "1 US Ton" -> "US ton", "1 Metric Ton" -> "metric ton". Falls back to "ton" if a bulk
    SKU ever ships without a unit, which is wrong-but-harmless rather than wrong-and-specific. */
 function unitNoun(p){
@@ -881,7 +887,7 @@ function cartUrlQty(url, qty){
   return String(url).replace(/:\d+$/, ":" + n);
 }
 // ids whose primary CTA reads "Buy Now" instead of "Request a Sample Kit"
-const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble","absorbent-crumble-mt"]);
+const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-ton","agricultural-biochar-mt","absorbent-crumble","absorbent-crumble-ton"]);
 /* A product page is the one place "Buy Now" means buy THIS, so it goes straight to the
    Shopify cart. Everywhere else the same button routes to /buy (see CTA.buyNow), because
    the visitor has not picked a product or a size yet. If a product has no checkout, the
@@ -897,7 +903,7 @@ function productPrimary(id, cta){
 const SPEC_SPECID = {
   "absorbent-pellets": "absorbent-pellets",
   "agricultural-biochar": "biochar",
-  "absorbent-pellets-mt": "absorbent-pellets",
+  "absorbent-pellets-ton": "absorbent-pellets",
   "agricultural-biochar-mt": "biochar",
   // Crumble is deliberately NOT here: the absorbents PDF is written for pellets, so crumble
   // stays on "Request Spec Sheet" until it has its own approved sheet.
