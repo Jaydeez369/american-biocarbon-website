@@ -11,7 +11,7 @@
  * Checks:
  *   1. Every ICP a roster company is filed under exists as a campaign.
  *   2. roster-data.js is current with its generator (no stale committed build).
- *   3. Product facts in OUTREACH.facts match website/data.js, the live checkout.
+ *   3. Product facts and UNITS in OUTREACH.facts match website/data.js, the live checkout.
  *   4. Effort allocation across all campaigns sums to 100.
  *   5. Derived counts on window.ROSTER match the array beneath them.
  *   6. Every generated snapshot is fresh enough to be worth showing.
@@ -63,15 +63,35 @@ const priceOf = re => {
   const m = readFileSync(join(ROOT, "data.js"), "utf8").match(re);
   return m ? +m[1] : null;
 };
-const sitePrices = [...readFileSync(join(ROOT, "data.js"), "utf8").matchAll(/price:\s*(\d+),\s*priceLabel:\s*"\$(\d+) \/ metric ton"/g)]
-  .map(m => +m[1]);
-if (!sitePrices.length) bad(`Could not read any metric ton price out of website/data.js. The gate cannot verify facts.`);
+/* Units are NOT interchangeable and the site is the authority on both: biochar is priced
+   per METRIC ton, absorbents per US ton in 2,000 lb super sacks. A gate that reads only
+   "/ metric ton" is how the absorbent line silently carried the wrong unit, so both the
+   number and its unit are asserted here. */
+const siteJs = readFileSync(join(ROOT, "data.js"), "utf8");
+const priced = [...siteJs.matchAll(/id:"([\w-]+)"[\s\S]{0,900}?priceLabel:\s*"\$(\d+) \/ (metric ton|US ton)"/g)]
+  .map(m => ({ id: m[1], price: +m[2], unit: m[3] }));
+const expectUnit = id => (/biochar/.test(id) ? "metric ton" : "US ton");
+if (!priced.length) bad(`Could not read any priced SKU out of website/data.js. The gate cannot verify facts.`);
 else {
-  const uniq = [...new Set(sitePrices)].sort((a, b) => a - b);
-  const expected = [F.absorbentMt, F.biocharMt].sort((a, b) => a - b);
-  if (JSON.stringify(uniq) !== JSON.stringify(expected))
-    bad(`OUTREACH.facts prices ${expected.join("/")} do not match the live site prices ${uniq.join("/")}. website/data.js is the source of truth for what checkout charges.`);
-  else ok(`Product prices match the live checkout (${uniq.map(p => "$" + p).join(", ")} per metric ton).`);
+  const wrongUnit = priced.filter(p => p.unit !== expectUnit(p.id));
+  if (wrongUnit.length)
+    bad(`Wrong unit on ${wrongUnit.map(p => `${p.id} ($${p.price} / ${p.unit}, expected ${expectUnit(p.id)})`).join("; ")}. Biochar is metric tons; absorbents are US tons.`);
+  else ok(`Every priced SKU carries its correct unit (${priced.map(p => `${p.id} $${p.price}/${p.unit}`).join(", ")}).`);
+
+  const siteBiochar = [...new Set(priced.filter(p => expectUnit(p.id) === "metric ton").map(p => p.price))];
+  const siteAbsorb  = [...new Set(priced.filter(p => expectUnit(p.id) === "US ton").map(p => p.price))];
+  if (siteBiochar.length !== 1 || siteAbsorb.length !== 1)
+    bad(`website/data.js prices are not internally consistent: biochar ${siteBiochar.join("/")}, absorbents ${siteAbsorb.join("/")}.`);
+  else if (F.biocharMt !== siteBiochar[0] || F.absorbentUsTon !== siteAbsorb[0])
+    bad(`OUTREACH.facts (biochar ${F.biocharMt}/MT, absorbent ${F.absorbentUsTon}/US ton) do not match the live site (biochar ${siteBiochar[0]}, absorbent ${siteAbsorb[0]}). website/data.js is the source of truth for what checkout charges.`);
+  else ok(`Product prices match the live checkout (biochar $${siteBiochar[0]}/metric ton, absorbents $${siteAbsorb[0]}/US ton).`);
+
+  /* The super sack is the package, not the priced unit, but a wrong sack weight is the same
+     error wearing a different hat, so it is asserted too. */
+  const sacks = [...new Set([...siteJs.matchAll(/([\d,]+) lb super sacks/g)].map(m => m[1]))];
+  if (sacks.length !== 1 || +sacks[0].replace(/,/g, "") !== F.superSackLb)
+    bad(`Super sack weight on the site (${sacks.join("/") || "none"} lb) does not match OUTREACH.facts.superSackLb (${F.superSackLb}).`);
+  else ok(`Absorbent packaging is consistent (${sacks[0]} lb super sacks = 1 US ton).`);
 }
 
 /* ---- 4. effort sums to 100 ---- */

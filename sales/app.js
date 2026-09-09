@@ -227,7 +227,7 @@ function sec(num,t){return `<h2 class="sec"><span class="num">${num}</span>${t}<
    values live in exactly one place now; this is a rename, not a second source. */
 const LIVE = {
   biocharMt: F.biocharMt,
-  absorbentMt: F.absorbentMt,
+  absorbentUsTon: F.absorbentUsTon,
   inventoryMt: BIOCHAR_INVENTORY_TONS,
   samples: F.samples,
   sampleEta: F.sampleEta,

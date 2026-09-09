@@ -115,7 +115,7 @@ meta:{
 
    These MUST agree with website/data.js, which is the source of truth for what the live
    checkout actually charges. Verified against it: biochar 450, pellets 275, crumble 275,
-   all in 1,650 lb super sacks.
+   biochar by the metric ton, absorbents by the US ton in 2,000 lb super sacks.
 
    Note for anyone reading a HubSpot thread: the activity log contains older negotiated
    quotes (300 for powder, 225 for crumble, 230 for pellets). Those are records of what was
@@ -123,9 +123,9 @@ meta:{
    ============================================================ */
 facts:{
   biocharMt: 450,
-  absorbentMt: 275,
+  absorbentUsTon: 275,
   inventoryMt: 80,
-  superSackLb: 1650,
+  superSackLb: 2000,
   samples: "Biochar half pound, pellets 1 lb, crumble 1 lb",
   sampleEta: "4 to 7 business days",
   bulkEta: "7 to 10 business days",
@@ -148,7 +148,7 @@ facts:{
    allocation table can never drift from the cards.
    ============================================================ */
 plan:{
-  thesis:"Biochar is priority one because roughly 80 metric tons of it are finished and sitting. All three lines sell by the metric ton today, so a winning free sample converts to a paid order rather than to a promise. Absorbent is the second track by effort, not by availability, and after the Aug 10 call it carries far more addressable market than biochar does: biochar is fenced to 500 miles by port distance and carbon credit economics, while absorbent ships anywhere the buyer will pay freight.",
+  thesis:"Biochar is priority one because roughly 80 metric tons of it are finished and sitting. All three lines sell by the ton today, biochar by the metric ton and absorbents by the US ton, so a winning free sample converts to a paid order rather than to a promise. Absorbent is the second track by effort, not by availability, and after the Aug 10 call it carries far more addressable market than biochar does: biochar is fenced to 500 miles by port distance and carbon credit economics, while absorbent ships anywhere the buyer will pay freight.",
 
   wedge:[
     "The cold ask is always a free sample. Never a bulk quote, never an LOI, never a meeting. Those come after a trial wins.",
@@ -794,11 +794,11 @@ tracks:[
 {
   key:"absorbent",
   name:"Absorbent",
-  sub:"Nationwide track. Pellets and crumble, both sold by the metric ton.",
+  sub:"Nationwide track. Pellets and crumble, both sold by the US ton.",
   product:"Absorbent pellets and crumble made from sugarcane bagasse. Takes up to about 5 to 1 on non viscous liquids, against roughly 2.5 times for wood pellets. Lighter to handle and lighter to dispose of than clay.",
   geo:"Nationwide, FOB White Castle. The buyer covers freight, which is what opens the whole country up. Victor: if they need it and they are willing to pay the freight, that is fine with us. Operator ruling August 17, 2026: accounts past 500 road miles score lower and sit in a deferred contact tier. Near accounts get worked first; far accounts are later, never dead.",
-  price:"$275 per metric ton",
-  inventory:"Pellets and crumble, both sellable by the metric ton today",
+  price:"$275 per US ton",
+  inventory:"Pellets and crumble, both sellable by the US ton today",
   sample:"1 lb pellets or 1 lb crumble, 4 to 7 business days",
   why:"Jesse on the call: this is a lead generation campaign as much as a product campaign. Eight times out of ten a reply comes back with a phone number, and those numbers are what the power dialer runs on.",
 
@@ -981,7 +981,7 @@ tracks:[
       "Up to about 5 to 1 on non viscous liquids",
       "Roughly 2.5 to 1 is the wood pellet comparator",
       "100% sugarcane bagasse, made in White Castle, Louisiana",
-      "Finished inventory on hand, sold by the metric ton",
+      "Finished inventory on hand, sold by the US ton",
     ],
     guardrail:"Never promise enough free material to run a bore. The approved free sample is 1 lb and it is a comparison, not a job. Make no disposal classification or regulatory claim: we solidify liquid, we do not certify what the resulting waste is.",
     campaign:{
@@ -992,7 +992,7 @@ tracks:[
       offer:"Free 1 lb sample to compare against the material already on the trailer.",
       cta:"Want a 1 lb sample to try against what rides on the trailer now?",
       cta2:"If your supply house would rather stock it, who do you buy fluid from?",
-      metric:"1 lb comparisons run, then volume quoted by the metric ton",
+      metric:"1 lb comparisons run, then volume quoted by the US ton",
       cycle:"2 to 8 weeks, and it turns recurring once it lands.",
       list:"NEAR tier first per the operator ruling of August 17, 2026. 17 accounts on the roster.",
       persona:{
@@ -1051,7 +1051,7 @@ tracks:[
       "Up to about 5 to 1 on non viscous liquids",
       "100% sugarcane bagasse, a sugar mill byproduct",
       "Made in White Castle, Louisiana, with finished inventory on hand",
-      "Sold by the metric ton in 1,650 lb super sacks",
+      "Sold by the US ton in 2,000 lb super sacks",
     ],
     guardrail:"Do not assume what they stock. Some carry clay, some diatomaceous earth, some a proprietary blend, and the big houses with trademarked lines rarely take one in. Paper leads here: the pellet spec sheet first, a sample after the product side has looked at it. There is no crumble spec sheet.",
     campaign:{
@@ -1085,7 +1085,7 @@ tracks:[
         body:"Hi {First},\n\nEvery crew buying bentonite off your counter is also buying something for the mess at the entry pit, usually clay, usually from somebody else.\n\nWe make a sugarcane bagasse sorbent in White Castle. Plant based, up to about 5 to 1 on non viscous liquids against roughly 2.5 to 1 for wood, and we hold finished inventory.\n\nWorth a look as a line card add?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Spec first",
         subject:"spec for your product side",
-        body:"Hi {First},\n\nThis is for whoever owns the absorbent line rather than a pitch.\n\nOur sorbent is 100% sugarcane bagasse, a sugar mill byproduct, made in White Castle, Louisiana. Up to about 5 to 1 on non viscous liquids, wood is roughly 2.5 to 1, and it sells by the metric ton in 1,650 lb super sacks.\n\nWant the pellet spec sheet, or a 1 lb sample to look at first?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nThis is for whoever owns the absorbent line rather than a pitch.\n\nOur sorbent is 100% sugarcane bagasse, a sugar mill byproduct, made in White Castle, Louisiana. Up to about 5 to 1 on non viscous liquids, wood is roughly 2.5 to 1, and it sells by the US ton in 2,000 lb super sacks.\n\nWant the pellet spec sheet, or a 1 lb sample to look at first?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
     ],
     followups:[
       { t:"Follow up 1, day 4",
@@ -1095,7 +1095,7 @@ tracks:[
     ],
     phone:{
       opener:"Hi {First}, {Me} with American BioCarbon. Calling about the absorbent on your counter. Ours is a plant based sorbent made in Louisiana, up to about 5 to 1 on non viscous liquids. Are you the one who decides what gets stocked?",
-      voicemail:"Hi {First}, {Me} with American BioCarbon. Plant based sorbent made in Louisiana, sold by the metric ton. I would like to send the spec sheet for a line review. {phone}. Thanks.",
+      voicemail:"Hi {First}, {Me} with American BioCarbon. Plant based sorbent made in Louisiana, sold by the US ton. I would like to send the spec sheet for a line review. {phone}. Thanks.",
     },
     objections:[
       { o:"We already carry an absorbent",
@@ -1121,7 +1121,7 @@ tracks:[
     proof:[
       "Up to about 5 to 1 on non viscous liquids",
       "Less material to solidify the same volume",
-      "Sold by the metric ton, shipped nationwide",
+      "Sold by the US ton, shipped nationwide",
       "Made from sugarcane bagasse rather than mined clay",
     ],
     guardrail:"No claims about geotechnical performance or about meeting a disposal spec. We absorb liquid, that is the claim.",
@@ -1131,7 +1131,7 @@ tracks:[
       companies:["Heavy civil and site work contractors","Dredging operations","Slurry wall and deep foundation contractors","Marine construction","Demolition and excavation handling wet spoil"],
       triggers:["A job with a dewatering line item","Disposal tonnage running over budget","A wet season slowing the schedule","A new project mobilizing nearby"],
       disq:["Dry work only","Dewatering handled entirely by a specialty subcontractor","No repeat volume"],
-      offer:"Free 1 lb sample for the next dewatering job, with volume pricing by the metric ton.",
+      offer:"Free 1 lb sample for the next dewatering job, with volume pricing by the US ton.",
       cta:"Can I send a free sample for your next dewatering job?",
       cta2:"Want the spec and a price by the ton?",
       metric:"Samples tested on a job",
@@ -1156,10 +1156,10 @@ tracks:[
     variants:[
       { id:"A", angle:"Direct value",
         subject:"Cut the tonnage you haul off the site",
-        body:"Hi {First},\n\nWe make an absorbent from sugarcane bagasse that takes up to about 5 to 1 on non viscous liquids in liquid, about double what a wood pellet does.\n\nOn wet spoil, slurry and dredge material that means less product mixed in to get a load haulable, and less total tonnage leaving the site. Both show up on the disposal invoice.\n\nWe sell by the metric ton and ship nationwide. Want a free sample to test on the next one? Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nWe make an absorbent from sugarcane bagasse that takes up to about 5 to 1 on non viscous liquids in liquid, about double what a wood pellet does.\n\nOn wet spoil, slurry and dredge material that means less product mixed in to get a load haulable, and less total tonnage leaving the site. Both show up on the disposal invoice.\n\nWe sell by the US ton and ship nationwide. Want a free sample to test on the next one? Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"What does dewatering cost you per load?",
-        body:"Hi {First},\n\nWet material does not move, and everything you mix in to fix that becomes tonnage you pay to haul. So the absorbent you pick quietly sets your disposal cost.\n\nOurs takes up to about 5 to 1 on non viscous liquids, roughly double a wood pellet, so you add less and haul less. Made from sugarcane bagasse in Louisiana, sold by the metric ton, shipped anywhere.\n\nCan I send a free sample for your next dewatering job? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nWet material does not move, and everything you mix in to fix that becomes tonnage you pay to haul. So the absorbent you pick quietly sets your disposal cost.\n\nOurs takes up to about 5 to 1 on non viscous liquids, roughly double a wood pellet, so you add less and haul less. Made from sugarcane bagasse in Louisiana, sold by the US ton, shipped anywhere.\n\nCan I send a free sample for your next dewatering job? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"C", angle:"Short and curious",
         subject:"Drying out slurry and dredge spoil",
         body:"Hi {First},\n\nOur absorbent takes up to about 5 to 1 on non viscous liquids in liquid, which is about double a wood pellet.\n\nIf you are drying out spoil or slurry to get it haulable, reply and I will send the time lapse plus a free sample.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
@@ -1174,7 +1174,7 @@ tracks:[
     ],
     phone:{
       opener:"Hi {First}, {Me} with American BioCarbon. Calling about dewatering. We make a sugarcane absorbent that takes up to about 5 to 1 on non viscous liquids, so it takes less material to make a load haulable and less tonnage leaves the site. Are you the one sourcing that?",
-      voicemail:"Hi {First}, {Me} with American BioCarbon. Absorbent for slurry and dredge spoil, up to about 5 to 1 on non viscous liquids, sold by the metric ton. I would like to send you a free sample. {phone}. Thanks.",
+      voicemail:"Hi {First}, {Me} with American BioCarbon. Absorbent for slurry and dredge spoil, up to about 5 to 1 on non viscous liquids, sold by the US ton. I would like to send you a free sample. {phone}. Thanks.",
     },
     objections:[
       { o:"We use lime or cement kiln dust",
@@ -1200,7 +1200,7 @@ tracks:[
     proof:[
       "Up to about 5 to 1 on non viscous liquids",
       "Less added weight per unit of liquid solidified",
-      "Sold by the metric ton on a standing basis",
+      "Sold by the US ton on a standing basis",
       "Made from sugarcane bagasse",
     ],
     guardrail:"No paint filter test claim, no regulatory compliance claim, and no odor reduction percentage. Say it helps with moisture and handling.",
@@ -1210,7 +1210,7 @@ tracks:[
       companies:["Municipal and private landfills","Transfer stations","Liquid waste treatment facilities","Waste companies operating multiple sites"],
       triggers:["Leachate volume up after a wet stretch","A new liquid waste stream coming in","A solidifier contract up for renewal","Odor complaints at the working face"],
       disq:["No liquid waste acceptance","Locked into a corporate supply agreement with no site level discretion"],
-      offer:"Free 1 lb sample to run against their current solidifier, then standing supply by the metric ton if it wins.",
+      offer:"Free 1 lb sample to run against their current solidifier, then standing supply by the US ton if it wins.",
       cta:"Can I send a free sample to run against your current solidifier?",
       cta2:"Tell me your spec and I will tell you honestly whether we clear it.",
       metric:"Samples tested, then standing supply conversations",
@@ -1235,7 +1235,7 @@ tracks:[
     variants:[
       { id:"A", angle:"Direct value",
         subject:"Cut the weight you are paying to move",
-        body:"Hi {First},\n\nWe make a sugarcane bagasse absorbent that takes up to about 5 to 1 on non viscous liquids in liquid, roughly double what a wood pellet does.\n\nFor leachate and liquid waste solidification that means less material added per load and less total weight to place or haul. When everything is priced by the ton, that is the number that matters.\n\nWe supply by the metric ton on a standing basis. Can I send a free sample to run against your current solidifier?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nWe make a sugarcane bagasse absorbent that takes up to about 5 to 1 on non viscous liquids in liquid, roughly double what a wood pellet does.\n\nFor leachate and liquid waste solidification that means less material added per load and less total weight to place or haul. When everything is priced by the ton, that is the number that matters.\n\nWe supply by the US ton on a standing basis. Can I send a free sample to run against your current solidifier?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"Moisture and odor at the working face",
         body:"Hi {First},\n\nTwo things that never stop at a site like yours: liquid that has to be solidified before it moves, and moisture and odor at the working face.\n\nOurs is a bagasse absorbent that takes up to about 5 to 1 on non viscous liquids, so you use less of it and add less weight. It handles clean and it is made from sugarcane rather than mined clay.\n\nHappy to send a free sample to test. What is a good ship to address?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
@@ -1249,7 +1249,7 @@ tracks:[
       { t:"Follow up 2, day 7",
         b:"Hi {First},\n\nIf sourcing is not yours, who should I be talking to? I just want a free sample in the right hands.\n\n{Me}\n{phone}" },
       { t:"Breakup, day 12",
-        b:"Hi {First},\n\nI will close the loop here. If solidifier comes up for review, we supply by the metric ton on a standing basis and the sample is free.\n\n{Me}\n{phone}" },
+        b:"Hi {First},\n\nI will close the loop here. If solidifier comes up for review, we supply by the US ton on a standing basis and the sample is free.\n\n{Me}\n{phone}" },
     ],
     phone:{
       opener:"Hi {First}, {Me} with American BioCarbon. For leachate and liquid waste solidification we make a sugarcane absorbent that takes up to about 5 to 1 on non viscous liquids, so you add less material and move less weight. Are you the right person to send a spec and a free sample to?",
@@ -1279,7 +1279,7 @@ tracks:[
     proof:[
       "Up to about 5 to 1 on non viscous liquids",
       "Made in the United States from sugarcane bagasse",
-      "Sold by the metric ton, shipped nationwide",
+      "Sold by the US ton, shipped nationwide",
     ],
     guardrail:"Do not claim a heavy metal remediation capability. The sock product is in development and is not something to sell yet. Do not claim any procurement certification or approved vendor status we do not hold.",
     campaign:{
@@ -1358,7 +1358,7 @@ tracks:[
     proof:[
       "Up to about 5 to 1 on non viscous liquids, roughly double a wood pellet",
       "We manufacture it at our own mill, so private label is a real conversation",
-      "Sold by the metric ton in 1,650 lb super sacks",
+      "Sold by the US ton in 2,000 lb super sacks",
       "Made in the United States from sugarcane bagasse",
     ],
     guardrail:"Do not promise private label or co branded packaging terms in a cold email. We can produce it, but the terms are a conversation with Victor, not a line in an opener.",
@@ -1372,25 +1372,25 @@ tracks:[
     variants:[
       { id:"A", angle:"Direct value",
         subject:"Who supplies your loose absorbent?",
-        body:"Hi {First},\n\nYou already stock a loose absorbent, so this is a supply question rather than a new category.\n\nWe manufacture one from sugarcane bagasse at our own mill in White Castle, Louisiana. It takes up to about 5 to 1 on non viscous liquids in liquid, which is roughly double a wood pellet, and we sell it by the metric ton in 1,650 lb super sacks.\n\nCan I send a free sample and our distributor pricing? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nYou already stock a loose absorbent, so this is a supply question rather than a new category.\n\nWe manufacture one from sugarcane bagasse at our own mill in White Castle, Louisiana. It takes up to about 5 to 1 on non viscous liquids in liquid, which is roughly double a wood pellet, and we sell it by the US ton in 2,000 lb super sacks.\n\nCan I send a free sample and our distributor pricing? Just need a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Problem led",
         subject:"Your absorbent line is missing a plant based option",
         body:"Hi {First},\n\nMost absorbent lines are clay and wood, and more buyers are asking for something that is not mined.\n\nOurs is made from sugarcane bagasse and takes up to about 5 to 1 on non viscous liquids, so it sits above clay on performance rather than beside it on price. We manufacture it ourselves, which means supply is ours and a house label is a real option.\n\nWorth a free sample and a look at distributor pricing? Reply with a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"C", angle:"Short and curious",
         subject:"We manufacture it, we do not broker it",
-        body:"Hi {First},\n\nWe make a sugarcane absorbent at our own mill in Louisiana. Up to about 5 to 1 on non viscous liquids, sold by the metric ton.\n\nWorth a free sample and the distributor sheet? Send me a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nWe make a sugarcane absorbent at our own mill in Louisiana. Up to about 5 to 1 on non viscous liquids, sold by the US ton.\n\nWorth a free sample and the distributor sheet? Send me a ship to address.\n\n{Me}\nAmerican BioCarbon\n{phone}" },
     ],
     followups:[
       { t:"Follow up 1, day 3",
-        b:"Hi {First},\n\nThe short version: we manufacture a sugarcane absorbent that takes up to about 5 to 1 on non viscous liquids and we sell it by the metric ton to distributors.\n\nHappy to send a free sample and pricing. A ship to address is all I need.\n\n{Me}\n{phone}" },
+        b:"Hi {First},\n\nThe short version: we manufacture a sugarcane absorbent that takes up to about 5 to 1 on non viscous liquids and we sell it by the US ton to distributors.\n\nHappy to send a free sample and pricing. A ship to address is all I need.\n\n{Me}\n{phone}" },
       { t:"Follow up 2, day 7",
         b:"Hi {First},\n\nAre you the one who evaluates new products for the line, or should I be talking to a category manager? Point me the right way and I will stop filling your inbox.\n\n{Me}\n{phone}" },
       { t:"Breakup, day 12",
         b:"Hi {First},\n\nI will park this. If a plant based absorbent ever comes up for the line, or if you need a manufacturer behind a house label, we are here.\n\n{Me}\n{phone}" },
     ],
     phone:{
-      opener:"Hi {First}, {Me} with American BioCarbon. You already carry a loose absorbent, so I will keep this to a supply question. We manufacture one from sugarcane at our own mill, up to about 5 to 1 on non viscous liquids, sold by the metric ton. Are you the one who evaluates products for the line?",
-      voicemail:"Hi {First}, {Me} with American BioCarbon. We manufacture a sugarcane absorbent and sell it by the metric ton to distributors. I would like to send a free sample and pricing. {phone}. Thanks.",
+      opener:"Hi {First}, {Me} with American BioCarbon. You already carry a loose absorbent, so I will keep this to a supply question. We manufacture one from sugarcane at our own mill, up to about 5 to 1 on non viscous liquids, sold by the US ton. Are you the one who evaluates products for the line?",
+      voicemail:"Hi {First}, {Me} with American BioCarbon. We manufacture a sugarcane absorbent and sell it by the US ton to distributors. I would like to send a free sample and pricing. {phone}. Thanks.",
     },
     objections:[
       { o:"We have a supplier for that",
@@ -1403,7 +1403,7 @@ tracks:[
       companies:["Industrial safety distributors","Environmental and restoration suppliers","Janitorial and sanitation supply houses","Oilfield and industrial supply distributors","Private label and house brand absorbent programs"],
       triggers:["A line review or an annual buying cycle","Their current absorbent supplier missing deliveries","Customers asking for a plant based option","Building out a house label"],
       disq:["Manufactures its own proprietary blend, which Victor flagged as unlikely to engage","No shelf and no reps, purely a price broker","Freight distance so long the product cannot carry it"],
-      offer:"Free 1 lb sample plus distributor pricing by the metric ton, and a private label conversation if the product earns it.",
+      offer:"Free 1 lb sample plus distributor pricing by the US ton, and a private label conversation if the product earns it.",
       cta:"Can I send a free sample and our distributor pricing?",
       cta2:"Want the spec and the super sack format first?",
       metric:"Distributor conversations opened, then stocking pilots",
@@ -1437,7 +1437,7 @@ tracks:[
       "Up to about 5 to 1 on non viscous liquids",
       "Roughly 2.5 to 1 is the wood comparator",
       "100% sugarcane bagasse, made in White Castle, Louisiana",
-      "Sold by the metric ton in 1,650 lb super sacks",
+      "Sold by the US ton in 2,000 lb super sacks",
     ],
     guardrail:"The hardest line in the book and the easiest to cross by accident. Bedding, moisture and litter management ONLY. No feed claim. No animal health, performance or mortality claim. No ammonia outcome claim. No compost performance claim. No customer anecdotes. If a reply moves toward health outcomes, say we sell it as a bedding and absorbency product and stop there. The approved free sample is 1 lb and never a house or stall trial.",
     campaign:{
@@ -1470,7 +1470,7 @@ tracks:[
         body:"Hi {First},\n\nMost of the bedding on a farm supply shelf is wood or paper. Ours is sugarcane bagasse out of a Louisiana sugar mill, so it is a plant based byproduct rather than cut timber.\n\nIt takes up to about 5 to 1 on non viscous liquids, against roughly 2.5 to 1 for wood.\n\nWant a 1 lb sample to look at?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
       { id:"B", angle:"Buying side",
         subject:"spec for the buying side",
-        body:"Hi {First},\n\nSending this to the buying side rather than pitching a store.\n\nOurs is 100% sugarcane bagasse, made in White Castle, Louisiana, sold by the metric ton in 1,650 lb super sacks with finished inventory on hand. We sell it as a bedding and absorbency product.\n\nWant the pellet spec sheet, or a 1 lb sample?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
+        body:"Hi {First},\n\nSending this to the buying side rather than pitching a store.\n\nOurs is 100% sugarcane bagasse, made in White Castle, Louisiana, sold by the US ton in 2,000 lb super sacks with finished inventory on hand. We sell it as a bedding and absorbency product.\n\nWant the pellet spec sheet, or a 1 lb sample?\n\n{Me}\nAmerican BioCarbon\n{phone}" },
     ],
     followups:[
       { t:"Follow up 1, day 4",
@@ -1480,7 +1480,7 @@ tracks:[
     ],
     phone:{
       opener:"Hi {First}, {Me} with American BioCarbon. Calling about the bedding you carry. Ours is a sugarcane bagasse product made in Louisiana, sold as a bedding and absorbency product. Are you the one who buys that line?",
-      voicemail:"Hi {First}, {Me} with American BioCarbon. Plant based bagasse bedding made in Louisiana, sold by the metric ton. I would like to send the spec sheet. {phone}. Thanks.",
+      voicemail:"Hi {First}, {Me} with American BioCarbon. Plant based bagasse bedding made in Louisiana, sold by the US ton. I would like to send the spec sheet. {phone}. Thanks.",
     },
     objections:[
       { o:"Does it help with ammonia or bird health",

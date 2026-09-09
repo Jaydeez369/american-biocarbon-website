@@ -754,7 +754,7 @@ function buyCard(p){
       <h3>${raw(p.name)}</h3>
       <p class="claim">${raw(p.claim)}</p>
       ${p.uses?`<ul class="uses">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
-      <div class="chips">${(p.chips||[]).filter(c=>/sample bag|metric ton|super sack/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
+      <div class="chips">${(p.chips||[]).filter(c=>/sample bag|metric ton|us ton|super sack/i.test(c)).map(c=>`<span>${raw(c)}</span>`).join("")}</div>
       <div class="availline">${isLive?(p.priceLabel?"FOB bulk bags ready in 7-10 business days.":"Free sample ships in 4 to 7 business days. Bulk and truckload by quote."):"Coming Q4. Request a sample on a 30 day lead time."}</div>
       ${docs}
       ${cta}
@@ -855,16 +855,25 @@ const SHOPIFY_CHECKOUT = {
   "agricultural-biochar": SHOP_DOMAIN + "/cart/54185346335012:1",
   // Third $0 variant of the same "Product Samples" product (Shopify spells it "Abosrbent Crumble").
   "absorbent-crumble":   SHOP_DOMAIN + "/cart/55922925175076:1",
-  // Sold BY THE METRIC TON; packaged in 1,650 lb super sacks (the priced unit is the
-  // metric ton, the sack is the package - keep the two distinct in all copy).
+  // Absorbents sell BY THE US TON, packaged in 2,000 lb super sacks; biochar sells by the
+  // METRIC TON. The priced unit and the package are distinct - keep both distinct in copy.
   "absorbent-pellets-mt":   SHOP_DOMAIN + "/cart/54182475170084:1",
   "agricultural-biochar-mt": SHOP_DOMAIN + "/cart/54184340914468:1",
-  // Standalone Shopify product "Absorbent Crumble" (10749467459876), $275 / metric ton.
+  // Standalone Shopify product "Absorbent Crumble" (10749467459876), $275 / US ton.
   "absorbent-crumble-mt": SHOP_DOMAIN + "/cart/55923046023460:1",
 };
-/* Bulk SKUs are priced per metric ton and buyers routinely order several tons, so their
-   PDP gets a quantity stepper. Sample bags stay one-per-order (free, one to a customer). */
+/* Bulk SKUs are priced per ton (US ton for absorbents, metric ton for biochar) and buyers
+   routinely order several, so their PDP gets a quantity stepper. The unit noun comes from
+   the product's own `unit` field - never hardcode one, the two lines do not share it.
+   Sample bags stay one-per-order (free, one to a customer). */
 const BULK_QTY_IDS = new Set(["absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble-mt"]);
+/* "1 US Ton" -> "US ton", "1 Metric Ton" -> "metric ton". Falls back to "ton" if a bulk
+   SKU ever ships without a unit, which is wrong-but-harmless rather than wrong-and-specific. */
+function unitNoun(p){
+  const u = String((p && p.unit) || "").replace(/^\s*(1|½|\d+)\s*/, "").trim();
+  if(!u) return "ton";
+  return /^US\b/.test(u) ? "US ton" : u.toLowerCase();
+}
 const QTY_MAX = 40; // larger orders go through a specialist, not self-serve checkout
 // A Shopify cart permalink ends in "<variantId>:<qty>" - swap the qty in place.
 function cartUrlQty(url, qty){
@@ -906,25 +915,26 @@ function renderShopProduct(id){
   const hasCheckout = !!SHOPIFY_CHECKOUT[p.id];
   const isBuyNow = BUY_NOW_IDS.has(p.id) && hasCheckout;
   const ctaLabel = isBuyNow ? "Buy Now" : (p.priceLabel ? "Talk to a specialist" : "Request a Sample Kit");
-  // Bulk (metric-ton) SKUs are paid; the sample bags stay free. Both are Shopify checkouts.
+  // Bulk (per-ton) SKUs are paid; the sample bags stay free. Both are Shopify checkouts.
   const priceHTML = p.priceLabel
     ? `<div class="pdp-price">${raw(p.priceLabel)}${p.stock?` <span>· ${p.stock} in stock</span>`:""}</div>`
     : `<div class="pdp-price free">Free sample <span>· shipping &amp; handling included</span></div>`;
   const checkoutHref = SHOPIFY_CHECKOUT[p.id]
     ? SHOPIFY_CHECKOUT[p.id]
     : (p.priceLabel ? `/contact?product=${p.id}&intent=purchase` : `/request-sample?product=${p.id}`);
-  // Metric-ton SKUs order in whole tons: stepper rewrites every [data-buy-link] on the page.
+  // Bulk SKUs order in whole tons: stepper rewrites every [data-buy-link] on the page.
   const showQty = hasCheckout && BULK_QTY_IDS.has(p.id);
+  const unitWord = unitNoun(p);
   const qtyHTML = showQty ? `
-        <div class="pdp-qtyrow" data-qty-row data-base-href="${checkoutHref}" data-unit-price="${p.price||0}">
+        <div class="pdp-qtyrow" data-qty-row data-base-href="${checkoutHref}" data-unit-price="${p.price||0}" data-unit-noun="${raw(unitWord)}">
           <span class="pdp-qlabel">Quantity</span>
           <div class="pdp-qty">
             <button class="qty-btn" type="button" data-qty-step="-1" aria-label="Decrease quantity">&minus;</button>
             <input class="qty-val" type="number" inputmode="numeric" min="1" max="${QTY_MAX}" value="1"
-                   data-qty-input aria-label="Quantity in metric tons" style="border:0;background:transparent;width:56px">
+                   data-qty-input aria-label="Quantity in ${raw(unitWord)}s" style="border:0;background:transparent;width:56px">
             <button class="qty-btn" type="button" data-qty-step="1" aria-label="Increase quantity">+</button>
           </div>
-          <span class="pdp-qlabel" data-qty-total style="font-weight:400;color:var(--mute)">metric ton${p.price?` · $${p.price.toLocaleString()} total`:""}</span>
+          <span class="pdp-qlabel" data-qty-total style="font-weight:400;color:var(--mute)">${raw(unitWord)}${p.price?` · $${p.price.toLocaleString()} total`:""}</span>
         </div>` : "";
   return `
   <section class="block" style="padding-top:34px"><div class="wrap">
@@ -978,7 +988,7 @@ document.addEventListener("click", e=>{
   media.querySelectorAll(".pdp-slide").forEach(s=>s.classList.toggle("active", s.dataset.slide===i));
   media.querySelectorAll(".pdp-thumb").forEach(x=>x.classList.toggle("active", x===t));
 });
-/* PDP quantity stepper (bulk metric-ton SKUs only). The Shopify cart permalink carries
+/* PDP quantity stepper (bulk per-ton SKUs only). The Shopify cart permalink carries
    the quantity, so every Buy Now link on the page is rewritten to "<variant>:<qty>" and
    the running total is kept in sync. Nothing here touches sample-bag pages. */
 function syncQty(row, qty){
@@ -989,7 +999,8 @@ function syncQty(row, qty){
   document.querySelectorAll("[data-buy-link]").forEach(a=>{ a.href = cartUrlQty(base, n); });
   const unit = parseFloat(row.dataset.unitPrice) || 0;
   const total = row.querySelector("[data-qty-total]");
-  if(total) total.textContent = `metric ton${n>1?"s":""}` + (unit ? ` · $${(unit*n).toLocaleString()} total` : "");
+  const noun = row.dataset.unitNoun || "ton";
+  if(total) total.textContent = `${noun}${n>1?"s":""}` + (unit ? ` · $${(unit*n).toLocaleString()} total` : "");
 }
 document.addEventListener("click", e=>{
   const b = e.target.closest("[data-qty-step]"); if(!b) return;

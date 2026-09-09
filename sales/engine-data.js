@@ -285,7 +285,7 @@ instantly:{
     { p:6, t:"Crumble technical packet", d:"Blocks AB.MUNI, AB.LF and AB.DIST from converting a reply. A video persuades a person, a document gets a product onto an approved vendor list.", owner:"Jesse, from verified facts only" },
     { p:7, t:"Windrow trial protocol one pager", d:"Blocks BC.COMP email 1 and step 2. The protocol design already exists in playbook 08.", owner:"Jesse" },
     { p:8, t:"Sender identity confirmation", d:"Two domains, four mailboxes, From name a real person on each.", owner:"Jesse" },
-    { p:9, t:"Municipal packaging below a super sack", d:"If we cannot pack under 1,650 lb, AB.MUNI spill kit and in vehicle use cases close and only yard, street and stormwater demand remains.", owner:"operations" },
+    { p:9, t:"Municipal packaging below a super sack", d:"If we cannot pack under 2,000 lb, AB.MUNI spill kit and in vehicle use cases close and only yard, street and stormwater demand remains.", owner:"operations" },
     { p:10, t:"NRCS 336 cost share for BC.FARM", d:"Probably the strongest farm hook available and still unverified. Verify, then add as a third BC.FARM version. Never improvise it on a reply.", owner:"Jesse" },
   ],
 },

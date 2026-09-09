@@ -112,7 +112,7 @@ const DATA = {
     { id:"freight", name:"Freight-Aware Delivered Margin", inputs:["Product revenue","COGS","Freight cost"], formula:"delivered margin = revenue − COGS − freight; margin % = /revenue", saves:["delivered margin","est. freight"] },
   ],
   sample:{
-    sizes:["Absorbent Pellets — 1 lb sample (free, S&H incl.)","Absorbent Crumble — 1 lb sample (free, S&H incl.)","100% Biochar — 8 oz sample (free, S&H incl.)","LIVE bulk: Biochar $450/MT · Pellets & Crumble $275/MT (1,650 lb super sacks)","(Q4+) truckload supply once capacity is online"],
+    sizes:["Absorbent Pellets — 1 lb sample (free, S&H incl.)","Absorbent Crumble — 1 lb sample (free, S&H incl.)","100% Biochar — 8 oz sample (free, S&H incl.)","LIVE bulk: Biochar $450 / metric ton · Pellets & Crumble $275 / US ton (2,000 lb super sacks)","(Q4+) truckload supply once capacity is online"],
     gates:["Confirmed ICP + use case","Named decision-maker (who can sign an LOI)","Agreed success criteria","Ship-to address"],
     fields:["account","contact","product","sample size","use case","success criteria","ship-to","ship date","carrier/tracking","follow-up date","outcome"],
     follow:["Day 0 ship confirmation","Day 3 'arrived?'","Day 7 trial check-in","Day 10 results + present LOI"],
@@ -176,7 +176,7 @@ const DATA = {
 
   /* ============ 11. PLAYBOOK ============ */
   playbook:{
-    principles:["Sample first, then convert a winning trial to a PAID metric-ton order at the published site price","A PO against the roughly 80 MT on hand is the Month-1 win. The LOI sits on top of it to reserve Q4 TRUCKLOAD volume","Never advance a stage without its exit criteria","Every trial has a written success metric before it ships","Claim discipline: match every claim to its proof tier","Multi-thread any account worth a meaningful recurring order","Carbon is a days-61–90 layer, not the Month-1 pitch","Log it in the app or it didn't happen"],
+    principles:["Sample first, then convert a winning trial to a PAID bulk order at the published site price (biochar by the metric ton, absorbents by the US ton)","A PO against the roughly 80 MT on hand is the Month-1 win. The LOI sits on top of it to reserve Q4 TRUCKLOAD volume","Never advance a stage without its exit criteria","Every trial has a written success metric before it ships","Claim discipline: match every claim to its proof tier","Multi-thread any account worth a meaningful recurring order","Carbon is a days-61–90 layer, not the Month-1 pitch","Log it in the app or it didn't happen"],
     qual:{ framework:"MEDDIC-A (adapted): Metrics, Economic buyer, Decision criteria, Decision process, Identify pain, Champion + Application/Carbon fit",
       criteria:["Real, specific use case","Order potential ≥ pallet w/ recurring path","Freight fit (zone A/B or volume justifies C)","Named decision-maker engaged","Urgency / trigger present","Proof requirements known","Sample success criteria agreed","Carbon-credit eligibility assessed","Operational complexity acceptable"] },
     discovery:{

@@ -67,8 +67,8 @@
   <div class="toast" id="toast">Copied to clipboard</div>
 
   <!-- LEAN daily-driver view. load order: data → gtm-data → gtm (exposes window.GTMB) → pipeline (exposes window.PIPELIVE) → outreach (exposes window.OUTREACH_UI) → engine (exposes window.ENGINE_UI) → crumble (exposes window.CRUMBLE_UI) → app -->
-  <script src="data.js?v=f67d7711"></script>
-  <script src="gtm-data.js?v=1d0188f7"></script>
+  <script src="data.js?v=91f81250"></script>
+  <script src="gtm-data.js?v=9dd10959"></script>
   <script src="gtm.js?v=24092995"></script>
   <script src="pipeline-data.js?v=5d82008e"></script>
   <!-- roster-data.js is NOT loaded here. It is 2.1 MB of the 2.9 MB this app used to pull
@@ -77,19 +77,19 @@
        the lazy fetch is cache busted exactly like every other asset. Do not turn this back
        into a script tag without reading the ROSTER, LOADED LATE block in app.js: two modules
        cache roster derived aggregates on first call and need their bust hooks. -->
-  <span id="rosterSrc" hidden data-src="roster-data.js?v=58996685"></span>
+  <span id="rosterSrc" hidden data-src="roster-data.js?v=4d2b7eb1"></span>
   <script src="hubspot-data.js?v=2b77b695"></script>
   <script src="hubspot-comms.js?v=c969930f"></script>
   <script src="pipeline.js?v=3e09688a"></script>
-  <script src="outreach-data.js?v=99d57e78"></script>
+  <script src="outreach-data.js?v=882ec239"></script>
   <script src="outreach.js?v=815780b5"></script>
   <script src="phone-data.js?v=4a650573"></script>
   <script src="instantly-data.js?v=8a5a32e7"></script>
   <script src="apollo-data.js?v=badc561d"></script>
-  <script src="engine-data.js?v=e7b0e5e7"></script>
+  <script src="engine-data.js?v=7efdc9a7"></script>
   <script src="engine.js?v=8d9d5535"></script>
   <script src="reports.js?v=187748a3"></script>
   <script src="summary.js?v=f58cfc1e"></script>
-  <script src="app.js?v=628ab051"></script>
+  <script src="app.js?v=9cd7398a"></script>
 </body>
 </html>
