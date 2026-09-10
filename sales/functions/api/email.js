@@ -31,6 +31,8 @@
  * the `block_list_entries` scope the suppression consumer wants, and this route never writes.
  */
 
+import { redact } from '../_lib/redact.js';
+
 const API = 'https://api.instantly.ai/api/v2';
 const TIMEOUT_MS = 8000;
 
@@ -118,7 +120,7 @@ export async function onRequestGet(context) {
       if (!cursor || batch.length < PAGE) break;
     }
   } catch (error) {
-    return soft(abort.signal.aborted ? 'timeout' : 'unreachable', String(error).slice(0, 200));
+    return soft(abort.signal.aborted ? 'timeout' : 'unreachable', redact(error, env));
   } finally {
     clearTimeout(timer);
   }

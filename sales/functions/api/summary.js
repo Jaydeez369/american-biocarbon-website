@@ -38,6 +38,7 @@
  */
 import { requireCapability } from '../_lib/authz.js';
 import { REPORTED_ON, scopeOf } from '../_lib/authz.js';
+import { redact } from '../_lib/redact.js';
 
 const DEFAULT_WORKER = 'https://allo-hooks.csopsmarketing.workers.dev';
 const TIMEOUT_MS = 8000;
@@ -125,7 +126,7 @@ export async function onRequestGet(context) {
        reporting a short day. */
     [audit, feed] = await Promise.all([get('/crm/audit?limit=500'), get('/export?limit=1000')]);
   } catch (error) {
-    return soft(abort.signal.aborted ? 'timeout' : 'unreachable', String(error).slice(0, 200));
+    return soft(abort.signal.aborted ? 'timeout' : 'unreachable', redact(error, env));
   } finally {
     clearTimeout(timer);
   }

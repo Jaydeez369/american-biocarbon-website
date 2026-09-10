@@ -40,6 +40,7 @@ const API = 'https://api.withallo.com';
 const TIMEOUT_MS = 12000; // three sequential writes on a cold edge, still bounded
 
 import { requireCapability } from '../_lib/authz.js';
+import { redact } from '../_lib/redact.js';
 
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -117,7 +118,7 @@ export async function onRequestPost(context) {
     return json({
       ok: false,
       reason: abort.signal.aborted ? 'timeout' : 'unreachable',
-      error: String(error).slice(0, 300),
+      error: redact(error, env, 300),
     }, 502);
   } finally {
     clearTimeout(timer);

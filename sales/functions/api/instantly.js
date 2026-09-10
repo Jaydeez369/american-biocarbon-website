@@ -23,6 +23,7 @@
  */
 
 import { shapeInstantly } from '../_lib/instantly-shape.js';
+import { redact } from '../_lib/redact.js';
 
 const API = 'https://api.instantly.ai/api/v2';
 const TIMEOUT_MS = 8000;
@@ -82,7 +83,7 @@ export async function onRequestGet(context) {
   } catch (error) {
     if (abort.signal.aborted) return soft('timeout', `Instantly did not answer in ${TIMEOUT_MS}ms`);
     if (error && error.status === 401) return soft('unauthorized', error.detail || 'key rejected');
-    return soft('upstream-error', String(error && error.message ? error.message : error).slice(0, 240));
+    return soft('upstream-error', redact(error, env, 240));
   } finally {
     clearTimeout(timer);
   }

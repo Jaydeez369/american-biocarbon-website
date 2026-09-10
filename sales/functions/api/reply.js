@@ -60,6 +60,7 @@ const signatureHtml = () =>
   `<a href="https://${SIGNATURE.site}">${SIGNATURE.site}</a></p>`;
 
 import { requireCapability } from '../_lib/authz.js';
+import { redact } from '../_lib/redact.js';
 
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -134,7 +135,7 @@ export async function onRequestPost(context) {
     return json({
       ok: false,
       reason: abort.signal.aborted ? 'timeout' : 'unreachable',
-      error: String(error).slice(0, 200),
+      error: redact(error, env),
     }, 502);
   } finally {
     clearTimeout(timer);

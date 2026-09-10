@@ -37,6 +37,8 @@
  *   APOLLO_API_KEY   secret. The same key that is in .env.
  */
 
+import { redact } from '../_lib/redact.js';
+
 const HEALTH = 'https://api.apollo.io/api/v1/auth/health';
 const TIMEOUT_MS = 6000;
 
@@ -61,7 +63,7 @@ export async function onRequestGet(context) {
        key rather than a wrong verb — it cost a debugging round the first time. */
     res = await fetch(HEALTH, { headers: { 'x-api-key': key }, signal: abort.signal });
   } catch (error) {
-    return soft(abort.signal.aborted ? 'timeout' : 'unreachable', String(error).slice(0, 200));
+    return soft(abort.signal.aborted ? 'timeout' : 'unreachable', redact(error, env));
   } finally {
     clearTimeout(timer);
   }

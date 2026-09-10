@@ -37,6 +37,8 @@
  * the page is exactly as it was. Setting it is the whole go-live step.
  */
 
+import { redact } from '../_lib/redact.js';
+
 const DEFAULT_WORKER = 'https://allo-hooks.csopsmarketing.workers.dev';
 
 /* Long enough for a cold Worker and a D1 read, short enough that a wedged dependency cannot
@@ -72,7 +74,7 @@ export async function onRequestGet(context) {
       signal: abort.signal,
     });
   } catch (error) {
-    return soft(abort.signal.aborted ? 'timeout' : 'unreachable', String(error).slice(0, 200));
+    return soft(abort.signal.aborted ? 'timeout' : 'unreachable', redact(error, env));
   } finally {
     clearTimeout(timer);
   }

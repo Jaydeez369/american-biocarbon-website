@@ -42,6 +42,7 @@ const DEFAULT_WORKER = 'https://allo-hooks.csopsmarketing.workers.dev';
 const TIMEOUT_MS = 8000;
 
 import { requireCapability, crmCapability } from './authz.js';
+import { redact } from './redact.js';
 
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -117,7 +118,7 @@ export async function proxyCrm(context, kind) {
     });
   } catch (error) {
     const reason = abort.signal.aborted ? 'timeout' : 'unreachable';
-    return json({ ok: false, reason, error: String(error).slice(0, 200) }, isRead ? 200 : 502);
+    return json({ ok: false, reason, error: redact(error, env) }, isRead ? 200 : 502);
   } finally {
     clearTimeout(timer);
   }
