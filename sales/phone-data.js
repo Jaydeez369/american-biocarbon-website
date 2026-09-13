@@ -6,10 +6,10 @@
    Re-stamp after any outbound activity:
      NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem node build-phone-snapshot.mjs
 
-   Read on 2026-09-08, 2026-08-09 to 2026-09-08. Reads only; nothing here writes to Allo.
+   Read on 2026-09-13, 2026-08-14 to 2026-09-13. Reads only; nothing here writes to Allo.
    FORMATTING RULE: no hyphens, en dashes or em dashes in any visible string. */
 window.PHONE = {
-  "read": "2026-09-08, 2026-08-09 to 2026-09-08",
+  "read": "2026-09-13, 2026-08-14 to 2026-09-13",
   "window": "30 days",
   "salesLine": "+12253989286",
   "outboundLine": "+17867519983",
@@ -20,11 +20,11 @@ window.PHONE = {
   "agentTransferRules": 4,
   "flowStatus": "PUBLISHED",
   "ringsAPerson": true,
-  "dials": 17,
+  "dials": 26,
   "connected": 4,
-  "connectRate": 0.235,
+  "connectRate": 0.154,
   "conversations": 3,
-  "conversationRate": 0.176,
+  "conversationRate": 0.115,
   "conversions": 0,
   "conversionRate": 0,
   "conversionTags": [
@@ -48,6 +48,10 @@ window.PHONE = {
     {
       "date": "2026-08-31",
       "dials": 5
+    },
+    {
+      "date": "2026-09-07",
+      "dials": 9
     }
   ],
   "totalCalls": null

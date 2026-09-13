@@ -12,8 +12,8 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-09-08 12:58 UTC",
-  "readDate": "2026-09-08",
+  "read": "2026-09-13 05:08 UTC",
+  "readDate": "2026-09-13",
   "source": "snapshot",
   "inWorkspace": 15,
   "launched": 1,
@@ -32,20 +32,20 @@ window.INSTANTLY_LIVE = {
   "totals": {
     "campaigns": 15,
     "leads": 595,
-    "contacted": 1140,
-    "sent": 1140,
+    "contacted": 1200,
+    "sent": 1220,
     "replies": 10,
-    "bounced": 5,
+    "bounced": 6,
     "unsubscribed": 0
   },
   "byLine": {
     "absorbent": {
       "campaigns": 9,
       "leads": 367,
-      "contacted": 716,
-      "sent": 716,
+      "contacted": 776,
+      "sent": 796,
       "replies": 3,
-      "bounced": 1,
+      "bounced": 2,
       "unsubscribed": 0
     },
     "biochar": {
@@ -58,12 +58,14 @@ window.INSTANTLY_LIVE = {
       "unsubscribed": 0
     }
   },
-  "mailboxes": 4,
+  "mailboxes": 8,
   "mailboxDomains": {
+    "useprogreaux.com": 2,
+    "getprogreaux.com": 2,
     "pureamericanbiocarbon.com": 2,
     "getamericanbiocarbon.com": 2
   },
-  "dailyCeiling": 120,
+  "dailyCeiling": 240,
   "requestedDaily": 20,
   "campaigns": [
     {
@@ -161,9 +163,9 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 191,
-      "sent": 240,
+      "sent": 320,
       "replies": 1,
-      "bounced": 1
+      "bounced": 2
     },
     {
       "name": "BC-BLEND · Soil & Media Blenders · R1",
