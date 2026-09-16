@@ -565,3 +565,11 @@ table.cb-tbl tr:last-child td{border-bottom:0}
 .nur-preview{position:sticky;top:14px}
 .nur-subject{font-size:13px;color:var(--text);padding:8px 12px;background:var(--paper-2);border:1px solid var(--line);border-bottom:0;border-radius:var(--radius) var(--radius) 0 0}
 .nur-frame{width:100%;height:720px;border:1px solid var(--line);border-radius:0 0 var(--radius) var(--radius);background:#f4f5f7}
+/* ---- Cold Email (coldemail.js): the message as it lands in an inbox ---- */
+.ce-inbox{background:#fff;color:#202124;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.ce-subj{font-size:20px;font-weight:400;margin:0 0 14px;color:#1f1f1f}
+.ce-meta{display:flex;gap:12px;align-items:flex-start;font-size:13px;margin-bottom:16px;color:#1f1f1f}
+.ce-avatar{width:36px;height:36px;border-radius:50%;background:#7a1f2b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.ce-addr{color:#5f6368;font-size:12px}
+.ce-body{white-space:pre-wrap;font:14px/1.55 inherit;margin:0;color:#1f1f1f;font-family:inherit}
+.ce-count{margin-top:14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#5f6368}

@@ -28,7 +28,7 @@ const DATA = {
   /* segments and personas are deleted. They were a nine segment / six persona taxonomy
      that predated the Aug 10 call and never matched the ICP list the team settled on.
      Firmographics, triggers, disqualifiers and the persona block now live per ICP in
-     outreach-data.js, which both Campaigns & ICP and the Outreach Engine read. */
+     outreach-data.js (ICP taxonomy and facts) and the Cold Email section (the copy). */
 
   messaging: {
     splitRule:"TWO SEPARATE AVATARS — NEVER mix products in one pitch. Absorbent Pellets/Crumble and Biochar go to two completely different people with different pain, language, proof, and channel. An absorbent pitch never says 'biochar / soil / compost / OMRI / carbon.' A biochar pitch never says 'spill / absorbent / SDS-for-disposal / oilfield / leachate.' Every email, call, landing page, one-pager, and deck is SINGLE-PRODUCT. If a contact somehow fits both, run two separate threads.",

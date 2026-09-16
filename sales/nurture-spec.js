@@ -20,8 +20,8 @@
   const SPEC_PELLETS = SITE + "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf";
   const SPEC_BIOCHAR = SITE + "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf";
   const BOOK = "{{calendarLink}}";
-  const V = "Victor Jehle\nAmerican BioCarbon\n(225) 398-9286";
-  const TEAM = "The team at American BioCarbon\n(225) 398-9286";
+  const V = "Victor Jehle\nAmerican BioCarbon\n(225) 398 9286";
+  const TEAM = "The team at American BioCarbon\n(225) 398 9286";
 
   const A = {
     id: "A", name: "Family", who: "Engaged and Customer stage accounts, plus past ABC customers",
@@ -216,7 +216,7 @@
           paras:[
             "We have your order for {{orderSummary}}, shipping to {{shipTo}}.",
             "Material is staged at our plant in White Castle, Louisiana. We will confirm the carrier and pickup date within two business days.",
-            "Questions about the order go to Victor at (225) 398-9286 or by reply to this email.",
+            "Questions about the order go to Victor at (225) 398 9286 or by reply to this email.",
           ],
           ctaLabel:"", ctaHref:"", imageUrl:"", imageAlt:"", signoff:TEAM, style:"minimal",
         }},

@@ -12,7 +12,6 @@
  *   1. Every ICP a roster company is filed under exists as a campaign.
  *   2. roster-data.js is current with its generator (no stale committed build).
  *   3. Product facts and UNITS in OUTREACH.facts match website/data.js, the live checkout.
- *   4. Effort allocation across all campaigns sums to 100.
  *   5. Derived counts on window.ROSTER match the array beneath them.
  *   6. Every generated snapshot is fresh enough to be worth showing.
  *
@@ -94,10 +93,8 @@ else {
   else ok(`Absorbent packaging is consistent (${sacks[0]} lb super sacks = 1 US ton).`);
 }
 
-/* ---- 4. effort sums to 100 ---- */
-const effort = icps.reduce((a, i) => a + (i.campaign?.effort ?? 0), 0);
-if (effort !== 100) bad(`Campaign effort sums to ${effort}, not 100. Rebalance campaign.effort across the ICPs.`);
-else ok(`Campaign effort allocation sums to 100 across ${icps.length} campaigns.`);
+/* 4 (effort allocation across campaigns) was retired with the Instantly Logic section on
+   2026-09-16. The ICP list no longer carries campaign weights. */
 
 /* ---- 5. derived counts match the data ---- */
 const live = ROSTER.companies.filter(c => !c.dead).length;

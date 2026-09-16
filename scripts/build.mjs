@@ -4,7 +4,7 @@
  * Point the Cloudflare Pages build command at this file: `node scripts/build.mjs`
  *
  *   1. check-dashes           - brand kit gate (fails the deploy on em/en dashes)
- *   2. check-outreach-dashes  - stricter gate on Sales OS cold copy (no dash at all)
+ *   2. check-copy-dashes      - stricter gate on outbound copy specs (no dash at all)
  *   2b. check-sales-canon     - ICP taxonomy, roster freshness, prices, derived counts
  *   2c. check-contact-rules   - lead forms still require a reachable email and phone,
  *                               and the browser and /api/lead still agree on what counts
@@ -28,7 +28,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 
 const STEPS = [
   ["check-dashes.mjs"],
-  ["check-outreach-dashes.mjs"],
+  ["check-copy-dashes.mjs"],
   ["check-sales-canon.mjs"],
   ["check-contact-rules.mjs"],
   ["build-spec-sheets.mjs", "--check"],

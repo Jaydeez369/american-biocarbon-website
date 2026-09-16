@@ -79,10 +79,7 @@ const LEAN_NAV=[
 
      Crumble Blitz is deleted: 14,940 lines of crumble-data.js, most of the payload every user
      downloaded on every load, for a push against inventory that is over. The data file and
-     module stay in git history.
-
-     Campaigns & ICP moved to Execute, where the operator asked for it: it belongs beside the
-     copy and the send, not in a "Launch" group that no longer exists. */
+     module stay in git history. */
   {group:"Work",items:[
     /* Leads leads. It is where a rep starts a day of calling: the whole pool of companies,
        filtered down to the list they are about to work, with a click into the full record.
@@ -106,13 +103,13 @@ const LEAN_NAV=[
        above it: a Reports figure is only worth reading if the feed behind it is connected. */
     {id:"systems",ic:"◈",t:"Systems Map"},
   ]},
+  /* Execute, cut down on 2026-09-16. Campaigns & ICP, Outreach Engine and Instantly Logic
+     were three screens of campaign architecture, 17 ICP copy banks and funnel costing that
+     nobody opened while selling. Retired, with their data files, in favour of two editors
+     that hold the words actually sent: eight cold email variants and three nurture
+     sequences, both saved to D1 and both rendered the way the recipient sees them. */
   {group:"Execute",items:[
-    {id:"strategy",ic:"◆",t:"Campaigns & ICP"},
-    {id:"outreach",ic:"✦",t:"Outreach Engine"},
-    {id:"instantly",ic:"⚙",t:"Instantly Logic"},
-    /* Nurture sits in Execute because it is a send, not a reference: the three Resend
-       sequences agreed on the 2026-09-09 call. It shows the plan with the copy slots Victor
-       and Daniel own, so the document lives where the people filling it in already are. */
+    {id:"coldemail",ic:"✦",t:"Cold Email"},
     {id:"nurture",ic:"↻",t:"Nurture Plan"},
   ]},
   /* Reference collapsed from three entries to one on 2026-09-08. Future Funnels, Product &
@@ -140,14 +137,14 @@ const NAV = LEAN_NAV;
    re render. The person sees the shell, the nav and the Inbox counts immediately instead of
    a white page. That is the whole claim.
 
-   THE TRAP THIS HAS TO AVOID, and it is a real one. outreach.js caches LIVE_BY_ICP and
-   engine.js caches ICP_AGG on their FIRST call. If either renders before the roster lands,
-   it caches the fallback numbers and never recomputes, and Campaigns & ICP would show the
-   stale engine-data.js figures forever with nothing on screen saying so. So the load does
-   not merely fire a re render: it calls each module's bust hook first. A module that gains
-   a roster derived cache later must add a hook here or it will silently freeze the same way. */
+   THE TRAP THIS HAS TO AVOID. A module that caches something derived from the roster on its
+   first call, before the roster lands, keeps the fallback numbers forever with nothing on
+   screen saying so. So the load does not merely fire a re render: it calls each module's
+   bust hook first. A module that gains a roster derived cache later must add a hook to
+   rosterReady() or it will silently freeze the same way. (outreach.js and engine.js did
+   exactly this; both are retired.) */
 let ROSTER_PROMISE=null;
-const ROSTER_SECTIONS=new Set(["leads","strategy","crm","reports","instantly","reference"]);
+const ROSTER_SECTIONS=new Set(["leads","crm","reports","reference"]);
 function ensureRoster(){
   if(window.ROSTER) return Promise.resolve(true);
   if(ROSTER_PROMISE) return ROSTER_PROMISE;
@@ -174,7 +171,7 @@ function ensureRoster(){
 /* Every module that caches something derived from the roster clears it here. Guarded
    individually so one missing module cannot stop the others being busted. */
 function rosterReady(){
-  for(const bust of [window.pipeRosterBust, window.outreachRosterBust, window.engineRosterBust]){
+  for(const bust of [window.pipeRosterBust]){
     try{ if(typeof bust==="function") bust(); }catch(e){ console.warn("[roster] bust failed",e); }
   }
   try{ rerender(); }catch(e){ console.warn("[roster] re render failed",e); }
@@ -259,7 +256,7 @@ const fmtN = v => Number.isFinite(+v) ? Math.round(+v).toLocaleString() : "0";
 /* The ICP codes actually present in the roster, read at render time. */
 const icpCodes = () => {
   const R = window.ROSTER;
-  if(!R || !R.byIcp) return "see Campaigns & ICP";
+  if(!R || !R.byIcp) return "roster not loaded yet";
   return Object.keys(R.byIcp).sort().join(", ");
 };
 
@@ -268,9 +265,8 @@ const icpCodes = () => {
    They ran on a parallel taxonomy: nine DATA.segments scored by a composite rank, and
    six DATA.personas keyed to segment names. Neither lined up with the ICP list the
    Aug 10 call settled on, so the tool described three different customer lists at once
-   and a rep had to work out which one was current. The canonical ICPs now carry their own
-   firmographics, triggers, disqualifiers and persona block in outreach-data.js, and
-   Campaigns & ICP renders from that. One list, one set of tags. */
+   and a rep had to work out which one was current. The ICP taxonomy lives in
+   outreach-data.js and the roster carries the tags. One list, one set of tags. */
 
 /* --- Messaging --- */
 function rMessaging(){
@@ -348,9 +344,6 @@ function rBiochar(){
 
 
 
-
-/* The Outreach Engine renderer moved to outreach.js. It reads outreach-data.js, which is
-   now the only place cold copy lives. DATA.outreach was deleted with it. */
 
 /* --- Windrow trial protocol (composter closing asset) --- */
 function rWindrow(){
@@ -504,7 +497,6 @@ let REF_TAB = "product";
 const REF_TABS = [
   ["product","Product & Messaging"],
   ["playbook","Assets & Playbook"],
-  ["funnels","Future Funnels"],
 ];
 window.refTab = id => {
   REF_TAB = id;
@@ -517,15 +509,14 @@ function rReference(){
      reading all three panes at once. Cut by data-tab. */
   const panes = {
     product:  [rBiochar, rMessaging],
-    playbook: [rCollateral, G("rSample"), rPlaybook, G("rLinkedIn"), G("rSocial"), G("rLongTerm")],
-    funnels:  [ENG("rFunnels")],
+    playbook: [rCollateral, rPlaybook],
   };
   const body = REF_TABS.map(([id,label])=>
     `<div class="ref-pane${id===REF_TAB?" active":""}" data-tab="${id}">${panes[id].map(stripBody).join(mergeDiv)}</div>`
   ).join("");
   return `<section class="section" id="sec-reference">
     <h1 class="page-h">Reference</h1>
-    <p class="page-sub">The material you read once and come back to: what the product is, what to say about it, what to send, and the funnels that are not built yet. Nothing here reads a live record, which is why it is one section rather than three.</p>
+    <p class="page-sub">The material you read once and come back to: what the product is, what to say about it, and what to send. Nothing here reads a live record.</p>
     <div class="pipe-tabs">${REF_TABS.map(([id,label])=>
       `<span class="pill${id===REF_TAB?" active":""}" data-tab="${id}" onclick="refTab('${id}')">${label}</span>`).join("")}</div>
     ${body}
@@ -537,7 +528,6 @@ function stripBody(fn){
   try{ h=fn()||""; }catch(e){ console.error("renderer failed:",e&&e.message,e); return ""; }
   return h.replace(/^\s*<section[^>]*>/,"").replace(/<\/section>\s*$/,"");
 }
-const G = k => (window.GTMB && GTMB[k]) ? GTMB[k] : (()=> "");
 /* Live SIBRA pipeline module (pipeline.js, loads before app.js) */
 const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
 /* Reports module (reports.js). Same shape as PL/OUT/ENG: a missing file degrades one
@@ -545,11 +535,8 @@ const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
 const RPT = k => (window.REPORTS_UI && REPORTS_UI[k]) ? REPORTS_UI[k] : (()=> "");
 /* Daily summary and systems map (summary.js). Same fail-soft shape as the others. */
 const SUM = k => (window.SUMMARY_UI && SUMMARY_UI[k]) ? SUMMARY_UI[k] : (()=> "");
-/* Canonical outreach module (outreach-data.js + outreach.js, both load before app.js) */
-const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
-/* Engine module (engine-data.js + engine.js): campaign architecture and the funnel costing */
-const ENG = k => (window.ENGINE_UI && ENGINE_UI[k]) ? ENGINE_UI[k] : (()=> "");
-/* Nurture module (nurture-data.js + nurture.js): the Resend sequence plan, rendered from markdown */
+/* Copy editors (copy-editor.js, then coldemail.js and nurture.js). Same fail-soft shape. */
+const COLD = k => (window.COLDEMAIL_UI && COLDEMAIL_UI[k]) ? COLDEMAIL_UI[k] : (()=> "");
 const NUR = k => (window.NURTURE_UI && NURTURE_UI[k]) ? NURTURE_UI[k] : (()=> "");
 /* Operations module (ops-data.js + ops.js): sample to cash, team, system of record, runbook */
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
@@ -572,9 +559,7 @@ const LEAN_SECTIONS=[
   ["summary",  [SUM("rSummary")]],
   ["reports",  [RPT("rReports")]],
   ["systems",  [SUM("rSystems")]],
-  ["strategy", [OUT("rCampaigns")]],
-  ["outreach", [OUT("rOutreach")]],
-  ["instantly",[ENG("rInstantly")]],
+  ["coldemail",[COLD("rColdEmail")]],
   ["nurture",  [NUR("rNurture")]],
   ["reference",[rReference]],
 ];
