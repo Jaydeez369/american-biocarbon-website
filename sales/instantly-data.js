@@ -12,8 +12,8 @@
    All reads. Nothing here writes to Instantly.
    ===================================================================== */
 window.INSTANTLY_LIVE = {
-  "read": "2026-09-13 05:08 UTC",
-  "readDate": "2026-09-13",
+  "read": "2026-09-16 05:46 UTC",
+  "readDate": "2026-09-16",
   "source": "snapshot",
   "inWorkspace": 15,
   "launched": 1,
@@ -32,8 +32,8 @@ window.INSTANTLY_LIVE = {
   "totals": {
     "campaigns": 15,
     "leads": 595,
-    "contacted": 1200,
-    "sent": 1220,
+    "contacted": 1239,
+    "sent": 1260,
     "replies": 10,
     "bounced": 6,
     "unsubscribed": 0
@@ -42,8 +42,8 @@ window.INSTANTLY_LIVE = {
     "absorbent": {
       "campaigns": 9,
       "leads": 367,
-      "contacted": 776,
-      "sent": 796,
+      "contacted": 815,
+      "sent": 836,
       "replies": 3,
       "bounced": 2,
       "unsubscribed": 0
@@ -163,7 +163,7 @@ window.INSTANTLY_LIVE = {
       "status": "live",
       "parked": false,
       "leads": 191,
-      "sent": 320,
+      "sent": 360,
       "replies": 1,
       "bounced": 2
     },

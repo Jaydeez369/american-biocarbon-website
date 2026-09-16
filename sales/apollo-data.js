@@ -13,8 +13,8 @@
      sales-department/refresh-snapshots.sh
    ================================================================== */
 window.APOLLO_LIVE = {
-  "read": "2026-09-13 05:08 UTC",
-  "readDate": "2026-09-13",
+  "read": "2026-09-16 05:46 UTC",
+  "readDate": "2026-09-16",
   "generator": "sales-department/apollo-analytics/build-apollo-snapshot.mjs",
   "spendsCredits": false,
   "source": "local reveal receipts (handoff/enrichment/api-revealed-*.csv) plus a free key health check",
