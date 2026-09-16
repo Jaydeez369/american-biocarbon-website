@@ -434,10 +434,23 @@ export function buildAutoreply(formKey, fields = {}, env = {}, styleOverride) {
     ? `<p style="margin:0 0 16px;font:400 16px/1.6 ${FONT};color:${C.slate}">Hi ${esc(name)},</p>`
     : "";
 
+  /* Two lines every auto reply carries, agreed on the VEJ call of 2026-09-09: say a person is
+     going to call and give them the number so they can call first (speed to lead), and tell
+     them a few short emails are coming so the nurture sequence is not a surprise. Kept here,
+     not in each sequence, so a new form cannot ship without them. No pricing in this email
+     on purpose: information first, price when there is a conversation. See
+     sales-department/campaigns/NURTURE-PLAN.md section 6. */
+  const closing = [
+    `If you would rather talk now, call us at <a href="${BRAND.phoneHref}" style="color:${C.slate}">${BRAND.phone}</a>. A specialist is also going to call you to introduce themselves.`,
+    "Over the next couple of weeks we will send a few short emails on how customers use the material. You can unsubscribe from those at any time.",
+  ];
+  const closingText = closing.map((p) => p.replace(/<[^>]+>/g, ""));
+
   const body =
     greeting +
     paras(c.paras) +
     linkList(c.links) +
+    paras(closing) +
     (c.cta ? button(c.cta.label, c.cta.href) : "") +
     `<p style="margin:22px 0 0;font:400 16px/1.6 ${FONT};color:${C.slate}">` +
     `- The team at ${BRAND.name}</p><div style="height:6px"></div>`;
@@ -448,6 +461,8 @@ export function buildAutoreply(formKey, fields = {}, env = {}, styleOverride) {
     ...c.paras.map((p) => p.replace(/<[^>]+>/g, "")),
     "",
     ...(c.links || []).map((l) => `${l.label}: ${l.href}`),
+    "",
+    ...closingText,
     "",
     `- The team at ${BRAND.name}`,
     BRAND.address,

@@ -110,6 +110,10 @@ const LEAN_NAV=[
     {id:"strategy",ic:"◆",t:"Campaigns & ICP"},
     {id:"outreach",ic:"✦",t:"Outreach Engine"},
     {id:"instantly",ic:"⚙",t:"Instantly Logic"},
+    /* Nurture sits in Execute because it is a send, not a reference: the three Resend
+       sequences agreed on the 2026-09-09 call. It shows the plan with the copy slots Victor
+       and Daniel own, so the document lives where the people filling it in already are. */
+    {id:"nurture",ic:"↻",t:"Nurture Plan"},
   ]},
   /* Reference collapsed from three entries to one on 2026-09-08. Future Funnels, Product &
      Messaging and Assets & Playbook were three top level sections of static prose with no
@@ -545,6 +549,8 @@ const SUM = k => (window.SUMMARY_UI && SUMMARY_UI[k]) ? SUMMARY_UI[k] : (()=> ""
 const OUT = k => (window.OUTREACH_UI && OUTREACH_UI[k]) ? OUTREACH_UI[k] : (()=> "");
 /* Engine module (engine-data.js + engine.js): campaign architecture and the funnel costing */
 const ENG = k => (window.ENGINE_UI && ENGINE_UI[k]) ? ENGINE_UI[k] : (()=> "");
+/* Nurture module (nurture-data.js + nurture.js): the Resend sequence plan, rendered from markdown */
+const NUR = k => (window.NURTURE_UI && NURTURE_UI[k]) ? NURTURE_UI[k] : (()=> "");
 /* Operations module (ops-data.js + ops.js): sample to cash, team, system of record, runbook */
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
 /* newId → ordered list of renderer thunks it composes */
@@ -569,6 +575,7 @@ const LEAN_SECTIONS=[
   ["strategy", [OUT("rCampaigns")]],
   ["outreach", [OUT("rOutreach")]],
   ["instantly",[ENG("rInstantly")]],
+  ["nurture",  [NUR("rNurture")]],
   ["reference",[rReference]],
 ];
 
