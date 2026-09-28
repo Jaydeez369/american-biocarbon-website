@@ -732,9 +732,9 @@ function buyCard(p){
   const docs = isLive
     ? `<div class="buy-docs">${(p.docIds||[]).map(docLink).join("<span>·</span>")}</div>`
     : `<div class="buy-docs muted">Spec sheet coming</div>`;
-  const primaryLabel = isBuyNow ? "Buy Now" : "Request a Sample Kit";
+  const primaryLabel = isBuyNow ? "Buy Now" : p.quote ? "Get Delivered Pricing" : "Request a Sample Kit";
   const primary = isLive
-    ? `<a class="btn btn-primary btn-sm" href="${isBuyNow?"/shop/"+p.id:"/request-sample?product="+p.id}">${primaryLabel}</a>`
+    ? `<a class="btn btn-primary btn-sm" href="${(isBuyNow||p.quote)?"/shop/"+p.id:"/request-sample?product="+p.id}">${primaryLabel}</a>`
     : `<a class="btn btn-primary btn-sm" href="/request-sample?preorder=1&product=${p.id}">Stay informed</a>`;
   const cta = isLive
     ? `<div class="btn-row">${primary}</div>
@@ -857,10 +857,9 @@ const SHOPIFY_CHECKOUT = {
   "absorbent-crumble":   SHOP_DOMAIN + "/cart/55922925175076:1",
   // Absorbents sell BY THE US TON, packaged in 2,000 lb super sacks; biochar sells by the
   // METRIC TON. The priced unit and the package are distinct - keep both distinct in copy.
-  "absorbent-pellets-mt":   SHOP_DOMAIN + "/cart/54182475170084:1",
   "agricultural-biochar-mt": SHOP_DOMAIN + "/cart/54184340914468:1",
-  // Standalone Shopify product "Absorbent Crumble" (10749467459876), $275 / US ton.
-  "absorbent-crumble-mt": SHOP_DOMAIN + "/cart/55923046023460:1",
+  // Absorbent bulk (pellets 54182475170084, crumble 55923046023460) is quote-only since
+  // 2026-09-28: "as low as $375 / US ton", delivered price by call. No self-serve cart.
 };
 /* The "-mt" suffix on a bulk id means BULK, not metric ton. Both units are in play (US ton
    for absorbents, metric ton for biochar) and the operator's call is that one opaque suffix
@@ -874,7 +873,7 @@ const SHOPIFY_CHECKOUT = {
    routinely order several, so their PDP gets a quantity stepper. The unit noun comes from
    the product's own `unit` field - never hardcode one, the two lines do not share it.
    Sample bags stay one-per-order (free, one to a customer). */
-const BULK_QTY_IDS = new Set(["absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble-mt"]);
+const BULK_QTY_IDS = new Set(["agricultural-biochar-mt"]);
 /* "1 US Ton" -> "US ton", "1 Metric Ton" -> "metric ton". Falls back to "ton" if a bulk
    SKU ever ships without a unit, which is wrong-but-harmless rather than wrong-and-specific. */
 function unitNoun(p){
@@ -889,7 +888,7 @@ function cartUrlQty(url, qty){
   return String(url).replace(/:\d+$/, ":" + n);
 }
 // ids whose primary CTA reads "Buy Now" instead of "Request a Sample Kit"
-const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","absorbent-pellets-mt","agricultural-biochar-mt","absorbent-crumble","absorbent-crumble-mt"]);
+const BUY_NOW_IDS = new Set(["absorbent-pellets","agricultural-biochar","agricultural-biochar-mt","absorbent-crumble"]);
 /* A product page is the one place "Buy Now" means buy THIS, so it goes straight to the
    Shopify cart. Everywhere else the same button routes to /buy (see CTA.buyNow), because
    the visitor has not picked a product or a size yet. If a product has no checkout, the
@@ -922,14 +921,17 @@ function renderShopProduct(id){
   // where it actually goes (sample request form / quote request), not promise a purchase.
   const hasCheckout = !!SHOPIFY_CHECKOUT[p.id];
   const isBuyNow = BUY_NOW_IDS.has(p.id) && hasCheckout;
-  const ctaLabel = isBuyNow ? "Buy Now" : (p.priceLabel ? "Talk to a specialist" : "Request a Sample Kit");
+  const ctaLabel = isBuyNow ? "Buy Now" : p.quote ? "Get Delivered Pricing" : (p.priceLabel ? "Talk to a specialist" : "Request a Sample Kit");
+  // Quote-only bulk: the price is a floor, so the phone number sits right under it.
+  const quoteHTML = p.quote
+    ? `<p class="pdp-secure" style="margin:0 0 14px">${raw(p.priceNote||"")} <a href="${BRAND.phoneHref}">Call ${raw(BRAND.phone)}</a></p>` : "";
   // Bulk (per-ton) SKUs are paid; the sample bags stay free. Both are Shopify checkouts.
   const priceHTML = p.priceLabel
     ? `<div class="pdp-price">${raw(p.priceLabel)}${p.stock?` <span>· ${p.stock} in stock</span>`:""}</div>`
     : `<div class="pdp-price free">Free sample <span>· shipping &amp; handling included</span></div>`;
   const checkoutHref = SHOPIFY_CHECKOUT[p.id]
     ? SHOPIFY_CHECKOUT[p.id]
-    : (p.priceLabel ? `/contact?product=${p.id}&intent=purchase` : `/request-sample?product=${p.id}`);
+    : (p.priceLabel ? `/contact?product=${p.id}&intent=${p.quote?"quote":"purchase"}` : `/request-sample?product=${p.id}`);
   // Bulk SKUs order in whole tons: stepper rewrites every [data-buy-link] on the page.
   const showQty = hasCheckout && BULK_QTY_IDS.has(p.id);
   const unitWord = unitNoun(p);
@@ -955,6 +957,7 @@ function renderShopProduct(id){
       <div class="pdp-info">
         <h1>${raw(p.name)}${p.unit?", "+raw(p.unit):""}</h1>
         ${priceHTML}
+        ${quoteHTML}
         <p class="pdp-lead">${raw(p.claim)}</p>
         ${p.uses?`<ul class="uses" style="margin:12px 0 14px">${p.uses.map(u=>`<li>${raw(u)}</li>`).join("")}</ul>`:""}
         <div class="chips" style="margin:0 0 18px">${(p.chips||[]).map(c=>`<span>${raw(c)}</span>`).join("")}</div>

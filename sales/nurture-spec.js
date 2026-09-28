@@ -6,7 +6,7 @@
  * wins over anything in this file. Nothing here is sent by anything yet.
  *
  * Facts in the placeholders come from sales-playbook/01-company-and-products.md and
- * website/data.js as of 2026-09-16: biochar $450 per metric ton, absorbents $275 per US ton in
+ * website/data.js as of 2026-09-16: biochar $450 per metric ton, absorbents as low as $375 per US ton (quote only, 2026-09-28) in
  * 2,000 lb super sacks, free 1 lb samples in 4 to 7 business days, OMRI Listed, Puro.earth
  * CORC, patented, IBI tested (never certified). No dashes of any kind in customer copy.
  *
@@ -81,7 +81,7 @@
           heading:"The economics, in one paragraph",
           greeting:"Hi {{firstName}},",
           paras:[
-            "Absorbent pellets and crumble are $275 per US ton in 2,000 lb super sacks. Because they hold up to 5 times their weight, a ton of ours picks up what [X] tons of clay does, and you pay disposal on a fraction of the weight.",
+            "Absorbent pellets and crumble start as low as $375 per US ton in 2,000 lb super sacks, depending on volume and freight. Because they hold up to 5 times their weight, a ton of ours picks up what [X] tons of clay does, and you pay disposal on a fraction of the weight.",
             "Biochar is $450 per metric ton. At a 10% blend that is about $[X] per cubic yard of finished compost, and it does not leave the soil.",
             "Reply with what you are paying today and I will put the comparison in writing for your numbers.",
           ],
@@ -191,7 +191,7 @@
           heading:"What it costs",
           greeting:"Hi {{firstName}},",
           paras:[
-            "Premium biochar: $450 per metric ton. Absorbent pellets and crumble: $275 per US ton, sold in 2,000 lb super sacks. Samples are free.",
+            "Premium biochar: $450 per metric ton. Absorbent pellets and crumble: as low as $375 per US ton in 2,000 lb super sacks, delivered price by quote. Samples are free.",
             "Volume pricing is tied to a committed monthly volume and a start month. Truckload supply on every line comes online with our Q4 capacity ramp, and reservations are taken now.",
             "The fastest next step is a short call with Victor.",
           ],

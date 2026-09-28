@@ -112,7 +112,7 @@ const DATA = {
     { id:"freight", name:"Freight-Aware Delivered Margin", inputs:["Product revenue","COGS","Freight cost"], formula:"delivered margin = revenue − COGS − freight; margin % = /revenue", saves:["delivered margin","est. freight"] },
   ],
   sample:{
-    sizes:["Absorbent Pellets — 1 lb sample (free, S&H incl.)","Absorbent Crumble — 1 lb sample (free, S&H incl.)","100% Biochar — 8 oz sample (free, S&H incl.)","LIVE bulk: Biochar $450 / metric ton · Pellets & Crumble $275 / US ton (2,000 lb super sacks)","(Q4+) truckload supply once capacity is online"],
+    sizes:["Absorbent Pellets — 1 lb sample (free, S&H incl.)","Absorbent Crumble — 1 lb sample (free, S&H incl.)","100% Biochar — 8 oz sample (free, S&H incl.)","LIVE bulk: Biochar $450 / metric ton · Pellets & Crumble as low as $375 / US ton, quote only (2,000 lb super sacks)","(Q4+) truckload supply once capacity is online"],
     gates:["Confirmed ICP + use case","Named decision-maker (who can sign an LOI)","Agreed success criteria","Ship-to address"],
     fields:["account","contact","product","sample size","use case","success criteria","ship-to","ship date","carrier/tracking","follow-up date","outcome"],
     follow:["Day 0 ship confirmation","Day 3 'arrived?'","Day 7 trial check-in","Day 10 results + present LOI"],

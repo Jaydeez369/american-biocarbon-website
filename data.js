@@ -358,8 +358,8 @@ const HOME = {
       { id:"absorbent-pellets-mt", name:"Absorbent Pellets", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Bulk Supply", accent:"aqua",
         claim:"The same up to 5:1 absorption pellets sold in 2,000 lb super sacks, ready to ship now.",
         uses:["Drilling and frac fluid solidification","Oil and non-viscous chemical spill cleanup","Landfill leachate and aqueous waste","Animal bedding and pet litter"],
-        chips:["Sold in 2,000 lb super sacks","100% bagasse","Low dust"], unit:"1 US Ton", packaging:"2,000 lb super sacks", price:275, priceLabel:"$275 / US ton", photo:ASSETS.pelletsPhoto,
-        desc:"The same up to 5:1 absorption sugarcane bagasse pellets sold in 2,000 lb super sacks, ready for immediate purchase.",
+        chips:["Sold in 2,000 lb super sacks","100% bagasse","Low dust"], unit:"1 US Ton", packaging:"2,000 lb super sacks", price:375, priceLabel:"As low as $375 / US ton", quote:true, priceNote:"Volume and freight dependent. Call or contact us for delivered pricing.", photo:ASSETS.pelletsPhoto,
+        desc:"The same up to 5:1 absorption sugarcane bagasse pellets sold in 2,000 lb super sacks. Priced by volume and delivered freight.",
         gallery:[ ASSETS.pelletsPhoto ],
         sections:[
           { h:"Spill cleanup and remediation", body:"Soak up soil runoff, solvents, drilling and frac fluids, and other non-viscous liquids. Sprinkle the pellets over the spill, wait for full absorption, then sweep up and dispose of the saturated material per your local requirements." },
@@ -385,8 +385,8 @@ const HOME = {
       { id:"absorbent-crumble-mt", name:"Absorbent Crumble", avail:"live", cat:"Absorbents", category:"Industrial Absorbent · Bulk Supply", accent:"aqua",
         claim:"The same coarse grade crumble sold in 2,000 lb super sacks, ready to ship now.",
         uses:["Large area and high volume spill coverage","Fast, broad application","Drilling and frac fluid solidification","Disaster and flood cleanup"],
-        chips:["Sold in 2,000 lb super sacks","Coarse grade","100% bagasse"], unit:"1 US Ton", packaging:"2,000 lb super sacks", price:275, priceLabel:"$275 / US ton", photo:ASSETS.pelletsPhoto, gallery:[ ASSETS.pelletsPhoto ],
-        desc:"The same up to 5:1 absorption sugarcane bagasse crumble sold in 2,000 lb super sacks, ready for immediate purchase.",
+        chips:["Sold in 2,000 lb super sacks","Coarse grade","100% bagasse"], unit:"1 US Ton", packaging:"2,000 lb super sacks", price:375, priceLabel:"As low as $375 / US ton", quote:true, priceNote:"Volume and freight dependent. Call or contact us for delivered pricing.", photo:ASSETS.pelletsPhoto, gallery:[ ASSETS.pelletsPhoto ],
+        desc:"The same up to 5:1 absorption sugarcane bagasse crumble sold in 2,000 lb super sacks. Priced by volume and delivered freight.",
         sections:[
           { h:"Large area spill cleanup", body:"Broadcast the crumble across the spill in fewer passes than a fine sorbent needs, let it fully absorb, then sweep up and dispose of the saturated material per your local requirements." },
           { h:"Waste solidification", body:"An up to 5:1 absorption ratio solidifies aqueous and oilfield waste with less sorbent mass, so crews open fewer bags and haul away less material." },

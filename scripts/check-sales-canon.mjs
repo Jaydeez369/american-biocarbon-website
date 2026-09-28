@@ -67,7 +67,7 @@ const priceOf = re => {
    "/ metric ton" is how the absorbent line silently carried the wrong unit, so both the
    number and its unit are asserted here. */
 const siteJs = readFileSync(join(ROOT, "data.js"), "utf8");
-const priced = [...siteJs.matchAll(/id:"([\w-]+)"[\s\S]{0,900}?priceLabel:\s*"\$(\d+) \/ (metric ton|US ton)"/g)]
+const priced = [...siteJs.matchAll(/id:"([\w-]+)"[\s\S]{0,900}?priceLabel:\s*"(?:As low as )?\$(\d+) \/ (metric ton|US ton)"/g)]
   .map(m => ({ id: m[1], price: +m[2], unit: m[3] }));
 const expectUnit = id => (/biochar/.test(id) ? "metric ton" : "US ton");
 if (!priced.length) bad(`Could not read any priced SKU out of website/data.js. The gate cannot verify facts.`);
