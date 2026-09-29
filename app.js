@@ -859,7 +859,7 @@ const SHOPIFY_CHECKOUT = {
   // METRIC TON. The priced unit and the package are distinct - keep both distinct in copy.
   "agricultural-biochar-mt": SHOP_DOMAIN + "/cart/54184340914468:1",
   // Absorbent bulk (pellets 54182475170084, crumble 55923046023460) is quote-only since
-  // 2026-09-28: "as low as $375 / US ton", delivered price by call. No self-serve cart.
+  // 2026-09-28: "as low as $325 / US ton", delivered price by call. No self-serve cart.
 };
 /* The "-mt" suffix on a bulk id means BULK, not metric ton. Both units are in play (US ton
    for absorbents, metric ton for biochar) and the operator's call is that one opaque suffix

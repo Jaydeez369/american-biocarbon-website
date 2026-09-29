@@ -21,7 +21,7 @@ const OUTREACH = {
   },
   "facts": {
     "biocharMt": 450,
-    "absorbentUsTon": 375,
+    "absorbentUsTon": 325,
     "inventoryMt": 80,
     "superSackLb": 2000,
     "samples": "Biochar half pound, pellets 1 lb, crumble 1 lb",
@@ -188,7 +188,7 @@ const OUTREACH = {
       "sub": "Nationwide track. Pellets and crumble, both sold by the US ton.",
       "product": "Absorbent pellets and crumble made from sugarcane bagasse. Takes up to about 5 to 1 on non viscous liquids, against roughly 2.5 times for wood pellets. Lighter to handle and lighter to dispose of than clay.",
       "geo": "Nationwide, FOB White Castle. The buyer covers freight, which is what opens the whole country up. Victor: if they need it and they are willing to pay the freight, that is fine with us. Operator ruling August 17, 2026: accounts past 500 road miles score lower and sit in a deferred contact tier. Near accounts get worked first; far accounts are later, never dead.",
-      "price": "as low as $375 per US ton, delivered price by quote",
+      "price": "as low as $325 per US ton, delivered price by quote",
       "sample": "1 lb pellets or 1 lb crumble, 4 to 7 business days",
       "icps": [
         {
