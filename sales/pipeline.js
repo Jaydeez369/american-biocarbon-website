@@ -56,6 +56,7 @@
   const ROLE_CAPS = {
     admin:   ["read","record.write","record.delete","outbound.send","admin"],
     manager: ["read","record.write","outbound.send"],
+    sdr:     ["read","record.write","outbound.send"],
     dev:     ["read","record.write","record.delete","outbound.send","admin"],
   };
   function readCookie(name){
@@ -67,6 +68,10 @@
     }
     return "";
   }
+  /* The display name the login gate set in sales_os_user (readable by JS, a label and nothing
+     more). Stamped on whatever this person logs so it is not all credited to the first name in
+     the team list. Falls back to "" when the cookie is absent; callers then use the default. */
+  const ME = () => readCookie("sales_os_user");
   const ROLE = (()=>{ const r=readCookie("sales_os_role").toLowerCase(); return ROLE_CAPS[r]?r:""; })();
   const can = cap => !!(ROLE_CAPS[ROLE]||[]).includes(cap);
   /* Named so a call site reads as the thing it is guarding rather than as a role check. The
@@ -228,6 +233,7 @@
   const RECORD_KEYS=()=>({ [N_KEY]:"note", [L_KEY]:"lead", [A_KEY]:"account",
                            [O_KEY]:"offtake", [ST_KEY]:"status", [QX_KEY]:"quarter",
                            [T_KEY]:"todo", [POOL_KEY]:"pool" });
+  const NOTE_DIRTY=new Set();     // account names whose note bucket changed since the last push
   let _recordKind=null;
   const RECORD_KIND_OF=k=>{ if(!_recordKind) _recordKind=RECORD_KEYS(); return _recordKind[k]; };
 
@@ -276,8 +282,12 @@
     const val=lsGet(key,null); if(val==null) return;
     const at=nowISO();
     if(kind==="note"){
-      const list=Object.entries(val).map(([account,acts])=>({
-        id:account, scope:account, acts, updated_at:at }));
+      /* Only the buckets that were actually edited. Pushing every account with a fresh
+         updated_at let a stale local copy of an account nobody touched overwrite a
+         colleague's newer notes on it. */
+      const names=[...NOTE_DIRTY]; NOTE_DIRTY.clear();
+      const list=names.filter(account=>Object.prototype.hasOwnProperty.call(val,account)).map(account=>({
+        id:account, scope:account, acts:val[account], updated_at:at }));
       if(list.length) pushRecords(kind,list);
     } else {
       pushRecords(kind,[{ id:"all", data:val, updated_at:at }]);
@@ -321,7 +331,7 @@
      Records the server does not know about are KEPT, not deleted, an unsynced local record
      is a pending write, and treating "absent upstream" as "deleted" would erase exactly the
      entries this whole design exists to protect. */
-  function mergeDown(kind, remote){
+  function mergeDown(kind, remote, deleted){
     const key=STORES[kind];
     const local=lsGet(key,[]);
     const byId=new Map();
@@ -331,6 +341,14 @@
       if(!r||!r.id) continue;
       const mine=byId.get(r.id);
       if(!mine || String(r.updated_at||"")>=String(mine.updated_at||"")){ byId.set(r.id,r); changed=true; }
+    }
+    /* Tombstones from the list API: a row another browser deleted. Dropped here unless the
+       local copy was edited AFTER the delete (a pending write, which wins, same rule as the
+       server). Without this a delete only ever reached the browser that did it. */
+    for(const t of (Array.isArray(deleted)?deleted:[])){
+      if(!t||!t.id) continue;
+      const mine=byId.get(t.id);
+      if(mine && String(t.updated_at||"")>=String(mine.updated_at||"")){ byId.delete(t.id); changed=true; }
     }
     const unsynced=local.filter(r=>!r||!r.id);
     const merged=[...byId.values(),...unsynced];
@@ -369,7 +387,7 @@
     for(const kind of ["deals","contacts"]){
       try{
         const data=await apiCall(kind,"GET");
-        if(Array.isArray(data.records) && mergeDown(kind,data.records)) changed=true;
+        if(Array.isArray(data.records) && mergeDown(kind,data.records,data.deleted)) changed=true;
         SYNC_STATE={ ok:true, reason:null, at:nowISO() };
       }catch(err){
         SYNC_STATE={ ok:false, reason:err.reason||err.message, at:nowISO() };
@@ -382,6 +400,7 @@
     await loadMail();
     syncBadge();
     if(changed||PHONE.rows.length||PHONE_LEADS.length||WEBLEADS.length||MAIL.rows.length) rr();
+    if(typeof updateInboxBadge==="function") updateInboxBadge();
   }
 
   /* ---- phone activity, from /api/activity (allo-hooks D1, live) ----
@@ -526,6 +545,7 @@
   /* Instantly mail as a timeline activity. No `_idx`, so no delete button: this is what the
      sending system recorded, not a note the team typed, and offering to delete it would imply
      the deletion reached Instantly. */
+  const normSubj = t => String(t||"").replace(/^(re:\s*)+/i,"").trim().toLowerCase();
   function mailToActivity(r){
     const title=r.isReply
       ? `Reply received: ${r.subject}`
@@ -556,6 +576,7 @@
              need per-activity ids these records have never had; account granularity is the
              honest limit and it is stated where syncStore explains the tradeoff. */
           const mine=local[r.id];
+          if(NOTE_DIRTY.has(r.id)) continue;       // a local edit still waiting to be pushed wins
           if(!mine || (r.updated_at||"") >= (LOCAL_STAMP[r.id]||"")){
             local[r.id]=r.acts; touched=true;
           }
@@ -982,7 +1003,7 @@
       keys.forEach(k=>merged.push(...(all[k]||[])));
       merged.sort((a,b)=>new Date((b&&b.ts)||0)-new Date((a&&a.ts)||0));
       keys.forEach(k=>{ if(k!==canon) delete all[k]; });
-      all[canon]=merged; lsSet(N_KEY,all);
+      all[canon]=merged; writeQuiet(N_KEY,all);     // a render never writes through to the server
       return merged.map(migrateAct);
     }
     return (all[canon]||[]).map(migrateAct);
@@ -991,11 +1012,12 @@
     const all=lsGet(N_KEY,{});
     (all[name]=all[name]||[]).unshift({ ch:"note", status:"logged", ts:new Date().toISOString(), ...act });
     LOCAL_STAMP[name]=new Date().toISOString();
+    NOTE_DIRTY.add(name);
     lsSet(N_KEY,all);
   };
   /* back-compat: a plain note is just a note-channel activity */
   const addAcctNote = (name,body) => addAcctActivity(name,{ ch:"note", title:"Internal Note", body, status:"logged" });
-  const delAcctActivity = (name,i) => { const all=lsGet(N_KEY,{}); if(all[name]){ all[name].splice(i,1); lsSet(N_KEY,all); } };
+  const delAcctActivity = (name,i) => { const all=lsGet(N_KEY,{}); if(all[name]){ all[name].splice(i,1); NOTE_DIRTY.add(name); lsSet(N_KEY,all); } };
   /* legacy alias kept so any old caller still resolves */
   const acctNotes = name => acctActivities(name);
 
@@ -1143,6 +1165,13 @@
   const todayISO=()=>{ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
 
   /* ======================= DEAL CRUD (feeds every tab) ======================= */
+  /* Who a deal can be assigned to: the current team, the person logged in, and (on edit) the
+     owner already on the deal so an old name is never silently reassigned. */
+  const ownerChoices = existing => {
+    const out=[]; const add=n=>{ n=String(n||"").trim(); if(n&&!out.includes(n)) out.push(n); };
+    add(ME()); P.team.forEach(t=>add(t.name)); add(existing);
+    return out;
+  };
   window.pipeDealModal=(ci,prefill)=>{
     const cur=(ci!=null&&ci>=0)?customDeals()[ci]:(prefill||{});
     const accts=accountNames();
@@ -1170,7 +1199,7 @@
         ${SEL("pdConf","Confidence",[["secured","Secured (100%)"],["medium","Medium (65%)"],["low","Low (30%)"]],cur.conf||"low")}
         ${SEL("pdStatus","Status",["open","won","lost"],cur.status||"open")}
       </div>
-      ${SEL("pdOwner","Assigned To",P.team.map(t=>t.name),cur.owner||P.team[0].name)}
+      ${SEL("pdOwner","Assigned To",ownerChoices(cur.owner),cur.owner||ME()||P.team[0].name)}
       <div class="pcf"><label>Notes</label><textarea class="pinput" id="pdNotes" rows="2">${esc(cur.notes||"")}</textarea></div>
       <div class="pcf-hint" id="pdValueHint"></div>`;
     openModal((ci!=null&&ci>=0?"Edit":"Add")+" Deal",body,ci!=null&&ci>=0?"Save Changes":"Add Deal",`pipeDealSave(${ci!=null&&ci>=0?ci:-1},${prefill&&prefill.__leadCi!=null?prefill.__leadCi:-1})`,true);
@@ -1262,10 +1291,14 @@
 
   function tPipeline(){
     const ds = periodDeals();
+    /* The tiles count OPEN deals only, like the strip above them and Reports. The table below
+       still lists every deal in the period, won and lost included, with its own totals row. */
+    const od = ds.filter(d=>d.status==="open");
     const total = sum(ds,value), wtd = sum(ds,weighted);
+    const oTotal = sum(od,value), oWtd = sum(od,weighted);
     const confirmed = sum(ds.filter(d=>d.status==="won"),value);
-    const mtTotal = sum(ds.filter(d=>d.uom==="MT"),d=>d.qty);
-    const corcsTotal = sum(ds.filter(d=>d.product==="CORCS"),d=>d.qty);
+    const mtTotal = sum(od.filter(d=>d.uom==="MT"),d=>d.qty);
+    const corcsTotal = sum(od.filter(d=>d.product==="CORCS"),d=>d.qty);
     const products = [...new Set(ds.map(d=>d.product))]
       .sort((a,b)=>sum(ds.filter(d=>d.product===b),value)-sum(ds.filter(d=>d.product===a),value));
     const totalsRow = `<tr class="ptotal"><td colspan="3"><strong>TOTALS (${ds.length})</strong></td><td class="t-num" colspan="6">${qtyStr(ds)}</td>
@@ -1284,11 +1317,11 @@
     return `
       ${promotedBanner()}
       <div class="grid g6">
-        ${kpi("Total Pipeline",money(total))}
-        ${kpi("Weighted Pipeline",money(wtd),null,"pk-blue")}
-        ${kpi("Total MT (Pipeline)",num(mtTotal)+' <span class="pk-u">MT</span>')}
-        ${kpi("Total CORCS (Pipeline)",num(corcsTotal)+' <span class="pk-u">UNIT</span>')}
-        ${kpi("Active Deals",ds.length)}
+        ${kpi("Open Pipeline",money(oTotal))}
+        ${kpi("Open Weighted",money(oWtd),null,"pk-blue")}
+        ${kpi("Open MT",num(mtTotal)+' <span class="pk-u">MT</span>')}
+        ${kpi("Open CORCS",num(corcsTotal)+' <span class="pk-u">UNIT</span>')}
+        ${kpi("Open Deals",od.length)}
         ${kpi("Confirmed Revenue",money(confirmed),null,"pk-green")}
       </div>
       <div class="pdeals-bar">
@@ -1375,7 +1408,10 @@
     const filter=lsGet(EXECF_KEY,"");
     const allDs=periodDeals();
     const ds=filter?allDs.filter(d=>d.product===filter):allDs;
-    const total=sum(ds,value), wtd=sum(ds,weighted), qty=sum(ds.filter(d=>d.uom==="MT"),d=>d.qty);
+    /* The tiles count OPEN deals only (see tPipeline). `total`/`wtd`/`qty` feed the tiles and the
+       projection; the charts below build their own series from `ds`. */
+    const od=ds.filter(d=>d.status==="open");
+    const total=sum(od,value), wtd=sum(od,weighted), qty=sum(od.filter(d=>d.uom==="MT"),d=>d.qty);
     const confirmed=sum(ds.filter(d=>d.status==="won"),value);
     const sc=P.sampleConversions;
     const qs=prodQuarters();
@@ -1413,10 +1449,10 @@
         }).join("")}</div><span class="phv">${money(t)}</span></div>`; }).join("")}</div>
       <div class="plegend">${prods.map(p=>`<span><i style="background:${colorFor(prods,p)}"></i>${esc(p)}</span>`).join("")}</div>`;
     const sectors=[...new Set(ds.map(d=>d.sector))];
-    const secVals=sectors.map(s=>sum(ds.filter(d=>d.sector===s),value));
-    let acc=0; const slices=sectors.map((s,i)=>{ const p=secVals[i]/(total||1)*100; const seg=`${colorFor(sectors,s)} ${acc}% ${acc+p}%`; acc+=p; return seg; });
+    const secVals=sectors.map(s=>sum(ds.filter(d=>d.sector===s),value)); const secTotal=sum(ds,value)||1;
+    let acc=0; const slices=sectors.map((s,i)=>{ const p=secVals[i]/secTotal*100; const seg=`${colorFor(sectors,s)} ${acc}% ${acc+p}%`; acc+=p; return seg; });
     const pie=`<div class="ppie-row"><div class="ppie" style="background:conic-gradient(${slices.join(",")||"var(--paper-2) 0 100%"})"></div>
-      <div class="plegend pcol-legend">${sectors.map((s,i)=>`<span><i style="background:${colorFor(sectors,s)}"></i>${esc(s)} · ${Math.round(secVals[i]/(total||1)*100)}%</span>`).join("")}</div></div>`;
+      <div class="plegend pcol-legend">${sectors.map((s,i)=>`<span><i style="background:${colorFor(sectors,s)}"></i>${esc(s)} · ${Math.round(secVals[i]/secTotal*100)}%</span>`).join("")}</div></div>`;
     const custs=[...new Set(ds.map(d=>d.customer))].map(c=>({c,v:sum(ds.filter(d=>d.customer===c),value),n:ds.filter(d=>d.customer===c).length})).sort((a,b)=>b.v-a.v);
     const maxC=custs[0]?.v||1;
     const top=custs.slice(0,10).map((x,i)=>`<div class="phrow"><span class="phl">${i+1}. ${esc(x.c)}</span>
@@ -1435,10 +1471,10 @@
         <span class="pcount-lbl">${filter?"Scoped to "+esc(filter):"All products"} · ${ds.length} deals</span>
       </div>
       <div class="grid g4 pkpi-grid">
-        ${kpi("Total Pipeline",kfmt(total))}
-        ${kpi("Weighted Pipeline",kfmt(wtd),null,"pk-purple")}
-        ${kpi("Total MT in Pipeline",num(qty))}
-        ${kpi("Active Deals",ds.length)}
+        ${kpi("Open Pipeline",kfmt(total))}
+        ${kpi("Open Weighted",kfmt(wtd),null,"pk-purple")}
+        ${kpi("Open MT",num(qty))}
+        ${kpi("Open Deals",od.length)}
         ${kpi("Confirmed Revenue",kfmt(confirmed),null,"pk-green")}
         ${kpi("Projected Annual",kfmt(wtd),"Weighted, current year","pk-purple")}
         ${kpi("Sample Conversions",`${sc.converted}/${sc.sampled}`, Math.round(sc.converted/sc.sampled*100)+"% rate · $0")}
@@ -1563,7 +1599,7 @@
         <td class="t-num">${money(value(d))}</td><td class="t-num">${fmtDate(d)}</td>
         <td><span class="pbadge ${d.status==="won"?"st-won":d.status==="lost"?"cf-low":"pfreq"}">${esc(d.status)}</span></td>
         <td>${esc(d.owner)}</td>
-        <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">Edit</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">Delete</span>`:""}`:`<span class="pdim" title="Imported from the SIBRA snapshot, read-only">-</span>`}</td></tr>`).join("")}</tbody>`)}`;
+        <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">Edit</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">Delete</span>`:""}`:`<span class="pdim" title="Seed row, read-only">-</span>`}</td></tr>`).join("")}</tbody>`)}`;
   }
   window.pipeDealFilter = () => {
     const q=(V("pipeDealSearch")).toLowerCase();
@@ -2182,12 +2218,18 @@
     upsertAccount(input.company, "prospect");
     const arr = getCustom();
     const parts = input.person.trim().split(/\s+/);
-    arr.push({
+    /* id and timestamps like every other contact, and pushed to the shared store; without them
+       the contact stayed in this browser only and was never migrated or merged. */
+    const stamp = nowISO();
+    const contactRec = {
+      id:uid("contact"), created_at:stamp, updated_at:stamp,
       name:input.person, first:parts.slice(0,-1).join(" ")||parts[0], last:parts.length>1?parts[parts.length-1]:"",
       account:input.company, title:input.title, email:input.email, phone:data.e164, mobile:"",
       notes:`Created in Allo CRM ${data.personId}${input.note?": "+input.note:""}`,
-    });
+    };
+    arr.push(contactRec);
     saveCustom(arr);
+    pushRecord("contacts", contactRec);
     addAcctActivity(input.company, {
       ch:"note", title:"Prospect created in Allo",
       body:`${input.person}${input.title?", "+input.title:""}: ${data.e164}. Allo person ${data.personId}, company ${data.companyId}.${data.reused?" Filled in an existing bare-number record rather than creating a twin.":""}`,
@@ -2441,78 +2483,8 @@
     arr.splice(idx,1); saveCustom(arr); removeRecord("contacts",c.id); rr();
   };
 
-  /* ================= TAB 7 · LEADS (CRUD + convert-to-deal) ================= */
-  const LEAD_ST={converted:"st-won",qualified:"st-discovery",contacted:"cf-medium",new:"cf-secured",disqualified:"cf-low"};
-  function tLeads(){
-    /* Same ICP grouping as Contacts: domain join first, company name second, blanks last. */
-    const ls=allLeads().map(l=>({...l,_icp:icpFor(l)})).sort(byIcpThen("contact"));
-    const statuses=[...new Set(ls.map(l=>l.status))];
-    const icps=[...new Set(ls.map(l=>l._icp))].filter(Boolean).sort();
-    return `
-      <div class="pdeals-bar">
-        <input class="pinput" id="pipeLSearch" placeholder="Search leads…" oninput="pipeLeadFilter()">
-        <select class="pinput" id="pipeLIcp" onchange="pipeLeadFilter()"><option value="">All ICPs</option>${icps.map(i=>`<option>${esc(i)}</option>`).join("")}</select>
-        <select class="pinput" id="pipeLStatus" onchange="pipeLeadFilter()"><option value="">All Status</option>${statuses.map(s=>`<option>${esc(s)}</option>`).join("")}</select>
-        <span class="pcount-lbl" id="pipeLCount">${ls.length} leads</span>
-        <button class="btn btn-ghost" onclick="pipeLeadExport()">Export CSV</button>
-        <button class="btn btn-primary pc-add" onclick="pipeLeadModal()">Add Lead</button>
-      </div>
-      ${tblWrap(`<thead><tr><th>Contact</th><th>Company</th><th>ICP</th><th>Email</th><th>Phone</th><th>Source</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="pipeLTbl">${ls.map(l=>`<tr data-status="${esc(l.status)}" data-icp="${esc(l._icp)}">
-        <td><strong>${esc(l.contact)}</strong></td><td>${esc(l.company)}</td><td>${icpCell(l._icp)}</td>
-        <td>${l.email?`<a href="mailto:${esc(l.email)}">${esc(l.email)}</a>`:"-"}</td><td>${chip(l.phone)||"-"}</td>
-        <td><span class="pbadge pfreq">${esc(l.source)}</span></td>
-        <td><span class="pbadge ${LEAD_ST[l.status]||"pfreq"}">${esc(l.status)}</span>${l.converted?`<div class="pconf-sub">Converted to ${esc(l.convertedTo)}${l.convertedDate?" ("+l.convertedDate+")":""}</div>`:""}</td>
-        <td class="pact-cell">${l.converted?"":`<span class="pc-act pc-conv" onclick="pipeLeadConvert(${l.base?-1:l.ci},'${jq(l.company)}','${jq(l.contact)}')" title="Convert to deal">Convert</span>`}
-          ${l.base?`<span class="pdim" title="From the SIBRA snapshot">-</span>`
-          :`<span class="pc-act" onclick="pipeLeadModal(${l.ci})" title="Edit">Edit</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeLeadDelete(${l.ci})" title="Delete">Delete</span>`:""}`}</td></tr>`).join("")}</tbody>`)}`;
-  }
-  window.pipeLeadExport=()=>downloadCSV("leads.csv",["Contact","Company","ICP","Email","Phone","Source","Status","Converted To","Converted Date"],
-    allLeads().map(l=>({...l,_icp:icpFor(l)})).sort(byIcpThen("contact")).map(l=>[l.contact,l.company,l._icp,l.email,l.phone,l.source,l.status,l.convertedTo||"",l.convertedDate||""]));
-  window.pipeLeadFilter=()=>{
-    const q=(V("pipeLSearch")).toLowerCase();
-    const s=V("pipeLStatus");
-    const i=V("pipeLIcp");
-    let n=0;
-    document.querySelectorAll("#pipeLTbl tr").forEach(r=>{
-      const ok=(!q||r.textContent.toLowerCase().includes(q))&&(!s||r.dataset.status===s)&&(!i||r.dataset.icp===i);
-      r.style.display=ok?"":"none"; if(ok)n++;
-    });
-    const c=document.getElementById("pipeLCount"); if(c)c.textContent=n+" leads";
-  };
-  window.pipeLeadConvert=(ci,company,contact)=>{
-    /* open the Deal modal prefilled from the lead; on save it creates the deal
-       and (for custom leads) flips the lead to converted. */
-    pipeDealModal(null,{ deal:company+": New Deal", customer:company, notes:"Converted from lead, "+contact, stage:"discovery_qualified", __leadCi:ci>=0?ci:null });
-  };
-  window.pipeLeadModal=ci=>{
-    const cur=(ci!=null&&ci>=0)?lsGet(L_KEY,[])[ci]:{};
-    if(!cur) return;
-    const body=`
-      <div class="pcf-grid">${F("plContact","Contact Name",cur.contact,1)}${F("plCompany","Company",cur.company,1)}</div>
-      <div class="pcf-grid">${F("plEmail","Email",cur.email)}${F("plPhone","Phone",cur.phone)}</div>
-      <div class="pcf-grid">
-        ${SEL("plSource","Source",["website","referral","outbound","event","other"],cur.source||"outbound")}
-        ${SEL("plStatus","Status",["new","contacted","qualified","converted","disqualified"],cur.status||"new")}
-      </div>
-      <div class="pcf"><label>Notes</label><textarea class="pinput" id="plNotes" rows="3">${esc(cur.notes||"")}</textarea></div>`;
-    openModal((ci!=null&&ci>=0?"Edit":"Add")+" Lead",body,ci!=null&&ci>=0?"Save Changes":"Add Lead",`pipeLeadSave(${ci!=null&&ci>=0?ci:-1})`);
-  };
-  window.pipeLeadSave=ci=>{
-    const contact=V("plContact"), company=V("plCompany");
-    if(!contact||!company){ alert("Contact name and company are required."); return; }
-    const st=V("plStatus");
-    const rec={contact, company, email:V("plEmail"), phone:V("plPhone"), source:V("plSource"), status:st, notes:V("plNotes"), converted:st==="converted"};
-    const arr=lsGet(L_KEY,[]);
-    if(ci>=0){ rec.convertedTo=arr[ci]?.convertedTo; rec.convertedDate=arr[ci]?.convertedDate; arr[ci]=rec; } else arr.push(rec);
-    lsSet(L_KEY,arr); pipeModalClose(); rr();
-  };
-  window.pipeLeadDelete=ci=>{
-    if(!guardDelete()) return;
-    const arr=lsGet(L_KEY,[]); const l=arr[ci];
-    if(!l) return; if(!confirm(`Delete lead "${l.contact}" (${l.company})?`)) return;
-    arr.splice(ci,1); lsSet(L_KEY,arr); rr();
-  };
+  /* The old Leads list (tLeads, Add/Edit/Convert/Delete lead) was dead code with no pane or nav
+     entry and is deleted. The Leads section is the roster board and table (leadsInner). */
 
   /* TAB 8 · REPORTS was here and is deleted. It is now a top level section, reports.js,
      built off the PIPELIVE.data seam at the foot of this file. What it was: four KPIs, an
@@ -2626,7 +2598,7 @@
   window.pipeAcctCommSave = ch => {
     if(!PROFILE) return;
     const m=CH_META[ch]||CH_META.note;
-    const who=(P.team[0]&&P.team[0].name)||"";
+    const who=ME()||"";
     let title="", body="";
     if(ch==="email"){ const s=V("acEmailSubj"), b=V("acEmailBody"); if(!s||!b){ alert("Subject and body are required."); return; } title=s; body=b; }
     else if(ch==="sms"){ const b=V("acSmsBody"); if(!b){ alert("A message is required."); return; } title="SMS"; body=b; }
@@ -2903,7 +2875,12 @@
     /* Website form submissions. The last of the four intake paths to reach this timeline, and
        the one that had never reached any screen at all. */
     webLeadsFor(name).forEach(w=>derived.push(webLeadToActivity(w)));
-    const all = stored.concat(derived).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+    /* A reply sent from here is logged locally at once, then Instantly returns its own "Reply
+       sent" row for the same message. Show the sender's record once: drop the local note when
+       the same subject has come back from Instantly. */
+    const sentBack = new Set(derived.filter(a=>a._mail && /^Reply sent: /.test(a.title)).map(a=>normSubj(a.title.slice(12))));
+    const storedKept = stored.filter(a=>!(a._replySubj && sentBack.has(normSubj(a._replySubj))));
+    const all = storedKept.concat(derived).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
     const filterSet = PROFILE_FILTER==="all" ? null : PROFILE_FILTER.split(",");
     const shown = filterSet ? all.filter(a=>filterSet.includes(a.ch)) : all;
 
@@ -3022,15 +2999,7 @@
     if(PROFILE && PROFILE_HOST==="crm") return renderProfile(PROFILE);
     const at=activeTab();
     const panes=[["pipeline",tPipeline],["deals",tDeals],["people",tContacts],["offtake",tOfftake],["production",tProduction],["exec",tExec]];
-    /* The deal book's provenance, stated where the KPIs are read. Companies, contacts and
-       ICPs on this page come off the live roster join, but every DEAL number (pipeline,
-       weighted, confirmed revenue, win rate) is computed from the SIBRA snapshot plus
-       local adds, without the date a four-week-old book reads as today's. */
-    const snapNote = P.snapshot
-      ? `<div class="note" style="margin:6px 0 12px;font-size:12.5px"><b>Deal data as of ${esc(P.snapshot)}</b>, the SIBRA snapshot plus anything added here. Accounts, contacts and ICP columns read the live roster. Refreshing the deal book needs an operator login to SIBRA (/api/crm/*).</div>`
-      : "";
     return `<h1 class="pipe-h">Sales Pipeline</h1>
-      ${snapNote}
       <div class="pipe-tabs">${TABS.map(([id,t])=>`<span class="pill${id===at?" active":""}" data-tab="${id}" onclick="pipeTab('${id}')">${t}</span>`).join("")}</div>
       ${panes.map(([id,fn])=>`<div class="pipe-pane${id===at?" active":""}" data-tab="${id}">${fn()}</div>`).join("")}`;
   }
@@ -3496,7 +3465,26 @@
       email:V("plnEmail"), phone:V("plnPhone"), city:V("plnCity"), state:V("plnState"),
       line:V("plnLine"), icp:V("plnIcp"), what:V("plnWhat") });
     const arr=lsGet(POOL_KEY,[]);
-    if(pi>=0){ rec.added = arr[pi]?.added || rec.added; arr[pi]=rec; } else arr.push(rec);
+    /* Duplicate check on the company name, against the roster and the pool, the same fold the
+       importer uses. On edit the record's own name is not a duplicate of itself. */
+    const nk=norm(name), own=pi>=0&&arr[pi]?norm(arr[pi].name):null;
+    if(nk!==own && poolList().some(c=>norm(c.name)===nk)){
+      alert(`"${name}" is already in the lead list. Search for it and edit that one instead.`); return;
+    }
+    if(pi>=0 && arr[pi]){
+      /* Edit starts from the stored record, so a lead with several phones, emails or contacts
+         keeps all but the first. The form only owns the first of each. */
+      const prev=arr[pi];
+      const out={ ...prev, ...rec, added:prev.added||rec.added };
+      const first=(list,v)=>{ const l=Array.isArray(list)?list.slice():[]; if(v){ if(l.length) l[0]=v; else l.push(v); } return l; };
+      const emails=first(prev.emails,V("plnEmail")), phones=first(prev.phones,V("plnPhone"));
+      if(emails.length) out.emails=emails; else delete out.emails;
+      if(phones.length) out.phones=phones; else delete out.phones;
+      const pc=Array.isArray(prev.contacts)?prev.contacts.slice():[];
+      if(rec.contacts){ pc[0]={ ...(pc[0]||{}), ...rec.contacts[0] }; }
+      if(pc.length) out.contacts=pc; else delete out.contacts;
+      arr[pi]=out;
+    } else arr.push(rec);
     lsSet(POOL_KEY,arr); poolBust(); pipeModalClose(); rr();
   };
   window.pipePoolDelete = pi => {
@@ -3620,8 +3608,7 @@
     rr();
     alert(`Imported ${added} lead${added===1?"":"s"}.`+
       (dupe?` ${dupe} already in the pool, skipped.`:"")+
-      (blank?` ${blank} row${blank===1?"":"s"} had no company name, skipped.`:"")+
-      `\n\nThese live in this browser only until the shared store learns the "pool" kind.`);
+      (blank?` ${blank} row${blank===1?"":"s"} had no company name, skipped.`:""));
   };
 
 
@@ -3670,7 +3657,10 @@
   window.pipeInboxReadAll=()=>{ lsSet(READ_KEY,inboxItems().map(i=>i.sig)); remountInbox(); };
   let INBOX_FILTER="all";
   window.pipeInboxFilter=f=>{ INBOX_FILTER=f; remountInbox(); };
-  function remountInbox(){ const el=document.getElementById("sec-inbox"); if(el) el.innerHTML=rInbox(); }
+  function remountInbox(){
+    const el=document.getElementById("sec-inbox"); if(el) el.innerHTML=rInbox();
+    if(typeof updateInboxBadge==="function") updateInboxBadge();
+  }
 
   /* The account a number or a domain belongs to, or null. Reuses the same matching the account
      timeline uses, so a row in the Inbox and the same event on the account agree. */
@@ -3703,7 +3693,10 @@
           action:"Review call", href:acct });
         return;
       }
-      if(r.kind==="call"&&r.result&&MISSED.test(r.result)){
+      /* INBOUND only. An outbound call nobody picked up is our own no-answer, not somebody
+         waiting on us, and listing it as "Missed call, Call back" sends the rep to ring the
+         prospect they just rang. */
+      if(r.kind==="call"&&r.direction==="INBOUND"&&r.result&&MISSED.test(r.result)){
         out.push({ sig, type:"missed", at:r.at, title:"Missed call \u2014 "+r.result.toLowerCase().replace(/_/g," "),
           who:r.who||r.number, acct, body:r.summary||"No summary recorded.", action:"Call back", tel:r.number, href:acct });
         return;
@@ -3893,7 +3886,7 @@
       /* Logged on the account as well as sent, so the timeline shows the whole conversation
          rather than only the half Instantly happens to return on the next read. */
       if(i.acct) addAcctActivity(i.acct,{ ch:"email", who:i.eaccount||"", title:"Reply sent \u2014 "+subject,
-        body:text, status:"sent" });
+        body:text, status:"sent", _replySubj:subject });
       pipeInboxRead(sig);
       pipeModalClose();
       await loadMail(); remountInbox();
@@ -3919,7 +3912,7 @@
     const el=document.getElementById("tdyNew"); const what=el?el.value.trim():"";
     if(!what) return;
     const arr=todos();
-    arr.push({ id:uid("todo"), what, done:false, who:(P.team[0]&&P.team[0].name)||"",
+    arr.push({ id:uid("todo"), what, done:false, who:ME()||"",
       created_at:nowISO(), updated_at:nowISO() });
     lsSet(T_KEY,arr); if(el) el.value=""; remountToday();
   };
@@ -3945,7 +3938,7 @@
 
     inboxItems().filter(i=>!read.has(i.sig)&&i.type!=="text").forEach(i=>{
       rows.push({ at:i.at, what:i.title, who:i.acct||i.who, why:INBOX_META[i.type].label,
-        action:i.action, lead:i.lead, tel:i.tel, href:i.href });
+        action:i.action, lead:i.lead, tel:i.tel, href:i.href, sig:i.sig, replyTo:i.replyTo });
     });
 
     const today=todayISO();
@@ -3957,7 +3950,8 @@
     rows.sort((a,b)=>new Date(a.at)-new Date(b.at));   // oldest first: longest waiting, first
 
     const body=rows.length?rows.map(r=>{
-      const act = r.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${jq(r.lead)}')">${esc(r.action)}</button>`
+      const act = r.replyTo ? `<button type="button" class="btn btn-accent ibx-act" onclick="pipeReplyModal('${jq(r.sig)}')">${esc(r.action)}</button>`
+        : r.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${jq(r.lead)}')">${esc(r.action)}</button>`
         : r.tel ? `<a class="btn btn-accent ibx-act" href="tel:${esc(r.tel)}">${esc(r.action)}</a>`
         : r.href ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeOpenAccount('${jq(r.href)}')">${esc(r.action)}</button>`
         : "";

@@ -38,12 +38,17 @@ console.log(`✓ nurture-data.js: ${body.length} chars from NURTURE-PLAN.md`);
 
 /* Second output: the email template module, made into a browser global so the Sales OS can
    render a nurture email exactly the way the Pages Function will send it. _email.js is an ES
-   module with `export` keywords and no imports, so the transform is: strip `export `, wrap in
+   module with `export` keywords and one import (the brand config), so the transform is: strip `export `, wrap in
    an IIFE, hand the public names to window.EMAIL_TPL. If _email.js ever grows an import this
    will break loudly at load, which is the right failure. */
 const tplSrc = readFileSync(join(ROOT, "functions", "api", "_email.js"), "utf8");
-if (/^\s*import\s/m.test(tplSrc)) throw new Error("_email.js has an import; build-nurture cannot bundle it");
-const stripped = tplSrc.replace(/^export\s+(const|function|let)\s/gm, "$1 ");
+/* The one allowed import is the brand config; the browser gets it as window.BRAND_CONFIG
+   (sales/brand-data.js, loaded before this bundle). Any other import breaks loudly here. */
+const BRAND_IMPORT = /^import \{ BRAND_CONFIG as CFG \} from "\.\.\/\.\.\/brand\.config\.mjs";$/m;
+if (!BRAND_IMPORT.test(tplSrc)) throw new Error("_email.js no longer imports BRAND_CONFIG from ../../brand.config.mjs");
+const withoutBrand = tplSrc.replace(BRAND_IMPORT, "const CFG = window.BRAND_CONFIG;");
+if (/^\s*import\s/m.test(withoutBrand)) throw new Error("_email.js has another import; build-nurture cannot bundle it");
+const stripped = withoutBrand.replace(/^export\s+(const|function|let)\s/gm, "$1 ");
 const NAMES = ["esc", "origin", "SPEC", "STYLES", "renderEmail", "SEQUENCES", "buildAutoreply", "buildInternalLead", "buildNurtureEmail", "_internals"];
 for (const n of NAMES) if (!new RegExp(`(const|function)\\s+${n}\\b`).test(stripped)) throw new Error(`_email.js no longer defines ${n}`);
 writeFileSync(

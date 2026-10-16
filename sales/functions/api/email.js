@@ -144,9 +144,8 @@ export async function onRequestGet(context) {
     }
   }
 
-  /* Our own sending mailboxes, taken from the data rather than hard-coded — the programme runs
-     across getamericanbiocarbon.com and pureamericanbiocarbon.com today and will not stay that
-     way. Whichever end of the message is not ours is the prospect. */
+  /* Our own sending mailboxes, taken from the data rather than hard-coded — the sending
+     domains change over time (the roster is not fixed), so nothing here names them. Whichever end of the message is not ours is the prospect. */
   const ourDomains = new Set(
     items.map((e) => domainOf(e.eaccount)).filter(Boolean),
   );

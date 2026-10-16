@@ -26,9 +26,13 @@
 #                          again, but this script no longer writes it.
 #   INSTANTLY_API_KEY      optional. /api/instantly goes live when set.
 #   APOLLO_API_KEY         optional. /api/apollo goes live when set.
-#   ALLO_EXPORT_TOKEN      optional. The Launchpad live call row appears when set.
+#   ALLO_EXPORT_TOKEN      optional. The shared store (deals, contacts, records, audit) and the
+#                          live activity feed work when set. Must equal EXPORT_TOKEN on the Worker.
+#   ALLO_API_KEY           optional. Create Prospect (/api/prospect) writes to Allo when set.
+#   SALES_OS_SESSION_SECRET optional but recommended. Signs the session cookie instead of the
+#                          user's password. Rotating it signs everyone out.
 #
-# The three optional ones are skipped with a warning if absent; those routes fail soft on
+# The optional ones are skipped with a warning if absent; those routes fail soft on
 # their own and the page keeps rendering its dated snapshot.
 set -euo pipefail
 
@@ -86,7 +90,7 @@ printf '%s' "${SALES_OS_USERS:?set SALES_OS_USERS in the shell or in .env, as us
 # sales/functions/api/*.js hold these server side so the browser never sees a key. Each route
 # fails soft when its secret is missing: it answers ok:false and the page keeps rendering the
 # dated snapshot. So a missing key here degrades one row, it does not break the deploy — which
-# is why these are skipped with a warning rather than treated like SALES_OS_PASSWORD.
+# is why these are skipped with a warning. SALES_OS_USERS above is the one that must exist.
 #
 put_secret() {
   local name="$1" value="$2" why="$3"
@@ -107,7 +111,15 @@ put_secret APOLLO_API_KEY "${APOLLO_API_KEY:-$(read_env APOLLO_API_KEY)}" \
 # generated. If it was lost, re-run sales-department/allo-hooks/scripts/deploy.sh to mint a
 # new one and put the SAME value in .env as ALLO_EXPORT_TOKEN.
 put_secret ALLO_EXPORT_TOKEN "${ALLO_EXPORT_TOKEN:-$(read_env ALLO_EXPORT_TOKEN)}" \
-  "/api/allo will answer not-configured and the Launchpad live row stays hidden."
+  "The shared store and live activity answer not-configured; the pipeline falls back to this browser's copy."
+# Create Prospect writes to Allo through this key (api/prospect.js). Without it the button
+# answers not-configured after a fresh deploy.
+put_secret ALLO_API_KEY "${ALLO_API_KEY:-$(read_env ALLO_API_KEY)}" \
+  "Create Prospect will answer not-configured."
+# Signs the session cookie. Unset, the cookie is signed with the user's password, which lets a
+# stolen cookie be attacked offline. Generate once (openssl rand -hex 32), keep it in .env.
+put_secret SALES_OS_SESSION_SECRET "${SALES_OS_SESSION_SECRET:-$(read_env SALES_OS_SESSION_SECRET)}" \
+  "Sessions are signed with each user's password instead. Set a long random value in .env."
 
 echo "==> deploy"
 # Deploy from INSIDE sales/, not from the repo root with "deploy sales".
@@ -129,7 +141,7 @@ cat <<NOTE
 Deployed. Verify, in this order:
   1. open the project URL, log in with a username and password from SALES_OS_USERS
   2. the Launchpad Instantly tile should say the campaign count, not "no live read"
-  3. a live row appears under the phone tiles only if ALLO_EXPORT_TOKEN was set
+  3. the pipeline shows shared data only if ALLO_EXPORT_TOKEN was set
 Any route whose secret was skipped above answers ok:false by design; the page still renders
 its dated snapshot. Re-run this script after adding the value to .env to fill it in.
 NOTE

@@ -12,8 +12,8 @@
  * sacks by the US ton, free samples in 4 to 7 business days, biochar OMRI Listed and Puro
  * certified, IBI tested (never certified). */
 (function(){
-  const BRAND = "Progreaux"; /* the one place the company name lives for cold email copy */
-  const SIG = "Victor Jehle\n" + BRAND + "\n(225) 398 9286";
+  const CFG = window.BRAND_CONFIG; /* brand-data.js, generated from brand.config.mjs: the one source for name, phone and sender */
+  const SIG = window.BRAND_FN.signatureLines(CFG.signatureName).join("\n");
   const V = (id, line, icp, title, intent, subject, body, ask) => ({ id, line, icp, title, intent,
     copy:{ subject, greeting:"Hi {{firstName}},", body, ask, signoff:SIG } });
 
@@ -67,7 +67,8 @@
     lines:[ { id:"absorbent", name:"Absorbent", variants:ABSORBENT }, { id:"biochar", name:"Biochar", variants:BIOCHAR } ],
     /* Filled in the preview only. Instantly fills the real ones from the lead. */
     previewTokens:{ firstName:"Sam", companyName:"Gulf South Environmental", state:"Texas", crop:"sugarcane" },
-    fromName:"Victor Jehle", fromAddress:"victor@progreaux.com", previewTo:"sam@gulfsouthenv.com",
+    /* Preview only. Instantly sends from the done for you mailboxes, not from this address. */
+    fromName:CFG.coldFromName, fromAddress:CFG.coldFromAddress, previewTo:CFG.coldPreviewTo,
     statuses:["draft","ready","canonical"],
   };
 })();

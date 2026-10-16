@@ -49,7 +49,7 @@
     const copy = { ...c, footerNote: c.footerNote || seq.footerNote || "" };
     for(const k of ["subject","preheader","heading","greeting","ctaLabel","ctaHref","signoff"]) copy[k]=fillTokens(copy[k]);
     copy.paras = (copy.paras||[]).map(fillTokens);
-    const out = tpl.buildNurtureEmail(copy, { firstName:(SPEC().previewTokens||{}).firstName||"", unsubscribeHref:"https://progreaux.com/unsubscribe?u=preview" }, {});
+    const out = tpl.buildNurtureEmail(copy, { firstName:(SPEC().previewTokens||{}).firstName||"", unsubscribeHref:window.BRAND_CONFIG.siteOrigin+"/unsubscribe?u=preview" }, {});
     return out;
   }
 
@@ -92,16 +92,17 @@
     const ph = placeholder(email, variant);
     const out = renderPreview(seq, email, variant);
     const st = rec.status||"draft";
+    const locked = CE().lockedForMe(st);
     const msg = store.lastMsg(id);
     return `<div class="card nur-card" id="nur-${esc(email.id)}">
       <div class="nur-head">
         <div><span class="nur-id">${esc(email.id)}</span> <b>${esc(email.title)}</b> <span class="nur-day">${typeof email.day==="number"?"day "+email.day:esc(email.day)}</span> ${statusPill(st)}${store.dirty[id]?' <span class="nur-status warn">unsaved</span>':""}</div>
         <div class="nur-actions">
-          <button class="btn btn-primary" type="button" onclick="NURTURE_UI.save('${esc(id)}')">Save</button>
+          ${locked?`<span class="nur-status">locked, an admin must reopen it</span>`:`<button class="btn btn-primary" type="button" onclick="NURTURE_UI.save('${esc(id)}')">Save</button>`}
           ${st!=="ready"&&st!=="approved"?`<button class="btn btn-ghost" type="button" onclick="NURTURE_UI.setStatus('${esc(id)}','ready')">Mark ready for Victor</button>`:""}
           ${canApprove()&&st!=="approved"?`<button class="btn btn-accent" type="button" onclick="NURTURE_UI.setStatus('${esc(id)}','approved')">Approve</button>`:""}
-          ${st==="approved"?`<button class="btn btn-ghost" type="button" onclick="NURTURE_UI.setStatus('${esc(id)}','draft')">Reopen</button>`:""}
-          <button class="btn btn-ghost" type="button" onclick="NURTURE_UI.reset('${esc(id)}')">Clear my copy</button>
+          ${st==="approved"&&canApprove()?`<button class="btn btn-ghost" type="button" onclick="NURTURE_UI.setStatus('${esc(id)}','draft')">Reopen</button>`:""}
+          ${locked?"":`<button class="btn btn-ghost" type="button" onclick="NURTURE_UI.reset('${esc(id)}')">Clear my copy</button>`}
         </div>
       </div>
       <p class="nur-intent">${esc(email.intent)}</p>
@@ -189,9 +190,22 @@
     save(id){ store.save(id, { copy: readForm(id) }); },
     setStatus(id, status){
       if(status==="approved" && !canApprove()){ alert("Only Victor (admin) can approve."); return; }
+      /* Ready and approved both pass the copy gate, run on the copy as it is in force. */
+      if(status!=="draft"){
+        const r=findEmail(id.split(":")[0]); if(!r) return;
+        const variant = id.includes(":") ? id.split(":")[1] : null;
+        const c = CE().effective(placeholder(r.email, variant), readForm(id));
+        if(!store.gate(id, c, status==="approved" ? "approving it" : "marking it ready")){
+          alert("Not saved. Fix these first:\n\n"+CE().validate("nurture", c).failures.map(f=>"\u2022 "+f).join("\n")); return;
+        }
+      }
       store.save(id, { copy: readForm(id), status });
     },
-    reset(id){ if(!confirm("Clear your copy for this email and go back to the starter draft?")) return; store.save(id, { copy:{}, status:"draft" }); },
+    reset(id){
+      if(CE().lockedForMe((store.records[id]||{}).status)) return;
+      if(!confirm("Clear your copy for this email and go back to the starter draft?")) return;
+      store.save(id, { copy:{}, status:"draft" });
+    },
     addPara(id){ const rec=store.records[id]||{}; const copy=readForm(id); (copy.paras=copy.paras||[]).push(""); store.records[id]={...rec, copy}; store.dirty[id]=true; rerender(); },
     _internals:{ effective, placeholder, renderPreview, md, findEmail, get RECORDS(){return store.records;}, set RECORDS(v){store.records=v;}, readForm, store },
   };

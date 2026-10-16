@@ -30,14 +30,24 @@
   function effective(v){ return CE().effective(v.copy, (store.records[v.id]||{}).copy||{}); }
 
   /* The message as sent: greeting, body, ask, signature, with tokens filled for the preview
-     or left as merge tags for the clipboard. */
+     or left as merge tags for the clipboard. For the clipboard EVERY {{firstName}}, in the
+     subject and body as well as the greeting, becomes {{firstName | there}}, so a lead with a
+     blank first name never ships "Hi ,". */
   function compose(v, fill){
     const c = effective(v);
-    const f = fill ? (s)=>CE().fillTokens(s, SPEC().previewTokens) : (s)=>s;
-    const greeting = fill ? f(c.greeting) : String(c.greeting||"").replace(/\{\{\s*firstName\s*\}\}/g, "{{firstName | there}}");
-    const parts = [greeting, f(c.body), f(c.ask), f(c.signoff)].map(s=>String(s||"").trim()).filter(Boolean);
+    const f = fill ? (s)=>CE().fillTokens(s, SPEC().previewTokens) : (s)=>CE().withFallback(s);
+    const parts = [c.greeting, c.body, c.ask, c.signoff].map(s=>String(f(s)||"").trim()).filter(Boolean);
     return { subject: f(c.subject), text: parts.join("\n\n") };
   }
+
+  /* The CAN-SPAM footer, from brand.config: the entity and postal address, then the one line
+     unsubscribe. Appended to what is copied for Instantly and nowhere else, because the
+     preview is the message the person reads and the footer is the legal block under it.
+     handoff/enrichment/preflight-absorbent.mjs reads the same two lines from the same config. */
+  function footerLines(){ return window.BRAND_FN.canspamFooterLines(window.BRAND_CONFIG); }
+
+  /* The copy as in force (typed over starter), for the gate. */
+  function inForce(id){ const v=findVariant(id); return v ? CE().effective(v.copy, CE().readForm(id)) : null; }
 
   function inboxMock(v){
     const m = compose(v, true); const s = SPEC();
@@ -55,16 +65,17 @@
     const rec = store.records[v.id]||{}; const saved = rec.copy||{};
     const st = rec.status||"draft";
     const can = CE().canApprove();
+    const locked = CE().lockedForMe(st);
     return `<div class="card nur-card" id="ce-${esc(v.id)}">
       <div class="nur-head">
         <div><span class="nur-id">${esc(v.id)}</span> <b>${esc(v.title)}</b> <span class="nur-day">${esc(v.lineName)} · ${esc(v.icp)}</span> ${CE().statusPill(st)}${store.dirty[v.id]?' <span class="nur-status warn">unsaved</span>':""}</div>
         <div class="nur-actions">
-          <button class="btn btn-primary" type="button" onclick="COLDEMAIL_UI.save('${esc(v.id)}')">Save</button>
+          ${locked?`<span class="nur-status">locked, an admin must reopen it</span>`:`<button class="btn btn-primary" type="button" onclick="COLDEMAIL_UI.save('${esc(v.id)}')">Save</button>`}
           ${st==="draft"?`<button class="btn btn-ghost" type="button" onclick="COLDEMAIL_UI.setStatus('${esc(v.id)}','ready')">Mark ready for Victor</button>`:""}
           ${can&&st!=="canonical"?`<button class="btn btn-accent" type="button" onclick="COLDEMAIL_UI.setStatus('${esc(v.id)}','canonical')">Make canonical</button>`:""}
-          ${st==="canonical"?`<button class="btn btn-ghost" type="button" onclick="COLDEMAIL_UI.setStatus('${esc(v.id)}','draft')">Reopen</button>`:""}
+          ${st==="canonical"&&can?`<button class="btn btn-ghost" type="button" onclick="COLDEMAIL_UI.setStatus('${esc(v.id)}','draft')">Reopen</button>`:""}
           <button class="btn btn-ghost" type="button" onclick="COLDEMAIL_UI.copyOut('${esc(v.id)}')">Copy for Instantly</button>
-          <button class="btn btn-ghost" type="button" onclick="COLDEMAIL_UI.reset('${esc(v.id)}')">Clear my copy</button>
+          ${locked?"":`<button class="btn btn-ghost" type="button" onclick="COLDEMAIL_UI.reset('${esc(v.id)}')">Clear my copy</button>`}
         </div>
       </div>
       <p class="nur-intent">${esc(v.intent)}</p>
@@ -111,18 +122,35 @@
     save(id){ store.save(id, { copy:CE().readForm(id) }); },
     setStatus(id, status){
       if(status==="canonical" && !CE().canApprove()){ alert("Only Victor (admin) can mark a variant canonical."); return; }
+      /* Ready and canonical both pass the copy gate; reopening to draft never needs to. */
+      if(status!=="draft"){
+        const c=inForce(id); if(!c) return;
+        const what = status==="canonical" ? "making it canonical" : "marking it ready";
+        if(!store.gate(id, c, what)){ alert("Not saved. Fix these first:\n\n"+CE().validate("coldemail", c).failures.map(f=>"\u2022 "+f).join("\n")); return; }
+      }
       store.save(id, { copy:CE().readForm(id), status });
     },
-    reset(id){ if(!confirm("Clear your copy for this variant and go back to the starter draft?")) return; store.save(id, { copy:{}, status:"draft" }); },
+    reset(id){
+      if(CE().lockedForMe((store.records[id]||{}).status)) return;
+      if(!confirm("Clear your copy for this variant and go back to the starter draft?")) return;
+      store.save(id, { copy:{}, status:"draft" });
+    },
     async copyOut(id){
       store.snapshot();
       const v=findVariant(id); if(!v) return;
       const m=compose(v,false);
-      const text=`Subject: ${m.subject}\n\n${m.text}`;
-      try{ await navigator.clipboard.writeText(text); store.msg[id]="Copied for Instantly: subject and body with {{firstName | there}}."; }
+      /* The gate runs on what will actually be pasted, after the fallback rewrite. */
+      const check = CE().validate("coldemail", { subject:m.subject, body:m.text, signoff:effective(v).signoff });
+      if(!check.ok){
+        store.fails[id]=check.failures; store.msg[id]="Not copied: the copy fails the copy gate.";
+        rerender(); alert("Not copied. Fix these first:\n\n"+check.failures.map(f=>"\u2022 "+f).join("\n")); return;
+      }
+      delete store.fails[id];
+      const text=`Subject: ${m.subject}\n\n${m.text}\n\n${footerLines().join("\n")}`;
+      try{ await navigator.clipboard.writeText(text); store.msg[id]="Copied for Instantly: subject, body with {{firstName | there}}, and the CAN-SPAM footer."; }
       catch(e){ store.msg[id]="Clipboard blocked by the browser. Select the preview and copy it by hand."; }
       rerender();
     },
-    _internals:{ compose, effective, allVariants, findVariant, store },
+    _internals:{ compose, effective, allVariants, findVariant, store, footerLines, inForce },
   };
 })();

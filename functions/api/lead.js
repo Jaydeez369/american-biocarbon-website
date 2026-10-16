@@ -12,11 +12,13 @@
  *
  * Required environment variables (Cloudflare Pages > Settings > Variables and secrets):
  *   RESEND_API_KEY  secret. API key from the Resend account.
- *   LEAD_FROM       optional. Verified sender, defaults to the send. subdomain so the
- *                   root SPF record for Microsoft 365 and Proofpoint is never touched.
+ *   LEAD_FROM       optional. Verified sender. Defaults to leadFrom in brand.config, which is on
+ *                   the send. subdomain so the root SPF record for Microsoft 365 and Proofpoint
+ *                   is never touched. That subdomain is NOT verified in Resend yet, so set
+ *                   LEAD_FROM to a sender that is until it is, or no lead mail is delivered.
  *   LEAD_TO         optional. Comma separated override for the internal recipient list,
  *                   for proving delivery against a test inbox. Unset in production.
- *   SITE_ORIGIN     optional. Base URL for links inside emails. Defaults to the apex.
+ *   SITE_ORIGIN     optional. Base URL for links inside emails. Defaults to siteOrigin in brand.config.
  *                   Point it at the pages.dev URL before cutover: the spec-sheet PDFs
  *                   404 on the apex until the apex actually serves this site.
  *
@@ -26,14 +28,16 @@
  */
 import { buildAutoreply, buildInternalLead } from "./_email.js";
 import { contactState, emailFrom } from "./_contact.js";
+import { BRAND_CONFIG as CFG } from "../../brand.config.mjs";
 
 /* Website enquiries go to the two people who actually work the leads, by name.
    These addresses are taken from the live Shopify staff accounts (Settings > Users,
    verified 2026-08-06), NOT from the handoff docs, which specified
-   sarah.boone@ / victor.jehle@americanbiocarbon.com - spellings that appear nowhere in any
-   live system and may reach no inbox at all.
+   sarah.boone@ / victor.jehle@ on the old brand domain - spellings that appear nowhere in any
+   live system and may reach no inbox at all. The list itself lives in brand.config
+   (leadRecipients).
 
-   sales@americanbiocarbon.com is deliberately NOT here. A test send did deliver to it, so
+   The old sales@ address on the retired domain is deliberately NOT here. A test send did deliver to it, so
    something accepts mail at that address, but nobody has confirmed it is a monitored
    mailbox rather than a catch-all. A lead sitting unread in a catch-all is indistinguishable
    from a lead that was never sent, which is the exact failure this whole endpoint exists to
@@ -44,13 +48,13 @@ import { contactState, emailFrom } from "./_contact.js";
    Leave it unset in production: unset means the two addresses below, which is the whole
    point of hardcoding them. Note this is an env var read by the server, NOT the client
    supplied "recipients" array, which is still ignored for the open-relay reason above. */
-const DEFAULT_RECIPIENTS = ["sboone@cs-ops.com", "victor.jehle@cs-ops.com"];
+const DEFAULT_RECIPIENTS = CFG.leadRecipients;
 
 /* Where a prospect's reply goes when they hit Reply on the auto-reply. Deliberately ONE
    address, not the DEFAULT_RECIPIENTS pair: a reply-to with two addresses makes every
    prospect reply fork into two threads that neither person can see the other half of.
    Victor for now; revisit if the volume outgrows one inbox. */
-const REPLY_TO = "victor.jehle@cs-ops.com";
+const REPLY_TO = CFG.replyTo;
 
 /* Resolve who gets the internal lead. Returns {list} or {error}; never falls back to the
    sales desk when an override was clearly intended but unusable.
@@ -67,7 +71,8 @@ function recipientsFrom(env) {
   return { list, overridden: true };
 }
 
-const DEFAULT_FROM = "Progreaux <leads@send.americanbiocarbon.com>";
+/* UNVERIFIED sender domain, see brand.config. Env LEAD_FROM overrides. */
+const DEFAULT_FROM = CFG.leadFrom;
 const MAX_BODY_BYTES = 32 * 1024;
 
 /* Pull the visitor address out of whatever the form called it, so a reply goes to the
@@ -90,7 +95,7 @@ const replyToFrom = (fields) => emailFrom(fields);
  * one of them adds a field. The cost is one extra hop on a request that already makes two to
  * Resend, and one shared secret.
  *
- * SETUP (Cloudflare Pages > americanbiocarbon > Settings > Variables and secrets):
+ * SETUP (Cloudflare Pages > the marketing site project > Settings > Variables and secrets):
  *   ALLO_EXPORT_TOKEN  secret. The SAME value as EXPORT_TOKEN on the allo-hooks Worker.
  *   ALLO_HOOKS_URL     optional override of the Worker URL.
  *
@@ -299,7 +304,7 @@ export async function onRequest({ request, env }) {
           to: [replyTo],
           /* Where a PROSPECT's reply lands. This is the warmest signal the funnel produces,
              so it must reach a mailbox somebody demonstrably reads. It used to be
-             sales@americanbiocarbon.com, which contradicted this file's own DEFAULT_RECIPIENTS
+             the old sales@ address on the retired domain, which contradicted this file's own DEFAULT_RECIPIENTS
              comment: that address was excluded from internal leads precisely because nobody
              confirmed it is monitored rather than a catch-all. Routing replies there while
              refusing to route leads there was the worst of both. Jesse's call, 2026-08-11. */

@@ -11,9 +11,23 @@
 (function(){
   const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
-  const who = () => { for(const p of String(document.cookie||"").split(";")){ const i=p.indexOf("="); if(i>0&&p.slice(0,i).trim()==="sales_os_name") return decodeURIComponent(p.slice(i+1).trim()); } return ""; };
+  /* The display name cookie the login gate sets is sales_os_user (functions/_middleware.js NAME_COOKIE). */
+  const who = () => { for(const p of String(document.cookie||"").split(";")){ const i=p.indexOf("="); if(i>0&&p.slice(0,i).trim()==="sales_os_user") return decodeURIComponent(p.slice(i+1).trim()); } return ""; };
   const role = () => (window.PIPELIVE && PIPELIVE.data && PIPELIVE.data.role && PIPELIVE.data.role())||"";
   const canApprove = () => ["admin","dev"].includes(role());
+  const isLocked = st => st==="approved"||st==="canonical";
+  /* A locked record is read only for everyone but an admin: the edge refuses their writes, so the
+     buttons that would try are not drawn. */
+  const lockedForMe = st => isLocked(st) && !canApprove();
+
+  /* The copy gate (sales/copy-rules.js, the same function the edge runs). */
+  const RULES = () => window.COPY_RULES;
+  function validate(kind, copy){
+    const r = RULES();
+    if(!r) return { ok:false, failures:["The copy gate (copy-rules.js) did not load, so nothing can be approved. Reload the page."] };
+    return r.validateCopy(copy, { kind });
+  }
+  const withFallback = s => RULES() ? RULES().withFallback(s) : String(s==null?"":s).replace(/\{\{\s*firstName\s*\}\}/g,"{{firstName | there}}");
 
   /* A store is one kind in /api/record. Records are cached in this browser too, so a save
      that cannot reach the server is kept and shown as such, never lost. */
@@ -21,7 +35,7 @@
     const LS_KEY = `vej_copy_${kind}_v1`;
     const lsGet=()=>{ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); }catch(e){ return {}; } };
     const lsSet=v=>{ try{ localStorage.setItem(LS_KEY, JSON.stringify(v)); }catch(e){} };
-    const S = { kind, records:{}, loaded:false, loadErr:"", dirty:{}, msg:{}, baseCopy:{} };
+    const S = { kind, records:{}, loaded:false, loadErr:"", dirty:{}, msg:{}, baseCopy:{}, fails:{} };
 
     /* Unsaved typing survives any re-render: before the cards are rebuilt from records, each
        dirty form is copied into its record in memory (not sent anywhere). The copy as last
@@ -52,8 +66,19 @@
       S.loaded=true; lsSet(S.records); onChange();
     };
 
+    /* Run the copy gate for one record and remember the failure list for the card. Returns true
+       when the copy may proceed. `copy` is the copy as it is in force (placeholders included). */
+    S.gate = function(id, copy, what){
+      const r = validate(kind, copy);
+      if(r.ok){ delete S.fails[id]; return true; }
+      S.fails[id] = r.failures; S.msg[id] = `Blocked: ${what} needs these fixed first.`;
+      onChange();
+      return false;
+    };
+
     S.save = async function(id, patch){
       const prev = S.records[id]||{};
+      const hadPrev = id in S.records;
       /* Changed copy invalidates an approval: unless this very call sets a status, an approved
          or canonical record falls back to draft when its copy differs from what was saved. */
       const lockedPrev = prev.status==="approved"||prev.status==="canonical";
@@ -67,10 +92,27 @@
         const res = await fetch(`/api/record?kind=${encodeURIComponent(kind)}`,{ method:"POST", credentials:"same-origin",
           headers:{"Content-Type":"application/json"}, body:JSON.stringify({ records:[rec] }) });
         const data = await res.json().catch(()=>({}));
-        if(!res.ok||data.ok===false) throw new Error(data.error||data.reason||`store returned ${res.status}`);
+        if(!res.ok||data.ok===false){
+          const e = new Error(data.error||data.reason||`store returned ${res.status}`);
+          e.status = res.status; e.failures = data.failures; throw e;
+        }
+        delete S.fails[id];
         S.msg[id]=`Saved to the shared store ${new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})}`;
       }catch(err){
-        S.msg[id]=`Saved in this browser only. The shared store said: ${err.message}. Save again to retry.`;
+        if(err.status===403){
+          /* The server refused this write. Keeping it locally would show a status (or wording) the
+             shared store does not hold, so the browser's record goes back to what it was. */
+          if(hadPrev) S.records[id]=prev; else delete S.records[id];
+          lsSet(S.records);
+          S.msg[id]=`Refused, nothing was saved: ${err.message}`;
+        } else if(err.status===422){
+          /* The copy gate said no. The wording is kept so it can be fixed, the status is not. */
+          S.records[id]={ ...rec, status: prev.status||"draft" }; lsSet(S.records);
+          S.fails[id]=err.failures||[err.message];
+          S.msg[id]="Refused by the shared store: the copy fails the copy gate.";
+        } else {
+          S.msg[id]=`Saved in this browser only. The shared store said: ${err.message}. Save again to retry.`;
+        }
       }
       onChange();
     };
@@ -82,7 +124,9 @@
     };
     S.lastMsg = function(id){
       const rec=S.records[id]||{};
-      return S.msg[id] || (rec.updated_at ? `Last saved ${rec.updated_at.slice(0,16).replace("T"," ")} by ${esc(rec.updated_by||"unknown")}` : "Not saved yet. Everything you see is the starter draft.");
+      const base = S.msg[id] ? esc(S.msg[id]) : (rec.updated_at ? `Last saved ${esc(rec.updated_at.slice(0,16).replace("T"," "))} by ${esc(rec.updated_by||"unknown")}` : "Not saved yet. Everything you see is the starter draft.");
+      const fails = S.fails[id];
+      return base + (fails&&fails.length ? `<ul class="nur-fails" style="margin:6px 0 0 18px;padding:0;color:var(--red,#b3261e)">${fails.map(f=>`<li>${esc(f)}</li>`).join("")}</ul>` : "");
     };
     return S;
   }
@@ -148,5 +192,5 @@
     if(tag){ const own = Boolean(el.value.trim()); tag.textContent = own ? "your copy" : "using starter draft"; tag.className = "nur-using" + (own ? " own" : ""); }
   }
 
-  window.COPY_EDITOR = { esc, who, role, canApprove, makeStore, effective, fillTokens, statusPill, fieldRow, readForm, flipTag };
+  window.COPY_EDITOR = { esc, who, role, canApprove, isLocked, lockedForMe, validate, withFallback, makeStore, effective, fillTokens, statusPill, fieldRow, readForm, flipTag };
 })();

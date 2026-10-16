@@ -36,20 +36,20 @@ const C = {
   line: "#e2e2de",
 };
 
-/* Logos are served from the Shopify CDN (the only place they exist). Both URLs carry an
-   explicit &format=png: the reversed asset is stored as .webp, and although Shopify
-   currently content-negotiates it down to PNG, WebP is not renderable in Outlook desktop.
-   Pinning the format means a header logo cannot silently disappear for Outlook readers if
-   that negotiation ever changes. width=440 is 2x the 220px display width, for retina. */
+/* Brand facts come from brand.config.mjs (the single source). The Sales OS preview bundle
+   (sales/email-template.js, built by scripts/build-nurture.mjs) swaps this import for the
+   window.BRAND_CONFIG global, so the preview and the real send read the same values.
+   Logos are PNG because Outlook desktop and Gmail do not render SVG or WebP; they resolve once
+   the apex serves the site, so verify with curl before any send references them. */
+import { BRAND_CONFIG as CFG } from "../../brand.config.mjs";
+
 const BRAND = {
-  name: "Progreaux",
-  address: "32525 Highway 1 South, White Castle, LA 70788",
-  /* Kept in sync with BRAND in website/data.js by hand: a Pages Function cannot import the
-     site's browser-global data.js, so this is a deliberate second copy, not a stray one. */
-  phone: "(225) 398-9286",
-  phoneHref: "tel:+12253989286",
-  logo: "https://progreaux.com/assets/progreaux-wordmark.png",
-  logoRev: "https://progreaux.com/assets/progreaux-wordmark-rev.png",
+  name: CFG.brand,
+  address: CFG.postalAddress,
+  phone: CFG.phone,
+  phoneHref: CFG.phoneHref,
+  logo: CFG.logoUrl,
+  logoRev: CFG.logoRevUrl,
 };
 
 const FONT =
@@ -62,9 +62,10 @@ export const esc = (s) =>
   );
 
 /* The site origin used for links inside emails. Overridable so pre-cutover sends can point
-   at pages.dev: the spec-sheet PDFs 404 on the apex until the apex serves this site. */
+   at pages.dev: the spec-sheet PDFs 404 on the apex until the apex serves this site.
+   Default is siteOrigin in brand.config. */
 export function origin(env = {}) {
-  return env.SITE_ORIGIN || "https://americanbiocarbon.com";
+  return env.SITE_ORIGIN || CFG.siteOrigin;
 }
 
 export const SPEC = {
@@ -188,8 +189,8 @@ function footer(env, note, unsubscribeHref) {
     `<p style="margin:0 0 5px;font:600 13px/1.5 ${FONT};color:${C.slate}">${BRAND.name}</p>` +
     `<p style="margin:0 0 5px;font:400 13px/1.6 ${FONT};color:${C.mute}">${esc(BRAND.address)}</p>` +
     `<p style="margin:0;font:400 13px/1.6 ${FONT};color:${C.mute}">` +
-    `<a href="${o}" style="color:${C.navy600};text-decoration:none">americanbiocarbon.com</a>` +
-    ` &nbsp;·&nbsp; <a href="mailto:sales@americanbiocarbon.com" style="color:${C.navy600};text-decoration:none">sales@americanbiocarbon.com</a>` +
+    `<a href="${o}" style="color:${C.navy600};text-decoration:none">${esc(CFG.domain)}</a>` +
+    ` &nbsp;·&nbsp; <a href="mailto:${esc(CFG.salesInbox)}" style="color:${C.navy600};text-decoration:none">${esc(CFG.salesInbox)}</a>` +
     ` &nbsp;·&nbsp; <a href="${BRAND.phoneHref}" style="color:${C.navy600};text-decoration:none">${esc(BRAND.phone)}</a>` +
     `</p>` +
     `<p style="margin:12px 0 0;font:400 12px/1.5 ${FONT};color:#595959">` +
@@ -298,7 +299,7 @@ export const SEQUENCES = {
     build: (o) => ({
       paras: [
         "Thanks for requesting a bagasse animal bedding sample.",
-        `A bedding supply specialist will follow up ${ONE_DAY} with the product specifications, to confirm your ship-to address, and to agree the comparison you want to run against your current bedding.`,
+        `A bedding supply specialist will follow up ${ONE_DAY} with the product specifications, to confirm your ship to address, and to agree the comparison you want to run against your current bedding.`,
       ],
       links: [],
       cta: null,
@@ -308,13 +309,13 @@ export const SEQUENCES = {
   sample: {
     label: "Industrial sample kit",
     subject: "Your Progreaux sample kit",
-    preheader: "Spec sheet inside. A specialist will confirm your ship-to.",
+    preheader: "Spec sheet inside. A specialist will confirm your ship to address.",
     heading: "Your sample kit request is in",
     style: "classic",
     build: (o) => ({
       paras: [
         "Thanks for requesting a sample kit. One complimentary sample bag per company, shipping included.",
-        `A specialist will follow up ${ONE_DAY} to confirm your use case and ship-to address, and answer any handling questions for your application.`,
+        `A specialist will follow up ${ONE_DAY} to confirm your use case and ship to address, and answer any handling questions for your application.`,
       ],
       links: [{ label: "Absorbent Pellets specification sheet (PDF)", href: o + SPEC.pellets }],
       cta: null,
@@ -324,12 +325,12 @@ export const SEQUENCES = {
   quote: {
     label: "Bulk quote request",
     subject: "Your Progreaux bulk quote",
-    preheader: "We're preparing freight-aware pricing for your volume.",
+    preheader: "We're preparing freight aware pricing for your volume.",
     heading: "We're preparing your quote",
     style: "classic",
     build: (o) => ({
       paras: [
-        "Thanks for your quote request. We're preparing freight-aware pricing for your volume and ship-to location.",
+        "Thanks for your quote request. We're preparing freight aware pricing for your volume and ship to location.",
         "In the meantime, the specification sheets are below.",
       ],
       links: [
@@ -349,7 +350,7 @@ export const SEQUENCES = {
     build: (o) => ({
       paras: [
         "Thanks for your interest in our premium bagasse biochar.",
-        "We'll confirm your sample and ship-to address shortly. Composters: ask about our side-by-side windrow trial protocol.",
+        "We'll confirm your sample and ship to address shortly. Composters: ask about our side by side windrow trial protocol.",
       ],
       links: [{ label: "Premium Biochar specification sheet (PDF)", href: o + SPEC.biochar }],
       cta: null,
@@ -375,7 +376,7 @@ export const SEQUENCES = {
   carbon: {
     label: "Carbon removal enquiry",
     subject: "Your Progreaux carbon removal enquiry",
-    preheader: "Puro.earth CORC-certified durable carbon removal.",
+    preheader: "Durable carbon removal on the Puro.earth pathway.",
     heading: "Thanks for your carbon removal enquiry",
     style: "classic",
     build: (o) => ({

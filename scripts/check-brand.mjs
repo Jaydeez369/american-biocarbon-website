@@ -12,6 +12,9 @@ const SKIP_EXT = /\.(png|jpe?g|webp|gif|ico|pdf|woff2?|ttf|mp4|zip)$/i;
 const ALLOW = new Set([
   // Frozen scraped HubSpot/roster records (real email subjects, file names, account names); not rewritten.
   'sales/hubspot-comms.js', 'sales/hubspot-data.js', 'sales/roster-data.js',
+  // Generated copies of brand.config.mjs: they carry the CURRENT legal entity until the new one is
+  // decided (see the CONFIRM list from scripts/check-brand-config.mjs). The source is outside SCOPE.
+  'sales/brand-data.js', 'sales/functions/_lib/brand.js',
   // Print templates carry the legal entity footer; keep until the new legal entity exists.
   'spec-templates/absorbent-pellets.html', 'spec-templates/biochar-premium.html',
 ]);

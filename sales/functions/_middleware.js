@@ -68,6 +68,7 @@
  */
 
 import { parseUsers } from './_lib/users.js';
+import { LOGIN_PHOTO } from './_lib/login-photo.js';
 
 const COOKIE = 'sales_os_session';
 /* Readable by JS on purpose: the app renders "Victor" in the header instead of a
@@ -82,40 +83,12 @@ const ROLE_COOKIE = 'sales_os_role';
 const SESSION_SECONDS = 60 * 60 * 12; // one working day, then log in again
 const LOGIN_PATH = '/__login';
 
-/* THE LOGIN PAGE'S IMAGERY, AND WHY IT IS NOT LOCAL.
- *
- * This middleware runs in front of every path on this project, so the login page is served
- * BEFORE any asset from this origin is reachable. A local /assets/... reference would 302 back
- * to the login page and render as a broken image to somebody who is not signed in yet, which is
- * the first thing they would ever see of this system.
- *
- * So both come from the Shopify CDN that already serves the marketing site's imagery: the same
- * files, the same cache, nothing new to host and nothing added to this project's bundle. They
- * are public assets on a public storefront, so serving them here reveals nothing that
- * americanbiocarbon.com does not already show anyone.
- *
- * Inlining them as data URIs was the alternative and is worse: the photograph is ~850KB, and it
- * would be re-sent inside the HTML on every unauthenticated request, including every bot that
- * knocks on this door.
- *
- * The page is built to survive both of these 404ing. The body keeps a solid warm ground under
- * the photograph, and the logo has real alt text, so a failed load degrades to a plain dark card
- * with the company name in words rather than to a broken layout. */
-const CDN = 'https://cdn.shopify.com/s/files/1/0773/9270/7876/files/';
-
-/* Pellets coming off the conveyor at the mill.
- *
- * SIZED PROPERLY, because this is a page people wait on before they can do anything and the
- * original is 1365x2048 at ~850KB. Shopify's CDN resizes on the `width` parameter, and measured:
- * 900 -> 375KB, 1100 -> 608KB, 1365 -> 871KB. Asking for more than 1365 does nothing, which is
- * why the first version at width=1600 saved nothing at all.
- *
- * So the page ships a srcset and lets the browser choose. A phone takes the 375KB frame, a wide
- * monitor takes the full one, and nobody downloads a 2K-wide file to look at it through a
- * vignette on a laptop. `sizes="100vw"` because the image is full bleed by definition. */
-const SHOT_BASE = CDN + 'AmericanBiocarbon2021-292.jpg?v=1699280021';
-const SHOT_SRC = SHOT_BASE + '&width=1365';
-const SHOT_SRCSET = [900, 1100, 1365].map((w) => `${SHOT_BASE}&width=${w} ${w}w`).join(', ');
+/* THE LOGIN PAGE'S IMAGERY. Both the logo and the background photo are inlined: this
+ * middleware runs in front of every path, so an unauthenticated visitor can be served nothing
+ * from this origin except what is in the HTML, and the page must not hot-link another host.
+ * The photo is a ~32KB downsized copy of our own site photo (_lib/login-photo.js). It sits
+ * behind a scrim, so a failed decode degrades to the solid dark ground. */
+const SHOT_SRC = LOGIN_PHOTO;
 
 /* The reversed (white) horizontal wordmark, which is the one that works on a dark ground. */
 const LOGO_SRC = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 64%22 width=%22300%22 height=%2264%22 role=%22img%22 aria-label=%22Progreaux%22%3E %3Cg fill=%22none%22 stroke=%22%23ffffff%22 stroke-width=%223.2%22 stroke-linecap=%22round%22%3E %3Cpath d=%22M24 48 V27%22/%3E %3C/g%3E %3Cpath d=%22M24 35c0-8-6-13-13-13 0 8 5 13 13 13z%22 fill=%22%23ffffff%22 opacity=%22.72%22/%3E %3Cpath d=%22M24 30c0-8 6-13 14-13 0 8-6 13-14 13z%22 fill=%22%23ffffff%22/%3E %3Ctext x=%2256%22 y=%2241%22 font-family=%22'Helvetica Neue',Helvetica,Arial,sans-serif%22 font-size=%2227%22 font-weight=%22700%22 letter-spacing=%223.4%22 fill=%22%23ffffff%22%3EPROGREAUX%3C/text%3E %3C/svg%3E";
@@ -158,9 +131,15 @@ async function issue(account) {
    account on success so the caller learns who this is from the same pass that proves it. */
 export async function verify(token, users) {
   if (typeof token !== 'string') return null;
-  const parts = token.split('.');
-  if (parts.length !== 3) return null;
-  const [username, exp, mac] = parts;
+  /* username.exp.mac, but a username may itself contain dots (victor.jehle). exp and mac never
+     do, so split off the LAST two segments and treat everything before them as the username. */
+  const macAt = token.lastIndexOf('.');
+  if (macAt < 0) return null;
+  const expAt = token.lastIndexOf('.', macAt - 1);
+  if (expAt < 1) return null;
+  const username = token.slice(0, expAt);
+  const exp = token.slice(expAt + 1, macAt);
+  const mac = token.slice(macAt + 1);
   if (!/^\d+$/.test(exp)) return null;
   const account = users.get(username.toLowerCase());
   if (!account) return null;
@@ -218,8 +197,6 @@ function loginPage(error, username) {
 <title>Progreaux Sales OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preconnect" href="${CDN}" crossorigin />
-<link rel="preload" as="image" href="${SHOT_SRC}" imagesrcset="${SHOT_SRCSET}" imagesizes="100vw" fetchpriority="high" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
   /* ---------------------------------------------------------------------------
@@ -363,8 +340,8 @@ function loginPage(error, username) {
 </head>
 <body>
   <div class="stage">
-    <img class="shot" src="${SHOT_SRC}" srcset="${SHOT_SRCSET}" sizes="100vw"
-         alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
+    <img class="shot" src="${SHOT_SRC}"
+         alt="" aria-hidden="true" decoding="async" />
     <div class="scrim"></div>
   </div>
   <main class="wrap">

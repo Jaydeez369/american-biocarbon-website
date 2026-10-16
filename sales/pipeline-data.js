@@ -1,10 +1,9 @@
 /* ============ Progreaux Sales OS: pipeline seed data ============
-   Snapshot of the SIBRA (Replit) Sales Pipeline module, pulled from the
-   app's API on 2026-07-20 (asset-track--vejprocurement.replit.app /crm).
-   This is the REAL book of business: 18 deals, 10 accounts, the offtake
-   grid, and the production plan. To refresh, re-export from SIBRA
-   (/api/crm/*) and update this file, everything on the Pipeline page
-   is computed from these records at render time. */
+   The seed for the Pipeline screens: stages, the offtake grid, the production plan and the
+   team list. It started as a snapshot of the old SIBRA pipeline module taken on 2026-07-20.
+   The live deal and contact book is the shared D1 store (/api/deal, /api/contact), not this
+   file; the deals and contacts arrays below are historical and mostly unused. Everything on
+   the Pipeline page is computed from records at render time. */
 window.PIPE = {
 
   /* When this snapshot was pulled from SIBRA. Rendered on the Sales Pipeline page so the
@@ -74,15 +73,8 @@ window.PIPE = {
   ],
 
   team: [
-    { name:"Victor Jehle",     username:"vjehle",     role:"admin" },
-    { name:"Karina Vasquez",   username:"Kvasquez",   role:"user" },
-    { name:"Daniel Fonseca",   username:"DFonseca",   role:"user" },
-    { name:"Laura Mow-Noda",   username:"LMow-noda",  role:"user" },
-    { name:"Lucia Mercado",    username:"LMercado",   role:"user" },
-    { name:"Cristina Kelly",   username:"CKelly",     role:"user" },
-    { name:"Isabel Lima",      username:"DrLima",     role:"user" },
-    { name:"Daniel Villamizar",username:"Dvillamizar",role:"user" },
-    { name:"Jonathan Davila",  username:"jdavila",    role:"user" },
+    { name:"Victor Jehle",      username:"victor", role:"admin" },
+    { name:"Daniel Villamizar", username:"daniel", role:"manager" },
   ],
 
   /* ---- Offtake pipeline: expected MT per customer × product per quarter.

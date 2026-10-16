@@ -16,18 +16,20 @@
  * Field names match what buildNurtureEmail (functions/api/_email.js) reads.
  */
 (function(){
-  const BRAND = "Progreaux"; /* the one place the company name lives for nurture copy */
-  const DOMAIN = "progreaux.com";
-  const SITE = "https://" + DOMAIN;
+  const CFG = window.BRAND_CONFIG; /* brand-data.js, generated from brand.config.mjs */
+  const BRAND = CFG.brand;
+  const DOMAIN = CFG.domain;
+  const SITE = CFG.siteOrigin;
+  const REPLY = "mailto:" + CFG.replyTo;
   const SPEC_PELLETS = SITE + "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf";
   const SPEC_BIOCHAR = SITE + "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf";
   const BOOK = "{{calendarLink}}";
-  const V = "Victor Jehle\n" + BRAND + "\n(225) 398 9286";
-  const TEAM = "The team at " + BRAND + "\n(225) 398 9286";
+  const V = window.BRAND_FN.signatureLines(CFG.signatureName).join("\n");
+  const TEAM = "The team at " + BRAND + "\n" + CFG.phone;
 
   const A = {
     id: "A", name: "Family", who: "Engaged and Customer stage accounts, plus past " + BRAND + " customers",
-    cadence: "One a week, then monthly", sender: "Victor Jehle <victor@send.americanbiocarbon.com>",
+    cadence: "One a week, then monthly", sender: CFG.nurtureFrom,
     footerNote: "You are receiving this because you are a customer of " + BRAND + " or have worked with us on a sample.",
     emails: [
       { id:"A1", day:0, title:"What is new at the plant",
@@ -42,7 +44,7 @@
             "Right now we are running bagasse through the line for the Q4 ramp. Biochar is on hand today and absorbent pellets and crumble ship by the US ton in 2,000 lb super sacks.",
             "I will send one short note a week, nothing more. If it is not useful, the unsubscribe link at the bottom works and I will not take it personally.",
           ],
-          ctaLabel:"Reply and tell me what you are working on this season", ctaHref:"mailto:victor.jehle@cs-ops.com",
+          ctaLabel:"Reply and tell me what you are working on this season", ctaHref:REPLY,
           imageUrl:"", imageAlt:"", signoff:V, style:"classic",
         }},
       { id:"A2", day:7, title:"One customer, one result",
@@ -57,7 +59,7 @@
             "What changed: [fewer bags per spill / less disposal weight / better moisture control / faster compost cure]. Their words, not ours: \"[one sentence quote]\".",
             "If you want the numbers for your operation, reply with your monthly volume and I will run them.",
           ],
-          ctaLabel:"Reply with your volume", ctaHref:"mailto:victor.jehle@cs-ops.com",
+          ctaLabel:"Reply with your volume", ctaHref:REPLY,
           imageUrl:"", imageAlt:"", signoff:V, style:"classic",
         }},
       { id:"A3", day:14, title:"How to use it right",
@@ -87,7 +89,7 @@
             "Biochar is $450 per metric ton. At a 10% blend that is about $[X] per cubic yard of finished compost, and it does not leave the soil.",
             "Reply with what you are paying today and I will put the comparison in writing for your numbers.",
           ],
-          ctaLabel:"Reply and I will run it for your numbers", ctaHref:"mailto:victor.jehle@cs-ops.com",
+          ctaLabel:"Reply and I will run it for your numbers", ctaHref:REPLY,
           imageUrl:"", imageAlt:"", signoff:V, style:"classic",
         }},
       { id:"A5", day:28, title:"The ask",
@@ -110,7 +112,7 @@
 
   const B = {
     id: "B", name: "New website lead", who: "Anyone who submits a form on " + DOMAIN,
-    cadence: "E1 instant (the live auto reply), then two a week", sender: BRAND + " <leads@send.americanbiocarbon.com>, reply to Victor",
+    cadence: "E1 instant (the live auto reply), then two a week", sender: CFG.leadFrom + ", reply to " + CFG.signatureName,
     footerNote: "You are receiving this because you submitted a request on our website.",
     variants: ["biochar", "absorbent", "bedding"],
     emails: [
@@ -128,7 +130,7 @@
             "It is plant based, made in the USA, and consistent load to load because the feedstock is. It is not a chemical, not a clay, and not a blend.",
             "Reply and tell us what you are using today and we will tell you straight whether ours is a fit.",
           ],
-          ctaLabel:"Reply with what you use today", ctaHref:"mailto:victor.jehle@cs-ops.com",
+          ctaLabel:"Reply with what you use today", ctaHref:REPLY,
           imageUrl:"", imageAlt:"", signoff:TEAM, style:"classic",
         },
         variantCopy:{
@@ -160,7 +162,7 @@
             "The test that tells you the most: same spill, same volume, ours beside what you use today. Weigh what you pick up. Weigh what you throw away.",
             "If a sample is already on its way to you, reply when it lands and we will send the comparison sheet.",
           ],
-          ctaLabel:"Confirm your ship to address", ctaHref:"mailto:victor.jehle@cs-ops.com",
+          ctaLabel:"Confirm your ship to address", ctaHref:REPLY,
           imageUrl:"", imageAlt:"", signoff:TEAM, style:"classic",
         },
         variantCopy:{
@@ -205,7 +207,7 @@
 
   const C = {
     id: "C", name: "Order status", who: "Anyone with an order in flight",
-    cadence: "On each fulfillment event", sender: BRAND + " <orders@send.americanbiocarbon.com>, reply to Victor",
+    cadence: "On each fulfillment event", sender: CFG.ordersFrom + ", reply to " + CFG.signatureName,
     footerNote: "You are receiving this because you placed an order with " + BRAND + ".",
     emails: [
       { id:"C1", day:"Order confirmed", title:"Order confirmed",
@@ -218,7 +220,7 @@
           paras:[
             "We have your order for {{orderSummary}}, shipping to {{shipTo}}.",
             "Material is staged at our plant in White Castle, Louisiana. We will confirm the carrier and pickup date within two business days.",
-            "Questions about the order go to Victor at (225) 398 9286 or by reply to this email.",
+            "Questions about the order go to Victor at " + CFG.phone + " or by reply to this email.",
           ],
           ctaLabel:"", ctaHref:"", imageUrl:"", imageAlt:"", signoff:TEAM, style:"minimal",
         }},
@@ -260,7 +262,7 @@
             "Two quick questions now that the material is with you: did it arrive in good shape, and how is it performing?",
             "Reply with a sentence either way. If anything is off I want to hear it first.",
           ],
-          ctaLabel:"Reply to Victor", ctaHref:"mailto:victor.jehle@cs-ops.com",
+          ctaLabel:"Reply to Victor", ctaHref:REPLY,
           imageUrl:"", imageAlt:"", signoff:V, style:"classic",
         }},
     ],

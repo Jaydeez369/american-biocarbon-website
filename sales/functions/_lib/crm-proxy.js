@@ -107,12 +107,12 @@ export async function proxyCrm(context, kind) {
       });
       const listed = await res.json();
       if (!res.ok || listed?.ok === false) throw new Error('store read failed');
-      for (const r of listed.records || []) stored[String(r.id)] = r;
+      for (const r of listed.records || []) stored[String(r.id).trim()] = r;
     } catch {
       return json({ ok: false, reason: 'unreachable', error: 'could not check approval status, nothing was saved' }, 502);
     }
-    const checked = applyApprovalRules(context?.data?.user?.role, parsed, stored, id);
-    if (checked.error) return json({ ok: false, reason: 'forbidden', error: checked.error, role: context?.data?.user?.role }, checked.status);
+    const checked = applyApprovalRules(context?.data?.user?.role, parsed, stored, id, recordKind);
+    if (checked.error) return json({ ok: false, reason: checked.status === 422 ? 'copy-gate' : 'forbidden', error: checked.error, ...(checked.failures ? { failures: checked.failures } : {}), role: context?.data?.user?.role }, checked.status);
     parsed = checked.body;
     body = JSON.stringify(parsed);
   }

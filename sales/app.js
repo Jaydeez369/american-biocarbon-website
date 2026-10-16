@@ -103,6 +103,16 @@ function buildNav(){
     g.items.map(i=>`<a data-id="${i.id}" onclick="go('${i.id}')">${i.t}</a>`).join("")
   ).join("");
 }
+/* Unread count on the Inbox nav entry, from the same feed and read set the Inbox itself uses. */
+function updateInboxBadge(){
+  try{
+    const n=(window.PIPELIVE&&PIPELIVE.inboxCount)?PIPELIVE.inboxCount():0;
+    const a=document.querySelector('.nav a[data-id="inbox"]'); if(!a) return;
+    let b=a.querySelector(".nav-badge");
+    if(n>0){ if(!b){ b=document.createElement("span"); b.className="nav-badge"; a.appendChild(b); } b.textContent=n>99?"99+":String(n); }
+    else if(b) b.remove();
+  }catch(e){}
+}
 const titleOf = id => NAV.flatMap(g=>g.items).find(i=>i.id===id)?.t||"";
 
 function go(id, opts={}){
@@ -115,6 +125,7 @@ function go(id, opts={}){
   const sec=document.getElementById("sec-"+id); if(sec)sec.classList.add("active");
   document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.id===id));
   $("#topbarTitle").textContent=titleOf(id);
+  updateInboxBadge();
   $("#sidebar").classList.remove("open");
   // keepScroll is for re-renders in place (ticking a checkbox), where jumping to the top
   // would throw away the user's position mid-list.
@@ -503,7 +514,7 @@ applyTheme(themeStored());
   const role=(window.PIPELIVE && PIPELIVE.data && PIPELIVE.data.role && PIPELIVE.data.role())||"";
   const name=(()=>{ for(const p of String(document.cookie||"").split(";")){
       const i=p.indexOf("="); if(i<0) continue;
-      if(p.slice(0,i).trim()==="sales_os_name") return decodeURIComponent(p.slice(i+1).trim());
+      if(p.slice(0,i).trim()==="sales_os_user") return decodeURIComponent(p.slice(i+1).trim());
     } return ""; })();
   if(!role && !name) return;
   chip.hidden=false;

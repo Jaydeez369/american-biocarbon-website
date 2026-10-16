@@ -3,6 +3,8 @@
  * Deploy build. Static site, so this is verification + stamping, not bundling.
  * Point the Cloudflare Pages build command at this file: `node scripts/build.mjs`
  *
+ *   0. build-brand + check-brand-config - regenerate the Sales OS copies of brand.config.mjs and
+ *                               the copy gate; warn (never fail) on unconfirmed brand fields
  *   1. check-dashes           - brand kit gate (fails the deploy on em/en dashes)
  *   2. check-copy-dashes      - stricter gate on outbound copy specs (no dash at all)
  *   2b. check-sales-canon     - ICP taxonomy, roster freshness, prices, derived counts
@@ -27,6 +29,8 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 const STEPS = [
+  ["build-brand.mjs"],
+  ["check-brand-config.mjs"],
   ["check-dashes.mjs"],
   ["check-copy-dashes.mjs"],
   ["check-sales-canon.mjs"],

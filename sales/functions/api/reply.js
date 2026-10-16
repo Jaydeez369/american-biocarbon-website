@@ -44,22 +44,41 @@ const TIMEOUT_MS = 12000;
  * dropped by whoever is typing, and there is exactly one copy of it. The composer fetches this
  * same block for its preview (GET below), so what a rep sees and what goes out cannot drift.
  *
- * Phone written with spaces, never hyphens, matching every other piece of outreach copy here. */
-const SIGNATURE = {
-  name: 'Victor Jehle',
-  company: 'Progreaux',
-  phone: '(225) 398 9286',
-  site: 'americanbiocarbon.com',
+ * Phone written with spaces, never hyphens, matching every other piece of outreach copy here.
+ * Company, phone and site come from brand.config (generated copy in _lib/brand.js). */
+const FALLBACK_NAME = 'Victor Jehle';
+
+/* The name on the signature is the logged in user's display name (from the signed session, so
+   it cannot be typed in), falling back to Victor when there is no session. A display name that
+   is only the username is capitalised ("daniel" becomes "Daniel"). Dashes and control
+   characters are stripped so the signature never breaks the no dashes rule. */
+export function signerName(user) {
+  let name = String((user && user.display) || '').replace(/[\u0000-\u001f]/g, ' ').replace(/[-\u2010-\u2015\u2212]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+  if (!name) return FALLBACK_NAME;
+  if (!/\s/.test(name) && name === name.toLowerCase()) name = name[0].toUpperCase() + name.slice(1);
+  return name;
+}
+
+const signatureOf = (user) => ({
+  name: signerName(user),
+  company: BRAND_CONFIG.brand,
+  phone: BRAND_CONFIG.phone,
+  site: BRAND_CONFIG.domain,
+});
+
+const signatureText = (user) => {
+  const s = signatureOf(user);
+  return `${s.name}\n${s.company}\n${s.phone}\n${s.site}`;
 };
 
-const signatureText = () =>
-  `${SIGNATURE.name}\n${SIGNATURE.company}\n${SIGNATURE.phone}\n${SIGNATURE.site}`;
-
-const signatureHtml = () =>
-  `<p>${SIGNATURE.name}<br>${SIGNATURE.company}<br>${SIGNATURE.phone}<br>` +
-  `<a href="https://${SIGNATURE.site}">${SIGNATURE.site}</a></p>`;
+const signatureHtml = (user) => {
+  const s = signatureOf(user);
+  return `<p>${escapeHtml(s.name)}<br>${s.company}<br>${s.phone}<br>` +
+    `<a href="https://${s.site}">${s.site}</a></p>`;
+};
 
 import { requireCapability } from '../_lib/authz.js';
+import { BRAND_CONFIG } from '../_lib/brand.js';
 import { redact } from '../_lib/redact.js';
 
 const json = (body, status = 200) =>
@@ -122,10 +141,10 @@ export async function onRequestPost(context) {
         body: {
           /* The signature is appended here, after validation, so a rep cannot send without one
              and cannot accidentally send two by pasting their own. */
-          text: `${text}\n\n${signatureText()}`,
+          text: `${text}\n\n${signatureText(context?.data?.user)}`,
           html: text.split(/\n{2,}/)
             .map((p) => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
-            .join('') + signatureHtml(),
+            .join('') + signatureHtml(context?.data?.user),
         },
       }),
       signal: abort.signal,
@@ -156,10 +175,11 @@ export async function onRequestPost(context) {
 /* The composer reads this to render its live preview. Serving the block rather than
    duplicating it in pipeline.js is what stops the preview and the sent mail drifting apart —
    the failure there is quiet and embarrassing: a rep proofreads one thing and sends another. */
-export function onRequestGet() {
+export function onRequestGet(context) {
+  const user = context?.data?.user;
   return json({
     ok: true,
     note: 'POST a reply to this route. It answers an existing Instantly thread; it cannot compose new mail.',
-    signature: { text: signatureText(), html: signatureHtml() },
+    signature: { text: signatureText(user), html: signatureHtml(user) },
   });
 }

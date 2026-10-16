@@ -111,8 +111,10 @@ else ok(`Roster counts are derived and correct (${ROSTER.count} total, ${ROSTER.
    speeds: campaigns and calls change daily, Apollo spend only changes on a reveal run. */
 const SNAPSHOTS = [
   { file: "sales/instantly-data.js", global: "INSTANTLY_LIVE", days: 2, what: "campaigns, sends and mailboxes" },
-  { file: "sales/phone-data.js", global: "PHONE", days: 3, what: "dials, queue and transfer rules" },
-  { file: "sales/apollo-data.js", global: "APOLLO_LIVE", days: 14, what: "credit spend against the written ceiling" },
+  /* phone-data.js and apollo-data.js left this gate on 2026-10-15. index.html stopped loading
+     them (nothing reads window.PHONE or window.APOLLO_LIVE), so a stale date on a file no
+     screen renders was failing the gate and forcing two live pulls for no reader. The files and
+     their generators stay on disk; re-add the entry here if a screen ever renders them. */
   /* crumble-data.js was removed with the Crumble Blitz section on 2026-08-31 (IA v7). The
      push it tracked is over, and the file was 14,940 lines shipped to every user on every
      load. Its check is deleted rather than relaxed: a snapshot gate for a file that should

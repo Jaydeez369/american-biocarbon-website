@@ -64,6 +64,8 @@ function walk(node, path, file) {
 }
 function loadGlobal(file, name) {
   const ctx = vm.createContext({ window: {} });
+  /* The specs read window.BRAND_CONFIG, so the generated brand script loads first. */
+  vm.runInContext(readFileSync(join(SALES, "brand-data.js"), "utf8"), ctx, { filename: "brand-data.js" });
   vm.runInContext(readFileSync(join(SALES, file), "utf8"), ctx, { filename: file });
   return vm.runInContext(`(typeof ${name} !== "undefined" ? ${name} : window.${name})`, ctx);
 }
@@ -82,6 +84,25 @@ for (const seq of N.sequences) for (const e of seq.emails) {
 
 /* 3. the ICP taxonomy and facts that a rep reads on screen */
 walk(loadGlobal("outreach-data.js", "OUTREACH"), "OUTREACH", "outreach-data.js");
+
+/* 4. the brand config strings that land in customer facing footers and signatures, and the
+   text the real renderer produces (the auto reply and its footer). The renderer used to be
+   unscanned, so a hyphen in the footer phone shipped while this gate was green. */
+const { BRAND_CONFIG: B, canspamFooterLines, signatureLines } = await import("../brand.config.mjs");
+for (const f of ["brand", "phone", "legalEntity", "postalAddress", "unsubscribeLine", "signatureName", "coldFromName"]) flag(`brand.config.mjs  ${f}`, B[f]);
+canspamFooterLines().forEach((l, i) => flag(`brand.config.mjs  canspamFooterLines[${i}]`, l));
+signatureLines().forEach((l, i) => flag(`brand.config.mjs  signatureLines[${i}]`, l));
+const tpl = await import("../functions/api/_email.js");
+const sample = { name: "Sam Sample", email: "sam@example.com", company: "Example Co", phone: "(555) 555 5555" };
+for (const form of Object.keys(tpl.SEQUENCES)) {
+  const out = tpl.buildAutoreply(form, sample, {});
+  if (!out) continue;
+  flag(`_email.js  autoreply ${form} subject`, out.subject);
+  flag(`_email.js  autoreply ${form} text`, out.text);
+  /* The HTML carries the preheader, heading, footer and button labels. Visible text only:
+     tags, style blocks and attribute values (colours, urls) are stripped first. */
+  flag(`_email.js  autoreply ${form} html text`, out.html.replace(/<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ").replace(/&[#\w]+;/g, " "));
+}
 
 if (violations) {
   console.error(`\n${violations} dash violation(s) in outbound copy. Rewrite without a dash.`);

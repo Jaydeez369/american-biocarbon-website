@@ -151,6 +151,7 @@
       one("contacts","/api/contact",d=>({ok:d.ok!==false,n:(d.records||[]).length,reason:d.reason})),
       one("audit","/api/audit?limit=1",d=>({ok:d.ok!==false,reason:d.reason})),
       one("mail","/api/email",d=>({ok:d.ok,n:(d.rows||[]).length,replies:d.replies,reason:d.reason})),
+      one("apollo","/api/apollo",d=>({ok:d.ok,keyValid:d.keyValid,reason:d.reason})),
     ]);
     SYS=out; SYS_LOADING=false; rrSys();
   }
@@ -187,21 +188,58 @@
     return worst==="unknown" && written==="live" ? "unknown" : written;
   }
 
+  /* The Instantly row is derived from where the numbers on screen came from, not asserted: the
+     bundled file says source "snapshot", the live route says "live" and replaces it on load. */
+  function instantlyRow(){
+    const L=window.INSTANTLY_LIVE||null;
+    const live=!!(L&&L.source==="live");
+    const when=L&&(L.read||L.readDate||L.at);
+    return { from:"Instantly campaigns", via:live?"/api/instantly live read":"instantly-data.js snapshot (live read not answering)",
+      to:live?"the Reports screens, refreshed on load":"instantly-data.js in the bundle", surface:"Reports",
+      health:live?"live":"dated",
+      count:L?((live?"live read":"snapshot")+(when?` · read ${esc(when)}`:"")):"no data",
+      why:live
+        ? `The Reports screens are showing a live read of the Instantly workspace, fetched when this page loaded.`
+        : `The Reports screens are showing the bundled snapshot. Campaign sends and replies are as current as the last time somebody ran the generator, and the screens that use it print that date. The live read needs INSTANTLY_API_KEY on the Pages project.`,
+      fix:live?"":"Run sales-department/refresh-snapshots.sh, or set INSTANTLY_API_KEY on the Pages project so the numbers are live. The campaign to revenue report grades itself LOW either way, because there is no join from a reply to a deal." };
+  }
+
+  /* Apollo: only the key can be checked from here. It exposes no credit balance. */
+  function apolloRow(){
+    const p=(SYS||{}).apollo;
+    let health="unknown", count="not checked";
+    if(p&&!p.error){
+      if(p.ok&&p.keyValid===false){ health="broken"; count="key rejected"; }
+      else if(p.ok&&p.keyValid){ health="live"; count="key valid"; }
+      else { health="unknown"; count=p.reason==="not-configured"?"no key on this deployment":"not answering"; }
+    }
+    return { from:"Apollo", via:"/api/apollo · free auth health check",
+      to:"nothing stored", surface:"A warning on Pipeline if the key dies",
+      health, count,
+      why:`Only the key is checked, and the check spends no credits. Apollo exposes no credit balance to this key, so how many credits are left is not visible here and has to be read in the Apollo settings page.`,
+      fix:health==="broken"?"Replace the Apollo key in the Pages variables.":"" };
+  }
+
   function flows(){
     const A=SYS||{};
     const n=k=>A[k]&&A[k].n!=null?num(A[k].n):"-";
     const act=A.activity||{};
     return [
-      { from:"Progreaux website", via:"8 forms · /api/lead · POST to allo-hooks, then Resend",
+      { from:"Progreaux website", via:"8 forms · /api/lead · stored in D1 through the Worker, then a Resend mail",
         to:"D1 records, kind weblead", surface:"Leads screen, account timeline",
         health:probed(["weblead"],"live"), count:`${n("weblead")} stored${(A.weblead&&A.weblead.refused)?` · ${A.weblead.refused} refused`:""}`,
-        why:`Live end to end since 2026-09-08. A form on the website posts to /api/lead, which writes the lead to D1 through the Worker BEFORE it mails the desk, then mails it. The record lands as kind "weblead" with the company as its scope, idempotent on the submission id so a keepalive retry is one lead. The Leads screen lists them and they reach the account timeline carrying the answers the visitor typed. Proved by submitting all eight forms against the live site: 8 stored, 8 mailed, 16 messages delivered. Store first is the load bearing part, because a lead we hold and could not mail is on the Leads screen, and a lead that reached an inbox and not the record is gone the moment the mail is missed.`,
+        why:`The STORE leg is what this row grades. A form on the website posts to /api/lead, which writes the lead to D1 through the Worker before it tries to mail the desk. The record lands as kind "weblead" with the company as its scope, idempotent on the submission id. The Leads screen lists them and they reach the account timeline. The probe here only checks that the weblead store answers. It cannot see the mail leg, which is graded in the next row.`,
         fix:"" },
+      { from:"Website lead mail", via:"/api/lead · Resend · sender set by LEAD_FROM",
+        to:"the sales desk inbox", surface:"Nowhere in this app, the mail leaves the site",
+        health:"unknown", count:"mail leg not proved",
+        why:`Not proved, and not provable from here. The sender defaults to a send.americanbiocarbon.com address and that host has no DNS, so Resend cannot send as it unless LEAD_FROM is set on the Pages project to a verified sender. A send.progreaux.com sender does not exist yet. Until it does, a lead is safe in D1 and on the Leads screen, and the mail to the desk may not arrive.`,
+        fix:"Verify a sender domain in Resend (send.progreaux.com or another), set LEAD_FROM on the website Pages project, then submit a test form and confirm the mail arrives." },
       { from:"Website form validation", via:"contactState() gate · one channel is enough",
         to:"Stored and flagged, or refused and counted", surface:"Leads screen, with what is missing",
         health:probed(["weblead"],"live"), count:(A.weblead&&A.weblead.n!=null)?`${A.weblead.incomplete||0} incomplete · ${A.weblead.refused||0} refused`:"-",
-        why:`Live since 2026-09-08. The gate used to demand BOTH a valid email and a phone and answer 400 otherwise, while the browser painted the tick before the response arrived, so a lead with a real address and no number vanished with nobody on either side knowing. It now refuses only a submission nobody could answer, records which channel is missing, and writes the refusals down so the count exists at all. The browser waits for the answer and keeps the form on screen when it fails, with a phone number that does not depend on the thing that just failed. Proved live: the two forms submitted without a phone came back 200 and stored, flagged "no phone", where the same submission was a silent 400 the day before.`,
-        fix:"" },
+        why:`The gate refuses only a submission nobody could answer, records which channel is missing, and writes the refusals down so the count exists. The browser waits for the answer and keeps the form on screen when it fails. This was proved live on 2026-09-08, before the rebrand. It has not been proved again since, and the mail side cannot be re-proved until the sender domain exists.`,
+        fix:"Re-prove with a test submission once the sender domain is verified." },
       { from:"Allo phone", via:"POST /hooks/allo · HMAC verified · 11 topics",
         to:"D1 events, activity, leads", surface:"Inbox, account timeline, Reports",
         health:probed(["activity","leads"],"live"), count:`${n("activity")} timeline rows · ${n("leads")} phone leads`,
@@ -210,13 +248,15 @@
       { from:"Allo conversation", via:"salesos consumer · contact upsert · timeline backfill",
         to:"contacts, and activity.contact_name / .company", surface:"Account timeline, contact book",
         health:probed(["activity"],"live"), count:`${act.named!=null?act.named:"-"} of ${n("activity")} named · ${act.companied!=null?act.companied:"-"} with a company`,
-        why:`A conversation now files a contact, which is what lets it reach an account: the timeline matches a call to an account through the contact book, and the phone had never written to it. The rule is evidence of a person on the other end, so a text either way, an AI summary, an outbound call, an answered inbound call or a voicemail with a summary all qualify, and a single unanswered ring does not. A conversation carrying no name and no company also stays a lead: a contact holding only a number attaches to no account, so it would improve nothing and duplicate the callback queue. THE LIMIT IS THE DATA, not the wiring. Of 17 numbers in the log, 15 carry no name and no company and none of them match a phone in the roster, HubSpot, Apollo or the outreach lists, so who called cannot be worked out from anything we hold. The historical backfill moved rows reaching an account from 5 of 71 to 8.`,
-        fix:"Nothing here. Getting past 8 needs identity at the point of the call, which means a caller saying who they are, or Allo carrying a CRM record for them." },
-      { from:"Instantly", via:"/api/instantly live read, plus the instantly-data.js snapshot",
-        to:"instantly-data.js in the bundle", surface:"Reports",
-        health:"dated", count:(window.INSTANTLY_LIVE&&window.INSTANTLY_LIVE.read)?`read ${esc(window.INSTANTLY_LIVE.read)}`:"no snapshot",
-        why:`The Reports screens read a snapshot file. Campaign sends and replies in them are as current as the last time somebody ran the generator, and the screens that use it print that date. The Inbox reads Instantly live through /api/email. A reply that arrives this afternoon is not here until the snapshot is rebuilt.`,
-        fix:"Fine as a snapshot for campaign totals. It is not fine as the basis for attribution, which is why the campaign report grades itself LOW." },
+        why:`A conversation now files a contact, which is what lets it reach an account: the timeline matches a call to an account through the contact book, and the phone had never written to it. The rule is evidence of a person on the other end, so a text either way, an AI summary, an outbound call, an answered inbound call or a voicemail with a summary all qualify, and a single unanswered ring does not. A conversation carrying no name and no company also stays a lead: a contact holding only a number attaches to no account, so it would improve nothing and duplicate the callback queue. THE LIMIT IS THE DATA, not the wiring. Most numbers in the log carry no name and no company, and few match a phone in the roster, HubSpot, Apollo or the outreach lists, so who called often cannot be worked out from anything we hold. The count beside this row is read live.`,
+        fix:"Nothing here. Matching more calls to accounts needs identity at the point of the call, which means a caller saying who they are, or Allo carrying a CRM record for them." },
+      instantlyRow(),
+      { from:"Instantly mail into the Inbox", via:"/api/email · live read, two passes",
+        to:"Inbox, account timeline", surface:"Inbox, Pipeline account profile",
+        health:probed(["mail"],"live"), count:`${n("mail")} messages · ${A.mail&&A.mail.replies!=null?num(A.mail.replies):"-"} replies`,
+        why:`The Inbox reads Instantly live on every load, so a reply that arrives this afternoon shows here. Replies can only be sent from a mailbox that still exists and is connected, so a reply to a thread that started on a retired domain may fail.`,
+        fix:"" },
+      apolloRow(),
       { from:"Instantly reply", via:"nothing",
         to:"a deal", surface:"No link at all",
         health:"missing", count:"no join key",
@@ -234,14 +274,19 @@
         fix:"A real transport, which does not exist yet. Until then the labels must keep saying this only logs." },
       { from:"HubSpot", via:"one time scrape",
         to:"hubspot-data.js", surface:"Company layer, contact history",
-        health:"dated", count:"185 companies, frozen",
-        why:`Read only and not refreshed. Useful as history; it is not a live CRM link and nothing written here goes back.`,
+        health:"dated", count:"178 companies · 71 contacts · 55 timelines, frozen",
+        why:`Read only and not refreshed since 2026-07-22. 178 companies (185 exported, less 1 internal and 6 duplicates), 71 contacts and 55 account timelines. Useful as history; it is not a live CRM link and nothing written here goes back.`,
         fix:"" },
       { from:"Missed call alerts", via:"outbox · DRY_RUN_ALERTS is true",
         to:"nobody", surface:"Row written, mail not sent",
         health:"broken", count:"dry run",
-        why:`wrangler.toml sets DRY_RUN_ALERTS to "true", so the missed call consumer writes an outbox row with status DRY_RUN and sends nothing. The alerting looks wired and is switched off.`,
-        fix:"Set DRY_RUN_ALERTS to false once the recipient address is confirmed. See the note on which addresses are real." },
+        why:`wrangler.toml sets DRY_RUN_ALERTS to "true", so the missed call consumer writes an outbox row with status DRY_RUN and sends nothing. The alerting looks wired and is switched off. The sender, ALERT_FROM, is also an address on send.americanbiocarbon.com, which has no DNS, so flipping the flag alone would still send nothing.`,
+        fix:"Verify a sender domain (send.progreaux.com or another), change ALERT_FROM to it, confirm the recipient address, then set DRY_RUN_ALERTS to false." },
+      { from:"Shopify checkout and orders", via:"nothing",
+        to:"nowhere in this app", surface:"Not visible here",
+        health:"missing", count:"no read",
+        why:`Sample and order checkout runs on the Shopify store. This app has no route that reads Shopify, so orders and samples requested through checkout never appear on a screen here.`,
+        fix:"A read only Shopify route, or a webhook into the Worker. Until then check the Shopify admin." },
     ];
   }
 
@@ -284,7 +329,7 @@
 
       <div class="sys-list">${sorted.map(card).join("")}</div>
 
-      <p class="rpt-caveat"><b>The counts are live; the verdicts are read from the code.</b> Row counts come from /api/activity, /api/lead, /api/deal and /api/contact on every load, so they are as current as the store. The health of each edge was established by reading the source on 2026-09-08 and each one names the file that proves it. A verdict here going stale is possible and is the thing to distrust first: if you fix one of these, fix this card in summary.js in the same commit.</p>
+      <p class="rpt-caveat"><b>The counts are live; the verdicts are read from the code.</b> Row counts come from /api/activity, /api/lead, /api/deal and /api/contact on every load, so they are as current as the store. The health of each edge was established by reading the source and re-checked on 2026-10-15, after the rebrand. A verdict here going stale is possible and is the thing to distrust first: if you fix one of these, fix this card in summary.js in the same commit.</p>
       <p class="rpt-caveat"><b>What this cannot see.</b> Anything with no route to count it. A lead sitting unread in an inbox, a conversation nobody logged, a reply answered from a phone. Those are exactly the paths marked "No link", and the reason they are worth the red is that nothing else in this app will ever tell you about them.</p>`;
   }
 
