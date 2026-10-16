@@ -14,7 +14,7 @@
  * route reads D1 through the Worker on every request, so the feed is as current as the
  * webhook. It costs one D1 query behind an authenticated edge call.
  *
- * FAILS SOFT, like /api/allo and for the same reason. If the Worker is down or the token is
+ * FAILS SOFT: the Sales OS shows nothing rather than a wrong number. If the Worker is down or the token is
  * unset this answers ok:false with a reason and a 200, and the account timeline renders the
  * notes it always had. The phone history simply does not appear. Losing the live row is a
  * smaller harm than an account page that will not open.

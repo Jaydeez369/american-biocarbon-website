@@ -1,4 +1,4 @@
-/* ============ VEJ Sales OS — live Sales Pipeline module (SIBRA-parity skin) ============
+/* ============ Progreaux Sales OS: pipeline module styles ============
    Extends styles.css (light editorial theme). Matches the SIBRA app's density:
    segmented tab bar, compact stat tiles, tight table rows. Scoped to the pipeline
    section so the rest of the OS keeps its editorial look. */
@@ -23,7 +23,6 @@
 
 /* ---- stat tiles (SIBRA format: white card, small gray label, big bold value) — thin,
    single-line values so the unit sits inline instead of wrapping to a second row ---- */
-.grid.g5{grid-template-columns:repeat(5,1fr)}
 .grid.g6{grid-template-columns:repeat(6,1fr)}
 .pipe-pane .grid{gap:10px}
 .pkpi{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:10px 14px;box-shadow:var(--sh-1)}
@@ -36,8 +35,7 @@
 .pk-green{color:var(--green-deep)}
 .pk-purple{color:var(--purple)}
 @media(max-width:1400px){.grid.g6{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:1100px){.grid.g5{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:640px){.grid.g5,.grid.g6{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.grid.g6{grid-template-columns:1fr 1fr}}
 
 /* ---- tables: SIBRA has TWO densities. The Pipeline tracker + Production grid are
    compact (small font, uppercase headers); Offtake/Deals/Contacts/Leads use the roomier
@@ -91,7 +89,6 @@ tr.pconf-row td{background:rgba(var(--green-rgb),.09);color:var(--green-deep);fo
 .pdim{color:var(--text-mute);opacity:.55}
 .pnote{max-width:200px;font-size:11.5px;color:var(--text-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .uom{font-size:9.5px;color:var(--text-mute)}
-.pconf-v{color:var(--green-deep)}
 
 /* toolbar (all tabs) */
 .pdeals-bar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:2px 0 12px}
@@ -123,8 +120,8 @@ select.pinput{cursor:pointer;padding-right:26px}
 
 /* row action cells (edit/delete/convert) — keep them compact + right-aligned */
 .pact-cell{white-space:nowrap;text-align:right}
-.pc-conv{color:var(--green-deep)}
-.pc-conv:hover{background:rgba(var(--green-rgb),.14)}
+.pc-conv{color:var(--accent)}
+.pc-conv:hover{background:rgba(var(--accent-rgb),.14)}
 
 /* add/edit modal */
 .pmodal-wrap{position:fixed;inset:0;background:rgba(var(--navy-900-rgb),.45);z-index:80;display:grid;place-items:center;padding:20px}
@@ -468,7 +465,7 @@ tr.co-dead:hover{opacity:.85}
 
 /* freight verdict rides on the distance so one glance answers "can we ship it" */
 .geo{font-family:var(--mono);font-size:12px;padding:2px 6px;border-radius:6px;white-space:nowrap}
-.geo-in  {background:rgba(var(--green-rgb),.13);color:var(--green-deep)}
+.geo-in  {background:rgba(var(--accent-rgb),.13);color:var(--accent)}
 .geo-edge{background:rgba(var(--gold-rgb),.18);color:var(--warning-deep)}
 .geo-out {background:rgba(var(--red-rgb),.10);color:var(--red)}
 
@@ -508,8 +505,6 @@ tr.co-dead:hover{opacity:.85}
 .co-tel a,.co-mail a{font-family:var(--mono);font-size:11.5px}
 .co-gap{font-size:11px;font-style:italic;color:var(--text-mute);opacity:.75}
 .co-more-n{font-family:var(--mono);font-size:10px;color:var(--text-mute);margin-left:4px;cursor:help}
-.co-ppl{display:inline-block;font-size:10px;font-weight:700;background:rgba(var(--brand-rgb),.11);
-  color:var(--brand);padding:1px 6px;border-radius:999px;margin-bottom:3px}
 /* Absorbent ships nationwide, so its distance is information, not a warning. */
 .geo-na{background:var(--surface-2);color:var(--text-mute)}
 
@@ -810,7 +805,7 @@ button.pstrip-cell:focus-visible{outline:none;box-shadow:var(--ring)}
   font-size:10.5px;line-height:1.4;color:var(--text-mute);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lb-act.go{color:var(--green);font-weight:600}
-.lb-act.warn{color:var(--gold);font-weight:500}
+.lb-act.warn{color:var(--gold-soft);font-weight:500}
 .lb-act.dead{color:var(--text-mute);font-style:italic}
 
 /* ---- website leads, on the Leads screen ----

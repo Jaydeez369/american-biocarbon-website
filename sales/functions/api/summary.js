@@ -39,6 +39,7 @@
 import { requireCapability } from '../_lib/authz.js';
 import { REPORTED_ON, scopeOf } from '../_lib/authz.js';
 import { redact } from '../_lib/redact.js';
+import { parseUsers } from '../_lib/users.js';
 
 const DEFAULT_WORKER = 'https://allo-hooks.csopsmarketing.workers.dev';
 const TIMEOUT_MS = 8000;
@@ -49,26 +50,14 @@ const soft = (reason, detail) =>
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' },
   });
 
-/* The accounts, for the actor -> role map only. Deliberately a local re-parse rather than an
-   import from _middleware.js: that file's parser is entangled with the login flow and the
-   signed cookie, and this route needs one field off each line. Passwords are read and
-   discarded, never returned; the response carries usernames, roles and display names only. */
+/* The accounts, for the actor -> role map only. Uses the SAME parser as the login gate
+   (_lib/users.js), so the secret cannot be read two ways. Passwords are dropped here: the
+   response carries usernames, roles and display names only. */
 function rolesFrom(env) {
-  const raw = typeof env.SALES_OS_USERS === 'string' ? env.SALES_OS_USERS.trim() : '';
   const out = new Map();
-  if (!raw) return out;
-  for (const entry of raw.split(',')) {
-    const line = entry.trim();
-    if (!line) continue;
-    const first = line.indexOf(':');
-    if (first < 0) continue;
-    const username = line.slice(0, first).trim().toLowerCase();
-    const parts = line.slice(first + 1).split(':');
-    let role = 'manager';
-    let display = '';
-    if (parts.length >= 3) { display = parts.pop().trim(); role = parts.pop().trim().toLowerCase(); }
-    else if (parts.length === 2) { display = parts.pop().trim(); }
-    if (username) out.set(username, { username, role, display: display || username });
+  for (const [username, a] of parseUsers(env)) {
+    if (a.shared) continue;   // the legacy shared password is not a person
+    out.set(username, { username, role: a.role, display: a.display || username });
   }
   return out;
 }
@@ -157,7 +146,7 @@ export async function onRequestGet(context) {
     if (!b) continue;
     b.writes++;
     if (r.action === 'delete') b.deletes++;
-    else if (r.action === 'patch') b.edits++;
+    else if (r.action === 'patch' || r.action === 'update') b.edits++;
     else b.creates++;
     const ent = r.kind ? `${r.entity}:${r.kind}` : r.entity;
     b.entities[ent] = (b.entities[ent] || 0) + 1;

@@ -89,7 +89,7 @@
       ${list.map(card).join("")}`;
   }
   function rColdEmail(){ if(!store.loaded && !store.loading){ store.loading=true; setTimeout(store.load,0); } return `<section class="section" id="sec-coldemail">${inner()}</section>`; }
-  function rerender(){ const el=document.getElementById("sec-coldemail"); if(el) el.innerHTML=inner(); }
+  function rerender(){ store.snapshot(); const el=document.getElementById("sec-coldemail"); if(el) el.innerHTML=inner(); }
 
   let typeTimer=null;
   function onType(el){
@@ -113,8 +113,9 @@
       if(status==="canonical" && !CE().canApprove()){ alert("Only Victor (admin) can mark a variant canonical."); return; }
       store.save(id, { copy:CE().readForm(id), status });
     },
-    reset(id){ if(!confirm("Clear your copy for this variant and go back to the placeholder draft?")) return; store.save(id, { copy:{}, status:"draft" }); },
+    reset(id){ if(!confirm("Clear your copy for this variant and go back to the starter draft?")) return; store.save(id, { copy:{}, status:"draft" }); },
     async copyOut(id){
+      store.snapshot();
       const v=findVariant(id); if(!v) return;
       const m=compose(v,false);
       const text=`Subject: ${m.subject}\n\n${m.text}`;

@@ -1,9 +1,9 @@
-/* ============ VEJ Sales OS — LIVE PIPELINE DATA ============
+/* ============ Progreaux Sales OS: pipeline seed data ============
    Snapshot of the SIBRA (Replit) Sales Pipeline module, pulled from the
    app's API on 2026-07-20 (asset-track--vejprocurement.replit.app /crm).
    This is the REAL book of business: 18 deals, 10 accounts, the offtake
    grid, and the production plan. To refresh, re-export from SIBRA
-   (/api/crm/*) and update this file — everything on the Pipeline page
+   (/api/crm/*) and update this file, everything on the Pipeline page
    is computed from these records at render time. */
 window.PIPE = {
 
@@ -11,7 +11,7 @@ window.PIPE = {
      deal KPIs are never mistaken for today's book; update it with every re-export. */
   snapshot: "2026-07-20",
 
-  /* Stage ladder — probability drives the weighted pipeline (value × prob). */
+  /* Stage ladder, probability drives the weighted pipeline (value × prob). */
   stages: [
     { k:"prospect",            label:"Prospect",            prob:5,   cls:"st-prospect" },
     { k:"discovery_qualified", label:"Discovery/Qualified", prob:30,  cls:"st-discovery" },
@@ -26,7 +26,7 @@ window.PIPE = {
     low:    { label:"Low (30%)",      cls:"cf-low" },
   },
 
-  /* qty×price = deal value. close = expected close (ISO, UTC midnight —
+  /* qty×price = deal value. close = expected close (ISO, UTC midnight -
      rendered in local time, same as SIBRA). status: open | won | lost. */
   deals: [
     { deal:"Rose Acres: July Sale",                  customer:"Rose Acres",            product:"CORCS",             sector:"Agriculture",  qty:21, uom:"UNIT", price:130, order:"Recurring", close:"2026-07-20", stage:"negotiation_close",   conf:"secured", status:"open", owner:"Victor Jehle", notes:"" },
@@ -38,15 +38,15 @@ window.PIPE = {
     { deal:"ICT Holdings LLC: July Sale",            customer:"ICT Holdings LLC",      product:"Biochar",           sector:"Oil and Gas",  qty:20, uom:"MT",   price:450, order:"One-Time",  close:"2026-07-31", stage:"quote_proposal",      conf:"low",     status:"open", owner:"Victor Jehle", notes:"" },
     { deal:"ICT Holdings LLC: July Sale",            customer:"ICT Holdings LLC",      product:"Crumble",           sector:"Oil and Gas",  qty:20, uom:"MT",   price:225, order:"Recurring", close:"2026-07-31", stage:"quote_proposal",      conf:"low",     status:"open", owner:"Victor Jehle", notes:"" },
     { deal:"McTron Technologies: July Sale",         customer:"McTron Technologies",   product:"Crumble",           sector:"Retail",       qty:40, uom:"MT",   price:215, order:"Recurring", close:"2026-07-28", stage:"quote_proposal",      conf:"medium",  status:"open", owner:"Victor Jehle", notes:"Awaiting Machiery necessary" },
-    { deal:"Ronald Herbert - CORCS – CORCS",         customer:"Ronald Herbert Farms",  product:"CORCS",             sector:"Agriculture",  qty:39, uom:"UNIT", price:130, order:"One-Time",  close:"2026-07-02", stage:"prospect",            conf:"low",     status:"open", owner:"Victor Jehle",   notes:"Pending Puro.Earth" },
-    { deal:"Rose Acres - June – CORCS",              customer:"Rose Acres",            product:"CORCS",             sector:"Agriculture",  qty:21, uom:"UNIT", price:130, order:"Recurring", close:"2026-06-30", stage:"prospect",            conf:"low",     status:"open", owner:"Victor Jehle",   notes:"Pending Puro.Earth" },
-    { deal:"Rose Acres- May – CORCS",                customer:"Rose Acres",            product:"CORCS",             sector:"Agriculture",  qty:22, uom:"UNIT", price:130, order:"Recurring", close:"2026-07-01", stage:"prospect",            conf:"low",     status:"open", owner:"Victor Jehle", notes:"Pending Puro.Earth" },
-    { deal:"Jim Dupont – Biochar",                   customer:"Dupont Cattle Ranch",   product:"Biochar",           sector:"Agriculture",  qty:50, uom:"MT",   price:400, order:"One-Time",  close:"2026-08-28", stage:"discovery_qualified", conf:"medium",  status:"open", owner:"Victor Jehle", notes:"Discussed pricing will get feedback" },
-    { deal:"Rose Acres- July – Biochar",             customer:"Rose Acres",            product:"Biochar",           sector:"Agriculture",  qty:17, uom:"MT",   price:450, order:"Recurring", close:"2026-07-28", stage:"negotiation_close",   conf:"secured", status:"open", owner:"Victor Jehle", notes:"July order yet to be processed" },
-    { deal:"Ronald Herbert – Biochar",               customer:"Ronald Herbert Farms",  product:"Biochar",           sector:"Agriculture",  qty:30, uom:"MT",   price:450, order:"One-Time",  close:"2026-06-29", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Victor Jehle", notes:"already delivered waiting for NRCS" },
-    { deal:"Rose Acres - June – Biochar",            customer:"Rose Acres",            product:"Biochar",           sector:"Agriculture",  qty:16, uom:"MT",   price:450, order:"Recurring", close:"2026-06-25", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Victor Jehle", notes:"June Order" },
-    { deal:"Rose Acres - May – Biochar",             customer:"Rose Acres",            product:"Biochar",           sector:"Agriculture",  qty:17, uom:"MT",   price:450, order:"Recurring", close:"2026-05-27", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Victor Jehle", notes:"May Order" },
-    { deal:"Eco Vision Design – Biochar",           customer:"Eco Vision Design",     product:"Biochar",           sector:"Agriculture",  qty:6,  uom:"MT",   price:400, order:"One-Time",  close:"2026-07-01", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Victor Jehle", notes:"small but scaling" },
+    { deal:"Ronald Herbert - CORCS - CORCS",         customer:"Ronald Herbert Farms",  product:"CORCS",             sector:"Agriculture",  qty:39, uom:"UNIT", price:130, order:"One-Time",  close:"2026-07-02", stage:"prospect",            conf:"low",     status:"open", owner:"Victor Jehle",   notes:"Pending Puro.Earth" },
+    { deal:"Rose Acres - June - CORCS",              customer:"Rose Acres",            product:"CORCS",             sector:"Agriculture",  qty:21, uom:"UNIT", price:130, order:"Recurring", close:"2026-06-30", stage:"prospect",            conf:"low",     status:"open", owner:"Victor Jehle",   notes:"Pending Puro.Earth" },
+    { deal:"Rose Acres- May - CORCS",                customer:"Rose Acres",            product:"CORCS",             sector:"Agriculture",  qty:22, uom:"UNIT", price:130, order:"Recurring", close:"2026-07-01", stage:"prospect",            conf:"low",     status:"open", owner:"Victor Jehle", notes:"Pending Puro.Earth" },
+    { deal:"Jim Dupont - Biochar",                   customer:"Dupont Cattle Ranch",   product:"Biochar",           sector:"Agriculture",  qty:50, uom:"MT",   price:400, order:"One-Time",  close:"2026-08-28", stage:"discovery_qualified", conf:"medium",  status:"open", owner:"Victor Jehle", notes:"Discussed pricing will get feedback" },
+    { deal:"Rose Acres- July - Biochar",             customer:"Rose Acres",            product:"Biochar",           sector:"Agriculture",  qty:17, uom:"MT",   price:450, order:"Recurring", close:"2026-07-28", stage:"negotiation_close",   conf:"secured", status:"open", owner:"Victor Jehle", notes:"July order yet to be processed" },
+    { deal:"Ronald Herbert - Biochar",               customer:"Ronald Herbert Farms",  product:"Biochar",           sector:"Agriculture",  qty:30, uom:"MT",   price:450, order:"One-Time",  close:"2026-06-29", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Victor Jehle", notes:"already delivered waiting for NRCS" },
+    { deal:"Rose Acres - June - Biochar",            customer:"Rose Acres",            product:"Biochar",           sector:"Agriculture",  qty:16, uom:"MT",   price:450, order:"Recurring", close:"2026-06-25", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Victor Jehle", notes:"June Order" },
+    { deal:"Rose Acres - May - Biochar",             customer:"Rose Acres",            product:"Biochar",           sector:"Agriculture",  qty:17, uom:"MT",   price:450, order:"Recurring", close:"2026-05-27", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Victor Jehle", notes:"May Order" },
+    { deal:"Eco Vision Design - Biochar",           customer:"Eco Vision Design",     product:"Biochar",           sector:"Agriculture",  qty:6,  uom:"MT",   price:400, order:"One-Time",  close:"2026-07-01", stage:"won_fulfillment",     conf:"secured", status:"won",  owner:"Victor Jehle", notes:"small but scaling" },
   ],
 
   accounts: [
@@ -70,7 +70,7 @@ window.PIPE = {
 
   leads: [
     { company:"Eco Vision Design", contact:"Tim Watkins", email:"timothy@ecovisiondesign.com", phone:"+1 (239) 789-5919",
-      source:"website", status:"qualified", converted:true, convertedTo:"Eco Vision Design – Biochar", convertedDate:"2026-06-30" },
+      source:"website", status:"qualified", converted:true, convertedTo:"Eco Vision Design - Biochar", convertedDate:"2026-06-30" },
   ],
 
   team: [
@@ -115,7 +115,7 @@ window.PIPE = {
         vols:{ "Q3 2026":1000, "Q4 2026":1200, "Q1 2027":1500, "Q2 2027":1500 }, confirmed:{ "Q3 2026":80 }, notes:"" },
       { customer:"Natures Mastermind",   product:"Biochar",           sector:"Agriculture/ Horticulturist",  conf:"Low",    price:450, freq:"Recurring",
         vols:{ "Q3 2026":20, "Q4 2026":60, "Q1 2027":60, "Q2 2027":60 }, confirmed:{},
-        notes:"Expectations from discussions:\nWorking Year 1 raw material volume outlook (subject to change):\nMonth 1: ~40–45 tons\nMonth 2: ~55–60 tons\nMonth 3: ~75–80 tons\nMonths 4–6: ~105–160 tons/month\nMonths 7–9: ~190–255 tons/month\nMonths 10–12: ~285–365 tons/month" },
+        notes:"Expectations from discussions:\nWorking Year 1 raw material volume outlook (subject to change):\nMonth 1: ~40-45 tons\nMonth 2: ~55-60 tons\nMonth 3: ~75-80 tons\nMonths 4-6: ~105-160 tons/month\nMonths 7-9: ~190-255 tons/month\nMonths 10-12: ~285-365 tons/month" },
     ],
   },
 

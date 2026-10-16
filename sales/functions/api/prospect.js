@@ -1,7 +1,7 @@
 /**
  * POST /api/prospect — create ONE prospect in Allo CRM from the Sales OS.
  *
- * THE ONLY WRITE ROUTE ON THIS PROJECT, and it should stay that way. /api/allo,
+ * THE ONLY WRITE ROUTE ON THIS PROJECT, and it should stay that way. /api/activity,
  * /api/instantly and /api/apollo are read-only because each reads a system that is
  * authoritative somewhere else, and a dashboard that can mutate those is a second source of
  * truth waiting to disagree with the first. Allo CRM is the exception: nothing else owns it,
@@ -48,6 +48,24 @@ const json = (body, status = 200) =>
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' },
   });
 
+/* The dialer note names the product the rep is calling about. It used to say crumble for every
+   prospect, so a biochar call read the wrong script. Unknown values fall back to crumble. */
+const PRODUCTS = {
+  crumble: {
+    product: 'Absorbent Crumble. Coarse granular cellulosic, for oil and large-area, high-volume spills.',
+    ask: 'a free sample, then a truckload.',
+  },
+  biochar: {
+    product: 'Biochar. Soil amendment sold by the metric ton.',
+    ask: 'a free sample, then a bulk order.',
+  },
+  pellets: {
+    product: 'Pellets. Absorbent pellets.',
+    ask: 'a free sample, then a bulk order.',
+  },
+};
+const productFor = (key) => PRODUCTS[String(key || '').toLowerCase()] || PRODUCTS.crumble;
+
 export async function onRequestPost(context) {
   const { env, request } = context;
 
@@ -89,8 +107,7 @@ export async function onRequestPost(context) {
 
   try {
     const result = await createProspect(call, input, {
-      product: input.product || 'Absorbent Crumble. Coarse granular cellulosic, for oil and large-area, high-volume spills.',
-      ask: input.ask || 'a free sample, then a truckload.',
+      ...productFor(input.product),
       opener: input.opener || '',
       icp: input.icp || '',
       note: input.note || '',

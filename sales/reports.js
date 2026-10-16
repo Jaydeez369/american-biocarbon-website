@@ -1,5 +1,5 @@
 /* ============================================================
-   VEJ Sales OS — REPORTS
+   Progreaux Sales OS: REPORTS
    Loads AFTER pipeline.js; exposes window.REPORTS_UI.rReports for LEAN_SECTIONS.
 
    WHAT THIS REPLACED. A tab on the Pipeline page holding four KPIs, two bar charts and a
@@ -289,6 +289,13 @@
       if(F.history==="exclude" && String(deal.origin||"")==="seed") return false;
       return true;
     };
+    /* The forecast is always dated by close date, whatever "Dated by" says. */
+    const inWinClose = (deal,win) => {
+      if(!win) return true;
+      const t = D().closeDate(deal).getTime();
+      if(isNaN(t)) return false;
+      return t>=win.from && t<=win.to+DAY-1;
+    };
     const inWin = (deal,win) => {
       if(!win) return true;
       const t = basisAt(deal, A.idx);
@@ -302,7 +309,7 @@
       all,                                     // field filtered, every date
       rows: all.filter(x=>inWin(x,w)),         // the selection
       prev: cw ? all.filter(x=>inWin(x,cw)) : null,
-      inWin,
+      inWin, inWinClose,
     };
   }
 
@@ -385,14 +392,17 @@
      A labelled horizontal bar, clickable, with the ids of its rows on it. Deliberately not
      a chart library: the whole app is server rendered strings with no build step, and one
      bar chart does not justify becoming a different kind of application. */
+  /* A value inside a single-quoted JS string inside an HTML attribute: JS escape first, then
+     HTML escape, because the browser decodes entities before it parses the JS. */
+  const jq = v => D().esc(String(v==null?"":v).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n").replace(/\r/g,"\\r"));
   function bars(items, opts){
     const o = opts||{};
     const max = Math.max(...items.map(i=>Math.abs(i.v)), 1);
-    if(!items.length) return `<p class="pdim">Nothing in this selection.</p>`;
+    if(!items.length) return `<p class="pdim">Nothing matches this selection. Clear a filter or widen the date range.</p>`;
     return items.map((i,ix)=>{
       const pct = Math.abs(i.v)/max*100;
       const click = i.ids && i.ids.length
-        ? ` onclick="rptDrill('${D().esc(i.label).replace(/'/g,"&#39;")}','${i.ids.join("|")}')" title="Open the ${i.ids.length} rows behind this"`
+        ? ` onclick="rptDrill('${jq(i.label)}','${jq(i.ids.join("|"))}')" title="Open the ${i.ids.length} rows behind this"`
         : "";
       return `<div class="rpt-cbar${click?" click":""}"${click}>
         <span class="rb-l">${D().esc(i.label)}</span>
@@ -437,13 +447,13 @@
       }).filter(v=>v!=null) : [];
       const avg = ages.length ? Math.round(ages.reduce((a,b)=>a+b,0)/ages.length) : null;
       const pctOfTop = reached[0].n ? r.n/reached[0].n*100 : 0;
-      return `<div class="rpt-fn${r.ids.length?" click":""}"${r.ids.length?` onclick="rptDrill('Reached ${d.esc(r.s.label)}','${r.ids.join("|")}')"`:""}>
+      return `<div class="rpt-fn${r.ids.length?" click":""}"${r.ids.length?` onclick="rptDrill('Reached ${jq(r.s.label)}','${jq(r.ids.join("|"))}')"`:""}>
         <span class="fn-l">${d.esc(r.s.label)}</span>
         <div class="fn-track"><span class="fn-fill" style="width:${pctOfTop}%;background:${d.CAT[i%d.CAT.length]}"></span></div>
         <span class="fn-n">${r.n}</span>
         <span class="fn-v">${fmtMeasure(r.v)}</span>
-        <span class="fn-c">${conv==null?"—":conv+"%"}</span>
-        <span class="fn-a">${avg==null?"—":avg+"d"}</span>
+        <span class="fn-c">${conv==null?"-":conv+"%"}</span>
+        <span class="fn-a">${avg==null?"-":avg+"d"}</span>
       </div>`;
     }).join("");
     const dead = reached.map((r,i)=>({r,i})).filter(({r,i})=>i && reached[i-1].n && r.n/reached[i-1].n<0.5);
@@ -484,7 +494,7 @@
   };
   function rFcast(S){
     const d=D();
-    const open = S.rows.filter(x=>x.status==="open");
+    const open = S.all.filter(x=>x.status==="open" && S.inWinClose(x,S.w));
     const byMonth = new Map();
     for(const x of open){
       const t=d.closeDate(x); if(isNaN(t)) continue;
@@ -630,18 +640,18 @@
       </div>
       <div class="tbl-wrap"><table class="rpt-tbl">
         <thead><tr><th>Line</th><th class="ta-r">Campaigns</th><th class="ta-r">Leads</th><th class="ta-r">Sends</th><th class="ta-r">Replies</th><th class="ta-r">Reply %</th><th class="ta-r">Deals</th><th class="ta-r">${d.esc(measureLabel())}</th><th class="ta-r">Won</th></tr></thead>
-        <tbody>${rows.map(r=>`<tr class="${r.ids.length?"click":""}"${r.ids.length?` onclick="rptDrill('${d.esc(r.label)} deals','${r.ids.join("|")}')"`:""}>
+        <tbody>${rows.map(r=>`<tr class="${r.ids.length?"click":""}"${r.ids.length?` onclick="rptDrill('${jq(r.label)} deals','${jq(r.ids.join("|"))}')"`:""}>
           <td>${d.esc(r.label)}</td>
           <td class="ta-r">${d.num(r.campaigns)}</td>
           <td class="ta-r">${d.num(r.leads)}</td>
           <td class="ta-r">${d.num(r.sent)}</td>
           <td class="ta-r">${d.num(r.replies)}</td>
-          <td class="ta-r">${r.sent?(r.replies/r.sent*100).toFixed(1)+"%":"—"}</td>
+          <td class="ta-r">${r.sent?(r.replies/r.sent*100).toFixed(1)+"%":"-"}</td>
           <td class="ta-r">${d.num(r.deals)}</td>
           <td class="ta-r">${fmtMeasure(r.v)}</td>
           <td class="ta-r">${d.num(r.wonN)}</td>
         </tr>`).join("")}
-        <tr class="rpt-tot"><td>Total</td><td class="ta-r">${d.num(tot("campaigns"))}</td><td class="ta-r">${d.num(tot("leads"))}</td><td class="ta-r">${d.num(tot("sent"))}</td><td class="ta-r">${d.num(tot("replies"))}</td><td class="ta-r">${tot("sent")?(tot("replies")/tot("sent")*100).toFixed(1)+"%":"—"}</td><td class="ta-r">${d.num(tot("deals"))}</td><td class="ta-r">${fmtMeasure(tot("v"))}</td><td class="ta-r">${d.num(tot("wonN"))}</td></tr>
+        <tr class="rpt-tot"><td>Total</td><td class="ta-r">${d.num(tot("campaigns"))}</td><td class="ta-r">${d.num(tot("leads"))}</td><td class="ta-r">${d.num(tot("sent"))}</td><td class="ta-r">${d.num(tot("replies"))}</td><td class="ta-r">${tot("sent")?(tot("replies")/tot("sent")*100).toFixed(1)+"%":"-"}</td><td class="ta-r">${d.num(tot("deals"))}</td><td class="ta-r">${fmtMeasure(tot("v"))}</td><td class="ta-r">${d.num(tot("wonN"))}</td></tr>
         </tbody></table></div>
       <p class="rpt-caveat"><b>What would make this real.</b> A campaign field on the deal, set when a rep converts a reply, is the direct fix and costs one input. Failing that, a per lead Instantly export would allow an email domain join to the contact book, which is indirect but row level. Neither exists today. Campaign figures are a snapshot read ${d.esc(I.read||"unknown")}; deal figures are live.</p>
     `, ()=>d.downloadCSV("report-campaign-to-revenue.csv",
@@ -722,9 +732,9 @@
     return card("Sample to order", "The motion the company actually runs: a sample goes out, an order follows or it does not.", `
       <div class="grid g4">
         ${d.kpi("Reached sample", d.num(reached.length), "at Sample/Trial or beyond")}
-        ${d.kpi("Moved past it", d.num(past.length), reached.length?`${Math.round(past.length/reached.length*100)}% of sampled`:"—")}
+        ${d.kpi("Moved past it", d.num(past.length), reached.length?`${Math.round(past.length/reached.length*100)}% of sampled`:"-")}
         ${d.kpi("Won after sampling", d.num(won.filter(x=>rank(x.stage)>=SAMPLE).length), "closed won")}
-        ${d.kpi("Median days", med==null?"—":med+"d", "record created to close date")}
+        ${d.kpi("Median days", med==null?"-":med+"d", "record created to close date")}
       </div>
       <h4 class="rpt-h">By product line</h4>
       ${byLine.length?bars(byLine):`<p class="pdim">No deals have reached Sample/Trial in this selection.</p>`}
@@ -805,7 +815,7 @@
     const wonRate = ds => { const w=ds.filter(x=>x.status==="won").length,
       l=ds.filter(x=>x.status==="lost").length; return (w+l)?Math.round(w/(w+l)*100):0; };
     return `<div class="grid g4">
-      ${fig(`Pipeline, ${measureLabel()}`, m, fmtMeasure)}
+      ${fig(`Open pipeline, ${measureLabel()}`, ds=>m(ds.filter(x=>x.status==="open")), fmtMeasure)}
       ${fig("Deals", ds=>ds.length, d.num)}
       ${fig(`Won, ${measureLabel()}`, ds=>m(ds.filter(x=>x.status==="won")), fmtMeasure)}
       ${fig("Win rate", wonRate, v=>v+"%")}
@@ -838,7 +848,7 @@
   function toggle(id,label,opts,val){
     const d=D();
     return `<div class="rpt-tg"><span>${d.esc(label)}</span><div class="rpt-tgb">
-      ${opts.map(([v,l])=>`<button type="button" class="${String(v)===String(val)?"on":""}" onclick="rptSet('${id}','${d.esc(v)}')">${d.esc(l)}</button>`).join("")}
+      ${opts.map(([v,l])=>`<button type="button" class="${String(v)===String(val)?"on":""}" onclick="rptSet('${id}','${jq(v)}')">${d.esc(l)}</button>`).join("")}
     </div></div>`;
   }
 
@@ -896,7 +906,6 @@
         ${toggle("unit","Measure",[["value","Dollars"],["volume","Tonnes"]],F.unit)}
         ${toggle("weight","Weighting",[["gross","Gross"],["weighted","Weighted"]],F.weight)}
         ${toggle("history","Imported history",[["include","Include"],["exclude","Exclude"]],F.history)}
-        ${toggle("cume","Time series",[["period","Per period"],["cumulative","Cumulative"]],F.cume)}
         <button type="button" class="btn ghost sm rpt-reset" onclick="rptReset()">Reset all</button>
       </div>
       <div class="rpt-state">

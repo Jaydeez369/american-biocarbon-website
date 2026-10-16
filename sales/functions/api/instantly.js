@@ -1,7 +1,7 @@
 /**
  * GET /api/instantly — the live Instantly workspace, in the same shape as instantly-data.js.
  *
- * Same trick as /api/allo: a Pages Function runs server side on Cloudflare's edge, so the
+ * A Pages Function runs server side on Cloudflare's edge, so the
  * API key lives here and never reaches a browser. Same origin, so no CORS. Behind
  * functions/_middleware.js, so an unauthenticated request never gets this far.
  *

@@ -160,7 +160,7 @@
       ${body}`;
   }
   function rNurture(){ if(!store.loaded && !store.loading){ store.loading=true; setTimeout(store.load,0); } return `<section class="section" id="sec-nurture">${inner()}</section>`; }
-  function rerender(){ const el=document.getElementById("sec-nurture"); if(el) el.innerHTML=inner(); }
+  function rerender(){ store.snapshot(); const el=document.getElementById("sec-nurture"); if(el) el.innerHTML=inner(); }
 
   /* ---------- handlers ---------- */
   const readForm = id => CE().readForm(id);
@@ -191,7 +191,7 @@
       if(status==="approved" && !canApprove()){ alert("Only Victor (admin) can approve."); return; }
       store.save(id, { copy: readForm(id), status });
     },
-    reset(id){ if(!confirm("Clear your copy for this email and go back to the placeholder draft?")) return; store.save(id, { copy:{}, status:"draft" }); },
+    reset(id){ if(!confirm("Clear your copy for this email and go back to the starter draft?")) return; store.save(id, { copy:{}, status:"draft" }); },
     addPara(id){ const rec=store.records[id]||{}; const copy=readForm(id); (copy.paras=copy.paras||[]).push(""); store.records[id]={...rec, copy}; store.dirty[id]=true; rerender(); },
     _internals:{ effective, placeholder, renderPreview, md, findEmail, get RECORDS(){return store.records;}, set RECORDS(v){store.records=v;}, readForm, store },
   };

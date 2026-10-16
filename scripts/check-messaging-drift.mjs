@@ -117,10 +117,10 @@ if (flat.length) {
    the check is per string instead: any string that names an absorbent must not carry the
    metric ton or the old 1,650 lb sack, and any string that prices absorbents must say the
    US ton. Biochar is checked the other way round, so the two lines cannot swap units. */
-/* $275 is an absorbent signal in its own right, and it is the one that matters most:
-   "$275 per metric ton" names no product, so a product-word-only test walks straight past
-   the single most damaging string in the file. $450 plays the same role for biochar. */
-const ABSORBENT = /absorb|pellet|crumble|\$275/i;
+/* $325 (as low as, quote only) is an absorbent signal in its own right: "$325 per metric ton"
+   names no product, so a product-word-only test walks straight past it. $450 plays the same
+   role for biochar. The retired $275 figure is banned outright below. */
+const ABSORBENT = /absorb|pellet|crumble|\$325|\$275/i;
 const strings = [];
 (function walk(v){
   if (typeof v === "string") strings.push(v);
@@ -136,14 +136,18 @@ const mixed = strings.filter(t => ABSORBENT.test(t) && /metric ton/i.test(t) && 
 if (mixed.length) bad(`${mixed.length} absorbent string(s) in outreach-data.js still say "metric ton": ${mixed.map(t => JSON.stringify(t.slice(0, 70))).join("; ")}`);
 else ok(`No absorbent string in the Sales OS is priced or packaged in metric tons.`);
 
+const stale275 = strings.filter(t => /\$275/.test(t)).length + ((paste.match(/\$275/g) || []).length);
+if (stale275) bad(`${stale275} place(s) still quote the retired $275 absorbent price. Canon is "as low as $325 per US ton", quote only.`);
+else ok(`The retired $275 absorbent price is gone from the outreach data and the paste sheet.`);
+
 const pasteSacks = /1,?650\s*lb/i.test(paste);
 /* Scoped to the surrounding paragraph, not the line: an email body wraps at ~75 chars, so
    "priced at $450 a metric ton" can land a full line away from the word "biochar" that
-   makes it correct. $450 is itself a biochar signal - absorbents are $275. */
+   makes it correct. $450 is itself a biochar signal - absorbents are $325. */
 const pasteMetric = [...paste.matchAll(/metric ton/gi)]
   .map(m => paste.slice(Math.max(0, m.index - 300), m.index + 100))
-  .filter(ctx => !/biochar/i.test(ctx) || /\$275/.test(ctx))
-  .filter(ctx => !/\$450/.test(ctx) || /\$275/.test(ctx));
+  .filter(ctx => !/biochar/i.test(ctx) || /\$325/.test(ctx))
+  .filter(ctx => !/\$450/.test(ctx) || /\$325/.test(ctx));
 if (pasteSacks) bad(`INSTANTLY-PASTE.md still says 1,650 lb. The absorbent sack is 2,000 lb (1 US ton).`);
 else if (pasteMetric.length) bad(`INSTANTLY-PASTE.md has ${pasteMetric.length} non-biochar "metric ton" line(s): ${pasteMetric.map(t => JSON.stringify(t.trim().slice(-70))).join("; ")}`);
 else ok(`The campaigns sell absorbents by the US ton and reserve the metric ton for biochar.`);

@@ -1,5 +1,5 @@
 /* ============================================================
-   VEJ Sales OS — DAILY SUMMARY and the SYSTEMS MAP
+   Progreaux Sales OS: DAILY REPORT and DATA FEEDS
    Loads after pipeline.js; exposes window.SUMMARY_UI.
 
    TWO SCREENS, one module, because they answer two halves of the same question. The daily
@@ -55,12 +55,12 @@
 
   function sumInner(){
     if(!SUM){ if(!SUM_LOADING) loadSummary(SUM_DAY);
-      return `<h1 class="pipe-h">Daily summary</h1><p class="pdim">Loading the day…</p>`; }
+      return `<h1 class="pipe-h">Daily report</h1><p class="pdim">Loading the day…</p>`; }
     if(SUM.ok===false){
       const why = SUM.reason==="forbidden"
         ? "Your account may not read this."
         : `The summary could not be read: <b>${esc(SUM.reason||"unknown")}</b>. It is a live read through the Worker, so it recovers on its own.`;
-      return `<h1 class="pipe-h">Daily summary</h1><p class="rpt-flag">${why}</p>`;
+      return `<h1 class="pipe-h">Daily report</h1><p class="rpt-flag">${why}</p>`;
     }
     const t=SUM.team.today, y=SUM.team.yesterday;
     const tile=(l,v,d,sub)=>`<div class="pkpi"><div class="pk-l">${esc(l)}</div>
@@ -83,7 +83,7 @@
     }).join("");
 
     const isToday = SUM.day === new Date().toISOString().slice(0,10);
-    return `<h1 class="pipe-h">Daily summary</h1>
+    return `<h1 class="pipe-h">Daily report</h1>
       <p class="page-sub">What each person changed in the record today, and what the phone did.
       ${esc(SUM.scopeNote)} The scope is applied on the server, so this is the whole of what your account may see.</p>
 
@@ -164,7 +164,7 @@
     /* WRITTEN AND NOT LIVE is its own state, and it earns a colour of its own because it is the
        one most likely to be misread. Calling it "Live" because the code is merged would make
        this map lie in exactly the way the caveat at the bottom warns about, and calling it
-       "Broken" would hide that the work is done and waiting on one action. The americanbiocarbon
+       "Broken" would hide that the work is done and waiting on one action. The website
        Pages project builds from a git push, so a fix in the tree changes nothing a visitor
        touches until somebody pushes. */
     pending:{ label:"Built, not deployed", cls:"h-pending" },
@@ -173,35 +173,49 @@
     unknown:{ label:"Unknown",  cls:"h-unknown" },
   };
 
+  /* Health is computed from the probes loadSystems() already runs, not asserted. A row that
+     depends on a route which errored, answered ok:false or answered 4xx/5xx cannot say Live.
+     While the probes are still loading the written verdict stands. */
+  function probed(keys, written){
+    if(!SYS) return written;
+    let worst=null;
+    for(const k of keys){
+      const p=SYS[k];
+      if(!p || p.error){ worst = worst || "unknown"; continue; }
+      if(p.ok===false || p.status>=400) return "broken";
+    }
+    return worst==="unknown" && written==="live" ? "unknown" : written;
+  }
+
   function flows(){
     const A=SYS||{};
-    const n=k=>A[k]&&A[k].n!=null?num(A[k].n):"—";
+    const n=k=>A[k]&&A[k].n!=null?num(A[k].n):"-";
     const act=A.activity||{};
     return [
       { from:"Progreaux website", via:"8 forms · /api/lead · POST to allo-hooks, then Resend",
         to:"D1 records, kind weblead", surface:"Leads screen, account timeline",
-        health:"live", count:`${n("weblead")} stored${(A.weblead&&A.weblead.refused)?` · ${A.weblead.refused} refused`:""}`,
-        why:`Live end to end since 2026-09-08. A form on americanbiocarbon.com posts to /api/lead, which writes the lead to D1 through the Worker BEFORE it mails the desk, then mails it. The record lands as kind "weblead" with the company as its scope, idempotent on the submission id so a keepalive retry is one lead. The Leads screen lists them and they reach the account timeline carrying the answers the visitor typed. Proved by submitting all eight forms against the live site: 8 stored, 8 mailed, 16 messages delivered. Store first is the load bearing part, because a lead we hold and could not mail is on the Leads screen, and a lead that reached an inbox and not the record is gone the moment the mail is missed.`,
+        health:probed(["weblead"],"live"), count:`${n("weblead")} stored${(A.weblead&&A.weblead.refused)?` · ${A.weblead.refused} refused`:""}`,
+        why:`Live end to end since 2026-09-08. A form on the website posts to /api/lead, which writes the lead to D1 through the Worker BEFORE it mails the desk, then mails it. The record lands as kind "weblead" with the company as its scope, idempotent on the submission id so a keepalive retry is one lead. The Leads screen lists them and they reach the account timeline carrying the answers the visitor typed. Proved by submitting all eight forms against the live site: 8 stored, 8 mailed, 16 messages delivered. Store first is the load bearing part, because a lead we hold and could not mail is on the Leads screen, and a lead that reached an inbox and not the record is gone the moment the mail is missed.`,
         fix:"" },
       { from:"Website form validation", via:"contactState() gate · one channel is enough",
         to:"Stored and flagged, or refused and counted", surface:"Leads screen, with what is missing",
-        health:"live", count:(A.weblead&&A.weblead.n!=null)?`${A.weblead.incomplete||0} incomplete · ${A.weblead.refused||0} refused`:"—",
+        health:probed(["weblead"],"live"), count:(A.weblead&&A.weblead.n!=null)?`${A.weblead.incomplete||0} incomplete · ${A.weblead.refused||0} refused`:"-",
         why:`Live since 2026-09-08. The gate used to demand BOTH a valid email and a phone and answer 400 otherwise, while the browser painted the tick before the response arrived, so a lead with a real address and no number vanished with nobody on either side knowing. It now refuses only a submission nobody could answer, records which channel is missing, and writes the refusals down so the count exists at all. The browser waits for the answer and keeps the form on screen when it fails, with a phone number that does not depend on the thing that just failed. Proved live: the two forms submitted without a phone came back 200 and stored, flagged "no phone", where the same submission was a silent 400 the day before.`,
         fix:"" },
       { from:"Allo phone", via:"POST /hooks/allo · HMAC verified · 11 topics",
         to:"D1 events, activity, leads", surface:"Inbox, account timeline, Reports",
-        health:"live", count:`${n("activity")} timeline rows · ${n("leads")} phone leads`,
+        health:probed(["activity","leads"],"live"), count:`${n("activity")} timeline rows · ${n("leads")} phone leads`,
         why:`Verified and deduped on webhook id, then fanned out to five consumers. This is the one intake path that is fully wired end to end: a call lands in D1 within seconds and appears on the account timeline and in the Activity report.`,
         fix:"" },
       { from:"Allo conversation", via:"salesos consumer · contact upsert · timeline backfill",
         to:"contacts, and activity.contact_name / .company", surface:"Account timeline, contact book",
-        health:"live", count:`${act.named!=null?act.named:"—"} of ${n("activity")} named · ${act.companied!=null?act.companied:"—"} with a company`,
+        health:probed(["activity"],"live"), count:`${act.named!=null?act.named:"-"} of ${n("activity")} named · ${act.companied!=null?act.companied:"-"} with a company`,
         why:`A conversation now files a contact, which is what lets it reach an account: the timeline matches a call to an account through the contact book, and the phone had never written to it. The rule is evidence of a person on the other end, so a text either way, an AI summary, an outbound call, an answered inbound call or a voicemail with a summary all qualify, and a single unanswered ring does not. A conversation carrying no name and no company also stays a lead: a contact holding only a number attaches to no account, so it would improve nothing and duplicate the callback queue. THE LIMIT IS THE DATA, not the wiring. Of 17 numbers in the log, 15 carry no name and no company and none of them match a phone in the roster, HubSpot, Apollo or the outreach lists, so who called cannot be worked out from anything we hold. The historical backfill moved rows reaching an account from 5 of 71 to 8.`,
         fix:"Nothing here. Getting past 8 needs identity at the point of the call, which means a caller saying who they are, or Allo carrying a CRM record for them." },
-      { from:"Instantly", via:"build-instantly-snapshot.mjs, run by hand",
+      { from:"Instantly", via:"/api/instantly live read, plus the instantly-data.js snapshot",
         to:"instantly-data.js in the bundle", surface:"Reports",
         health:"dated", count:(window.INSTANTLY_LIVE&&window.INSTANTLY_LIVE.read)?`read ${esc(window.INSTANTLY_LIVE.read)}`:"no snapshot",
-        why:`A file, not a feed. Campaign sends and replies are as current as the last time somebody ran the generator, and the screens that use it print that date. A reply that arrives this afternoon is not here until the snapshot is rebuilt.`,
+        why:`The Reports screens read a snapshot file. Campaign sends and replies in them are as current as the last time somebody ran the generator, and the screens that use it print that date. The Inbox reads Instantly live through /api/email. A reply that arrives this afternoon is not here until the snapshot is rebuilt.`,
         fix:"Fine as a snapshot for campaign totals. It is not fine as the basis for attribution, which is why the campaign report grades itself LOW." },
       { from:"Instantly reply", via:"nothing",
         to:"a deal", surface:"No link at all",
@@ -210,14 +224,14 @@
         fix:"A campaign field on the deal, set when a rep converts a reply. One input, and the join becomes real." },
       { from:"Sales OS", via:"/api/* · signed session · x-actor",
         to:"D1 deals, contacts, records, audit", surface:"Every screen, plus the audit trail",
-        health:"live", count:`${n("deals")} deals · ${n("contacts")} contacts`,
+        health:probed(["deals","contacts","audit"],"live"), count:`${n("deals")} deals · ${n("contacts")} contacts`,
         why:`Every write goes through the edge, carries the identity from the signed cookie, is authorised in _lib/authz.js and leaves an audit row. This is the path the daily summary counts.`,
         fix:"" },
-      { from:"Sales OS SMS composer", via:"nothing",
-        to:"nowhere", surface:"Looks sent",
-        health:"broken", count:"0 sent, ever",
-        why:`The composer writes a timeline entry and stops. Allo exposes no messaging API, so there is no transport behind the button. It has been demonstrated as working.`,
-        fix:"Remove the button or label it as logging only, until there is a transport." },
+      { from:"Sales OS SMS and email composers", via:"nothing",
+        to:"a timeline entry only", surface:"Labeled as a log of a text or email sent elsewhere",
+        health:"missing", count:"log only, sends nothing",
+        why:`The composers write a timeline entry with status logged and stop. They are labeled "Log a text you sent" and "Log an email you sent", and the SMS button hands the number to the Messages app. Allo exposes no messaging API, so there is no transport behind them.`,
+        fix:"A real transport, which does not exist yet. Until then the labels must keep saying this only logs." },
       { from:"HubSpot", via:"one time scrape",
         to:"hubspot-data.js", surface:"Company layer, contact history",
         health:"dated", count:"185 companies, frozen",
@@ -258,7 +272,7 @@
     const order=["missing","broken","pending","dated","live"];
     const sorted=[...rows].sort((a,b)=>order.indexOf(a.health)-order.indexOf(b.health));
 
-    return `<h1 class="pipe-h">Systems map</h1>
+    return `<h1 class="pipe-h">Data feeds</h1>
       <p class="page-sub">Every way a lead, a call or a message can reach the business, what carries it,
       where it lands, and whether this app can see it. Sorted worst first, because the working ones do not need you.</p>
 

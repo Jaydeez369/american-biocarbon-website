@@ -67,7 +67,7 @@
  * this one.
  */
 
-import { DEFAULT_ROLE, isRole } from './_lib/authz.js';
+import { parseUsers } from './_lib/users.js';
 
 const COOKIE = 'sales_os_session';
 /* Readable by JS on purpose: the app renders "Victor" in the header instead of a
@@ -118,7 +118,7 @@ const SHOT_SRC = SHOT_BASE + '&width=1365';
 const SHOT_SRCSET = [900, 1100, 1365].map((w) => `${SHOT_BASE}&width=${w} ${w}w`).join(', ');
 
 /* The reversed (white) horizontal wordmark, which is the one that works on a dark ground. */
-const LOGO_SRC = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 64%22 width=%22300%22 height=%2264%22 role=%22img%22 aria-label=%22ProGreaux%22%3E %3Cg fill=%22none%22 stroke=%22%23ffffff%22 stroke-width=%223.2%22 stroke-linecap=%22round%22%3E %3Cpath d=%22M24 48 V27%22/%3E %3C/g%3E %3Cpath d=%22M24 35c0-8-6-13-13-13 0 8 5 13 13 13z%22 fill=%22%23ffffff%22 opacity=%22.72%22/%3E %3Cpath d=%22M24 30c0-8 6-13 14-13 0 8-6 13-14 13z%22 fill=%22%23ffffff%22/%3E %3Ctext x=%2256%22 y=%2241%22 font-family=%22'Helvetica Neue',Helvetica,Arial,sans-serif%22 font-size=%2227%22 font-weight=%22700%22 letter-spacing=%223.4%22 fill=%22%23ffffff%22%3EPROGREAUX%3C/text%3E %3C/svg%3E";
+const LOGO_SRC = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 64%22 width=%22300%22 height=%2264%22 role=%22img%22 aria-label=%22Progreaux%22%3E %3Cg fill=%22none%22 stroke=%22%23ffffff%22 stroke-width=%223.2%22 stroke-linecap=%22round%22%3E %3Cpath d=%22M24 48 V27%22/%3E %3C/g%3E %3Cpath d=%22M24 35c0-8-6-13-13-13 0 8 5 13 13 13z%22 fill=%22%23ffffff%22 opacity=%22.72%22/%3E %3Cpath d=%22M24 30c0-8 6-13 14-13 0 8-6 13-14 13z%22 fill=%22%23ffffff%22/%3E %3Ctext x=%2256%22 y=%2241%22 font-family=%22'Helvetica Neue',Helvetica,Arial,sans-serif%22 font-size=%2227%22 font-weight=%22700%22 letter-spacing=%223.4%22 fill=%22%23ffffff%22%3EPROGREAUX%3C/text%3E %3C/svg%3E";
 const LOGOUT_PATH = '/__logout';
 
 /* Constant-time compare. A plain === leaks the length of the matching prefix through
@@ -135,65 +135,8 @@ function timingSafeEqual(a, b) {
   return diff === 0;
 }
 
-/**
- * Parse SALES_OS_USERS into accounts, newest wins on a duplicate username.
- *
- *   username:password:role:Display Name
- *
- * Split on the FIRST colon for the username and the LAST two fields for role and display
- * name, so a password may contain colons; a role and a display name may not, which is a
- * fair trade because one is a keyword and the other is a person's name. The role field is
- * optional: a line whose third field is not a known role is read as the old
- * username:password:Display Name shape, so accounts written before roles existed keep
- * working and land on DEFAULT_ROLE. Blank lines and #-comments are allowed so the
- * variable can be annotated in the Cloudflare UI.
- *
- * A line missing a username or a password is skipped rather than becoming an account with
- * an empty password, which would be an open door.
- */
-export function parseUsers(env) {
-  const out = new Map();
-  const raw = typeof env.SALES_OS_USERS === 'string' ? env.SALES_OS_USERS : '';
-  for (const line of raw.split(/[\r\n,]+/)) {
-    const entry = line.trim();
-    if (!entry || entry.startsWith('#')) continue;
-    const first = entry.indexOf(':');
-    if (first < 1) continue;
-    const username = entry.slice(0, first).trim().toLowerCase();
-
-    /* Fields after the username, from the RIGHT, because the password is the only field
-       allowed to contain a colon and so must absorb whatever is left over. */
-    const rest = entry.slice(first + 1);
-    const parts = rest.split(':');
-    let role = DEFAULT_ROLE;
-    let display = '';
-    if (parts.length >= 3 && isRole(parts[parts.length - 2])) {
-      display = parts.pop().trim();
-      role = parts.pop().trim().toLowerCase();
-    } else if (parts.length >= 2 && isRole(parts[parts.length - 1])) {
-      role = parts.pop().trim().toLowerCase();
-    } else if (parts.length >= 2) {
-      display = parts.pop().trim();
-    }
-    const password = parts.join(':').trim();
-
-    if (!username || !password) continue;
-    out.set(username, { username, password, role, display: display || username });
-  }
-
-  /* The legacy shared password, as the account "team". Only if nobody has claimed that
-     username, so a real person named team in SALES_OS_USERS is never shadowed.
-
-     It gets DEFAULT_ROLE, not admin. Everyone who has ever been handed the shared word is
-     holding it, and a password with unknown reach must not carry the two capabilities
-     whose damage outlives the day — that is the whole argument for named accounts,
-     applied to the credential that made the argument necessary. */
-  const shared = typeof env.SALES_OS_PASSWORD === 'string' ? env.SALES_OS_PASSWORD.trim() : '';
-  if (shared && !out.has('team')) {
-    out.set('team', { username: 'team', password: shared, role: DEFAULT_ROLE, display: 'Team', shared: true });
-  }
-  return out;
-}
+/* parseUsers lives in _lib/users.js so api/summary.js reads the secret the same way. */
+export { parseUsers };
 
 async function sign(value, password) {
   const enc = new TextEncoder();
@@ -207,7 +150,7 @@ async function sign(value, password) {
 async function issue(account) {
   const exp = String(Math.floor(Date.now() / 1000) + SESSION_SECONDS);
   const body = `${account.username}.${exp}`;
-  return `${body}.${await sign(body, account.password)}`;
+  return `${body}.${await sign(body, account.sessionKey || account.password)}`;
 }
 
 /* Verify the signature BEFORE trusting anything in the cookie, the username and the
@@ -221,7 +164,7 @@ export async function verify(token, users) {
   if (!/^\d+$/.test(exp)) return null;
   const account = users.get(username.toLowerCase());
   if (!account) return null;
-  if (!timingSafeEqual(mac, await sign(`${account.username}.${exp}`, account.password))) return null;
+  if (!timingSafeEqual(mac, await sign(`${account.username}.${exp}`, account.sessionKey || account.password))) return null;
   if (Number(exp) <= Math.floor(Date.now() / 1000)) return null;
   return account;
 }
@@ -272,7 +215,7 @@ function loginPage(error, username) {
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Sales OS</title>
+<title>Progreaux Sales OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="${CDN}" crossorigin />

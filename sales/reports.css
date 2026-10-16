@@ -3,13 +3,12 @@
 
    Reads the same role tokens the rest of the Sales OS uses (--line, --paper-2, --brand,
    --text-dim, --sh-1). No raw brand hex here: the palette is tokens.css, and a colour
-   restated in a fifth file is how the two themes drifted last time. The only literal
-   colours below are the three delta states, which are status colours rather than brand
-   colours and are defined once at the top.
+   restated in a fifth file is how the two themes drifted last time. The delta states are status
+   aliases defined once at the top.
    ============================================================ */
 :root{
-  --rpt-up:#2f7a48;
-  --rpt-down:#b8323c;
+  --rpt-up:var(--green-deep);
+  --rpt-down:var(--red);
   --rpt-flat:var(--text-dim);
 }
 
@@ -63,7 +62,7 @@
   border-radius:8px;font-size:12.5px;line-height:1.55;background:var(--paper-2);border:1px solid var(--line)}
 .rpt-conf .rc-badge{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.04em;
   padding:3px 8px;border-radius:5px;white-space:nowrap}
-.rpt-conf.low .rc-badge{background:rgba(184,50,60,.1);color:var(--rpt-down);border:1px solid rgba(184,50,60,.3)}
+.rpt-conf.low .rc-badge{background:rgba(var(--red-rgb),.1);color:var(--rpt-down);border:1px solid rgba(var(--red-rgb),.3)}
 
 /* ---- deltas ------------------------------------------------------------- */
 .rpt-d{font-size:12px;font-weight:600;margin-left:6px;white-space:nowrap}
@@ -242,9 +241,9 @@
 .sys-h{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
   padding:2px 7px;border-radius:4px;border:1px solid}
 .sys-h.h-live{color:var(--green);border-color:rgba(var(--green-rgb),.4);background:rgba(var(--green-rgb),.08)}
-.sys-h.h-dated{color:var(--gold);border-color:rgba(var(--gold-rgb),.4);background:rgba(var(--gold-rgb),.08)}
+.sys-h.h-dated{color:var(--gold-soft);border-color:rgba(var(--gold-rgb),.4);background:rgba(var(--gold-rgb),.08)}
 .sys-h.h-broken,.sys-h.h-missing{color:var(--red);border-color:rgba(var(--red-rgb),.4);background:rgba(var(--red-rgb),.08)}
-.sys-h.h-pending{color:var(--gold);border-color:rgba(var(--gold-rgb),.4);background:rgba(var(--gold-rgb),.08)}
+.sys-h.h-pending{color:var(--gold-soft);border-color:rgba(var(--gold-rgb),.4);background:rgba(var(--gold-rgb),.08)}
 .sys-h.h-unknown{color:var(--text-mute);border-color:var(--line)}
 .sys-count{font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
 .sys-surface{color:var(--text-dim)}

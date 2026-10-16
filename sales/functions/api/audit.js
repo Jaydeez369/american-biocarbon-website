@@ -27,7 +27,7 @@
  * NEVER PROXIES A WRITE. GET only, and the Worker refuses anything else on its side as well.
  * Two independent refusals for a table whose entire value is that it cannot be edited.
  *
- * FAILS SOFT, like /api/activity and /api/allo: an unreachable Worker answers ok:false with a
+ * FAILS SOFT, like /api/activity: an unreachable Worker answers ok:false with a
  * reason and a 200, and the account profile renders the record it always had, minus the
  * history strip. A 403 is NOT soft and comes back as a 403, because "you may not see this"
  * and "this is temporarily unavailable" must never render as the same thing.

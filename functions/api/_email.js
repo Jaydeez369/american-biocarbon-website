@@ -192,10 +192,10 @@ function footer(env, note, unsubscribeHref) {
     ` &nbsp;·&nbsp; <a href="mailto:sales@americanbiocarbon.com" style="color:${C.navy600};text-decoration:none">sales@americanbiocarbon.com</a>` +
     ` &nbsp;·&nbsp; <a href="${BRAND.phoneHref}" style="color:${C.navy600};text-decoration:none">${esc(BRAND.phone)}</a>` +
     `</p>` +
-    `<p style="margin:12px 0 0;font:400 12px/1.5 ${FONT};color:#8c8c8c">` +
+    `<p style="margin:12px 0 0;font:400 12px/1.5 ${FONT};color:#595959">` +
     esc(note || "You are receiving this because you submitted a request on our website.") +
     (unsubscribeHref
-      ? ` <a href="${esc(unsubscribeHref)}" style="color:#8c8c8c;text-decoration:underline">Unsubscribe</a>`
+      ? ` <a href="${esc(unsubscribeHref)}" style="color:#595959;text-decoration:underline">Unsubscribe</a>`
       : "") +
     `</p>` +
     `</td></tr>`
@@ -316,7 +316,7 @@ export const SEQUENCES = {
         "Thanks for requesting a sample kit. One complimentary sample bag per company, shipping included.",
         `A specialist will follow up ${ONE_DAY} to confirm your use case and ship-to address, and answer any handling questions for your application.`,
       ],
-      links: [{ label: "Absorbent Pellets - specification sheet (PDF)", href: o + SPEC.pellets }],
+      links: [{ label: "Absorbent Pellets specification sheet (PDF)", href: o + SPEC.pellets }],
       cta: null,
     }),
   },
@@ -333,8 +333,8 @@ export const SEQUENCES = {
         "In the meantime, the specification sheets are below.",
       ],
       links: [
-        { label: "Absorbent Pellets - specification sheet (PDF)", href: o + SPEC.pellets },
-        { label: "Premium Biochar - specification sheet (PDF)", href: o + SPEC.biochar },
+        { label: "Absorbent Pellets specification sheet (PDF)", href: o + SPEC.pellets },
+        { label: "Premium Biochar specification sheet (PDF)", href: o + SPEC.biochar },
       ],
       cta: null,
     }),
@@ -351,7 +351,7 @@ export const SEQUENCES = {
         "Thanks for your interest in our premium bagasse biochar.",
         "We'll confirm your sample and ship-to address shortly. Composters: ask about our side-by-side windrow trial protocol.",
       ],
-      links: [{ label: "Premium Biochar - specification sheet (PDF)", href: o + SPEC.biochar }],
+      links: [{ label: "Premium Biochar specification sheet (PDF)", href: o + SPEC.biochar }],
       cta: null,
     }),
   },
@@ -400,8 +400,8 @@ export const SEQUENCES = {
         "A specialist will follow up with the laboratory data you need for your application.",
       ],
       links: [
-        { label: "Absorbent Pellets - specification sheet (PDF)", href: o + SPEC.pellets },
-        { label: "Premium Biochar - specification sheet (PDF)", href: o + SPEC.biochar },
+        { label: "Absorbent Pellets specification sheet (PDF)", href: o + SPEC.pellets },
+        { label: "Premium Biochar specification sheet (PDF)", href: o + SPEC.biochar },
       ],
       cta: null,
     }),
@@ -409,7 +409,7 @@ export const SEQUENCES = {
 
   contact: {
     label: "General contact",
-    subject: "We received your message - Progreaux",
+    subject: "We received your message to Progreaux",
     preheader: `We'll get back to you ${ONE_DAY}.`,
     heading: "Thanks for getting in touch",
     style: "classic",
@@ -441,15 +441,15 @@ export function buildAutoreply(formKey, fields = {}, env = {}, styleOverride) {
     ? `<p style="margin:0 0 16px;font:400 16px/1.6 ${FONT};color:${C.slate}">Hi ${esc(name)},</p>`
     : "";
 
-  /* Two lines every auto reply carries, agreed on the VEJ call of 2026-09-09: say a person is
-     going to call and give them the number so they can call first (speed to lead), and tell
-     them a few short emails are coming so the nurture sequence is not a surprise. Kept here,
+  /* One line every auto reply carries, agreed on the VEJ call of 2026-09-09: say a person may
+     call and give them the number so they can call first (speed to lead). The line about
+     nurture emails and an unsubscribe is NOT here: nothing sends the nurture yet, so do not
+     promise it until it does and the unsubscribe link is passed. Kept here,
      not in each sequence, so a new form cannot ship without them. No pricing in this email
      on purpose: information first, price when there is a conversation. See
      sales-department/campaigns/NURTURE-PLAN.md section 6. */
   const closing = [
-    `If you would rather talk now, call us at <a href="${BRAND.phoneHref}" style="color:${C.slate}">${BRAND.phone}</a>. A specialist is also going to call you to introduce themselves.`,
-    "Over the next couple of weeks we will send a few short emails on how customers use the material. You can unsubscribe from those at any time.",
+    `If you would rather talk now, call us at <a href="${BRAND.phoneHref}" style="color:${C.slate}">${BRAND.phone}</a>. A specialist may also call you to introduce themselves.`,
   ];
   const closingText = closing.map((p) => p.replace(/<[^>]+>/g, ""));
 
@@ -460,7 +460,7 @@ export function buildAutoreply(formKey, fields = {}, env = {}, styleOverride) {
     paras(closing) +
     (c.cta ? button(c.cta.label, c.cta.href) : "") +
     `<p style="margin:22px 0 0;font:400 16px/1.6 ${FONT};color:${C.slate}">` +
-    `- The team at ${BRAND.name}</p><div style="height:6px"></div>`;
+    `The team at ${BRAND.name}</p><div style="height:6px"></div>`;
 
   const text = [
     name ? `Hi ${name},` : "",
@@ -471,7 +471,7 @@ export function buildAutoreply(formKey, fields = {}, env = {}, styleOverride) {
     "",
     ...closingText,
     "",
-    `- The team at ${BRAND.name}`,
+    `The team at ${BRAND.name}`,
     BRAND.address,
     BRAND.phone,
     o,

@@ -1,19 +1,9 @@
-/* ============ VEJ Sales OS — app shell & renderers ============ */
+/* ============ Progreaux Sales OS: app shell and renderers ============ */
 const $ = (s,el=document)=>el.querySelector(s);
-const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 const nl = s => esc(s).replace(/\n/g,"<br>");
 
-/* ---- persistent checklists (localStorage-backed; stays checked across reloads) ---- */
-const CHECK_KEY = "vej_checks_v1";
-function getChecks(){ try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch(e){ return {}; } }
-function setCheck(k,on){ const c=getChecks(); c[k]= on?1:0; try{ localStorage.setItem(CHECK_KEY, JSON.stringify(c)); }catch(e){} }
-/* chk(key, labelHTML, def) — labelHTML is trusted HTML; def = default-checked when never touched */
-function chk(key, labelHTML, def){ const v=getChecks()[key]; const on = (v===undefined? !!def : !!v) ? " done" : ""; return `<label class="chk${on}" data-k="${esc(key)}" onclick="toggleChk(this)"><span class="box">✓</span><span class="lbl">${labelHTML}</span></label>`; }
-function checkStats(keys, defs){ const c=getChecks(); let done=0; keys.forEach((k,i)=>{ const v=c[k]; if(v===undefined? (defs&&defs[i]):v) done++; }); return {done, total:keys.length}; }
-/* Counters (per-block progress, the Daily Plan mission bar) are produced by the renderers
-   from getChecks(), so they only change when the DOM is rebuilt. Toggling a class and
-   writing storage is not enough - without a re-render the mission bar reads 0% forever.
-   rerender() rebuilds from live state while preserving what the user was looking at. */
+/* rerender() rebuilds from live state while preserving the section and scroll the user was looking at. */
 function rerender(){
   const y = window.scrollY;
   const id = (location.hash || "#" + NAV[0].items[0].id).slice(1);
@@ -21,16 +11,11 @@ function rerender(){
   go(id, { keepScroll:true });   // restore the active section without jumping to top
   window.scrollTo(0, y);
 }
-window.toggleChk = el => { const on = !el.classList.contains("done"); el.classList.toggle("done", on); setCheck(el.dataset.k, on); rerender(); };
-window.resetChecks = pfx => { const c=getChecks(); Object.keys(c).forEach(k=>{ if(!pfx||k.startsWith(pfx)) delete c[k]; }); localStorage.setItem(CHECK_KEY, JSON.stringify(c)); rerender(); };
 
 /* ---- toast + copy ---- */
 function toast(msg="Copied to clipboard"){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1400);}
 function copyText(txt){navigator.clipboard?.writeText(txt).then(()=>toast()).catch(()=>toast("Copy failed"));}
-/* Product facts come from OUTREACH.facts, the single canonical block, rather than being
-   restated here. This constant used to be the fourth independent declaration of the
-   tonnage. Guarded with a literal fallback so the Launchpad still renders if outreach-data.js
-   is missing from a partial deployment. */
+/* Product facts come from OUTREACH.facts, the single canonical block. Literal fallback keeps the page rendering if outreach-data.js is missing. */
 const F = (typeof OUTREACH !== "undefined" && OUTREACH.facts) || {};
 const BIOCHAR_INVENTORY_TONS = F.inventoryMt ?? 80;
 const BIOCHAR_INVENTORY_LINE = `${BIOCHAR_INVENTORY_TONS} metric tons of finished 100% biochar, ready to sell right now. Biochar is bulk-capable today: samples open the door, this tonnage moves now.`;
@@ -38,7 +23,6 @@ window.copyEl = id => { const e=document.getElementById(id); if(e) copyText(e.da
 
 /* ---- helpers ---- */
 const tier = t => { const p=DATA.proofTiers.find(x=>x.t===t); return `<span class="proof proof-${t}" title="${esc(p?.name||'')}">T${t}</span>`; };
-const badge = (txt,cls="badge-muted")=>`<span class="badge ${cls}">${esc(txt)}</span>`;
 function table(headers,rows){
   return `<div class="tbl-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
   <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
@@ -52,97 +36,32 @@ function script(label,body){
 }
 
 /* ================= NAV ================= */
-/* One view: the daily-driver sales tool. There used to be a second "BUILD" view holding
-   parked strategy modules (TAM/SAM/SOM, barge economics, a CRM schema spec, a metrics
-   dashboard) behind build-later.html. It was deleted, not parked: every section in it was
-   anchored to a $700/ton biochar price that the live $450/MT site price superseded, so it
-   was actively misleading rather than merely idle. The playbook owns the market model now.
-   Recoverable from git history if it is ever wanted back, re-derived at live prices. */
-/* Ordered by the live motion, not by planning hierarchy: launch the campaigns, send the
-   outreach, work the replies in the pipeline. Everything below Execute is reference material
-   you open when a specific question comes up, not something you read top to bottom. */
+/* Four groups. Work first: Leads is the landing screen. Measure answers whether it is working.
+   Execute holds the two copy editors. Reference is static reading. History is in git. */
 const LEAN_NAV=[
-  /* IA v7, 2026-08-31. Rebuilt around what a rep does, not around what the company was
-     building. Three changes and each one closes a complaint:
-
-       WORK comes first and Pipeline is the landing screen. You log in to the book of business,
-       not to a status page.
-
-       Launchpad is GONE as a section. It was 14 tiles and 9 cards of counts and a launch
-       checklist for work that shipped months ago, and none of it was actionable. The six
-       numbers worth keeping are a strip across the top of Pipeline; the three that represent
-       work carry an accent rail so the eye lands on those.
-
-       Inbox and Today are new, and they are the reason the phone and Instantly work was worth
-       doing. Every call, text, reply, policy flag and phone lead now arrives somewhere a person
-       looks, instead of in three systems nobody opens.
-
-     Crumble Blitz is deleted: 14,940 lines of crumble-data.js, most of the payload every user
-     downloaded on every load, for a push against inventory that is over. The data file and
-     module stay in git history. */
   {group:"Work",items:[
-    /* Leads leads. It is where a rep starts a day of calling: the whole pool of companies,
-       filtered down to the list they are about to work, with a click into the full record.
-       Pipeline is the book of business you already have; Leads is where the next one comes
-       from, so it sits above it. */
-    {id:"leads",ic:"◎",t:"Leads"},
-    {id:"crm",ic:"◉",t:"Pipeline"},
-    {id:"inbox",ic:"✉",t:"Inbox"},
-    {id:"today",ic:"✓",t:"Today"},
+    {id:"leads",t:"Leads"},
+    {id:"crm",t:"Pipeline"},
+    {id:"inbox",t:"Inbox"},
+    {id:"today",t:"Today"},
   ]},
-  /* Reports, promoted 2026-09-08 out of the seventh tab of the Pipeline page. It was asked
-     for by name and it was filed where nothing is found: behind a tab strip, on a page
-     whose first tab has the same name as the page. Measure is its own group because it
-     answers a different question from Work (what do I do next) and from Execute (send the
-     thing): it answers whether any of it is working. */
   {group:"Measure",items:[
-    {id:"summary",ic:"◷",t:"Daily Summary"},
-    {id:"reports",ic:"▤",t:"Reports"},
-    /* The systems map sits under Measure rather than in a settings corner on purpose. It
-       measures the plumbing, and the plumbing is the reason to trust or distrust everything
-       above it: a Reports figure is only worth reading if the feed behind it is connected. */
-    {id:"systems",ic:"◈",t:"Systems Map"},
+    {id:"summary",t:"Daily Report"},
+    {id:"reports",t:"Reports"},
+    {id:"systems",t:"Data Feeds"},
   ]},
-  /* Execute, cut down on 2026-09-16. Campaigns & ICP, Outreach Engine and Instantly Logic
-     were three screens of campaign architecture, 17 ICP copy banks and funnel costing that
-     nobody opened while selling. Retired, with their data files, in favour of two editors
-     that hold the words actually sent: eight cold email variants and three nurture
-     sequences, both saved to D1 and both rendered the way the recipient sees them. */
   {group:"Execute",items:[
-    {id:"coldemail",ic:"✦",t:"Cold Email"},
-    {id:"nurture",ic:"↻",t:"Nurture Plan"},
+    {id:"coldemail",t:"Cold Email"},
+    {id:"nurture",t:"Nurture Plan"},
   ]},
-  /* Reference collapsed from three entries to one on 2026-09-08. Future Funnels, Product &
-     Messaging and Assets & Playbook were three top level sections of static prose with no
-     computed output between them (gtm.js is 120 lines and reads no record). The content is
-     good and none of it is deleted; it is reference material, and reference material filed
-     as three peers of the pipeline made the nav claim that reading about a funnel is the
-     same kind of act as working one. One entry, tabs inside. */
   {group:"Reference",items:[
-    {id:"reference",ic:"❝",t:"Reference"},
+    {id:"reference",t:"Reference"},
   ]},
 ];
 const NAV = LEAN_NAV;
 
 /* ================= THE ROSTER, LOADED LATE =================
-   roster-data.js is 2.1 MB of the 2.9 MB this app pulled down synchronously before it
-   painted a single pixel. It is 1,145 researched companies, and it was blocking the login
-   screen on every load for everybody, including Victor and Daniel on phones, most of whom
-   open the app to look at the Inbox and never touch it.
-
-   WHAT THIS ACTUALLY BUYS, stated honestly rather than as a headline. The landing section
-   IS Leads, which reads the roster, so this is not "the roster is never loaded". It is:
-   the parser no longer blocks first paint. The app renders from the other 0.8 MB, the
-   roster arrives a moment later over the same connection, and the sections that need it
-   re render. The person sees the shell, the nav and the Inbox counts immediately instead of
-   a white page. That is the whole claim.
-
-   THE TRAP THIS HAS TO AVOID. A module that caches something derived from the roster on its
-   first call, before the roster lands, keeps the fallback numbers forever with nothing on
-   screen saying so. So the load does not merely fire a re render: it calls each module's
-   bust hook first. A module that gains a roster derived cache later must add a hook to
-   rosterReady() or it will silently freeze the same way. (outreach.js and engine.js did
-   exactly this; both are retired.) */
+   roster-data.js is 2.1 MB, so it is fetched on demand (go() into a section that reads it, search, or an idle warm) instead of blocking first paint. Modules that cache roster-derived values must register a bust hook in rosterReady(). */
 let ROSTER_PROMISE=null;
 const ROSTER_SECTIONS=new Set(["leads","crm","reports","reference"]);
 function ensureRoster(){
@@ -181,7 +100,7 @@ function rosterReady(){
 
 function buildNav(){
   $("#nav").innerHTML = NAV.map(g=>`<div class="nav-group">${g.group}</div>`+
-    g.items.map(i=>`<a data-id="${i.id}" onclick="go('${i.id}')"><span class="ic">${i.ic}</span>${i.t}</a>`).join("")
+    g.items.map(i=>`<a data-id="${i.id}" onclick="go('${i.id}')">${i.t}</a>`).join("")
   ).join("");
 }
 const titleOf = id => NAV.flatMap(g=>g.items).find(i=>i.id===id)?.t||"";
@@ -208,66 +127,6 @@ function page(id,inner){return `<section class="section" id="sec-${id}">${inner}
 function head(t,sub){return `<h1 class="page-h">${t}</h1><p class="page-sub">${sub}</p>`;}
 function sec(num,t){return `<h2 class="sec"><span class="num">${num}</span>${t}</h2>`;}
 
-/* ================= LAUNCHPAD =================
-   The one page that answers "where are we right now".
-
-   Two previous versions of this page rotted, and both rotted the same way: they stated a
-   plan instead of a state. The first was a 30-day calendar of 184 dated checkboxes whose
-   dates ran out. The second was a generic pre-send checklist that never knew whether any
-   of it had happened.
-
-   So this version states as little as possible in prose and reads as much as possible from
-   the data that is actually loaded. Roster size comes from PIPELIVE.stats(), campaign count
-   from the canonical ICP list, prices and sample sizes from the facts block. If the roster doubles
-   tonight, this page says so tomorrow morning without anyone editing it.
-
-   The rule for adding anything here: if it cannot be derived from live data OR checked off
-   by the person doing it, it does not belong on this page. Put it in the playbook. */
-
-/* Projection of OUTREACH.facts under the names the Launchpad renderers already use. The
-   values live in exactly one place now; this is a rename, not a second source. */
-const LIVE = {
-  biocharMt: F.biocharMt,
-  absorbentUsTon: F.absorbentUsTon,
-  inventoryMt: BIOCHAR_INVENTORY_TONS,
-  samples: F.samples,
-  sampleEta: F.sampleEta,
-  bulkEta: F.bulkEta,
-  replyTo: F.replyTo,
-  geo: F.geo,
-};
-/* The critical path from a raw list to a sent campaign. Ordered because each step genuinely
-   blocks the next: you cannot verify a list you have not pulled, and you must not send to a
-   list you have not verified. Each is a checkbox, not a date, because dates are what killed
-   the last two versions of this page.
-
-   done:true marks a step confirmed complete (operator confirmation 2026-08-17) and renders
-   it default-checked. It is only the DEFAULT: unticking it in the UI still works and still
-   persists, so a step that regresses can be reopened without an edit here. */
-/* The generated Instantly snapshot, read once at parse time. instantly-data.js is loaded
-   before this file, so it is already on window; null on a checkout that has never run
-   refresh-snapshots.sh, and every use below falls back to written text. */
-const LIVEQ = (typeof window !== "undefined" && window.INSTANTLY_LIVE) || null;
-
-/* Thousands-separated integer. pipeline.js has its own num() but it lives inside that file's
-   IIFE and is not global, so app.js needs its own rather than reaching for one that is not there. */
-const fmtN = v => Number.isFinite(+v) ? Math.round(+v).toLocaleString() : "0";
-
-/* The ICP codes actually present in the roster, read at render time. */
-const icpCodes = () => {
-  const R = window.ROSTER;
-  if(!R || !R.byIcp) return "roster not loaded yet";
-  return Object.keys(R.byIcp).sort().join(", ");
-};
-
-/* rSegments, segCard, rankbar and rPersonas lived here and are deleted.
-
-   They ran on a parallel taxonomy: nine DATA.segments scored by a composite rank, and
-   six DATA.personas keyed to segment names. Neither lined up with the ICP list the
-   Aug 10 call settled on, so the tool described three different customer lists at once
-   and a rep had to work out which one was current. The ICP taxonomy lives in
-   outreach-data.js and the roster carries the tags. One list, one set of tags. */
-
 /* --- Messaging --- */
 function rMessaging(){
   const m=DATA.messaging;
@@ -281,8 +140,8 @@ function rMessaging(){
     <p style="color:var(--text);font-size:13.5px;line-height:1.6"><b style="color:${accent(t.id)}">Positioning:</b> ${esc(t.positioning)}</p>
     <div class="card" style="margin:10px 0"><h4>One-liner</h4><p style="color:var(--text)">${esc(t.oneLiner)}</p></div>
     <div class="grid g2">
-      <div class="card">${script(t.product+" — 30-second pitch",t.pitch30)}</div>
-      <div class="card">${script(t.product+" — 90-second pitch",t.pitch90)}</div>
+      <div class="card">${script(t.product+", 30-second pitch",t.pitch30)}</div>
+      <div class="card">${script(t.product+", 90-second pitch",t.pitch90)}</div>
     </div>
     <div class="grid g2" style="margin-top:10px">
       <div><b style="font-size:11px;color:var(--green-bright)">Proof to use</b><ul>${t.proof.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div>
@@ -292,16 +151,16 @@ function rMessaging(){
   const tBiochar=m.tracks.find(t=>t.id==="biochar");
   const tAbsorbent=m.tracks.find(t=>t.id==="absorbent");
   return page("messaging",
-    head("Value Proposition & Messaging","TWO separate avatars — every pitch is single-product. BIOCHAR IS PRIORITY #1 — 80 MT of finished inventory is ready to ship now, and it sells to ag/soil/grower buyers. Absorbent Pellets are the secondary track for industrial/EHS/spill buyers. Different person, different pain, different proof.")+
-    `<div class="note ok"><b>🔥 Priority #1 — Biochar:</b> ${BIOCHAR_INVENTORY_LINE}</div>`+
+    head("Value Proposition & Messaging","TWO separate avatars, every pitch is single-product. BIOCHAR IS PRIORITY #1, 80 MT of finished inventory is ready to ship now, and it sells to ag/soil/grower buyers. Absorbent Pellets are the secondary track for industrial/EHS/spill buyers. Different person, different pain, different proof.")+
+    `<div class="note ok"><b>Priority 1, Biochar:</b> ${BIOCHAR_INVENTORY_LINE}</div>`+
     `<div class="note warn"><b>Split rule:</b> ${esc(m.splitRule)}</div>`+
-    sec("5","Track A — 100% Biochar (PRIORITY — 80 MT available now)")+trackBlock(tBiochar)+
-    sec("","Track B — Absorbent Pellets (secondary / industrial)")+trackBlock(tAbsorbent)+
+    sec("","Track A, 100% Biochar (PRIORITY, 80 MT available now)")+trackBlock(tBiochar)+
+    sec("","Track B, Absorbent Pellets (secondary / industrial)")+trackBlock(tAbsorbent)+
     sec("","Comparison messaging (use only within the matching track)")+
     table(["Positioned against","Why we win"],m.comparisons.map(c=>[`<strong>${esc(c.vs)}</strong>`,esc(c.win)]))+
-    sec("","Proof-point map (claim safety — both products)")+
-    `<p class="lead">Match every claim to its tier. Use the safe wording. Avoid the risky wording — it creates legal & credibility exposure.</p>`+
-    table(["Claim","Tier","Buyer relevance","Source","✅ Safe wording","⛔ Avoid"],m.proofMap.map(p=>[
+    sec("","Proof-point map (claim safety, both products)")+
+    `<p class="lead">Match every claim to its tier. Use the safe wording. Avoid the risky wording, it creates legal & credibility exposure.</p>`+
+    table(["Claim","Tier","Buyer relevance","Source","Safe wording","Avoid"],m.proofMap.map(p=>[
       `<strong>${esc(p.claim)}</strong>`,tier(p.tier),esc(p.rel),esc(p.src),
       `<span style="color:var(--green-bright)">${esc(p.safe)}</span>`,`<span style="color:var(--red-soft)">${esc(p.risk)}</span>`]))
   );
@@ -320,21 +179,21 @@ function rBiochar(){
       <div><b style="color:var(--green-bright)">Angle (lead with this):</b> ${esc(a.angle)}</div>
       <div><b style="color:var(--gold-soft)">Proof to lead:</b> ${esc(a.lead)}</div>
       <div><b style="color:var(--text)">Sample use-case:</b> ${esc(a.sample)}</div>
-      ${a.claim?`<div class="note warn" style="margin:4px 0 0">⚠ ${esc(a.claim)}</div>`:""}
+      ${a.claim?`<div class="note warn" style="margin:4px 0 0">Claim limit: ${esc(a.claim)}</div>`:""}
     </div>
   </div>`;
   return page("biochar",
-    head("Biochar — Specs, Data & Avatars","Biochar is the dynamic product: one material, MANY buyers. Full spec, benefit-by-mechanism, industry comparisons, and a differentiated avatar for each buyer type. Pull the ONE benefit + comparison that fits the buyer in front of you.")+
+    head("Biochar, Specs, Data & Avatars","Biochar is the dynamic product: one material, MANY buyers. Full spec, benefit-by-mechanism, industry comparisons, and a differentiated avatar for each buyer type. Pull the ONE benefit + comparison that fits the buyer in front of you.")+
     `<div class="card pad-lg"><p style="color:var(--text);font-size:13.5px;line-height:1.6">${esc(b.intro)}</p></div>`+
     sec("","Technical spec sheet")+
     table(["Property","Value"],b.spec.map(r=>[`<strong>${esc(r[0])}</strong>`,esc(r[1])]))+
-    sec("","Benefits by mechanism — match to the avatar")+
+    sec("","Benefits by mechanism, match to the avatar")+
     table(["Mechanism","What it does","Best for","Tier"],b.benefits.map(x=>[
       `<strong>${esc(x.mech)}</strong>`,esc(x.b),`<span style="color:var(--gold-soft)">${esc(x.who)}</span>`,tier(x.tier)]))+
-    sec("","Industry comparisons — how biochar stacks up")+
+    sec("","Industry comparisons, how biochar stacks up")+
     b.comparisons.map(c=>`<h3 class="sub">${esc(c.h)}</h3>`+table(c.cols.map(h=>esc(h)),c.rows.map(r=>r.map(x=>esc(x))))).join("")+
-    sec("","Biochar avatars — one material, differentiated per buyer")+
-    `<p class="lead">Absorbent Pellets have one industrial avatar; biochar sells across all of these. Each gets a different lead benefit and a different claim boundary — never a generic biochar pitch.</p>`+
+    sec("","Biochar avatars, one material, differentiated per buyer")+
+    `<p class="lead">Absorbent Pellets have one industrial avatar; biochar sells across all of these. Each gets a different lead benefit and a different claim boundary, never a generic biochar pitch.</p>`+
     b.avatars.map(avatarCard).join("")+
     sec("","Claim guardrails")+
     `<div class="note warn"><ul>${b.guardrails.map(g=>`<li>${esc(g)}</li>`).join("")}</ul></div>`
@@ -349,16 +208,16 @@ function rBiochar(){
 function rWindrow(){
   const w=DATA.windrowTrial;
   const sampleRows=[
-    ["0","___","118","120","55","54","N","Build day — baseline"],
+    ["0","___","118","120","55","54","N","Build day, baseline"],
     ["3","___","135","148","54","54","Y","Treatment heating faster"],
     ["7","___","150","158","52","53","Y","Both thermophilic"],
     ["…","___","…","…","…","…","…","…"],
   ];
-  return sec("","Windrow Trial Protocol — composter closing asset")+
+  return sec("","Windrow Trial Protocol, composter closing asset")+
     `<div class="note ok"><b>Purpose:</b> ${esc(w.goal)}</div>`+
     `<div class="grid g2">
-      <div class="card"><h4>🧪 Trial design (A/B)</h4><p>${esc(w.design)}</p></div>
-      <div class="card"><h4>⚖️ Biochar dose rates</h4>
+      <div class="card"><h4>Trial design (A/B)</h4><p>${esc(w.design)}</p></div>
+      <div class="card"><h4>Biochar dose rates</h4>
         ${table(["Rate","When to use","Note"],w.doses.map(d=>[`<strong>${esc(d.r)}</strong>`,esc(d.use),esc(d.note)]))}
       </div>
     </div>`+
@@ -379,12 +238,12 @@ function rWindrow(){
     windrowCopy(w);
 }
 function windrowCopy(w){
-  const txt=`WINDROW TRIAL PROTOCOL — Biochar vs Control
+  const txt=`WINDROW TRIAL PROTOCOL, Biochar vs Control
 Goal: ${w.goal}
 
 DESIGN: ${w.design}
 
-DOSE (treatment): default 10% by volume (options: 5% / 10% / 15–20%)
+DOSE (treatment): default 10% by volume (options: 5% / 10% / 15-20%)
 
 STEPS:
 ${w.steps.map((s,i)=>`${i+1}. ${s}`).join("\n")}
@@ -410,20 +269,7 @@ ${w.guardrails.map(g=>`- ${g}`).join("\n")}`;
 /* --- Collateral --- */
 function rCollateral(){
   return page("collateral",
-    head("Collateral Library","Pitch deck outline, one-pagers, calculator specs, sample workflow, and the objection battlecard — all build-ready.")+
-    sec("9","Master pitch deck (10–12 slides)")+
-    table(["#","Slide","Purpose","Key bullets","CTA"],DATA.deck.map((s,i)=>[
-      `<strong>${i+1}</strong>`,`<strong>${esc(s.s)}</strong>`,esc(s.p),
-      `<ul style="margin:0">${s.b.map(b=>`<li>${esc(b)}</li>`).join("")}</ul>`,esc(s.cta)]))+
-    sec("","One-pagers to produce")+
-    `<div class="filters">${DATA.onePagers.map(o=>`<span class="pill" style="cursor:default">${esc(o)}</span>`).join("")}</div>`+
-    sec("","ROI calculators (specs)")+
-    `<div class="grid g2">${DATA.calculators.map(c=>`<div class="card"><h4>${esc(c.name)}</h4>
-      <b style="font-size:11.5px;color:var(--gold-soft)">Inputs</b><ul>${c.inputs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-      <div style="font-size:12px;margin-top:6px"><b style="color:var(--text)">Formula:</b> <span style="font-family:var(--mono);color:var(--text-dim)">${esc(c.formula)}</span></div>
-      <div style="font-size:12px;margin-top:4px"><b style="color:var(--text)">Saves to CRM:</b> ${c.saves.map(s=>badge(s,"badge-muted")).join(" ")}</div>
-    </div>`).join("")}</div>`+
-    `<div class="note">Two of these ship as live calculators in the <b>Pricing &amp; Economics</b> module (parked under Build Later).</div>`+
+    head("Collateral and Objections","Sample request workflow, the windrow trial protocol, and the objection battlecard.")+
     sec("","Sample request workflow")+
     `<div class="grid g2">
       <div class="card"><h4>Sizes & gates</h4><b style="font-size:11.5px;color:var(--gold-soft)">Sizes</b><ul>${DATA.sample.sizes.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>
@@ -435,7 +281,7 @@ function rCollateral(){
     rWindrow()+
     sec("","Objection-handling battlecard")+
     `<div class="accordion">${DATA.objections.map((o,i)=>`
-      <div class="acc-h" onclick="accToggle(${i})"><span>⛌ ${esc(o.o)}</span><span class="chev">▸</span></div>
+      <div class="acc-h" onclick="accToggle(${i})"><span>${esc(o.o)}</span><span class="chev">▸</span></div>
       <div class="acc-b" id="acc-${i}">
         <div class="card" style="margin-top:6px">
           <div style="font-size:12.5px;display:grid;gap:5px">
@@ -457,9 +303,9 @@ function rPlaybook(){
   const pb=DATA.playbook;
   return page("playbook",
     head("Sales Playbook","Operating principles, qualification, discovery scripts, proof-demo motion, proposal & close, and the fulfillment handoff.")+
-    sec("11","Operating principles")+
+    sec("","Operating principles")+
     `<div class="grid g2">${pb.principles.map(p=>`<div class="card"><p style="color:var(--text)">→ ${esc(p)}</p></div>`).join("")}</div>`+
-    sec("","Qualification — "+esc(pb.qual.framework.split(":")[0]))+
+    sec("","Qualification, "+esc(pb.qual.framework.split(":")[0]))+
     `<div class="note">${esc(pb.qual.framework)}</div>`+
     `<div class="card"><ul>${pb.qual.criteria.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`+
     sec("","Discovery questions by area")+
@@ -475,28 +321,16 @@ function rPlaybook(){
     </div>`+
     sec("","Fulfillment & MRV handoff")+
     `<div class="card"><ul>${pb.handoff.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`+
-    `<div class="note warn"><b>Capture MRV data at delivery</b> (application, site/GPS, weights) — no data, no carbon credit. This is the link between the product sale and the carbon revenue.</div>`
+    `<div class="note warn"><b>Capture MRV data at delivery</b> (application, site/GPS, weights), no data, no carbon credit. This is the link between the product sale and the carbon revenue.</div>`
   );
 }
 
 /* ================= REFERENCE =================
-   One section, three tabs, holding what used to be three top level nav entries: Future
-   Funnels, Product & Messaging, and Assets & Playbook.
-
-   WHY THEY WERE COLLAPSED. None of the three reads a record. gtm.js is 120 lines of static
-   prose with no computed output at all; the product and playbook renderers below are copy
-   blocks and asset lists. That is good material and it is not deleted, not shortened and
-   not moved to another repo. It is reference: a thing you go and read once, not a thing you
-   work. Filing three of them as peers of Pipeline and Leads made the nav assert that
-   reading about a funnel is the same class of act as working one, and it pushed the section
-   a rep actually needs below the fold on a phone.
-
-   The tab state is deliberately NOT persisted. Unlike the pipeline tabs, which a rep returns
-   to many times a day, this is a reference shelf: opening it should show the top of it. */
+   One section, two tabs of static reading material. Tab state is not persisted: opening it shows the top of it. */
 let REF_TAB = "product";
 const REF_TABS = [
   ["product","Product & Messaging"],
-  ["playbook","Assets & Playbook"],
+  ["playbook","Collateral & Playbook"],
 ];
 window.refTab = id => {
   REF_TAB = id;
@@ -504,9 +338,7 @@ window.refTab = id => {
   document.querySelectorAll("#sec-reference .pipe-tabs .pill").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));
 };
 function rReference(){
-  /* Every pane is rendered, and CSS shows the active one. Same shape as the pipeline panes,
-     and it carries the same warning: a test that renders this and greps for a string is
-     reading all three panes at once. Cut by data-tab. */
+  /* Every pane is rendered and CSS shows the active one, so a test that greps this reads both panes. Cut by data-tab. */
   const panes = {
     product:  [rBiochar, rMessaging],
     playbook: [rCollateral, rPlaybook],
@@ -516,7 +348,7 @@ function rReference(){
   ).join("");
   return `<section class="section" id="sec-reference">
     <h1 class="page-h">Reference</h1>
-    <p class="page-sub">The material you read once and come back to: what the product is, what to say about it, and what to send. Nothing here reads a live record.</p>
+    <p class="page-sub">What the product is, what to say about it, and how to handle objections. Static reading, no live records.</p>
     <div class="pipe-tabs">${REF_TABS.map(([id,label])=>
       `<span class="pill${id===REF_TAB?" active":""}" data-tab="${id}" onclick="refTab('${id}')">${label}</span>`).join("")}</div>
     ${body}
@@ -528,30 +360,23 @@ function stripBody(fn){
   try{ h=fn()||""; }catch(e){ console.error("renderer failed:",e&&e.message,e); return ""; }
   return h.replace(/^\s*<section[^>]*>/,"").replace(/<\/section>\s*$/,"");
 }
-/* Live SIBRA pipeline module (pipeline.js, loads before app.js) */
+/* Pipeline module (pipeline.js loads before app.js). A missing file degrades one section to empty. */
 const PL = k => (window.PIPELIVE && PIPELIVE[k]) ? PIPELIVE[k] : (()=> "");
-/* Reports module (reports.js). Same shape as PL/OUT/ENG: a missing file degrades one
-   section to empty rather than taking the render down with it. */
+/* Reports module (reports.js). Same fail-soft shape. */
 const RPT = k => (window.REPORTS_UI && REPORTS_UI[k]) ? REPORTS_UI[k] : (()=> "");
 /* Daily summary and systems map (summary.js). Same fail-soft shape as the others. */
 const SUM = k => (window.SUMMARY_UI && SUMMARY_UI[k]) ? SUMMARY_UI[k] : (()=> "");
 /* Copy editors (copy-editor.js, then coldemail.js and nurture.js). Same fail-soft shape. */
 const COLD = k => (window.COLDEMAIL_UI && COLDEMAIL_UI[k]) ? COLDEMAIL_UI[k] : (()=> "");
 const NUR = k => (window.NURTURE_UI && NURTURE_UI[k]) ? NURTURE_UI[k] : (()=> "");
-/* Operations module (ops-data.js + ops.js): sample to cash, team, system of record, runbook */
 const mergeDiv = `<div class="hr" style="margin:26px 0 18px;opacity:.5"></div>`;
 /* newId → ordered list of renderer thunks it composes */
 function compose(id, thunks){
   return page(id, thunks.map(stripBody).join(mergeDiv));
 }
 
-/* LEAN = daily-driver. BUILD = parked heavy modules (build-later.html). */
+/* Render order, not nav order. */
 const LEAN_SECTIONS=[
-  /* Order here is render order, not nav order; nav decides what a person sees first. Pipeline
-     leads because it is the landing section — see the note on LEAN_NAV for the whole rationale.
-
-     rLaunchpad is gone with the Launchpad section. Its live counts moved into the Pipeline
-     header strip, where they sit next to the thing they describe. */
   ["leads",    [PL("rLeads")]],
   ["crm",      [PL("rCRM")]],
   ["inbox",    [PL("rInbox")]],
@@ -569,14 +394,6 @@ function render(){
 }
 buildNav();
 render();
-/* The Website/Sales OS toggle points at /  and /sales/, which only resolve when Sales OS
-   is served as /sales/ on the main site. On the standalone Sales OS deployment (served at
-   the root) those links break, and there is no stable public-site URL to point at yet, so
-   hide the toggle there. Detection: the standalone root path never contains /sales/. */
-if (!location.pathname.includes("/sales/")) {
-  const sw = document.querySelector(".app-switch");
-  if (sw) sw.style.display = "none";
-}
 /* ================= GLOBAL SEARCH, the shell =================
    The matching lives in pipeline.js, beside the records and the norm() fold that decides two
    spellings are one company (see the block above PIPELIVE.data). This is only the overlay:
@@ -600,7 +417,7 @@ function openSearch(){
     if(!el) return;
     el.innerHTML = (window.PIPELIVE && PIPELIVE.data)
       ? window.pipeSearchResults(input.value)
-      : `<p class="gs-hint">The record store did not load, so there is nothing to search.</p>`;
+      : `<p class="gs-hint">The record store did not load, so there is nothing to search. Reload the page, then check Data Feeds.</p>`;
   };
   input.addEventListener("input", paint);
   input.addEventListener("keydown", e => {
@@ -710,10 +527,10 @@ if(typeof window!=="undefined"){
 $("#menuBtn").addEventListener("click",()=>$("#sidebar").classList.toggle("open"));
 const defaultId = NAV[0].items[0].id;
 const isNavId = id => NAV.flatMap(g=>g.items).some(i=>i.id===id);
-/* Sections that used to be their own nav entry and are now a tab inside Reference. Someone
-   has #product bookmarked, and dropping them on Leads with no explanation reads as the link
-   being broken. Resolve to the section AND open the right tab. */
-const RETIRED = { product:["reference","product"], playbook:["reference","playbook"], funnels:["reference","funnels"] };
+/* Old bookmarks: sections that were folded into another one. */
+const RETIRED = { product:["reference","product"], playbook:["reference","playbook"], funnels:["reference","product"],
+  launch:["crm"], daily:["today"], instantly:["coldemail"], outreach:["coldemail"], campaigns:["coldemail"],
+  engine:["coldemail"], crumble:["leads"] };
 function resolve(id){
   if(isNavId(id)) return id;
   const r=RETIRED[id];
@@ -730,73 +547,8 @@ window.addEventListener("hashchange", () => {
   if(id){ if(id==="reference") refTab(REF_TAB); go(id); }
 });
 
-/* ---------------------------------------------------------------- live Allo activity
-   The one live read in the Sales OS. Everything else on every page is a dated snapshot,
-   because a static page cannot hold an API key; this works only because /api/allo is a
-   Pages Function that holds the token server side, behind the same password gate.
-
-   Deliberately additive and deliberately quiet. The dated phone snapshot renders first and
-   stays put; this appends a row underneath it if, and only if, the call succeeds. On the
-   local dev server there is no Pages Function at all, so the fetch 404s and nothing happens
-   — which is the same path taken when the token is unset or the Worker is down.
-
-   Never throws, never blocks a render, never retries in a loop. A dashboard that breaks
-   because a dependency blinked is worse than one that is a few hours stale. */
-let alloInFlight = false;
-async function loadAlloLive() {
-  const mount = document.getElementById("allo-live");
-  if (!mount) return;
-  /* go() writes the hash on first paint, so the boot call and the hashchange listener both
-     fire on a cold load. Without this that is two D1 reads for one page view. */
-  if (alloInFlight) return;
-  alloInFlight = true;
-  try { await fetchAlloLive(mount); } finally { alloInFlight = false; }
-}
-
-async function fetchAlloLive(mount) {
-
-  let d;
-  try {
-    const res = await fetch("api/allo?limit=50", { headers: { Accept: "application/json" } });
-    if (!res.ok) return;                       // 404 on a static host is the normal local case
-    d = await res.json();
-  } catch { return; }                          // offline, blocked, or not JSON: stay silent
-  if (!d || d.ok !== true) return;             // not-configured / timeout / unreachable
-
-  const when = d.fetchedAt ? new Date(d.fetchedAt) : new Date();
-  const clock = when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-  const t = (label, val, sub) =>
-    `<div class="card kpi"><div class="l">${esc(label)}</div><div class="v">${esc(String(val))}</div><div class="d">${esc(sub || "")}</div></div>`;
-
-  /* The snapshot above is Allo's own 30-day analytics. This is our webhook stream since the
-     Worker was deployed. They are different measurements of different windows, so they get
-     their own row and their own label rather than being averaged into one misleading number. */
-  const recent = (d.recent || [])[0];
-  mount.innerHTML =
-    `<div class="note ok" style="margin-top:14px;border-left:4px solid var(--green-bright)">
-       <b>Live, ${esc(clock)}.</b> Read from the allo-hooks event stream just now, not from the
-       dated snapshot above. That snapshot is Allo's own 30 day analytics; this is every event
-       the webhook has received since the Worker went up.
-     </div>
-     <div class="grid g4" style="margin-top:10px">
-       ${t("Events received", d.total, `${d.inbound} inbound · ${d.outbound} outbound`)}
-       ${t("Calls", d.calls, d.messages ? `${d.messages} message(s) alongside` : "no messages yet")}
-       ${t("Missed or AI answered", d.missed, d.missed ? "somebody still has to call back" : "none outstanding")}
-       ${t("Policy flags", d.policyFlags, d.policyFlags ? "a call mentioned price or a bad claim" : "no breach recorded")}
-     </div>` +
-    (recent
-      ? `<div class="note" style="margin-top:8px"><b>Most recent:</b> ${esc(recent.kind || "event")}
-           ${esc(recent.direction ? recent.direction.toLowerCase() : "")}
-           ${recent.who ? "with " + esc(recent.who) : ""}
-           ${recent.result ? "· " + esc(recent.result) : ""}
-           ${recent.minutes != null ? "· " + esc(String(recent.minutes)) + " min" : ""}
-           ${recent.at ? "· " + esc(new Date(recent.at).toLocaleString()) : ""}</div>`
-      : `<div class="note" style="margin-top:8px">The stream is connected and has received nothing yet.</div>`);
-}
-
 /* ---------------------------------------------------------------- live Instantly
-   Same pattern as the Allo route: a Pages Function holds the key server side. The response
+   A Pages Function holds the key server side. The response
    is the SAME SHAPE as instantly-data.js because both go through shapeInstantly(), so this
    can be dropped straight onto window.INSTANTLY_LIVE and the page re-rendered with no
    branching anywhere in the renderers.
@@ -824,13 +576,13 @@ async function loadInstantlyLive() {
      and any open accordion for no gain, and most loads land on an unchanged workspace. */
   if (before !== JSON.stringify(d.totals) || !before) {
     const current = (location.hash || "").slice(1) || NAV[0].items[0].id;
-    if (current === "launch" || current === "instantly") go(current);
+    if (["crm", "systems", "reports", "summary"].includes(current)) rerender();
   }
 }
 
 /* ---------------------------------------------------------------- live Apollo
    Deliberately thin. Apollo exposes no credit balance to this key, so the only thing that can
-   honestly be read live is whether the key still works — see functions/api/apollo.js. The
+   honestly be read live is whether the key still works (functions/api/apollo.js). The
    spend figures on screen stay receipt-based. This exists to catch a rotated or revoked key,
    which is otherwise invisible until the next reveal run fails. */
 async function loadApolloLive() {
@@ -842,25 +594,28 @@ async function loadApolloLive() {
   } catch { return; }
   if (!d || d.ok !== true || d.keyValid !== false) return;   // silent unless the key is DEAD
 
-  const host = document.getElementById("sec-launch");
-  if (!host || document.getElementById("apollo-key-warn")) return;
-  const warn = document.createElement("div");
-  warn.id = "apollo-key-warn";
-  warn.className = "note warn";
-  warn.style.marginTop = "10px";
-  warn.innerHTML = `<b>⛔ The Apollo key is not working.</b> ${esc(d.keyDetail || "Apollo rejected it.")}
-    Credit figures on this page are from our own receipts and are still accurate, but no new
-    reveal will run until the key is replaced.`;
-  host.appendChild(warn);
+  APOLLO_DEAD = d;
+  mountApolloWarn();
 }
 
-/* Fires on first paint and on every return to the Launchpad, so the numbers are current each
-   time somebody looks rather than only on a hard reload. */
-loadAlloLive();
+/* The dead-key warning mounts on Pipeline and Data Feeds, and is re-mounted after a section re-renders. */
+let APOLLO_DEAD = null;
+function mountApolloWarn() {
+  if (!APOLLO_DEAD) return;
+  for (const hostId of ["sec-crm", "sec-systems"]) {
+    const host = document.getElementById(hostId);
+    if (!host || host.querySelector(".apollo-key-warn")) continue;
+    const warn = document.createElement("div");
+    warn.className = "note warn apollo-key-warn";
+    warn.style.marginTop = "10px";
+    warn.innerHTML = `<b>The Apollo key is not working.</b> ${esc(APOLLO_DEAD.keyDetail || "Apollo rejected it.")}
+      Credit figures on this page are from our own receipts and are still accurate, but no new
+      reveal will run until the key is replaced.`;
+    host.insertBefore(warn, host.firstChild);
+  }
+}
+window.addEventListener("hashchange", () => setTimeout(mountApolloWarn, 0));
+document.addEventListener("click", () => setTimeout(mountApolloWarn, 0));
+
 loadInstantlyLive();
 loadApolloLive();
-/* The hashchange refetch that used to sit here named the "launch" section, which no longer
-   exists, so it could never fire. loadAlloLive() self-guards on a missing #allo-live mount and
-   is now a no-op for the same reason: the live call data it fetched is the Inbox's job, and the
-   Inbox refetches on its own hydrate. Left in place rather than deleted because the Instantly
-   and Apollo loaders beside it share its helpers and still mount. */

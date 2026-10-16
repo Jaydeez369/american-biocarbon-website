@@ -13,7 +13,7 @@
  * data. The edge passes a fetch-backed call, the test script passes a curl-backed one, and
  * the logic they exercise is byte-identical.
  *
- * WHY A WRITE ROUTE AT ALL, given /api/allo, /api/instantly and /api/apollo are all read-only
+ * WHY A WRITE ROUTE AT ALL, given /api/activity, /api/instantly and /api/apollo are all read-only
  * on purpose: those three read systems that are authoritative elsewhere, where a dashboard
  * write would be a second source of truth. Allo CRM is different — nothing else owns it, and
  * the alternative to writing here is a rep retyping a name into two systems. The blast radius
@@ -82,20 +82,20 @@ export function validate(input) {
    loaded from the crumble list should not read differently on the dialer. */
 export function noteFor(v, extra) {
   const L = [];
-  L.push(`WHO — ${v.person}${v.title ? ', ' + v.title : ''} at ${v.company}`);
-  L.push(`NUMBER — ${v.e164}`);
-  if (v.email) L.push(`EMAIL — ${v.email}`);
+  L.push(`WHO: ${v.person}${v.title ? ', ' + v.title : ''} at ${v.company}`);
+  L.push(`NUMBER: ${v.e164}`);
+  if (v.email) L.push(`EMAIL: ${v.email}`);
   L.push('');
-  if (extra.product) L.push(`PRODUCT — ${extra.product}`);
-  if (extra.ask) L.push(`ASK — ${extra.ask}`);
-  if (extra.opener) L.push(`OPEN WITH — ${extra.opener}`);
+  if (extra.product) L.push(`PRODUCT: ${extra.product}`);
+  if (extra.ask) L.push(`ASK: ${extra.ask}`);
+  if (extra.opener) L.push(`OPEN WITH: ${extra.opener}`);
   if (extra.product || extra.ask || extra.opener) L.push('');
-  L.push(`ACCOUNT — ${v.company}${v.website ? ' · ' + v.website : ''}`);
-  if (extra.icp) L.push(`ICP — ${extra.icp}`);
-  if (extra.note) L.push(`NOTES — ${extra.note}`);
+  L.push(`ACCOUNT: ${v.company}${v.website ? ', ' + v.website : ''}`);
+  if (extra.icp) L.push(`ICP: ${extra.icp}`);
+  if (extra.note) L.push(`NOTES: ${extra.note}`);
   L.push('');
-  L.push(`CLAIMS — do not quote sealing performance or an LCM grade. No sieve analysis in LCM grades, no fracture-sealing data. Ask what they run today.`);
-  L.push(`SOURCE — added by hand from the Sales OS, ${extra.today}`);
+  L.push(`CLAIMS: do not quote sealing performance or an LCM grade. No sieve analysis in LCM grades, no fracture-sealing data. Ask what they run today.`);
+  L.push(`SOURCE: added by hand from the Sales OS, ${extra.today}`);
   return L.join('\n');
 }
 
@@ -154,19 +154,31 @@ export async function createProspect(call, input, extra = {}) {
     const existing = String(p.json.error.message || '').match(/per-[A-F0-9]+/i)?.[0];
     if (!existing) {
       steps.push({ step: 'person', action: 'failed', status: p.status, detail: msg(p) });
-      return { ok: false, steps, error: `that number is already on a person Allo would not name: ${msg(p)}` };
+      return { ok: false, steps, companyId, error: `that number is already on a person Allo would not name: ${msg(p)}` };
+    }
+    /* Only a BARE number (no name, no company) may be filled in. A real contact who shares
+       the line must never be overwritten, and Allo has no way to undo a PUT. */
+    const g = await call('GET', `/v2/api/crm/people/${existing}`);
+    const cur = g.json?.data || g.json || {};
+    const bare = ok(g.status) && !String(cur.name || '').trim() && !(cur.company?.name || cur.company_name || cur.company_id);
+    if (!bare) {
+      const who = String(cur.name || '').trim();
+      steps.push({ step: 'person', action: 'refused', id: existing, detail: ok(g.status) ? 'number belongs to a named contact' : `could not read it (${g.status})` });
+      return { ok: false, steps, companyId, error: who
+        ? `that number already belongs to ${who} (${existing}). Nothing was changed.`
+        : `that number already belongs to ${existing} and it could not be checked (${g.status}). Nothing was changed.` };
     }
     const u = await call('PUT', `/v2/api/crm/people/${existing}`, fields);
     if (!ok(u.status)) {
       steps.push({ step: 'person', action: 'failed', status: u.status, detail: msg(u) });
-      return { ok: false, steps, error: `that number already belongs to ${existing} and it could not be updated (${u.status})` };
+      return { ok: false, steps, companyId, error: `that number already belongs to ${existing} and it could not be updated (${u.status})` };
     }
     personId = existing;
     reused = true;
     steps.push({ step: 'person', action: 'filled-in', id: personId, wasBareNumber: true });
   } else {
     steps.push({ step: 'person', action: 'failed', status: p.status, detail: msg(p) });
-    return { ok: false, steps, error: `could not create the person (${p.status}): ${msg(p)}` };
+    return { ok: false, steps, companyId, error: `could not create the person (${p.status}): ${msg(p)}` };
   }
 
   // ---- note

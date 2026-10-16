@@ -1,18 +1,29 @@
-/* ============ VEJ Sales OS — LIVE SALES PIPELINE (ported from SIBRA/Replit) ============
+/* ============ Progreaux Sales OS: leads, pipeline, inbox and today ============
    A fully interconnected CRM built on ONE live data layer. pipeline-data.js (window.PIPE)
    is the imported SIBRA snapshot; the team's own adds/edits live in localStorage and MERGE
-   with the snapshot at render. Every tab — Pipeline, Production Plan, Executive Dashboard,
-   Offtake Pipeline, Deals, Contacts, Leads, Reports — reads from the same live accessors
+   with the snapshot at render. Every tab, Pipeline, Production Plan, Executive Dashboard,
+   Offtake Pipeline, Deals, Contacts, Leads, Reports, reads from the same live accessors
    (liveDeals / liveAccounts / allContacts / allLeads / offRowsAll), so adding a deal
    cascades everywhere at once: KPIs, charts, reports, offtake-confirmed, account rollups.
 
    Any add/edit/delete saves to localStorage then calls rerender() (app.js), which rebuilds
-   the whole section from live state — one source of truth, everything cohesive.
+   the whole section from live state, one source of truth, everything cohesive.
    Snapshot records are read-only (base:true); records the team adds are fully CRUD.
    Loads BEFORE app.js; exposes window.PIPELIVE.rCRM for LEAN_SECTIONS. */
 (function(){
   const P = window.PIPE;
-  const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const esc = s => String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  /* A value placed inside a single-quoted JS string inside an HTML attribute, e.g.
+     onclick="f('${jq(name)}')". The JS escape comes first (backslash, quote, line breaks),
+     then the HTML escape, because the browser decodes entities BEFORE it parses the JS. Doing
+     it in the other order, or only escaping the quote, lets a trailing backslash cancel the
+     escape and run the rest of the name as code. */
+  const jq = s => esc(String(s??"").replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g,"\\n").replace(/\r/g,"\\r").replace(/\u2028/g,"\\u2028").replace(/\u2029/g,"\\u2029"));
+  /* The edge answers an expired session with the login page at 401 (HTML, no JSON reason).
+     Anything that expects JSON must recognise that and say so, instead of "Unexpected token <"
+     or "no Function". A 404 HTML page from a static dev server is NOT an expired session. */
+  const sessionGone = res => res.status===401 || (res.status===200 && /text\/html/i.test(res.headers.get("content-type")||""));
+  const SESSION_MSG = "Your session expired. Reload this page to sign in again.";
   const fin = n => Number.isFinite(+n)?+n:0;
   const money = n => "$" + Math.round(fin(n)).toLocaleString();
   const kfmt = n => "$" + Math.round(fin(n)/1000) + "K";
@@ -72,7 +83,7 @@
   function refused(err){
     LAST_REFUSAL={ at:Date.now(), message:String((err&&err.error)||(err&&err.message)||"not allowed"),
                    role:(err&&err.role)||ROLE||"unknown", required:(err&&err.required)||null };
-    try{ alert(LAST_REFUSAL.message + "\n\nNothing was changed. Ask Victor if you need this."); }catch(_){}
+    try{ alert(LAST_REFUSAL.message + (LAST_REFUSAL.message===SESSION_MSG ? "\n\nYour last change is kept in this browser." : "\n\nNothing was changed. Ask Victor if you need this.")); }catch(_){}
   }
   /* Rendered wherever a control had to be withheld, so the absence is explained rather than
      looking like a missing feature or a broken build. */
@@ -108,7 +119,7 @@
      LOCALSTORAGE STAYS, deliberately, as a write-through cache and offline fallback:
 
        write  local first, then the network. A rep on a bad connection in a yard never loses a
-              typed entry to a failed fetch, and never waits on one either — the UI re-renders
+              typed entry to a failed fetch, and never waits on one either, the UI re-renders
               from local state exactly as fast as it always did.
        read   render local immediately, hydrate from the server, re-render if anything changed.
               The page is never blank waiting on a fetch.
@@ -128,7 +139,7 @@
   const uid = p => `${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
   const nowISO = () => new Date().toISOString();
 
-  /* Digits only, last ten — the NANP identity. The activity feed precomputes the same key on
+  /* Digits only, last ten, the NANP identity. The activity feed precomputes the same key on
      the edge; two normalisers for one join is how a call lands on nobody's timeline. */
   const phoneKey = raw => { const d=String(raw||"").replace(/[^\d]/g,""); return d.length<10?"":d.slice(-10); };
   const toE164 = raw => { const k=phoneKey(raw); return k?`+1${k}`:""; };
@@ -152,14 +163,15 @@
          because the edge answers 403 with reason "forbidden" and a proxy in front of it may
          one day answer 403 with no body at all. */
       err.forbidden = res.status===403 || data.reason==="forbidden";
-      err.role=data.role; err.required=data.required; err.error=data.error;
+      if(res.status===401 && !data.reason){ err.forbidden=true; err.error=SESSION_MSG; err.message=SESSION_MSG; }
+      err.role=data.role; err.required=data.required; err.error=err.error||data.error;
       throw err;
     }
     return data;
   }
 
   /* Push one record. Local is already written by the caller, so a failure here queues rather
-     than alerting — the rep's entry is safe and the retry is invisible. The one thing this
+     than alerting, the rep's entry is safe and the retry is invisible. The one thing this
      must NOT do is report success it did not get. */
   async function pushRecord(kind, rec){
     try{
@@ -195,11 +207,11 @@
   /* ---- the generic store: notes, custom leads, accounts, offtake, status, quarters ----
      These six were still localStorage-only after deals and contacts moved to D1. `note` is the
      one that mattered most: every call, email, note, task and meeting a rep logs lands there,
-     and it was the least shared thing in the product. Same write-through contract as deals —
+     and it was the least shared thing in the product. Same write-through contract as deals -
      local first so nothing typed is ever lost, then the network, then a queued retry. */
   /* Built LAZILY, not at definition time. ST_KEY is declared further down this file, so an
      eager object literal here dies with "Cannot access 'ST_KEY' before initialization" and
-     takes the whole IIFE — and therefore window.PIPELIVE, and therefore every section — with
+     takes the whole IIFE, and therefore window.PIPELIVE, and therefore every section, with
      it. Exactly the trap the ROSTER_BY index above already documents. */
   /* POOL_KEY joined this list on 2026-09-08. Leads added or imported on the Leads screen were
      the last thing in the app that lived only in the browser that typed them: a rep importing
@@ -228,7 +240,8 @@
       const e=new Error(data.error||data.reason||`store returned ${res.status}`);
       e.reason=data.reason;
       e.forbidden = res.status===403 || data.reason==="forbidden";   // see apiCall
-      e.role=data.role; e.required=data.required; e.error=data.error;
+      if(res.status===401 && !data.reason){ e.forbidden=true; e.error=SESSION_MSG; e.message=SESSION_MSG; }
+      e.role=data.role; e.required=data.required; e.error=e.error||data.error;
       throw e;
     }
     return data;
@@ -305,7 +318,7 @@
   }
 
   /* Merge server rows into the local store, keyed by id, newest updated_at winning.
-     Records the server does not know about are KEPT, not deleted — an unsynced local record
+     Records the server does not know about are KEPT, not deleted, an unsynced local record
      is a pending write, and treating "absent upstream" as "deleted" would erase exactly the
      entries this whole design exists to protect. */
   function mergeDown(kind, remote){
@@ -327,7 +340,7 @@
 
   /* The one-time migration. Anything already sitting in this browser's localStorage is minted
      an id and pushed as a batch. Keyed by MIG_KEY so a reload cannot run it twice, and keyed by
-     id upstream so even if it did, the result would be the same rows rather than duplicates —
+     id upstream so even if it did, the result would be the same rows rather than duplicates -
      belt and braces, because a duplicated pipeline is very visible and very annoying to undo. */
   async function migrateUp(){
     if(lsGet(MIG_KEY,false)) return;
@@ -347,7 +360,7 @@
   }
 
   /* Called once on load. Renders from local immediately (the caller already did), then brings
-     the shared store down and re-renders only if something actually changed — a pointless
+     the shared store down and re-renders only if something actually changed, a pointless
      rerender mid-typing would blow away a half-filled modal. */
   async function hydrate(){
     await migrateUp();
@@ -396,8 +409,8 @@
 
      Two shapes, because the edge serves two permissions off one table (see functions/api/
      audit.js): a per account strip that any login may see, and the whole log that only an
-     admin may. Both are fetched ON DEMAND rather than on load — the strip when an account
-     profile opens, the log when the admin view opens — because neither is on the critical
+     admin may. Both are fetched ON DEMAND rather than on load, the strip when an account
+     profile opens, the log when the admin view opens, because neither is on the critical
      path of any screen and hydrating them at boot would put two more requests in front of
      first paint to render something nobody has asked to see yet.
 
@@ -435,8 +448,8 @@
   }
 
   /* Deal and contact ids, so the strip can ask about the records this account is made of.
-     An account is not itself a row in D1 — it is the fold of a name across deals, contacts
-     and the roster — so "the history of this account" is the union of the histories of its
+     An account is not itself a row in D1, it is the fold of a name across deals, contacts
+     and the roster, so "the history of this account" is the union of the histories of its
      records, which is what this collects. */
   function auditTargetsFor(name){
     const n=norm(name);
@@ -456,7 +469,7 @@
     if(!targets.length) return `<div class="av3-empty">No records with a shared-store id, so there is nothing to trace. Rows imported before stage 1 and anything still local only carry no history.</div>`;
     const loaded=targets.filter(([e,i])=>AUDIT.byEntity.has(auditKey(e,i)));
     if(loaded.length<targets.length){
-      return `<div class="av3-empty">Loading who changed what… <button type="button" class="btn sm" onclick="pipeAuditLoad('${esc(String(name)).replace(/'/g,"\\'")}')">Load history</button></div>`;
+      return `<div class="av3-empty">Loading who changed what… <button type="button" class="btn sm" onclick="pipeAuditLoad('${jq(String(name))}')">Load history</button></div>`;
     }
     const packs=loaded.map(([e,i])=>AUDIT.byEntity.get(auditKey(e,i)));
     const refused=packs.find(p=>p&&p.reason==="forbidden");
@@ -478,7 +491,7 @@
   /* ---- Instantly mail, from /api/email ----
      The twin of PHONE: same live-fetch, same fail-soft, same in-browser matching. Joined on
      EMAIL DOMAIN rather than address, because a campaign writes to one person at a company and
-     the reply can come from another, or from a shared inbox — matching the exact address would
+     the reply can come from another, or from a shared inbox, matching the exact address would
      split one conversation across two accounts. */
   const MAIL={ rows:[], ok:null, reason:null, replies:0 };
   async function loadMail(){
@@ -515,8 +528,8 @@
      the deletion reached Instantly. */
   function mailToActivity(r){
     const title=r.isReply
-      ? `Reply received — ${r.subject}`
-      : (r.manual?`Reply sent — ${r.subject}`:`Email sent — ${r.subject}`);
+      ? `Reply received: ${r.subject}`
+      : (r.manual?`Reply sent: ${r.subject}`:`Email sent: ${r.subject}`);
     return { ch:"email", who:r.who||"", title, body:r.body||"(no body captured)",
       status:r.isReply?"replied":"logged", ts:r.at, _mail:true };
   }
@@ -657,11 +670,18 @@
   /* Called by pipeContactSave once the contact is actually stored. */
   async function claimLeadAfterContact(phone,contact){
     try{
-      await fetch("/api/lead",{ method:"PATCH", headers:{"Content-Type":"application/json"},
+      const res=await fetch("/api/lead",{ method:"PATCH", headers:{"Content-Type":"application/json"},
         credentials:"same-origin",
         body:JSON.stringify({ id:phone, claimed:1, status:"qualified", name:contact.name, company:contact.account }) });
+      if(sessionGone(res)) throw new Error(SESSION_MSG);
+      let data={}; try{ data=await res.json(); }catch(e){}
+      if(!res.ok || data.ok===false) throw new Error(data.error||data.reason||`the lead store returned ${res.status}`);
       await loadPhoneLeads();
-    }catch(e){ /* the contact exists either way; the lead simply stays in the queue */ }
+    }catch(e){
+      /* The contact is saved either way. What did NOT happen is the claim, so the lead is still
+         in the Inbox queue. Say so, and say not to claim it twice. */
+      try{ alert("The contact "+(contact.name||"")+" was saved, but the lead was not marked claimed: "+(e.message||e)+"\n\nIt will still show in the Inbox. Do not add the contact again."); }catch(_){}
+    }
   }
 
   /* Every phone row belonging to an account, found by matching the numbers on that account's
@@ -694,7 +714,7 @@
     const dir=r.direction==="INBOUND"?"Inbound":r.direction==="OUTBOUND"?"Outbound":"";
     const mins=r.minutes!=null?` · ${r.minutes} min`:"";
     let title, body="";
-    if(r.kind==="call"){ title=`${dir} Call${r.result?" — "+r.result:""}`.trim(); body=(r.summary||"")+(mins&&!r.summary?`Duration ${r.minutes} min`:""); }
+    if(r.kind==="call"){ title=`${dir} Call${r.result?": "+r.result:""}`.trim(); body=(r.summary||"")+(mins&&!r.summary?`Duration ${r.minutes} min`:""); }
     else if(r.kind==="sms"){ title=`${dir} Text`.trim(); body=r.summary||""; }
     else if(r.kind==="summary"){ title="AI Call Summary"; body=r.summary||""; }
     else { title="Tag"; body=(r.tags||[]).join(", "); }
@@ -720,7 +740,7 @@
 
   /* ONE SOURCE, as of 2026-09-08.
    *
-   * This used to be `P.deals.concat(customDeals())` — the July seed export prepended to
+   * This used to be `P.deals.concat(customDeals())`, the July seed export prepended to
    * whatever the browser had typed. That is why a seed deal could not be edited (the edit
    * became a second row), could not be deleted, had no id and no history, and why the totals
    * depended on which browser you opened.
@@ -730,8 +750,8 @@
    * hydrate() pulls every D1 row into D_KEY, so customDeals() already returns them. Leaving
    * the concat in place would render all 18 TWICE and double every figure on the dashboard.
    *
-   * The cost of this, stated plainly: before the first successful hydrate — a cold browser
-   * with no network — the pipeline is empty rather than showing stale July numbers. That is
+   * The cost of this, stated plainly: before the first successful hydrate, a cold browser
+   * with no network, the pipeline is empty rather than showing stale July numbers. That is
    * the right failure. A screen that silently serves a two-month-old book of business as if
    * it were current is worse than one that says it has not synced, which the sync badge
    * does. */
@@ -744,7 +764,7 @@
      the company layer, which is account-level and was never part of the contact list. */
   const allContacts=()=>lsGet(C_KEY,[]).map((c,ci)=>({...c,ci}));
   /* Leads the PHONE created, from /api/lead. A call from a number nobody had on file used to
-     produce an activity row and nothing else — it matched no contact, rendered on no account,
+     produce an activity row and nothing else, it matched no contact, rendered on no account,
      and the caller existed nowhere a rep would look. These are read-only here: the row is a
      record of a real conversation, so a rep claims or removes one but does not rewrite it. */
   let PHONE_LEADS=[];
@@ -812,8 +832,8 @@
   const rosterOf = name => rosterIndex().get(norm(name)) || null;
 
   /* ICP for a CRM record (contact or lead) that does not carry one of its own. Email
-     domain is tried FIRST — key accounts are matched by DOMAIN, never company_name, per
-     the enrichment canon — and the account/company name join is the fallback. Lazy for
+     domain is tried FIRST, key accounts are matched by DOMAIN, never company_name, per
+     the enrichment canon, and the account/company name join is the fallback. Lazy for
      the same norm() reason as ROSTER_BY above. */
   let ROSTER_BY_DOM = null;
   const rosterDomIndex = () => {
@@ -835,7 +855,7 @@
   };
   const icpCell = icp => icp
     ? `<span class="co-icp">${esc(icp)}</span>`
-    : `<span class="pdim" title="No roster match by email domain or account name — not in a campaign ICP">—</span>`;
+    : `<span class="pdim" title="No roster match by email domain or account name, not in a campaign ICP">-</span>`;
   /* Order records grouped by ICP (blanks sink), name as the stable tie-break. */
   const byIcpThen = key => (a,b) => {
     const ia=a._icp||"", ib=b._icp||"";
@@ -941,7 +961,7 @@
     if(arr.some(a=>norm(a.name)===norm(name))) return;
     arr.push({name,type:type||"customer",industry:""}); lsSet(A_KEY,arr);
   };
-  /* per-account typed activity store — keyed by account name; newest-first.
+  /* per-account typed activity store, keyed by account name; newest-first.
      Shape: {ch,who,title,body,status,ts}. Legacy note rows {body,ts} are migrated
      on read so old data keeps rendering. Stored alongside nothing else in N_KEY. */
   const migrateAct = r => (r && r.ch)
@@ -1042,19 +1062,21 @@
   const stBadge = (d,pct=true) => { const s=stageOf(d.stage); return `<span class="pbadge ${s.cls}">${esc(s.label)}${pct?` (${s.prob}%)`:""}</span>`; };
   const cfBadge = d => { const c=P.confidence[d.conf]||P.confidence.low; return `<span class="pbadge ${c.cls}">${esc(c.label)}</span>`; };
 
-  const CAT = ["#24478a","#5f8a5b","#caa85a","#9a7fc8","#c85a54","#5a86c8","#d7153f","#3a4655"];
+  /* Category colours are token references (theme aware), never raw hex. Green is status only, so it is not in this list. */
+  const CAT = ["var(--info)","var(--accent)","var(--warning)","var(--purple)","var(--danger)","var(--navy-300)","var(--navy-600)","var(--info-soft)"];
   const colorFor = (list,name) => CAT[list.indexOf(name) % CAT.length];
 
   /* clickable customer/account name → opens the client-profile epicenter */
   const acctLink = name => name
-    ? `<span class="acct-link" onclick="pipeOpenAccount('${esc(String(name)).replace(/'/g,"\\'")}')" title="Open ${esc(name)} profile">${esc(name)}</span>`
-    : "—";
+    ? `<span class="acct-link" onclick="pipeOpenAccount('${jq(String(name))}')" title="Open ${esc(name)} profile">${esc(name)}</span>`
+    : "-";
   const fmtTs = iso => { const d=new Date(iso); if(isNaN(d)) return ""; return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}); };
   const initials = n => String(n||"?").split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
 
   /* ---- CSV export (shared) ---- */
   function downloadCSV(filename, header, rows){
-    const q=x=>`"${String(x??"").replace(/"/g,'""')}"`;
+    /* A cell that starts = + - @ is a formula to Excel. Text from leads or reps must not run as one. */
+    const q=x=>{ let v=String(x??""); if(typeof x==="string" && /^[=+\-@\t\r]/.test(v) && !/^[+-]?\d+(\.\d+)?$/.test(v)) v="'"+v; return `"${v.replace(/"/g,'""')}"`; };
     const csv=[header].concat(rows).map(r=>r.map(q).join(",")).join("\n");
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
@@ -1068,7 +1090,7 @@
      not confused: a company is the unit of work, a person is how you reach it. */
   /* The "Prospects" tab (tCompanies, the flat account list) was removed 2026-08-31. It was a
      directory of 322 rows nobody browsed: every route a rep actually takes to an account goes
-     THROUGH something else — a deal, a contact, a call in the Inbox — and each of those already
+     THROUGH something else, a deal, a contact, a call in the Inbox, and each of those already
      opens the account profile directly. Account records themselves are untouched; the profile
      is where the timeline, the phone activity and the Instantly mail render, and it is reached
      from every one of those places. tCompanies stays in git history. */
@@ -1088,7 +1110,7 @@
   ];
   const TAB_KEY = "vej_pipe_tab";
   /* Falls back to pipeline, and also catches the retired "prospects"/"contacts"/"companies"
-     ids still sitting in the localStorage of anyone who used an earlier build — without this,
+     ids still sitting in the localStorage of anyone who used an earlier build, without this,
      everyone who last used the Prospects tab would open to a blank pane. */
   const activeTab = () => { const t=lsGet(TAB_KEY,null); return TABS.some(x=>x[0]===t)?t:"pipeline"; };
   window.pipeTab = id => {
@@ -1204,8 +1226,8 @@
     <td class="t-num">${(+d.price).toFixed(2)}</td><td>${esc(d.order)}</td>
     <td class="t-num">${fmtDate(d)}</td><td>${stBadge(d)}</td><td>${cfBadge(d)}</td>
     <td class="t-num">${money(value(d))}</td><td class="t-num pwt">${money(weighted(d))}</td>
-    <td class="t-num">${quarterOf(d)}</td><td class="pnote" title="${esc(d.notes||"")}">${esc(d.notes||"—")}</td>
-    <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">✎</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">🗑</span>`:""}`:""}</td></tr>`;
+    <td class="t-num">${quarterOf(d)}</td><td class="pnote" title="${esc(d.notes||"")}">${esc(d.notes||"-")}</td>
+    <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">Edit</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">Delete</span>`:""}`:""}</td></tr>`;
   /* Companies that have crossed from prospecting into the pipeline but have no deal yet.
      The rule: a prospect enters the pipeline the moment someone actually talks to them, which
      is exactly what Engaged means. Before that they are research and belong on Prospects.
@@ -1230,7 +1252,7 @@
       </div>
       <div class="promo-list">${list.slice(0,12).map(a=>{
         const r=a.r||rosterOf(a.name);
-        return `<button class="promo-chip" onclick="pipeOpenAccount('${esc(String(a.name).replace(/'/g,"\\'"))}')">
+        return `<button class="promo-chip" onclick="pipeOpenAccount('${jq(String(a.name))}')">
           ${esc(a.name)}${r&&r.score!=null?`<span class="sc ${scoreCls(r.score)}">${r.score}</span>`:""}
         </button>`;}).join("")}
         ${list.length>12?`<span class="pdim">+${num(list.length-12)} more</span>`:""}
@@ -1281,7 +1303,7 @@
           <button class="pv-btn${view==="flat"?" active":""}" data-v="flat" onclick="pipeView('flat')">Flat List</button>
         </span>
         <span class="pcount-lbl" id="pipePCount">${ds.length} rows</span>
-        <button class="btn btn-ghost" onclick="pipeDealExport()">⭳ Export CSV</button>
+        <button class="btn btn-ghost" onclick="pipeDealExport()">Export CSV</button>
         <button class="btn btn-primary" onclick="pipeDealModal()">＋ Add Deal</button>
       </div>
       ${tblWrap(`${head}
@@ -1326,12 +1348,12 @@
     const quarters=prodQuarters(), products=P.production.products;
     const totals = quarters.map(q=>sum(products,r=>r.mt[q]||0));
     return `
-      <div class="pdeals-bar"><h3 class="sub" style="margin:0">Production Plan — planned production capacity (MT) per product</h3>
-        <button class="btn btn-ghost" onclick="pipeProductionExport()">⭳ Export CSV</button>
+      <div class="pdeals-bar"><h3 class="sub" style="margin:0">Production Plan, planned production capacity (MT) per product</h3>
+        <button class="btn btn-ghost" onclick="pipeProductionExport()">Export CSV</button>
         <button class="btn btn-primary pc-add" onclick="pipeAddQuarter()">＋ Add Quarter</button></div>
       ${tblWrap(`<thead><tr><th>Product Type</th>${quarters.map(q=>`<th class="t-num">${q}</th>`).join("")}</tr></thead>
         <tbody>${products.map(r=>`<tr><td><strong>${esc(r.p)}</strong></td>${quarters.map(q=>{
-          const v=r.mt[q]; return `<td class="t-num">${v==null?'<span class="pdim">—</span>':num(v)+' <span class="uom">MT</span>'}</td>`;
+          const v=r.mt[q]; return `<td class="t-num">${v==null?'<span class="pdim">-</span>':num(v)+' <span class="uom">MT</span>'}</td>`;
         }).join("")}</tr>`).join("")}
         <tr class="ptotal"><td><strong>TOTAL CAPACITY</strong></td>${totals.map(t=>`<td class="t-num"><strong>${num(t)} MT</strong></td>`).join("")}</tr></tbody>`)}
       <div class="note">This grid feeds the Executive Dashboard's Sales vs. Production chart and the Offtake coverage view. Update it as ops confirms quarterly capacity.</div>
@@ -1359,7 +1381,7 @@
     const qs=prodQuarters();
     /* THE CHART DELIBERATELY IGNORES THE PERIOD FILTER, and says so below.
      *
-     * Two of its four series — Offtake Expected and Production Capacity — are planned per
+     * Two of its four series, Offtake Expected and Production Capacity, are planned per
      * quarter and carry no deal dates, so they cannot be filtered at all. Filtering the two
      * deal series and not the other two would produce a chart where half the bars shrank and
      * half did not, which reads as a real change in coverage and is not one. A plan against
@@ -1373,7 +1395,7 @@
     const offMT=qs.map(q=>sum(offRows,r=>+(r.vols[q]||0)));
     const capMT=qs.map(q=>sum(prodRows,r=>r.mt[q]||0));
     const maxMT=Math.max(...confMT,...wtdMT,...offMT,...capMT,1);
-    const series=[["Confirmed MT","#5f8a5b",confMT],["Weighted Pipeline MT","#24478a",wtdMT],["Offtake Expected MT","#caa85a",offMT],["Production Capacity","#c4cfe6",capMT]];
+    const series=[["Confirmed MT","var(--accent)",confMT],["Weighted Pipeline MT","var(--info)",wtdMT],["Offtake Expected MT","var(--warning)",offMT],["Production Capacity","var(--navy-300)",capMT]];
     const svp=`<div class="pchart">${qs.map((q,i)=>`<div class="pcol">
         <div class="pbars">${series.map(([n,c,arr])=>`<span class="pbar" style="height:${Math.max(arr[i]/maxMT*100,arr[i]?1.5:0)}%;background:${c}" title="${esc(n)}: ${num(arr[i])} MT"></span>`).join("")}</div>
         <div class="plabel">${q}</div></div>`).join("")}</div>
@@ -1401,8 +1423,8 @@
       <div class="phtrack"><span class="phfill" style="width:${x.v/maxC*100}%;background:var(--navy-500)"></span></div><span class="phv">${kfmt(x.v)}</span></div>`).join("");
     const rec=ds.filter(d=>d.order==="Recurring"), one=ds.filter(d=>d.order!=="Recurring");
     const rv=sum(rec,value), ov=sum(one,value);
-    const rvo=`<div class="psplit"><span style="flex:${rv||0.001};background:#24478a" title="Recurring ${money(rv)}"></span><span style="flex:${ov||0.001};background:#5f8a5b" title="One-Time ${money(ov)}"></span></div>
-      <div class="plegend"><span><i style="background:#24478a"></i>Recurring · ${kfmt(rv)} (${rec.length} deals)</span><span><i style="background:#5f8a5b"></i>One-Time · ${kfmt(ov)} (${one.length} deals)</span></div>`;
+    const rvo=`<div class="psplit"><span style="flex:${rv||0.001};background:var(--info)" title="Recurring ${money(rv)}"></span><span style="flex:${ov||0.001};background:var(--purple)" title="One-Time ${money(ov)}"></span></div>
+      <div class="plegend"><span><i style="background:var(--info)"></i>Recurring · ${kfmt(rv)} (${rec.length} deals)</span><span><i style="background:var(--purple)"></i>One-Time · ${kfmt(ov)} (${one.length} deals)</span></div>`;
     const products=[...new Set(allDs.map(d=>d.product))].sort();
     return `
       <div class="pdeals-bar">
@@ -1455,10 +1477,10 @@
     const grouped=lsGet(OGRP_KEY,false);
     const oRow=r=>`<tr><td><strong>${acctLink(r.customer)}</strong></td><td>${esc(r.product)}</td><td class="pnote" title="${esc(r.sector)}">${esc(r.sector)}</td><td>${confB(r.conf)}</td>
       ${quarters.map(q=>{ const v=r.vols[q]; const c=confirmedFor(r,q);
-        return `<td class="t-num">${v==null?'<span class="pdim">—</span>':num(v)}${c?`<div class="pconf-sub">✓ ${num(c)} confirmed</div>`:""}</td>`; }).join("")}
+        return `<td class="t-num">${v==null?'<span class="pdim">-</span>':num(v)}${c?`<div class="pconf-sub">${num(c)} confirmed</div>`:""}</td>`; }).join("")}
       <td class="t-num">$${r.price}</td><td><span class="pbadge pfreq">${esc(r.freq)}</span></td>
       <td class="t-num pannual">${money(annual(r))}</td>
-      <td class="pact-cell">${r.base?"":`<span class="pc-act" onclick="pipeOfftakeModal(${r.ci})" title="Edit">✎</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeOfftakeDelete(${r.ci})" title="Delete">🗑</span>`:""}`}</td></tr>`;
+      <td class="pact-cell">${r.base?"":`<span class="pc-act" onclick="pipeOfftakeModal(${r.ci})" title="Edit">Edit</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeOfftakeDelete(${r.ci})" title="Delete">Delete</span>`:""}`}</td></tr>`;
     let body;
     if(grouped){
       const prods=[...new Set(rows.map(r=>r.product))];
@@ -1473,16 +1495,16 @@
       <div class="pdeals-bar">
         <button class="pv-btn${grouped?" active":""}" onclick="pipeOfftakeGroup(${!grouped})">≣ By Product</button>
         <span class="pcount-lbl">${rows.length} rows · <span style="color:var(--green-deep)">green = confirmed (won deals)</span></span>
-        <button class="btn btn-ghost" onclick="pipeOfftakeExport()">⭳ Export CSV</button>
+        <button class="btn btn-ghost" onclick="pipeOfftakeExport()">Export CSV</button>
         <button class="btn btn-primary pc-add" onclick="pipeOfftakeModal()">＋ Add Row</button>
       </div>
       ${tblWrap(`<thead><tr><th>Customer</th><th>Product</th><th>Sector</th><th>Conf.</th>${quarters.map(q=>`<th class="t-num">${q}</th>`).join("")}<th class="t-num">Price/MT</th><th>Freq.</th><th class="t-num">Annual Rev.</th><th></th></tr></thead>
       <tbody>${body}
       <tr class="ptotal"><td colspan="4"><strong>Total Expected (MT)</strong></td>${totQ.map(t=>`<td class="t-num"><strong>${num(t)}</strong></td>`).join("")}<td colspan="2"></td><td class="t-num pannual"><strong>${money(sum(rows,annual))}</strong></td><td></td></tr>
-      <tr class="prev"><td colspan="4">Revenue (MT × Price/MT)</td>${revQ.map(t=>`<td class="t-num">${t?money(t):"—"}</td>`).join("")}<td colspan="4"></td></tr>
-      <tr class="pconf-row"><td colspan="4">✓ Confirmed Sales (Won Deals)</td>${cfQ.map(t=>`<td class="t-num">${t?num(t)+" MT":"—"}</td>`).join("")}<td colspan="4"></td></tr>
+      <tr class="prev"><td colspan="4">Revenue (MT × Price/MT)</td>${revQ.map(t=>`<td class="t-num">${t?money(t):"-"}</td>`).join("")}<td colspan="4"></td></tr>
+      <tr class="pconf-row"><td colspan="4">Confirmed Sales (Won Deals)</td>${cfQ.map(t=>`<td class="t-num">${t?num(t)+" MT":"-"}</td>`).join("")}<td colspan="4"></td></tr>
       </tbody>`)}
-      <div class="note">Row notes worth keeping in view: ${offRowsAll().filter(r=>r.notes).map(r=>`<b>${esc(r.customer)} (${esc(r.product)})</b> — ${esc(r.notes).replace(/\n/g,"<br>")}`).join(" · ")}</div>
+      <div class="note">Row notes worth keeping in view: ${offRowsAll().filter(r=>r.notes).map(r=>`<b>${esc(r.customer)} (${esc(r.product)})</b>: ${esc(r.notes).replace(/\n/g,"<br>")}`).join(" · ")}</div>
       ${periodNote("Offtake is planned volume per quarter, so the quarter columns are its time axis. There is no close date here to filter on.")}`;
   }
   window.pipeOfftakeGroup=on=>{ lsSet(OGRP_KEY,!!on); rr(); };
@@ -1525,7 +1547,7 @@
 
   /* ================= TAB 5 · DEALS (flat list, full CRUD) ================= */
   function tDeals(){
-    /* Honours the same period as the strip, so the tile and the table can never disagree —
+    /* Honours the same period as the strip, so the tile and the table can never disagree -
        a header saying 6 open deals above a list of 40 is how people stop trusting both. */
     const ds=[...periodDeals()].sort((a,b)=>closeDate(b)-closeDate(a));
     return `
@@ -1533,7 +1555,7 @@
         <select class="pinput" id="pipeDealStatus" onchange="pipeDealFilter()"><option value="">All Status</option><option>open</option><option>won</option><option>lost</option></select>
         <select class="pinput" id="pipeDealStage" onchange="pipeDealFilter()"><option value="">All Stages</option>${P.stages.map(s=>`<option value="${s.k}">${esc(s.label)}</option>`).join("")}</select>
         <span class="pcount-lbl" id="pipeDealCount">${ds.length} deals</span>
-        <button class="btn btn-ghost" onclick="pipeDealExport()">⭳ Export CSV</button>
+        <button class="btn btn-ghost" onclick="pipeDealExport()">Export CSV</button>
         <button class="btn btn-primary" onclick="pipeDealModal()">＋ Add Deal</button></div>
       ${tblWrap(`<thead><tr><th>Deal Name</th><th>Account</th><th>Product</th><th>Stage</th><th class="t-num">Value</th><th>Close Date</th><th>Status</th><th>Assigned To</th><th></th></tr></thead>
       <tbody id="pipeDealsTbl">${ds.map(d=>`<tr data-stage="${d.stage}" data-status="${d.status}" title="${esc(d.notes||"")}">
@@ -1541,7 +1563,7 @@
         <td class="t-num">${money(value(d))}</td><td class="t-num">${fmtDate(d)}</td>
         <td><span class="pbadge ${d.status==="won"?"st-won":d.status==="lost"?"cf-low":"pfreq"}">${esc(d.status)}</span></td>
         <td>${esc(d.owner)}</td>
-        <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">✎</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">🗑</span>`:""}`:`<span class="pdim" title="Imported from the SIBRA snapshot — read-only">—</span>`}</td></tr>`).join("")}</tbody>`)}`;
+        <td class="pact-cell">${d.custom?`<span class="pc-act" onclick="pipeDealModal(${d.ci})" title="Edit">Edit</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeDealDelete(${d.ci})" title="Delete">Delete</span>`:""}`:`<span class="pdim" title="Imported from the SIBRA snapshot, read-only">-</span>`}</td></tr>`).join("")}</tbody>`)}`;
   }
   window.pipeDealFilter = () => {
     const q=(V("pipeDealSearch")).toLowerCase();
@@ -1557,7 +1579,7 @@
   /* ================= TAB 6 · CONTACTS ================= */
   const getCustom=()=>lsGet(C_KEY,[]);
   const saveCustom=a=>lsSet(C_KEY,a);
-  const chip = t => t?`<span class="pchip">☎ ${esc(t)}</span>`:"";
+  const chip = t => t?`<span class="pchip">${esc(t)}</span>`:"";
   /* ================= PROSPECTS =================
      The prospecting roster as a working spreadsheet: every company we have researched, with
      the ICP, freight verdict, score and status that decide whether it gets worked today.
@@ -1606,7 +1628,7 @@
       csv:c=>c.name,
       cell:c=>`<td class="co-name">
         ${acctLink(c.name)}
-        ${c.pi!=null?`<span class="pc-act" onclick="pipePoolModal(${c.pi})" title="Edit this lead — it was added here, not generated by the roster build">✎</span>`:""}
+        ${c.pi!=null?`<span class="pc-act" onclick="pipePoolModal(${c.pi})" title="Edit this lead, it was added here, not generated by the roster build">Edit</span>`:""}
         ${c.website?`<a class="co-web" href="https://${esc(c.website.replace(/^https?:\/\//,""))}" target="_blank" rel="noopener" title="${esc(c.website)}">↗</a>`:""}
         ${c.segment?`<div class="co-seg clamp2">${esc(c.segment)}</div>`:""}
       </td>` },
@@ -1614,17 +1636,17 @@
     /* Contact, Email and Phone sit directly after Company ON PURPOSE: the person and how
        to reach them are what a rep needs first, without scrolling past the research. */
     { key:"contacts", label:"Contact",
-      hint:"The best person on file — name and title from the enrichment join, with how many more sit behind them. Falls back to the researched target titles when nobody is on file yet.",
+      hint:"The best person on file, name and title from the enrichment join, with how many more sit behind them. Falls back to the researched target titles when nobody is on file yet.",
       blank:c=>!reachOf(c).people && !c.titles,
       sort:(a,b)=>reachOf(b).people-reachOf(a).people,
-      csv:c=>{ const p=primaryContact(c); return p?`${p.name}${p.title?" — "+p.title:""}`:(c.titles||""); },
+      csv:c=>{ const p=primaryContact(c); return p?`${p.name}${p.title?": "+p.title:""}`:(c.titles||""); },
       cell:c=>{ const reach=reachOf(c); const p=primaryContact(c);
         return `<td class="co-titles">${p
-          ? `<b>${esc(p.name||"—")}</b>${reach.people>1?`<span class="co-more-n" title="${reach.people} named contacts on file">+${reach.people-1}</span>`:""}<div class="clamp2 pdim">${esc(p.title||"")}</div>`
-          : `<div class="clamp2">${esc(c.titles&&c.titles!=="n/a - not a buying account"?c.titles:"—")}</div>`}</td>`; } },
+          ? `<b>${esc(p.name||"-")}</b>${reach.people>1?`<span class="co-more-n" title="${reach.people} named contacts on file">+${reach.people-1}</span>`:""}<div class="clamp2 pdim">${esc(p.title||"")}</div>`
+          : `<div class="clamp2">${esc(c.titles&&c.titles!=="n/a - not a buying account"?c.titles:"-")}</div>`}</td>`; } },
 
     { key:"email", label:"Email",
-      hint:"Best email on file — enriched and Instantly-verified addresses first, then desk research and CRM",
+      hint:"Best email on file, enriched and Instantly-verified addresses first, then desk research and CRM",
       blank:c=>!reachOf(c).emails.length,
       sort:(a,b)=>reachOf(b).emails.length-reachOf(a).emails.length,
       csv:c=>reachOf(c).emails.join(" / "),
@@ -1695,14 +1717,14 @@
       blank:c=>!c.city && !c.state,
       sort:(a,b)=>((a.state||"")+(a.city||"")).localeCompare((b.state||"")+(b.city||"")),
       csv:c=>[c.city,c.state].filter(Boolean).join(", "),
-      cell:c=>`<td>${esc([c.city,c.state].filter(Boolean).join(", ")||"—")}</td>` },
+      cell:c=>`<td>${esc([c.city,c.state].filter(Boolean).join(", ")||"-")}</td>` },
 
     { key:"freight", label:"Freight", num:true,
       hint:"Driving distance from White Castle. Gates biochar only, absorbent ships nationwide.",
       blank:c=>c.driveMi==null && c.crowMi==null,
       sort:(a,b)=>(a.driveMi??a.crowMi??0)-(b.driveMi??b.crowMi??0),
       csv:c=>c.driveMi??"",
-      cell:c=>{ const dist=c.driveMi!=null?`${num(c.driveMi)} mi`:(c.crowMi!=null?`~${num(c.crowMi)} mi`:"—");
+      cell:c=>{ const dist=c.driveMi!=null?`${num(c.driveMi)} mi`:(c.crowMi!=null?`~${num(c.crowMi)} mi`:"-");
         return `<td class="num"><span class="geo ${geoCls(c.geo,c.geoGates)}" title="${esc(geoTitle(c.geo,c.geoGates))}">${dist}</span></td>`; } },
 
     { key:"score", label:"Score", num:true,
@@ -1717,7 +1739,7 @@
       blank:c=>!(c.why||c.scoreWhy),
       sort:(a,b)=>String(a.why||"").localeCompare(String(b.why||"")),
       csv:c=>c.dead?(c.scoreWhy||""):(c.why||""),
-      cell:c=>`<td class="co-why"><div class="clamp3" title="${esc(c.why||c.scoreWhy||"")}">${esc(c.dead?(c.scoreWhy||"No reason recorded"):(c.why||"—"))}</div></td>` },
+      cell:c=>`<td class="co-why"><div class="clamp3" title="${esc(c.why||c.scoreWhy||"")}">${esc(c.dead?(c.scoreWhy||"No reason recorded"):(c.why||"-"))}</div></td>` },
 
     /* Off by default. Real data, but only some rows have it, so it earns its space only for
        someone actually working the CRM overlap. */
@@ -1726,7 +1748,7 @@
       blank:c=>!c.owner,
       sort:(a,b)=>String(a.owner||"").localeCompare(String(b.owner||"")),
       csv:c=>c.owner||"",
-      cell:c=>`<td>${c.owner?esc(c.owner):`<span class="pdim">—</span>`}</td>` },
+      cell:c=>`<td>${c.owner?esc(c.owner):`<span class="pdim">-</span>`}</td>` },
 
     { key:"lastContacted", label:"Last contacted", off:true,
       hint:"Most recent logged contact in HubSpot. Blank means never.",
@@ -1748,7 +1770,7 @@
       blank:c=>!c.trigger,
       sort:(a,b)=>String(a.trigger||"").localeCompare(String(b.trigger||"")),
       csv:c=>c.trigger||"",
-      cell:c=>`<td class="co-why"><div class="clamp2" title="${esc(c.trigger||"")}">${esc(c.trigger||"—")}</div></td>` },
+      cell:c=>`<td class="co-why"><div class="clamp2" title="${esc(c.trigger||"")}">${esc(c.trigger||"-")}</div></td>` },
   ];
   const COL_BY = Object.fromEntries(CO_COLS.map(c=>[c.key,c]));
 
@@ -2031,7 +2053,7 @@
      WHAT IT ACTUALLY DOES. POST /api/prospect, a Pages Function that holds ALLO_API_KEY on
      the edge, creates the company and the person, writes the dialer note, and then READS THE
      RECORD BACK. The read-back is not decoration: on this API a 200 is not evidence that a
-     field was stored — `title` and `first_name` both return 200 and vanish, which is exactly
+     field was stored, `title` and `first_name` both return 200 and vanish, which is exactly
      why every Power Dialer card once read "Job & company unknown". So the panel below shows
      what Allo returned when asked, not what we hoped we sent.
 
@@ -2045,7 +2067,7 @@
 
   /* Mirrors functions/_lib/prospect.js normalizeNANP(). Deliberately duplicated: this file is
      a classic script, not a module, and cannot import across that boundary. The SERVER copy is
-     the one that counts — this exists to fail a typo before a round trip, not to be the gate.
+     the one that counts, this exists to fail a typo before a round trip, not to be the gate.
      Apollo handed us a +91 mobile for a real person on 2026-08-28 and it reached the dialer. */
   const nanp = raw => {
     const digits = String(raw||"").replace(/[^\d]/g,"");
@@ -2080,6 +2102,7 @@
         <div class="pcf"><label>ICP</label><input class="pinput" id="prIcp" list="prIcpList" value="${esc(p.icp||"")}" placeholder="AB.OG"><datalist id="prIcpList">${icps.map(k=>`<option value="${esc(k)}">`).join("")}</datalist></div>
         ${F("prOpener","Open with",p.opener,0,"the line that earns the next 20 seconds")}
       </div>
+      <div class="pcf"><label>Product they are being called about</label><select class="pinput" id="prProduct"><option value="crumble">Absorbent Crumble</option><option value="biochar">Biochar</option><option value="pellets">Pellets</option></select></div>
       <div class="pcf"><label>Anything else for the note</label><textarea class="pinput" id="prNote" rows="2" placeholder="What they run today, who referred them, why now">${esc(p.note||"")}</textarea></div>
       <div id="prResult"></div>`;
     openModal("Create Prospect", body, "Create in Allo", "pipeProspectCreate()", true);
@@ -2094,16 +2117,21 @@
   };
   const prSay = html => { const el=document.getElementById("prResult"); if(el) el.innerHTML=html; };
 
+  let PR_COMPANY = null;
   window.pipeProspectCreate = async () => {
     const input = {
       company:V("prCompany"), website:V("prWebsite"), person:V("prPerson"), title:V("prTitle"),
       number:V("prNumber"), email:V("prEmail"), icp:V("prIcp"), opener:V("prOpener"), note:V("prNote"),
+      product:V("prProduct"),
     };
+    /* A retry after a failed person step reuses the company that step already created, so
+       every retry stops leaving another orphan company in Allo (which has no delete). */
+    if(PR_COMPANY && PR_COMPANY.name===input.company.trim()) input.companyId = PR_COMPANY.id;
     if(!input.company || !input.person){ prSay(`<div class="note warn" style="margin-top:10px"><b>Company and person are both required.</b></div>`); return; }
     const n = nanp(input.number);
     if(!n.ok){
       prSay(`<div class="note warn" style="margin-top:10px"><b>That number will not dial.</b> ${esc(n.reason)}.
-        Nothing was created — a bad number in the dialer burns a slot mid-session, and a gap is at least visible.</div>`);
+        Nothing was created, a bad number in the dialer burns a slot mid-session, and a gap is at least visible.</div>`);
       return;
     }
 
@@ -2121,12 +2149,17 @@
       return;
     }
     const text = await res.text();
+    if(sessionGone(res)){
+      prSetBusy(false);
+      prSay(`<div class="note warn" style="margin-top:10px"><b>${esc(SESSION_MSG)}</b> Nothing was created.</div>`);
+      return;
+    }
     try { data = JSON.parse(text); }
     catch {
       prSetBusy(false);
       /* A 404 with an HTML body is the static dev server, not a broken route. Say which. */
       prSay(`<div class="note warn" style="margin-top:10px"><b>This build has no /api/prospect Function.</b>
-        Pages Functions only run on the deployed Sales OS (and under <code>npx wrangler pages dev</code>) —
+        Pages Functions only run on the deployed Sales OS (and under <code>npx wrangler pages dev</code>) -
         a plain static server returns the 404 page, which is what came back (HTTP ${res.status}).
         <b>Nothing was created.</b></div>`);
       return;
@@ -2135,6 +2168,7 @@
     prSetBusy(false);
 
     if(!data.ok){
+      if(data.companyId) PR_COMPANY = { name:input.company.trim(), id:data.companyId };
       const why = data.reason==="not-configured"
         ? `<b>ALLO_API_KEY is not set on this deployment.</b> Set it in Cloudflare Pages → cs-ops-sales-os → Settings → Variables and secrets. Nothing was created.`
         : `<b>Allo rejected it.</b> ${esc(data.error||data.reason||"no reason given")}`;
@@ -2144,19 +2178,19 @@
       return;
     }
 
-    /* Remote first, local second — see the header. */
+    /* Remote first, local second, see the header. */
     upsertAccount(input.company, "prospect");
     const arr = getCustom();
     const parts = input.person.trim().split(/\s+/);
     arr.push({
       name:input.person, first:parts.slice(0,-1).join(" ")||parts[0], last:parts.length>1?parts[parts.length-1]:"",
       account:input.company, title:input.title, email:input.email, phone:data.e164, mobile:"",
-      notes:`Created in Allo CRM ${data.personId}${input.note?" — "+input.note:""}`,
+      notes:`Created in Allo CRM ${data.personId}${input.note?": "+input.note:""}`,
     });
     saveCustom(arr);
     addAcctActivity(input.company, {
       ch:"note", title:"Prospect created in Allo",
-      body:`${input.person}${input.title?", "+input.title:""} — ${data.e164}. Allo person ${data.personId}, company ${data.companyId}.${data.reused?" Filled in an existing bare-number record rather than creating a twin.":""}`,
+      body:`${input.person}${input.title?", "+input.title:""}: ${data.e164}. Allo person ${data.personId}, company ${data.companyId}.${data.reused?" Filled in an existing bare-number record rather than creating a twin.":""}`,
       status:"logged",
     });
 
@@ -2219,7 +2253,7 @@
             `<button class="co-stat ${s.cls}${CO_F.status===k?" on":""}" onclick="pipeCoQuick('status','${k}')" title="${esc(s.hint)}">
                <span class="n">${num(tally[k]||0)}</span><span class="l">${esc(s.label)}</span></button>`).join("")}
           <span class="co-total"><b>${num(pool.length)}</b> companies · <b>${num(pool.filter(c=>!c.dead).length)}</b> live · <b>${num(vTally.verified||0)}</b> desk verified${added.length?` · <b>${num(added.length)}</b> added here`:""}${R.needsWork?` · <button class="co-total-link" onclick="pipeCoQuick('verify','unverified')" title="Live rows imported or carried over that have never been desk scored. Click to see them.">${num(R.needsWork)} still need work</button>`:""}</span>
-          <span class="co-total"><button class="co-total-link" onclick="pipeCoQuick('proof','verified')" title="Companies whose OWN live site was fetched and matched their ICP's vocabulary. The only state Apollo credits may be spent on. Click to see them."><b>${num(R.icpProven||0)}</b> of ${num(R.liveIcp||0)} ICP PROVEN</button> · <button class="co-total-link" onclick="pipeCoQuick('proof','partial')" title="Site loaded but its copy did not clearly match the ICP. Held for a human read. Click to see them.">${num(cvTally.partial||0)} unproven</button> · <button class="co-total-link" onclick="pipeCoQuick('proof','not-checked')" title="Never put through the live-site test — almost all of these are AB.MUNI (prohibited) or have no website to fetch. Click to see them.">${num(cvTally["not-checked"]||0)} not checked</button></span>
+          <span class="co-total"><button class="co-total-link" onclick="pipeCoQuick('proof','verified')" title="Companies whose OWN live site was fetched and matched their ICP's vocabulary. The only state Apollo credits may be spent on. Click to see them."><b>${num(R.icpProven||0)}</b> of ${num(R.liveIcp||0)} ICP PROVEN</button> · <button class="co-total-link" onclick="pipeCoQuick('proof','partial')" title="Site loaded but its copy did not clearly match the ICP. Held for a human read. Click to see them.">${num(cvTally.partial||0)} unproven</button> · <button class="co-total-link" onclick="pipeCoQuick('proof','not-checked')" title="Never put through the live-site test, almost all of these are AB.MUNI (prohibited) or have no website to fetch. Click to see them.">${num(cvTally["not-checked"]||0)} not checked</button></span>
         </div>
       </div>
       <div class="co-bar">
@@ -2237,7 +2271,7 @@
         ${colPicker()}
         <button class="btn btn-ghost" onclick="pipeCoExport()" title="Exports exactly the columns you can see, in the order you put them in">Export view</button>
         <button class="btn btn-ghost" onclick="pipeCoExportAll()" title="Every field we hold, regardless of which columns are shown">Export all fields</button>
-        <button class="btn btn-ghost" onclick="pipePoolImport()" title="Import a CSV of leads. Any headers, any order: you map them on the next screen.">⬆ Import CSV</button>
+        <button class="btn btn-ghost" onclick="pipePoolImport()" title="Import a CSV of leads. Any headers, any order: you map them on the next screen.">Import CSV</button>
         <button class="btn btn-ghost" onclick="pipePoolModal()" title="Add one lead by hand. It lands in this same list.">+ Add lead</button>
         <button class="btn btn-primary" onclick="pipeProspectModal()" title="Create a company, a person and a dialer note in Allo CRM, then read the record back to prove it landed">+ Create prospect</button>
         <span class="pcount-lbl">${num(rows.length)} shown</span>
@@ -2285,7 +2319,7 @@
     coFiltered().map(c=>{const r=reachOf(c);return [c.name,(STATUS[statusOf(c.name)]||{}).label,(VERIFY[c.verify]||{}).label||"",(c.needs||[]).join("; "),(ORIGIN[c.origin]||{}).label||"",c.line,c.icp,c.icpLabel,c.segment,c.city,c.state,c.driveMi,c.geo,c.geoGates?"yes":"no (nationwide)",c.score,r.phones.join(" / "),r.emails.join(" / "),r.people,c.why,c.scoreWhy,c.titles,c.trigger,c.website,c.sourceUrl,c.owner||"",c.lastContacted||"",c.hsDeals||0];}));
 
   function tContacts(){
-    /* Grouped by ICP (email-domain join first, account name second), blanks last —
+    /* Grouped by ICP (email-domain join first, account name second), blanks last -
        contacts are worked campaign by campaign, same as the prospects table. */
     const cs=allContacts().map(c=>({...c,_icp:icpFor(c)})).sort(byIcpThen("name"));
     const accounts=[...new Set(liveAccounts().map(a=>a.name).concat(cs.map(c=>c.account)))].filter(Boolean).sort();
@@ -2296,18 +2330,18 @@
         <select class="pinput" id="pipeCIcp" onchange="pipeContactFilter()"><option value="">All ICPs</option>${icps.map(i=>`<option>${esc(i)}</option>`).join("")}</select>
         <select class="pinput" id="pipeCAccount" onchange="pipeContactFilter()"><option value="">All Accounts</option>${accounts.map(a=>`<option>${esc(a)}</option>`).join("")}</select>
         <span class="pcount-lbl" id="pipeCCount">${cs.length} contacts</span>
-        <button class="btn btn-ghost" onclick="pipeContactExport()">⭳ Export CSV</button>
+        <button class="btn btn-ghost" onclick="pipeContactExport()">Export CSV</button>
         <button class="btn btn-primary pc-add" onclick="pipeContactModal()">Add Contact</button>
       </div>
       ${tblWrap(`<thead><tr><th>Name</th><th>Job Title</th><th>ICP</th><th>Account</th><th>Email / Phone</th><th>Drop-off Address</th><th>Actions</th></tr></thead>
       <tbody id="pipeCTbl">${cs.map(c=>`<tr data-account="${esc(c.account||"")}" data-icp="${esc(c._icp)}">
-        <td title="${esc(c.notes||"")}"><strong>${esc(c.name)}</strong></td><td>${esc(c.title||"—")}</td><td>${icpCell(c._icp)}</td><td>${c.account?acctLink(c.account):"—"}</td>
+        <td title="${esc(c.notes||"")}"><strong>${esc(c.name)}</strong></td><td>${esc(c.title||"-")}</td><td>${icpCell(c._icp)}</td><td>${c.account?acctLink(c.account):"-"}</td>
         <td>${c.email?`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a><br>`:""}${chip(c.phone)}${c.mobile?` ${chip(c.mobile)} <span class="pdim" style="font-size:10.5px">(mobile)</span>`:""}</td>
-        <td class="pnote">${esc(c.dropOff||"—")}</td>
+        <td class="pnote">${esc(c.dropOff||"-")}</td>
         <td class="pact-cell">${readOnlyContact(c)
-          ? `<span class="pdim" title="${esc(readOnlyWhy(c))}">—</span>`
-          : `<span class="pc-act" onclick="pipeContactModal(${c.ci})" title="Edit">✎</span>
-             ${canDelete()?`<span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">🗑</span>`:""}`}</td></tr>`).join("")}</tbody>`)}
+          ? `<span class="pdim" title="${esc(readOnlyWhy(c))}">-</span>`
+          : `<span class="pc-act" onclick="pipeContactModal(${c.ci})" title="Edit">Edit</span>
+             ${canDelete()?`<span class="pc-act pc-del" onclick="pipeContactDelete(${c.ci})" title="Delete">Delete</span>`:""}`}</td></tr>`).join("")}</tbody>`)}
       ${periodNote("A contact has no close date, so there is nothing here for a date range to select on. Filter the list with the search and the ICP and account pickers above.")}`;
   }
   window.pipeContactExport=()=>downloadCSV("contacts.csv",["Name","Job Title","ICP","Account","Email","Phone","Mobile","Drop-off Address","Notes"],
@@ -2340,7 +2374,7 @@
       ${F("pcTitle","Job Title",cur.title)}
       <div class="pcf-grid">${F("pcEmail","Email",cur.email)}${F("pcPhone","Phone",cur.phone)}</div>
       ${F("pcMobile","Mobile Phone",cur.mobile)}
-      <details class="pc-details"${cur.dropOff?" open":""}><summary>⚲ Add Address / Drop-off Info</summary>
+      <details class="pc-details"${cur.dropOff?" open":""}><summary>Add Address / Drop-off Info</summary>
         ${F("pcDrop","Drop-off Address",cur.dropOff,0,"Street, City, State, Zip")}</details>
       <div class="pcf"><label>Notes</label><textarea class="pinput" id="pcNotes" rows="3">${esc(cur.notes||"")}</textarea></div>`;
     openModal((idx!=null&&idx>=0?"Edit":"Add")+" Contact",body,idx!=null&&idx>=0?"Save Changes":"Add Contact",`pipeContactSave(${idx!=null&&idx>=0?idx:-1})`);
@@ -2420,18 +2454,18 @@
         <select class="pinput" id="pipeLIcp" onchange="pipeLeadFilter()"><option value="">All ICPs</option>${icps.map(i=>`<option>${esc(i)}</option>`).join("")}</select>
         <select class="pinput" id="pipeLStatus" onchange="pipeLeadFilter()"><option value="">All Status</option>${statuses.map(s=>`<option>${esc(s)}</option>`).join("")}</select>
         <span class="pcount-lbl" id="pipeLCount">${ls.length} leads</span>
-        <button class="btn btn-ghost" onclick="pipeLeadExport()">⭳ Export CSV</button>
+        <button class="btn btn-ghost" onclick="pipeLeadExport()">Export CSV</button>
         <button class="btn btn-primary pc-add" onclick="pipeLeadModal()">Add Lead</button>
       </div>
       ${tblWrap(`<thead><tr><th>Contact</th><th>Company</th><th>ICP</th><th>Email</th><th>Phone</th><th>Source</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody id="pipeLTbl">${ls.map(l=>`<tr data-status="${esc(l.status)}" data-icp="${esc(l._icp)}">
         <td><strong>${esc(l.contact)}</strong></td><td>${esc(l.company)}</td><td>${icpCell(l._icp)}</td>
-        <td>${l.email?`<a href="mailto:${esc(l.email)}">${esc(l.email)}</a>`:"—"}</td><td>${chip(l.phone)||"—"}</td>
+        <td>${l.email?`<a href="mailto:${esc(l.email)}">${esc(l.email)}</a>`:"-"}</td><td>${chip(l.phone)||"-"}</td>
         <td><span class="pbadge pfreq">${esc(l.source)}</span></td>
-        <td><span class="pbadge ${LEAD_ST[l.status]||"pfreq"}">${esc(l.status)}</span>${l.converted?`<div class="pconf-sub">✓ ${esc(l.convertedTo)}${l.convertedDate?" ("+l.convertedDate+")":""}</div>`:""}</td>
-        <td class="pact-cell">${l.converted?"":`<span class="pc-act pc-conv" onclick="pipeLeadConvert(${l.base?-1:l.ci},'${esc(l.company).replace(/'/g,"\\'")}','${esc(l.contact).replace(/'/g,"\\'")}')" title="Convert to deal">➜</span>`}
-          ${l.base?`<span class="pdim" title="From the SIBRA snapshot">—</span>`
-          :`<span class="pc-act" onclick="pipeLeadModal(${l.ci})" title="Edit">✎</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeLeadDelete(${l.ci})" title="Delete">🗑</span>`:""}`}</td></tr>`).join("")}</tbody>`)}`;
+        <td><span class="pbadge ${LEAD_ST[l.status]||"pfreq"}">${esc(l.status)}</span>${l.converted?`<div class="pconf-sub">Converted to ${esc(l.convertedTo)}${l.convertedDate?" ("+l.convertedDate+")":""}</div>`:""}</td>
+        <td class="pact-cell">${l.converted?"":`<span class="pc-act pc-conv" onclick="pipeLeadConvert(${l.base?-1:l.ci},'${jq(l.company)}','${jq(l.contact)}')" title="Convert to deal">Convert</span>`}
+          ${l.base?`<span class="pdim" title="From the SIBRA snapshot">-</span>`
+          :`<span class="pc-act" onclick="pipeLeadModal(${l.ci})" title="Edit">Edit</span>${canDelete()?`<span class="pc-act pc-del" onclick="pipeLeadDelete(${l.ci})" title="Delete">Delete</span>`:""}`}</td></tr>`).join("")}</tbody>`)}`;
   }
   window.pipeLeadExport=()=>downloadCSV("leads.csv",["Contact","Company","ICP","Email","Phone","Source","Status","Converted To","Converted Date"],
     allLeads().map(l=>({...l,_icp:icpFor(l)})).sort(byIcpThen("contact")).map(l=>[l.contact,l.company,l._icp,l.email,l.phone,l.source,l.status,l.convertedTo||"",l.convertedDate||""]));
@@ -2449,7 +2483,7 @@
   window.pipeLeadConvert=(ci,company,contact)=>{
     /* open the Deal modal prefilled from the lead; on save it creates the deal
        and (for custom leads) flips the lead to converted. */
-    pipeDealModal(null,{ deal:company+": New Deal", customer:company, notes:"Converted from lead — "+contact, stage:"discovery_qualified", __leadCi:ci>=0?ci:null });
+    pipeDealModal(null,{ deal:company+": New Deal", customer:company, notes:"Converted from lead, "+contact, stage:"discovery_qualified", __leadCi:ci>=0?ci:null });
   };
   window.pipeLeadModal=ci=>{
     const cur=(ci!=null&&ci>=0)?lsGet(L_KEY,[])[ci]:{};
@@ -2488,7 +2522,7 @@
      nothing exported. The replacement is not a port; none of this code survives. */
 
   /* ================= CLIENT PROFILE (the "epicenter") =================
-     One unified account record — contacts + deals + offtake + activity in a
+     One unified account record, contacts + deals + offtake + activity in a
      single HubSpot-style screen. Opens on any customer-name click; reads the
      same live accessors so it's always in sync with every tab. */
   let PROFILE=null;              // account name currently open, or null (=tabs view)
@@ -2521,11 +2555,11 @@
   };
   window.pipeAcctActDelete = (name,i) => { if(!guardDelete()) return; delAcctActivity(name,i); remount(); };
 
-  /* ---- the 6 comm modals — reuse the app's openModal() shell ---- */
+  /* ---- the 6 comm modals, reuse the app's openModal() shell ---- */
   const CH_META = {
-    email:  { label:"Email",   status:"sent" },
+    email:  { label:"Email",   status:"logged" },
     call:   { label:"Call",    status:"logged" },
-    sms:    { label:"SMS",     status:"sent" },
+    sms:    { label:"SMS",     status:"logged" },
     note:   { label:"Note",    status:"logged" },
     task:   { label:"Task",    status:"scheduled" },
     meeting:{ label:"Meeting", status:"scheduled" },
@@ -2540,14 +2574,14 @@
 
   /* ACTUALLY PLACE THE CALL, then log it.
    *
-   * These buttons used to open a "Log Call" form and nothing else — a rep clicked Call, typed
+   * These buttons used to open a "Log Call" form and nothing else, a rep clicked Call, typed
    * what happened, and no call was ever placed. That is a logging tool wearing a dialer's
    * clothes, and it is worse than no button because it looks like it did something.
    *
    * It hands off with a tel: / sms: link rather than dialling through Allo, because Allo has no
    * API for it: /v2/api/calls, /messages and /sms all 404 and only /v2/api/crm/* exists. So the
-   * honest thing is to hand the number to whatever the operator actually dials with — desk
-   * phone, softphone, or the phone in their hand — and then log it. Probed 2026-08-31; if Allo
+   * honest thing is to hand the number to whatever the operator actually dials with, desk
+   * phone, softphone, or the phone in their hand, and then log it. Probed 2026-08-31; if Allo
    * ever ships a dial endpoint this is the one function to change.
    *
    * The log form still opens, because a call nobody wrote up is a call the account forgets. */
@@ -2555,12 +2589,16 @@
     /* A button on a contact card dials THAT person; the account action bar falls back to the
        best number on the account. Without the explicit argument every contact's Call button
        rang whoever happened to sort first, which is a worse bug than no button at all. */
+    if(explicit!==undefined && !explicit){
+      alert("This contact has no phone number. Add a phone or mobile to the contact first.");
+      return;
+    }
     const best = explicit ? { e164:explicit, who:who||"", kind:"contact" } : bestNumberFor(name);
     if(!best){
       alert("No dialable number on this account. Add a phone or mobile to a contact first.");
       return;
     }
-    /* Opened before the modal so the handoff is the click's direct result — a browser will
+    /* Opened before the modal so the handoff is the click's direct result, a browser will
        block a tel: navigation that happens after an await or a re-render. */
     window.location.href = (ch==="sms"?"sms:":"tel:")+best.e164;
     pipeAcctComm(ch,name,best);
@@ -2571,15 +2609,19 @@
     let body="";
     /* Prepended at openModal, not assigned here: every branch below reassigns `body`. */
     const dialHint = dialed
-      ? `<div class="pcf-hint">Dialing <b>${esc(dialed.e164)}</b>${dialed.who?" &middot; "+esc(dialed.who):""}. Log what happened when you are done.</div>`
+      ? (ch==="sms"
+          ? `<div class="pcf-hint">Opening your Messages app for <b>${esc(dialed.e164)}</b>${dialed.who?" &middot; "+esc(dialed.who):""}. Send the text there, then log it here.</div>`
+          : `<div class="pcf-hint">Dialing <b>${esc(dialed.e164)}</b>${dialed.who?" &middot; "+esc(dialed.who):""}. Log what happened when you are done.</div>`)
       : "";
-    if(ch==="email")      body=F("acEmailSubj","Subject",null,1,"Subject line")+`<div class="pcf"><label>Body *</label><textarea class="pinput" id="acEmailBody" rows="4" placeholder="Write your message…"></textarea></div>`;
-    else if(ch==="sms")   body=`<div class="pcf"><label>Message *</label><textarea class="pinput" id="acSmsBody" rows="3" placeholder="Type SMS message…"></textarea></div>`;
+    const noSend = (ch==="email"||ch==="sms")
+      ? `<div class="pcf-hint">This does not send. It records ${ch==="sms"?"a text":"an email"} you sent somewhere else.</div>` : "";
+    if(ch==="email")      body=F("acEmailSubj","Subject",null,1,"Subject line")+`<div class="pcf"><label>Body *</label><textarea class="pinput" id="acEmailBody" rows="4" placeholder="Paste or summarize the email you sent"></textarea></div>`;
+    else if(ch==="sms")   body=`<div class="pcf"><label>Message *</label><textarea class="pinput" id="acSmsBody" rows="3" placeholder="Paste or summarize the text you sent"></textarea></div>`;
     else if(ch==="call")  body=F("acCallOut","Outcome",null,1,"e.g. Confirmed order, discussed timing")+F("acCallDur","Duration (min)",null,0,"e.g. 12","number");
     else if(ch==="note")  body=`<div class="pcf"><label>Note *</label><textarea class="pinput" id="acNoteBody" rows="3" placeholder="Write an internal note…"></textarea></div>`;
     else if(ch==="task")  body=F("acTaskTitle","Title",null,1,"Task title")+F("acTaskDue","Due Date",todayISO(),1,"","date");
     else if(ch==="meeting")body=F("acMeetTitle","Title",null,1,"Meeting title")+F("acMeetWhen","Date & Time",null,1,"","datetime-local");
-    openModal("New "+m.label, dialHint+body, "Log "+m.label, `pipeAcctCommSave('${ch}')`, false);
+    openModal((ch==="email"?"Log an email you sent":ch==="sms"?"Log a text you sent":"New "+m.label), dialHint+noSend+body, "Log "+m.label, `pipeAcctCommSave('${ch}')`, false);
   };
   window.pipeAcctCommSave = ch => {
     if(!PROFILE) return;
@@ -2641,7 +2683,7 @@
     const deals = liveDeals().filter(d=>norm(d.customer)===norm(name));
     const contacts = allContacts().filter(c=>norm(c.account)===norm(name));
     const offs = offRowsAll().filter(r=>norm(r.customer)===norm(name));
-    const safe = esc(name).replace(/'/g,"\\'");
+    const safe = jq(name);
 
     /* ---- derived metrics ---- */
     const openDeals = deals.filter(d=>d.status==="open");
@@ -2652,10 +2694,10 @@
     const openPipe  = sum(openDeals,value);
     const weightedOpen = sum(openDeals,weighted);
     const wonRev    = sum(wonDeals,value);
-    const winRate   = closed ? Math.round(wonDeals.length/closed*100)+"%" : "—";
+    const winRate   = closed ? Math.round(wonDeals.length/closed*100)+"%" : "-";
     /* most-common deal owner */
     const ownerCount={}; deals.forEach(d=>{ if(d.owner) ownerCount[d.owner]=(ownerCount[d.owner]||0)+1; });
-    const owner = Object.keys(ownerCount).sort((a,b)=>ownerCount[b]-ownerCount[a])[0] || "—";
+    const owner = Object.keys(ownerCount).sort((a,b)=>ownerCount[b]-ownerCount[a])[0] || "-";
     const products = [...new Set(deals.map(d=>d.product).filter(Boolean))];
     const primary = contacts[0];
     const drop = (contacts.find(c=>c.dropOff)||{}).dropOff || "";
@@ -2680,7 +2722,7 @@
       </div>
       <div class="tile metric-tile accent">
         <div class="lbl">Lifetime Value</div><div class="val">${money(ltv)}</div>
-        <div class="sub">${deals.length} deal${deals.length===1?"":"s"} total${period()==="all"?"":" — the whole history, not the selected period"}</div>
+        <div class="sub">${deals.length} deal${deals.length===1?"":"s"} total${period()==="all"?"":", the whole history, not the selected period"}</div>
       </div>
       <div class="tile metric-tile">
         <div class="lbl">Win Rate</div><div class="val">${winRate}</div>
@@ -2703,7 +2745,7 @@
              lies about where the company stands. */
           const cur=statusOf(name), der=derivedStatus(name), over=statusOverrides()[norm(name)];
           return `<div class="kv-row"><span class="k">Status</span><span class="v">
-            <select class="pinput stt-sel" onchange="pipeSetStatus('${esc(String(name).replace(/'/g,"\\'"))}',this.value)">
+            <select class="pinput stt-sel" onchange="pipeSetStatus('${jq(String(name))}',this.value)">
               ${Object.entries(STATUS).map(([k,s])=>`<option value="${k}"${k===cur?" selected":""}>${esc(s.label)}</option>`).join("")}
             </select>
             ${over?`<span class="pdim" style="margin-left:6px;font-size:11px" title="Derived from evidence: ${esc((STATUS[der]||{}).label||"")}">set manually</span>`:""}
@@ -2728,8 +2770,8 @@
             + row("Source", r.sourceUrl?`<a href="${esc(r.sourceUrl)}" target="_blank" rel="noopener">${esc(r.sourceUrl.replace(/^https?:\/\//,"").slice(0,44))}</a>`:"")
             + row("Added in", esc(r.iter));
         })()}
-        <div class="kv-row"><span class="k">Type</span><span class="v"><span class="status-pill prospect">${esc((acct.type||"—").replace(/^\w/,c=>c.toUpperCase()))}</span></span></div>
-        <div class="kv-row"><span class="k">Industry</span><span class="v">${esc(acct.industry||"—")}</span></div>
+        <div class="kv-row"><span class="k">Type</span><span class="v"><span class="status-pill prospect">${esc((acct.type||"-").replace(/^\w/,c=>c.toUpperCase()))}</span></span></div>
+        <div class="kv-row"><span class="k">Industry</span><span class="v">${esc(acct.industry||"-")}</span></div>
         <div class="kv-row"><span class="k">Account Owner</span><span class="v">${esc(owner)}</span></div>
         ${acct.website?`<div class="kv-row"><span class="k">Website</span><span class="v">${esc(acct.website)}</span></div>`:""}
         ${acct.region?`<div class="kv-row"><span class="k">Region</span><span class="v">${esc(acct.region)}</span></div>`:""}
@@ -2750,8 +2792,8 @@
       </div>
       <div class="c-actions">
         <button type="button" class="icon-btn" aria-label="Email ${esc(c.name)}" onclick="pipeAcctComm('email','${safe}')">${iconSvg("email")}</button>
-        <button type="button" class="icon-btn" aria-label="Call ${esc(c.name)}" onclick="pipeAcctDial('call','${safe}','${esc(toE164(c.mobile)||toE164(c.phone)||toE164(c.phoneE164))}','${esc(c.name||"")}')">${iconSvg("call")}</button>
-        <button type="button" class="icon-btn" aria-label="SMS ${esc(c.name)}" onclick="pipeAcctDial('sms','${safe}','${esc(toE164(c.mobile)||toE164(c.phone)||toE164(c.phoneE164))}','${esc(c.name||"")}')">${iconSvg("sms")}</button>
+        <button type="button" class="icon-btn" aria-label="Call ${esc(c.name)}"${(toE164(c.mobile)||toE164(c.phone)||toE164(c.phoneE164))?"":' disabled title="No phone number on this contact"'} onclick="pipeAcctDial('call','${safe}','${esc(toE164(c.mobile)||toE164(c.phone)||toE164(c.phoneE164))}','${jq(c.name||"")}')">${iconSvg("call")}</button>
+        <button type="button" class="icon-btn" aria-label="SMS ${esc(c.name)}"${(toE164(c.mobile)||toE164(c.phone)||toE164(c.phoneE164))?"":' disabled title="No phone number on this contact"'} onclick="pipeAcctDial('sms','${safe}','${esc(toE164(c.mobile)||toE164(c.phone)||toE164(c.phoneE164))}','${jq(c.name||"")}')">${iconSvg("sms")}</button>
       </div>
     </div>`;
     /* Roster-sourced reachability: the phone, email and named people the research pass found,
@@ -2780,12 +2822,12 @@
       const list = (r && r.contacts) || [];
       if(!list.length) return "";
       const chipFor = s => s==="verified" ? `<span class="vfy vfy-ok" title="Instantly-verified deliverable">verified</span>`
-        : s==="invalid" ? `<span class="vfy vfy-dead" title="Bounced verification — do not send; kept so nobody re-buys it">invalid</span>`
+        : s==="invalid" ? `<span class="vfy vfy-dead" title="Bounced verification, do not send; kept so nobody re-buys it">invalid</span>`
         : s==="pending" ? `<span class="vfy vfy-part" title="Verification still pending">pending</span>`
         : `<span class="vfy vfy-no" title="Never put through verification">unchecked</span>`;
       return `<div class="rr-box">
         <div class="rr-head">Enriched contacts <span title="Apollo-revealed addresses joined by domain, with their Instantly verification verdicts.">${list.length}</span></div>
-        ${list.map(x=>`<div class="rr-row"><span class="rr-k">${esc(x.n||"—")}</span><span class="rr-v">${x.t?`<span class="pdim">${esc(x.t)}</span><br>`:""}<a href="mailto:${esc(x.e)}">${esc(x.e)}</a> ${chipFor(x.s)}</span></div>`).join("")}
+        ${list.map(x=>`<div class="rr-row"><span class="rr-k">${esc(x.n||"-")}</span><span class="rr-v">${x.t?`<span class="pdim">${esc(x.t)}</span><br>`:""}<a href="mailto:${esc(x.e)}">${esc(x.e)}</a> ${chipFor(x.s)}</span></div>`).join("")}
       </div>`;
     })();
     const contactsTile = `<div class="tile">
@@ -2847,15 +2889,15 @@
     const derived = [];
     wonDeals.forEach(d=>derived.push({ ch:"system", who:"System", title:"Deal Won",
       body:`${d.deal} (${money(value(d))}) marked ${stageOf(d.stage).label}`, status:"logged", ts:safeISO(d) }));
-    deals.filter(d=>d.notes).forEach(d=>derived.push({ ch:"note", who:d.owner||"", title:"Deal Note — "+d.deal,
+    deals.filter(d=>d.notes).forEach(d=>derived.push({ ch:"note", who:d.owner||"", title:"Deal Note, "+d.deal,
       body:d.notes, status:"logged", ts:safeISO(d) }));
     /* Calls, texts and AI summaries from the phone system, matched to this account by the
        numbers on its contacts. These had been landing in D1 since 2026-08-19 with no way to
-       reach a screen — an account could have been called twice and its timeline showed only
+       reach a screen, an account could have been called twice and its timeline showed only
        what somebody typed by hand. */
     phoneActivityFor(name).forEach(r=>derived.push(phoneToActivity(r)));
     /* Instantly mail, including the replies that until now lived only in Instantly's own inbox
-       — the one system meant to be the book of business was the one place the correspondence
+      , the one system meant to be the book of business was the one place the correspondence
        was not. */
     mailFor(name).forEach(r=>derived.push(mailToActivity(r)));
     /* Website form submissions. The last of the four intake paths to reach this timeline, and
@@ -2871,7 +2913,7 @@
       const dk=dayKey(a.ts);
       if(dk!==lastDay){ tl+=`<div class="date-sep"><span>${esc(dk)}</span></div>`; lastDay=dk; }
       const st=a.status?`&middot; <span class="badge ${STATUS_CLS[a.status]||""}">${esc(a.status)}</span>`:"";
-      const del=(a._idx!=null&&canDelete())?`<button type="button" class="av3-del" title="Delete" aria-label="Delete activity" onclick="pipeAcctActDelete('${safe}',${a._idx})">🗑</button>`:"";
+      const del=(a._idx!=null&&canDelete())?`<button type="button" class="av3-del" title="Delete" aria-label="Delete activity" onclick="pipeAcctActDelete('${safe}',${a._idx})">Delete</button>`:"";
       tl+=`<div class="item" data-ch="${esc(a.ch)}">
         <div class="ico">${iconSvg(a.ch)}</div>
         <div class="bubble">
@@ -2907,7 +2949,7 @@
       </div>
     </section>`;
 
-    /* =================== RIGHT COLUMN — analytics =================== */
+    /* =================== RIGHT COLUMN, analytics =================== */
     const kpis = `
       <div class="tile kpi-tile"><div class="lbl">Open Pipeline</div><div class="val">${money(openPipe)}</div></div>
       <div class="tile kpi-tile"><div class="lbl">Weighted</div><div class="val crimson">${money(weightedOpen)}</div></div>
@@ -2921,7 +2963,7 @@
       <div class="funnel"><div class="funnel-scale" aria-hidden="true"></div>
       ${stageAgg.map(s=>{ const empty=s.val===0; const w=empty?6:Math.max(Math.round(s.val/funMax*100),3);
         return `<div class="funnel-row"><div class="funnel-label">${esc(s.label)}</div>
-          <div class="funnel-bar ${empty?"empty":s.cls}" style="width:${w}%">${empty?"—":money(s.val)}</div>
+          <div class="funnel-bar ${empty?"empty":s.cls}" style="width:${w}%">${empty?"-":money(s.val)}</div>
           <div class="funnel-count">${s.count||""}</div></div>`; }).join("")}
       </div></div>`;
 
@@ -2983,9 +3025,9 @@
     /* The deal book's provenance, stated where the KPIs are read. Companies, contacts and
        ICPs on this page come off the live roster join, but every DEAL number (pipeline,
        weighted, confirmed revenue, win rate) is computed from the SIBRA snapshot plus
-       local adds — without the date a four-week-old book reads as today's. */
+       local adds, without the date a four-week-old book reads as today's. */
     const snapNote = P.snapshot
-      ? `<div class="note" style="margin:6px 0 12px;font-size:12.5px"><b>Deal data as of ${esc(P.snapshot)}</b> — the SIBRA snapshot plus anything added here. Accounts, contacts and ICP columns read the live roster. Refreshing the deal book needs an operator login to SIBRA (/api/crm/*).</div>`
+      ? `<div class="note" style="margin:6px 0 12px;font-size:12.5px"><b>Deal data as of ${esc(P.snapshot)}</b>, the SIBRA snapshot plus anything added here. Accounts, contacts and ICP columns read the live roster. Refreshing the deal book needs an operator login to SIBRA (/api/crm/*).</div>`
       : "";
     return `<h1 class="pipe-h">Sales Pipeline</h1>
       ${snapNote}
@@ -3007,7 +3049,7 @@
   window.pipePeriod=p=>{ lsSet(PERIOD_KEY,p); rr(); };
 
   /* THE ONE ACCESSOR. Every pane that counts deals goes through this, so a pane cannot be
-     added later that forgets to filter — the only way to get a deal list is to get a filtered
+     added later that forgets to filter, the only way to get a deal list is to get a filtered
      one. Before 2026-09-08 `inPeriod` was applied in exactly two places out of seven, so
      setting "This quarter" left the board, offtake, production, the executive dashboard and
      reports all silently showing all time. A filter obeyed in some panes and ignored in
@@ -3075,7 +3117,7 @@
 
   function rCRM(){ return `<section class="section" id="sec-crm">${rStrip()}${sectionInner()}</section>`; }
 
-  /* ================= LEADS — THE POOL =================
+  /* ================= LEADS, THE POOL =================
      The section a rep opens first: every company we hold, browsable and filterable, with the
      click into the full account profile that until now only existed for companies that already
      had a deal or a contact.
@@ -3255,18 +3297,18 @@
      guess would put a number on screen that means nothing. When a company has been
      contacted, the date it was is shown, and when it has not, that is what it says. */
   function nextAction(c){
-    if(c.dead) return `<div class="lb-act dead">✕ ${esc((c.scoreWhy||c.why||"Disqualified").slice(0,64))}</div>`;
+    if(c.dead) return `<div class="lb-act dead">${esc((c.scoreWhy||c.why||"Disqualified").slice(0,64))}</div>`;
     const phones=(c.phones||[]).filter(Boolean);
     const needs=(c.needs||[]);
-    if(!phones.length) return `<div class="lb-act warn">⌕ No number on file${needs.length?` · needs ${esc(needs.slice(0,2).join(", "))}`:""}</div>`;
-    if(c.verify && c.verify!=="verified") return `<div class="lb-act warn">⌕ Verify the contact before calling</div>`;
-    if(c.lastContacted) return `<div class="lb-act">✓ Last contacted ${esc(c.lastContacted)}</div>`;
-    return `<div class="lb-act go">☎ Ready to call · ${esc(phones[0])}</div>`;
+    if(!phones.length) return `<div class="lb-act warn">No number on file${needs.length?` · needs ${esc(needs.slice(0,2).join(", "))}`:""}</div>`;
+    if(c.verify && c.verify!=="verified") return `<div class="lb-act warn">Verify the contact before calling</div>`;
+    if(c.lastContacted) return `<div class="lb-act">Last contacted ${esc(c.lastContacted)}</div>`;
+    return `<div class="lb-act go">Ready to call · ${esc(phones[0])}</div>`;
   }
 
   function boardCard(c,i){
     const name=c.name;
-    const safe=esc(String(name)).replace(/'/g,"\\'");
+    const safe=jq(String(name));
     const pinned=!!statusOverrides()[norm(name)];
     const compact=BOARD.density==="compact";
     const hue=monoHue(name);
@@ -3278,11 +3320,11 @@
     return `<article class="lb-card${compact?" compact":""}" draggable="true"
         style="--rail:${railColor(c)}"
         ondragstart="pipeBoardDragStart(event,'${safe}')" ondragend="pipeBoardDragEnd(event)"
-        onclick="pipeOpenAccount('${safe}')" title="${esc(name)} — drag to move, click to open">
+        onclick="pipeOpenAccount('${safe}')" title="${esc(name)}, drag to move, click to open">
       <div class="lb-top">
         <span class="lb-mono" style="--h:${hue}" aria-hidden="true">${esc(monogram(name))}</span>
         <span class="lb-name">${esc(name)}</span>
-        ${pinned?`<button type="button" class="lb-pin" title="Moved by hand, so it no longer follows the data. Click to unpin." onclick="event.stopPropagation();pipeBoardUnpin('${safe}')">📌</button>`:`<span class="lb-rank">#${i+1}</span>`}
+        ${pinned?`<button type="button" class="lb-pin" title="Moved by hand, so it no longer follows the data. Click to unpin." onclick="event.stopPropagation();pipeBoardUnpin('${safe}')">Unpin</button>`:`<span class="lb-rank">#${i+1}</span>`}
       </div>
       ${sub?`<div class="lb-sub">${esc(sub)}</div>`:""}
       ${compact||!chips.length?"":`<div class="lb-chips">${chips.join("")}</div>`}
@@ -3331,7 +3373,7 @@
       </div>
       ${dropped?`<div class="note" style="margin:0 0 10px">${dropped} ${dropped===1?"company is":"companies are"} filed under a status this board has no column for, and ${dropped===1?"is":"are"} not shown. Turn Disqualified back on if you hid it.</div>`:""}
       <div class="lb-board">${columns}</div>
-      <p class="pdim lb-foot">Dragging a card pins it: it stops following the evidence and keeps the status you gave it until you unpin it with the 📌. Everything else is derived from deals, logged conversations and the research verdict, so it updates itself. Drops write to the shared store and everyone sees them.</p>`;
+      <p class="pdim lb-foot">Dragging a card pins it: it stops following the evidence and keeps the status you gave it until you click Unpin. Everything else is derived from deals, logged conversations and the research verdict, so it updates itself. Drops write to the shared store and everyone sees them.</p>`;
   }
 
   /* ---- WHAT THE WEBSITE SENT US ----
@@ -3356,7 +3398,7 @@
       if(!w.company) return `<span class="pdim">no company given</span>`;
       const hit=liveAccounts().find(a=>norm(a.name)===norm(w.company));
       return hit
-        ? `<a href="#" onclick="pipeOpenAccount('${esc(String(hit.name).replace(/'/g,"\\'"))}');return false">${esc(w.company)}</a>`
+        ? `<a href="#" onclick="pipeOpenAccount('${jq(String(hit.name))}');return false">${esc(w.company)}</a>`
         : esc(w.company);
     };
     const row=w=>`<tr class="${w.rejected?"wl-refused":""}">
@@ -3372,7 +3414,7 @@
     </tr>`;
     return `<section class="wl-panel">
       <h4 class="rpt-h">From the website &middot; ${live.length} ${live.length===1?"lead":"leads"}${refused.length?` &middot; ${refused.length} refused`:""}</h4>
-      <p class="pdim wl-sub">Form submissions from americanbiocarbon.com, stored as they arrive. A lead
+      <p class="pdim wl-sub">Form submissions from the Progreaux website, stored as they arrive. A lead
       marked "no phone" is one the site used to refuse outright, with the visitor shown a confirmation
       and nothing kept. Read only here: this is what the visitor typed.</p>
       <div class="tbl-wrap"><table class="rpt-tbl">
@@ -3438,7 +3480,7 @@
     return rec;
   }
   /* Every index is derived and cached for the life of the page, so a write that does not clear
-     them shows the new lead in the table and nowhere else — not on its own profile, not in the
+     them shows the new lead in the table and nowhere else, not on its own profile, not in the
      ICP join, not in the account list. */
   function poolBust(){ ROSTER_BY=null; ROSTER_BY_DOM=null; CO_BLOB.clear(); ICP_COLOR=null; }
   /* The roster now arrives after first paint (see ROSTER, LOADED LATE in app.js). Every index
@@ -3449,7 +3491,7 @@
   window.pipeRosterBust = poolBust;
   window.pipePoolSave = pi => {
     const name=V("plnName");
-    if(!name){ alert("A company name is required — it is the only thing every other join hangs off."); return; }
+    if(!name){ alert("A company name is required, it is the only thing every other join hangs off."); return; }
     const rec = poolRecord({ name, website:V("plnWebsite"), contact:V("plnContact"), title:V("plnTitle"),
       email:V("plnEmail"), phone:V("plnPhone"), city:V("plnCity"), state:V("plnState"),
       line:V("plnLine"), icp:V("plnIcp"), what:V("plnWhat") });
@@ -3470,7 +3512,7 @@
      columns before importing is how imports stop happening. Read whatever headers are there,
      guess the mapping, and let a person correct the guess before a single row is written. */
   /* Each field carries two patterns: an EXACT header match and a looser contains match. Both
-     passes run over every field before the loose one starts, which is the part that matters —
+     passes run over every field before the loose one starts, which is the part that matters -
      a one pass loose guess lets "Product line" claim the "Company Domain" column simply by
      being earlier in the list. Exact first means the unambiguous headers are spoken for before
      anything fuzzy is allowed to reach for what is left. */
@@ -3537,7 +3579,7 @@
       if(i>=0){ guessed[f[0]]=i; taken.add(i); }
     } };
     pass(3); pass(4);
-    const opts=()=>[["-1","— not in this file —"],...head.map((h,ix)=>[String(ix),h||`Column ${ix+1}`])];
+    const opts=()=>[["-1","- not in this file -"],...head.map((h,ix)=>[String(ix),h||`Column ${ix+1}`])];
     const rowsHtml=IMPORT_FIELDS.map(([k,label,req])=>{
       const g=guessed[k]==null?-1:guessed[k];
       return `<div class="pcf"><label>${esc(label)}${req?" *":""}</label>
@@ -3545,7 +3587,7 @@
     }).join("");
     openModal(`Import ${filename}`,
       `<div class="note" style="margin-bottom:12px;font-size:12.5px"><b>${num(body)} row${body===1?"":"s"}, ${head.length} column${head.length===1?"":"s"}.</b>
-         The mapping below is a guess from your header names — correct anything it got wrong. Only Company is
+         The mapping below is a guess from your header names, correct anything it got wrong. Only Company is
          required. Rows whose company is already in the pool are skipped, not duplicated.</div>
        <div class="pcf-grid">${rowsHtml}</div>`,
       `Import ${num(body)} row${body===1?"":"s"}`, "pipeImportRun()", true);
@@ -3695,11 +3737,11 @@
   }
 
   const INBOX_META={
-    missed:{ label:"Missed calls", rail:"var(--accent)", bg:"#fdeaef", fg:"#b91237", ic:"call" },
+    missed:{ label:"Missed calls", rail:"var(--accent)", bg:"rgba(var(--red-rgb),.1)", fg:"var(--red)", ic:"call" },
     text:  { label:"Texts",        rail:"var(--line-2)", bg:"var(--paper-2)", fg:"var(--text-dim)", ic:"sms" },
-    reply: { label:"Replies",      rail:"var(--accent)", bg:"#eef2f9", fg:"#24478a", ic:"email" },
-    flag:  { label:"Policy flags", rail:"var(--gold)",   bg:"#fbf4e6", fg:"#8a6412", ic:"system" },
-    lead:  { label:"New leads",    rail:"var(--accent)", bg:"#f0f7ee", fg:"#3f5f3c", ic:"task" },
+    reply: { label:"Replies",      rail:"var(--accent)", bg:"rgba(var(--blue-rgb),.1)", fg:"var(--blue-soft)", ic:"email" },
+    flag:  { label:"Policy flags", rail:"var(--gold)",   bg:"rgba(var(--gold-rgb),.14)", fg:"var(--gold-soft)", ic:"system" },
+    lead:  { label:"New leads",    rail:"var(--accent)", bg:"var(--paper-2)", fg:"var(--accent)", ic:"task" },
   };
 
   function rInbox(){
@@ -3724,10 +3766,10 @@
       if(dk!==lastDay){ body+=`<div class="ibx-day">${esc(dk)}</div>`; lastDay=dk; }
       const m=INBOX_META[i.type]||INBOX_META.text;
       const isNew=!read.has(i.sig);
-      const act = i.replyTo ? `<button type="button" class="btn btn-accent ibx-act" onclick="pipeReplyModal('${esc(i.sig)}')">Reply</button>`
-        : i.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${esc(i.lead)}')">${esc(i.action)}</button>`
+      const act = i.replyTo ? `<button type="button" class="btn btn-accent ibx-act" onclick="pipeReplyModal('${jq(i.sig)}')">Reply</button>`
+        : i.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${jq(i.lead)}')">${esc(i.action)}</button>`
         : i.tel ? `<a class="btn btn-accent ibx-act" href="${i.type==="text"?"sms":"tel"}:${esc(i.tel)}">${esc(i.action)}</a>`
-        : i.href ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeOpenAccount('${esc(i.href).replace(/'/g,"\\'")}')">${esc(i.action)}</button>`
+        : i.href ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeOpenAccount('${jq(i.href)}')">${esc(i.action)}</button>`
         : "";
       /* The whole row opens the account, not just the link in it. A feed where only one small
          word is clickable makes people hunt for the target; the action button stops the click
@@ -3735,15 +3777,15 @@
       /* An email row opens the REPLY, because answering it is the only thing anyone opens it
          to do. Every other row opens the account, which is where a call or a text is worked
          from. Rows with neither stay inert rather than pretending to be clickable. */
-      const rowAction = i.replyTo ? `pipeReplyModal('${esc(i.sig)}')`
-        : i.acct ? `pipeOpenAccount('${esc(i.acct).replace(/'/g,"\\'")}')` : "";
+      const rowAction = i.replyTo ? `pipeReplyModal('${jq(i.sig)}')`
+        : i.acct ? `pipeOpenAccount('${jq(i.acct)}')` : "";
       const open=rowAction?` onclick="${rowAction}" style="--rail:${m.rail};cursor:pointer"`:` style="--rail:${m.rail}"`;
       body+=`<div class="ibx-row${isNew?" new":""}"${open}>
         <div class="ibx-ico" style="background:${m.bg};color:${m.fg}">${iconSvg(m.ic)}</div>
         <div class="ibx-main">
           <div class="ibx-head">
             <span class="ibx-title">${esc(i.title)}</span>
-            ${i.acct?`<a class="acct-link" onclick="pipeOpenAccount('${esc(i.acct).replace(/'/g,"\\'")}')">${esc(i.acct)}</a>`
+            ${i.acct?`<a class="acct-link" onclick="pipeOpenAccount('${jq(i.acct)}')">${esc(i.acct)}</a>`
                     :`<span class="ibx-who">${esc(i.who||"")}</span>`}
           </div>
           <p class="ibx-body">${esc(String(i.body||"").slice(0,260))}</p>
@@ -3751,14 +3793,14 @@
         <div class="ibx-side" onclick="event.stopPropagation()">
           <span class="ibx-time">${esc(timeStr(i.at))}</span>
           ${act}
-          ${isNew?`<button type="button" class="ibx-dismiss" onclick="pipeInboxRead('${esc(i.sig)}')" title="Mark read">Mark read</button>`:""}
+          ${isNew?`<button type="button" class="ibx-dismiss" onclick="pipeInboxRead('${jq(i.sig)}')" title="Mark read">Mark read</button>`:""}
         </div>
       </div>`;
     });
 
     /* The icon sprite has to be in the DOM for <use href="#i-call"> to resolve. It used to be
        emitted only by the account profile, so every icon in the Inbox rendered as an empty
-       circle — the markup was right and the symbols simply were not on the page. Each section
+       circle, the markup was right and the symbols simply were not on the page. Each section
        that draws icons now carries its own copy; duplicate symbol ids are harmless and a lot
        safer than one section depending on another having rendered first. */
     return `${AV3_SPRITE}<div class="sec-head">
@@ -3811,7 +3853,7 @@
         </div>
       </div>
       <div class="pcf-hint" id="rpState">${sg?"":"<b>The signature could not be loaded.</b> It is still added when the reply sends."}</div>`;
-    openModal("Reply",body,"Send reply",`pipeReplySend('${esc(sig)}')`,false);
+    openModal("Reply",body,"Send reply",`pipeReplySend('${jq(sig)}')`,false);
     pipeReplyPreview();
     const el=document.getElementById("rpBody"); if(el) el.focus();
   };
@@ -3829,16 +3871,23 @@
       (paras||`<p class="rp-placeholder">Your reply will appear here.</p>`)+sig;
   };
 
+  let REPLY_SENDING=false;
   window.pipeReplySend=async sig=>{
+    /* One send at a time. Instantly would send a second email in the thread for a second POST. */
+    if(REPLY_SENDING) return;
     const i=inboxItems().find(x=>x.sig===sig); if(!i) return;
     const text=V("rpBody"), subject=V("rpSubj");
     if(!text){ alert("A message is required."); return; }
+    REPLY_SENDING=true;
     const state=document.getElementById("rpState");
+    const btns=[...document.querySelectorAll("#pipeModal .btn-primary")];
+    btns.forEach(b=>{ b.disabled=true; });
     if(state) state.textContent="Sending…";
     try{
       const res=await fetch("/api/reply",{ method:"POST", headers:{"Content-Type":"application/json"},
         credentials:"same-origin",
         body:JSON.stringify({ replyToUuid:i.replyTo, eaccount:i.eaccount, subject, text }) });
+      if(sessionGone(res)) throw new Error(SESSION_MSG);
       const data=await res.json();
       if(!data.ok) throw new Error(data.error||data.reason||"the reply was refused");
       /* Logged on the account as well as sent, so the timeline shows the whole conversation
@@ -3851,13 +3900,16 @@
     }catch(err){
       /* Fails loud: telling somebody their reply was sent when it was not means they stop
          following up on a prospect who never heard from them. */
+      btns.forEach(b=>{ b.disabled=false; });
       if(state) state.innerHTML=`<b style="color:var(--red)">Not sent.</b> ${esc(err.message)}`;
       else alert("The reply was not sent: "+err.message);
+    }finally{
+      REPLY_SENDING=false;
     }
   };
 
   /* ---- manual to-dos ----
-     Everything else on Today is DERIVED — a to-do the system can work out is one nobody should
+     Everything else on Today is DERIVED, a to-do the system can work out is one nobody should
      have to write down. But not every commitment has an event behind it ("call Daniel about the
      invoice", "chase the COA"), and those had nowhere to live. These are real records in the
      shared store, so a task Victor writes is a task Sarah sees. */
@@ -3905,9 +3957,9 @@
     rows.sort((a,b)=>new Date(a.at)-new Date(b.at));   // oldest first: longest waiting, first
 
     const body=rows.length?rows.map(r=>{
-      const act = r.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${esc(r.lead)}')">${esc(r.action)}</button>`
+      const act = r.lead ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeLeadClaim('${jq(r.lead)}')">${esc(r.action)}</button>`
         : r.tel ? `<a class="btn btn-accent ibx-act" href="tel:${esc(r.tel)}">${esc(r.action)}</a>`
-        : r.href ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeOpenAccount('${esc(r.href).replace(/'/g,"\\'")}')">${esc(r.action)}</button>`
+        : r.href ? `<button type="button" class="btn btn-primary ibx-act" onclick="pipeOpenAccount('${jq(r.href)}')">${esc(r.action)}</button>`
         : "";
       return `<div class="tdy-row">
         <div class="tdy-main"><span class="tdy-what">${esc(r.what)}</span>
@@ -3920,9 +3972,9 @@
     const ts=todos();
     const open=ts.filter(t=>!t.done), done=ts.filter(t=>t.done);
     const todoRow=t=>`<div class="tdy-todo${t.done?" done":""}">
-      <button type="button" class="tdy-check" onclick="pipeTodoToggle('${esc(t.id)}')" aria-label="${t.done?"Mark not done":"Mark done"}">${t.done?"&#10003;":""}</button>
+      <button type="button" class="tdy-check" onclick="pipeTodoToggle('${jq(t.id)}')" aria-label="${t.done?"Mark not done":"Mark done"}">${t.done?"&#10003;":""}</button>
       <span class="tdy-text">${esc(t.what)}</span>
-      ${canDelete()?`<button type="button" class="tdy-x" onclick="pipeTodoDelete('${esc(t.id)}')" title="Delete">&times;</button>`:""}
+      ${canDelete()?`<button type="button" class="tdy-x" onclick="pipeTodoDelete('${jq(t.id)}')" title="Delete">&times;</button>`:""}
     </div>`;
 
     return `${AV3_SPRITE}<div class="sec-head">
@@ -3944,7 +3996,7 @@
      Everything above lives inside this IIFE and is unreachable from another file. reports.js
      needs the same book of business the panes read, and there are exactly two ways to give it
      one: copy the accessors, or export them. Copying is how a reporting screen ends up
-     disagreeing with the pipeline screen it claims to summarise — two definitions of "value",
+     disagreeing with the pipeline screen it claims to summarise, two definitions of "value",
      two notions of which deals are live, and no way to tell from the numbers which one you
      are reading. So: one export, read at call time, never cached.
 
@@ -4026,7 +4078,7 @@
     return (res.partial?`<p class="gs-hint">The company roster is still loading, so accounts may be missing from this list.</p>`:"")
       + res.groups.filter(([,g])=>g.length).map(([label,g])=>`
         <div class="gs-group"><div class="gs-gh">${esc(label)}${g.length>SEARCH_MAX?` · showing ${SEARCH_MAX} of ${g.length}`:""}</div>
-        ${g.slice(0,SEARCH_MAX).map(i=>`<button type="button" class="gs-row" onclick="pipeSearchGo('${esc(String(i.act)).replace(/'/g,"\\'")}')">
+        ${g.slice(0,SEARCH_MAX).map(i=>`<button type="button" class="gs-row" onclick="pipeSearchGo('${jq(String(i.act))}')">
           <span class="gs-l">${esc(i.label)}</span><span class="gs-s">${esc(i.sub)}</span></button>`).join("")}</div>`).join("");
   };
 
@@ -4065,7 +4117,7 @@
   /* Hydrate AFTER first paint, never before it. The page renders from localStorage instantly
      the way it always has; the shared store arrives a moment later and re-renders only if it
      actually carries something new. Blocking the first render on a network call would trade a
-     real defect for a worse one — a dashboard that hangs when a dependency is slow. */
+     real defect for a worse one, a dashboard that hangs when a dependency is slow. */
   if(typeof window!=="undefined"){
     const start=()=>{ hydrate().catch(e=>console.warn("[pipeline] hydrate failed",e)); };
     if(document.readyState==="complete"||document.readyState==="interactive") setTimeout(start,0);

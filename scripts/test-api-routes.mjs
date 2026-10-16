@@ -33,7 +33,6 @@ const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, '..', '..')
 const LIVE = process.argv.includes('--live')
 
-const { onRequestGet: allo } = await import('../sales/functions/api/allo.js')
 const { onRequestGet: instantly } = await import('../sales/functions/api/instantly.js')
 const { onRequestGet: apollo } = await import('../sales/functions/api/apollo.js')
 const { onRequestPost: prospect, onRequestGet: prospectGet } = await import('../sales/functions/api/prospect.js')
@@ -47,7 +46,7 @@ const call = async (fn, env, url = 'https://sales.example/api/x') => {
 }
 
 console.log('\nUnconfigured: every route must answer 200 ok:false, never throw, never 500')
-for (const [name, fn] of [['allo', allo], ['instantly', instantly], ['apollo', apollo]]) {
+for (const [name, fn] of [['instantly', instantly], ['apollo', apollo]]) {
   try {
     const r = await call(fn, {})
     ok(`${name} returns 200`, r.status === 200, `got ${r.status}`)
@@ -58,16 +57,9 @@ for (const [name, fn] of [['allo', allo], ['instantly', instantly], ['apollo', a
 }
 
 console.log('\nBlank and whitespace secrets count as unset, not as a key')
-for (const [name, fn, key] of [['allo', allo, 'ALLO_EXPORT_TOKEN'], ['instantly', instantly, 'INSTANTLY_API_KEY'], ['apollo', apollo, 'APOLLO_API_KEY']]) {
+for (const [name, fn, key] of [['instantly', instantly, 'INSTANTLY_API_KEY'], ['apollo', apollo, 'APOLLO_API_KEY']]) {
   const r = await call(fn, { [key]: '   ' })
   ok(`${name} treats whitespace as unset`, r.body.ok === false && r.body.reason === 'not-configured', JSON.stringify(r.body).slice(0, 120))
-}
-
-console.log('\nUnreachable upstream fails soft rather than propagating')
-{
-  const r = await call(allo, { ALLO_EXPORT_TOKEN: 'x', ALLO_HOOKS_URL: 'https://127.0.0.1:9' })
-  ok('allo survives a dead Worker', r.status === 200 && r.body.ok === false, JSON.stringify(r.body).slice(0, 140))
-  ok('allo names the reason', ['unreachable', 'timeout', 'upstream-error'].includes(r.body.reason), r.body.reason)
 }
 
 console.log('\nA bad key is reported, not thrown')
@@ -81,13 +73,6 @@ console.log('\nA bad key is reported, not thrown')
   ok('apollo reports keyValid false rather than failing',
     a.body.ok === true ? a.body.keyValid === false : a.body.ok === false,
     JSON.stringify(a.body).slice(0, 140))
-}
-
-console.log('\nallo clamps a hostile limit')
-{
-  const r = await call(allo, { ALLO_EXPORT_TOKEN: 'x', ALLO_HOOKS_URL: 'https://127.0.0.1:9' },
-    'https://sales.example/api/allo?limit=999999')
-  ok('a huge limit does not throw', r.status === 200 && r.body.ok === false, JSON.stringify(r.body).slice(0, 120))
 }
 
 if (LIVE) {
@@ -128,7 +113,7 @@ if (LIVE) {
 console.log('\n/api/prospect refuses before it writes')
 {
   const post = async (env, body) => {
-    const res = await prospect({ env, request: new Request('https://sales.example/api/prospect', {
+    const res = await prospect({ env, data: { user: { username: 'test', role: 'admin' } }, request: new Request('https://sales.example/api/prospect', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: typeof body === 'string' ? body : JSON.stringify(body),
     }) })
@@ -159,6 +144,17 @@ console.log('\n/api/prospect refuses before it writes')
 
   const badEmail = await post({ ALLO_API_KEY: 'k' }, { ...good, email: 'not-an-email' })
   ok('a malformed email is refused', badEmail.status === 400 && /email/.test(badEmail.body.error || ''), badEmail.body.error)
+
+  /* The authz gate runs before anything else: no session is a 401, and a role without
+     outbound.send is a 403. Neither reaches Allo. */
+  const asRole = async (user) => {
+    const res = await prospect({ env: { ALLO_API_KEY: 'k' }, data: user ? { user } : {}, request: new Request('https://sales.example/api/prospect', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(good),
+    }) })
+    return res.status
+  }
+  ok('no session is a 401', await asRole(null) === 401)
+  ok('a role without outbound.send is a 403', await asRole({ username: 'x', role: 'nobody' }) === 403)
 
   const g = await prospectGet()
   ok('GET explains itself instead of 404ing', g.status === 405)

@@ -40,6 +40,7 @@ const TIMEOUT_MS = 8000;
    dashboard render can never walk an unbounded history. */
 const PAGE = 100;
 const MAX_PAGES = 2;
+const RECEIVED_PAGES = 3;   // received mail only, so replies reach further back than the newest 200 messages
 
 const soft = (reason, detail) =>
   new Response(JSON.stringify({ ok: false, reason, detail: detail || null, rows: [] }), {
@@ -102,27 +103,45 @@ export async function onRequestGet(context) {
   const timer = setTimeout(() => abort.abort(), TIMEOUT_MS);
 
   const items = [];
+  let cappedReceived = false;
   try {
-    let cursor = null;
-    for (let page = 0; page < MAX_PAGES; page++) {
-      const url = `${API}/emails?limit=${PAGE}${cursor ? `&starting_after=${encodeURIComponent(cursor)}` : ''}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${key}` },
-        signal: abort.signal,
-      });
-      if (res.status === 401 || res.status === 403) return soft('unauthorized', `instantly ${res.status}`);
-      if (!res.ok) return soft('upstream-error', `instantly returned ${res.status}`);
+    /* Two passes. The unfiltered newest-200 gives the outbound half of a conversation, but sent
+       mail outnumbers replies by far, so on its own a reply older than about a day of sends fell
+       out of the Inbox. A second pass asks for received mail only, which goes back much further.
+       Merged on the message id. */
+    const walk = async (filter, maxPages) => {
+      let cursor = null;
+      for (let page = 0; page < maxPages; page++) {
+        const url = `${API}/emails?limit=${PAGE}${filter}${cursor ? `&starting_after=${encodeURIComponent(cursor)}` : ''}`;
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${key}` },
+          signal: abort.signal,
+        });
+        if (res.status === 401 || res.status === 403) return soft('unauthorized', `instantly ${res.status}`);
+        if (!res.ok) return soft('upstream-error', `instantly returned ${res.status}`);
 
-      const data = await res.json();
-      const batch = Array.isArray(data.items) ? data.items : [];
-      items.push(...batch);
-      cursor = data.next_starting_after;
-      if (!cursor || batch.length < PAGE) break;
-    }
+        const data = await res.json();
+        const batch = Array.isArray(data.items) ? data.items : [];
+        items.push(...batch);
+        cursor = data.next_starting_after;
+        if (!cursor || batch.length < PAGE) return null;
+        if (page === maxPages - 1 && filter) cappedReceived = true;
+      }
+      return null;
+    };
+    const failed = await walk('', MAX_PAGES) || await walk('&email_type=received', RECEIVED_PAGES);
+    if (failed) return failed;
   } catch (error) {
     return soft(abort.signal.aborted ? 'timeout' : 'unreachable', redact(error, env));
   } finally {
     clearTimeout(timer);
+  }
+  {
+    const seen = new Set();
+    for (let i = items.length - 1; i >= 0; i--) {
+      const id = items[i] && items[i].id;
+      if (id && seen.has(id)) items.splice(i, 1); else if (id) seen.add(id);
+    }
   }
 
   /* Our own sending mailboxes, taken from the data rather than hard-coded — the programme runs
@@ -172,6 +191,8 @@ export async function onRequestGet(context) {
     fetchedAt: new Date().toISOString(),
     total: rows.length,
     replies: replies.length,
+    /* True when even the received-only pass hit its page cap, so the page can say "newest N". */
+    capped: cappedReceived,
     /* Domains present in the feed, so an empty timeline is diagnosable: domains here but no
        match is a joining bug, no domains is genuinely no mail. */
     domains: [...new Set(rows.map((r) => r.key).filter(Boolean))],

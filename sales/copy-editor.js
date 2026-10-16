@@ -21,7 +21,20 @@
     const LS_KEY = `vej_copy_${kind}_v1`;
     const lsGet=()=>{ try{ return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); }catch(e){ return {}; } };
     const lsSet=v=>{ try{ localStorage.setItem(LS_KEY, JSON.stringify(v)); }catch(e){} };
-    const S = { kind, records:{}, loaded:false, loadErr:"", dirty:{}, msg:{} };
+    const S = { kind, records:{}, loaded:false, loadErr:"", dirty:{}, msg:{}, baseCopy:{} };
+
+    /* Unsaved typing survives any re-render: before the cards are rebuilt from records, each
+       dirty form is copied into its record in memory (not sent anywhere). The copy as last
+       saved is remembered so save() can still tell whether the wording changed. */
+    S.snapshot = function(){
+      for(const id of Object.keys(S.dirty)){
+        if(!S.dirty[id]) continue;
+        if(!document.querySelector(`[data-nur="${CSS.escape(id)}"]`)) continue;
+        const prev = S.records[id]||{};
+        if(!(id in S.baseCopy)) S.baseCopy[id] = prev.copy||null;
+        S.records[id] = { ...prev, copy: readForm(id) };
+      }
+    };
 
     S.load = async function(){
       S.records = lsGet();
@@ -41,7 +54,14 @@
 
     S.save = async function(id, patch){
       const prev = S.records[id]||{};
-      const rec = { ...prev, ...patch, id, updated_by: who()||prev.updated_by||"", updated_at:new Date().toISOString() };
+      /* Changed copy invalidates an approval: unless this very call sets a status, an approved
+         or canonical record falls back to draft when its copy differs from what was saved. */
+      const lockedPrev = prev.status==="approved"||prev.status==="canonical";
+      const baseCopy = id in S.baseCopy ? S.baseCopy[id] : (prev.copy||null);
+      delete S.baseCopy[id];
+      const copyChanged = patch && "copy" in patch && JSON.stringify(patch.copy||null)!==JSON.stringify(baseCopy);
+      const demote = lockedPrev && copyChanged && !("status" in patch) ? { status:"draft" } : {};
+      const rec = { ...prev, ...patch, ...demote, id, updated_by: who()||prev.updated_by||"", updated_at:new Date().toISOString() };
       S.records[id]=rec; lsSet(S.records); S.dirty[id]=false;
       try{
         const res = await fetch(`/api/record?kind=${encodeURIComponent(kind)}`,{ method:"POST", credentials:"same-origin",
@@ -62,7 +82,7 @@
     };
     S.lastMsg = function(id){
       const rec=S.records[id]||{};
-      return S.msg[id] || (rec.updated_at ? `Last saved ${rec.updated_at.slice(0,16).replace("T"," ")} by ${esc(rec.updated_by||"unknown")}` : "Not saved yet. Everything you see is the placeholder draft.");
+      return S.msg[id] || (rec.updated_at ? `Last saved ${rec.updated_at.slice(0,16).replace("T"," ")} by ${esc(rec.updated_by||"unknown")}` : "Not saved yet. Everything you see is the starter draft.");
     };
     return S;
   }
@@ -88,7 +108,7 @@
     const cls = st==="approved"||st==="canonical"?"ok":st==="ready"?"warn":"";
     return `<span class="nur-status ${cls}">${esc(st||"draft")}</span>`;
   }
-  const usingTag = own => own ? `<span class="nur-using own">your copy</span>` : `<span class="nur-using">using placeholder</span>`;
+  const usingTag = own => own ? `<span class="nur-using own">your copy</span>` : `<span class="nur-using">using starter draft</span>`;
 
   /* One form row. `ui` is the editor's global name so the oninput handler can find it. */
   function fieldRow(ui, id, key, label, kind, ph, val){
@@ -125,7 +145,7 @@
   /* Flip the typed box's own tag as they type. */
   function flipTag(el){
     const tag = el.parentElement && el.parentElement.querySelector(".nur-using");
-    if(tag){ const own = Boolean(el.value.trim()); tag.textContent = own ? "your copy" : "using placeholder"; tag.className = "nur-using" + (own ? " own" : ""); }
+    if(tag){ const own = Boolean(el.value.trim()); tag.textContent = own ? "your copy" : "using starter draft"; tag.className = "nur-using" + (own ? " own" : ""); }
   }
 
   window.COPY_EDITOR = { esc, who, role, canApprove, makeStore, effective, fillTokens, statusPill, fieldRow, readForm, flipTag };

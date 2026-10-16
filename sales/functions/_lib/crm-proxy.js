@@ -5,7 +5,7 @@
  * WHY A PROXY AT ALL. The store lives on the allo-hooks Worker, which holds the D1 binding and
  * the export token. The browser cannot hold that token — it is a static page served to
  * whoever logs in — so the Sales OS calls its OWN origin and this function adds the credential
- * on the edge. Same shape as /api/allo, and the same two consequences:
+ * on the edge. Same shape as /api/activity, and the same two consequences:
  *
  *   NO CORS. Same origin, so the Worker needs no allow-list and adding this makes nothing on
  *   it reachable from any other site.
@@ -43,6 +43,7 @@ const TIMEOUT_MS = 8000;
 
 import { requireCapability, crmCapability } from './authz.js';
 import { redact } from './redact.js';
+import { COPY_KINDS, applyApprovalRules } from './approval.js';
 
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -95,6 +96,26 @@ export async function proxyCrm(context, kind) {
 
   const denied = requireCapability(context, crmCapability(method, parsed));
   if (denied) return denied;
+
+  /* Approval rules for the copy stores. Needs the stored status, so it reads the kind first. */
+  if (kind === 'records' && COPY_KINDS.includes(recordKind) && (method === 'POST' || method === 'PATCH')) {
+    let stored = {};
+    try {
+      const res = await fetch(`${base}/crm/records?kind=${encodeURIComponent(recordKind)}`, {
+        headers: { 'x-export-token': token },
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      const listed = await res.json();
+      if (!res.ok || listed?.ok === false) throw new Error('store read failed');
+      for (const r of listed.records || []) stored[String(r.id)] = r;
+    } catch {
+      return json({ ok: false, reason: 'unreachable', error: 'could not check approval status, nothing was saved' }, 502);
+    }
+    const checked = applyApprovalRules(context?.data?.user?.role, parsed, stored, id);
+    if (checked.error) return json({ ok: false, reason: 'forbidden', error: checked.error, role: context?.data?.user?.role }, checked.status);
+    parsed = checked.body;
+    body = JSON.stringify(parsed);
+  }
 
   const abort = new AbortController();
   const timer = setTimeout(() => abort.abort(), TIMEOUT_MS);
