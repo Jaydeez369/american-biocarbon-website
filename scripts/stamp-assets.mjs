@@ -59,10 +59,10 @@ let unstamped = 0;
 /* Sales OS deploys two ways: as /sales/ on the main site, AND as its own standalone
    Cloudflare Pages project (root dir = sales/). A standalone deploy cannot reach
    ../tokens.css, so Sales OS links a LOCAL sales/tokens.css that is a build-managed
-   mirror of the canonical tokens.css. Edit tokens.css; the build syncs the mirror.
+   mirror of scripts/sales-tokens.src.css (the Progreaux Sales OS palette; the public site keeps its own tokens.css). Edit the .src.css; the build syncs the mirror.
    --check fails on drift so a stale mirror can't ship. */
 {
-  const canon = readFileSync(join(ROOT, "tokens.css"));
+  const canon = readFileSync(join(ROOT, "scripts", "sales-tokens.src.css"));
   const mirrorPath = join(ROOT, "sales", "tokens.css");
   const mirror = existsSync(mirrorPath) ? readFileSync(mirrorPath) : null;
   if (!mirror || !canon.equals(mirror)) {
@@ -133,8 +133,9 @@ function walkAssets(dir, out = []) {
 }
 // Rasters that never pass through webpify, so a .webp sibling would be dead weight.
 // og-image.png is fetched by social/crawler bots via an absolute URL in <meta>, and those
-// bots want a PNG - it is never rendered as an <img>.
-const NO_WEBP_NEEDED = new Set(["assets/og-image.png"]);
+// bots want a PNG - it is never rendered as an <img>. The wordmark PNGs are email-only
+// (Gmail and Outlook do not render SVG or WebP); the site itself uses the SVGs.
+const NO_WEBP_NEEDED = new Set(["assets/og-image.png", "assets/progreaux-wordmark.png", "assets/progreaux-wordmark-rev.png"]);
 for (const file of walkAssets(join(ROOT, "assets"))) {
   const rel = file.replace(ROOT + "/", "");
   const m = file.match(/^(.*)\.(png|jpe?g)$/i);

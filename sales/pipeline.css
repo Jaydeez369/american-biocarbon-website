@@ -32,7 +32,7 @@
   line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pk-u{font-size:12.5px;font-weight:600;color:var(--text-mute);letter-spacing:0}
 .pk-d{font-size:11px;color:var(--text-mute);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pk-blue{color:#1f4d99}
+.pk-blue{color:var(--info-deep)}
 .pk-green{color:var(--green-deep)}
 .pk-purple{color:var(--purple)}
 @media(max-width:1400px){.grid.g6{grid-template-columns:repeat(3,1fr)}}
@@ -44,7 +44,7 @@
    shadcn default (14px, sentence-case headers). Base rule = roomy; the two compact tabs override. ---- */
 .pipe-pane .tbl-wrap{margin:6px 0 14px}
 .pipe-pane thead th{font-family:var(--font);text-transform:none;letter-spacing:0;
-  font-size:14px;font-weight:500;color:#526077;background:var(--paper);padding:11px 12px}
+  font-size:14px;font-weight:500;color:var(--navy-500);background:var(--paper);padding:11px 12px}
 .pipe-pane tbody td{padding:11px 12px;font-size:14px;line-height:1.5}
 .pipe-pane h3.sub{margin:18px 0 8px}
 
@@ -67,20 +67,20 @@
 /* stage / confidence chips */
 .pbadge{display:inline-block;font-size:10px;font-weight:700;padding:1.5px 7px;border-radius:11px;
   border:1px solid transparent;white-space:nowrap;line-height:1.5}
-.st-prospect {background:rgba(var(--info-rgb),.12);color:#1f4d99;border-color:rgba(var(--info-rgb),.3)}
+.st-prospect {background:rgba(var(--info-rgb),.12);color:var(--info-deep);border-color:rgba(var(--info-rgb),.3)}
 .st-discovery{background:rgba(var(--purple-rgb),.12);color:var(--purple);border-color:rgba(var(--purple-rgb),.3)}
 .st-sample   {background:rgba(var(--gold-rgb),.15);color:var(--gold-soft);border-color:rgba(var(--gold-rgb),.32)}
 .st-quote    {background:rgba(var(--crimson-500-rgb),.09);color:var(--crimson-600);border-color:rgba(var(--crimson-500-rgb),.25)}
-.st-nego     {background:rgba(224,130,50,.13);color:#a05a17;border-color:rgba(224,130,50,.3)}
+.st-nego     {background:rgba(var(--warning-rgb),.13);color:var(--warning-deep);border-color:rgba(var(--warning-rgb),.3)}
 .st-won      {background:rgba(var(--green-rgb),.14);color:var(--green-deep);border-color:rgba(var(--green-rgb),.32)}
-.cf-secured  {background:rgba(var(--info-rgb),.12);color:#1f4d99;border-color:rgba(var(--info-rgb),.3)}
+.cf-secured  {background:rgba(var(--info-rgb),.12);color:var(--info-deep);border-color:rgba(var(--info-rgb),.3)}
 .cf-medium   {background:rgba(var(--gold-rgb),.15);color:var(--gold-soft);border-color:rgba(var(--gold-rgb),.32)}
 .cf-low      {background:rgba(var(--red-rgb),.1);color:var(--red-soft);border-color:rgba(var(--red-rgb),.28)}
 .pfreq       {background:var(--paper-2);color:var(--text-dim);border-color:var(--line)}
 
 /* table accents */
 tr.pgroup td{background:var(--paper-2);border-top:1px solid var(--line);font-size:11.5px;padding:6px 12px}
-.pcount{display:inline-block;background:var(--navy-700);color:#fff;font-size:9.5px;font-weight:800;
+.pcount{display:inline-block;background:var(--navy-700);color:var(--white);font-size:9.5px;font-weight:800;
   border-radius:10px;padding:1px 6px;margin-left:6px;vertical-align:1px}
 tr.ptotal td{background:var(--paper-2);border-top:2px solid var(--line-2);font-size:12px}
 tr.prev td{background:rgba(var(--brand-rgb),.05);color:var(--brand);font-size:11.5px}
@@ -112,7 +112,7 @@ select.pinput{cursor:pointer;padding-right:26px}
 .pv-btn.active{background:var(--surface);color:var(--navy-800);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 /* standalone By-Product toggle (offtake) reads as a pill button */
 .pdeals-bar>.pv-btn{border:1px solid var(--line-2);border-radius:8px;background:var(--surface)}
-.pdeals-bar>.pv-btn.active{background:var(--navy-700);color:#fff;border-color:var(--navy-700)}
+.pdeals-bar>.pv-btn.active{background:var(--navy-700);color:var(--white);border-color:var(--navy-700)}
 
 /* contact phone chips (SIBRA dark chips) */
 .pchip{display:inline-block;background:var(--chip-fill);color:var(--chip-ink);font-family:var(--mono);font-size:10.5px;
@@ -127,7 +127,7 @@ select.pinput{cursor:pointer;padding-right:26px}
 .pc-conv:hover{background:rgba(var(--green-rgb),.14)}
 
 /* add/edit modal */
-.pmodal-wrap{position:fixed;inset:0;background:rgba(13,20,35,.45);z-index:80;display:grid;place-items:center;padding:20px}
+.pmodal-wrap{position:fixed;inset:0;background:rgba(var(--navy-900-rgb),.45);z-index:80;display:grid;place-items:center;padding:20px}
 .pmodal{background:var(--surface);border-radius:12px;box-shadow:var(--sh-3);width:100%;max-width:440px;
   max-height:92vh;overflow-y:auto;padding:20px 22px;animation:fade .2s ease}
 .pmodal.wide{max-width:560px}
@@ -163,7 +163,7 @@ select.pinput{cursor:pointer;padding-right:26px}
 .phl{flex:0 0 138px;font-size:11.5px;color:var(--text-dim);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .phtrack{flex:1;height:16px;background:var(--paper-2);border-radius:8px;overflow:hidden;border:1px solid var(--line)}
 .phfill{display:flex;align-items:center;justify-content:flex-end;height:100%;border-radius:8px;
-  color:#fff;font-size:10px;font-weight:800;padding-right:6px;min-width:0;transition:width .4s ease}
+  color:var(--white);font-size:10px;font-weight:800;padding-right:6px;min-width:0;transition:width .4s ease}
 .phv{flex:0 0 64px;font-size:11.5px;font-family:var(--mono);color:var(--navy-800);font-variant-numeric:tabular-nums}
 .pstack{display:flex;min-width:24px}
 .pstack span{height:100%}
@@ -176,12 +176,12 @@ select.pinput{cursor:pointer;padding-right:26px}
 @media(max-width:820px){.phl{flex-basis:96px}.ppie{width:100px;height:100px}}
 
 /* ============ CLIENT PROFILE (epicenter) ============ */
-.acct-link{color:var(--navy-600);font-weight:600;cursor:pointer;border-bottom:1px dashed rgba(36,71,138,.4)}
+.acct-link{color:var(--navy-600);font-weight:600;cursor:pointer;border-bottom:1px dashed rgba(var(--navy-600-rgb),.4)}
 .acct-link:hover{color:var(--crimson-600);border-bottom-color:var(--crimson-500)}
 /* ============ CLIENT PROFILE — "Analytics Bento" (v3), scoped under .av3 ============
    Ported from proto/v3.html. Every rule is scoped to .av3 so it cannot collide with
    the app's global .tile/.btn/.badge/.card/.tag styles. Semantic aliases are defined
-   ON .av3 from the canonical tokens.css primitives (navy/crimson/paper/line/status) —
+   ON .av3 from the canonical tokens.css primitives (neutral/accent/paper/line/status) —
    no raw hex except inside chart stencils that legitimately need it (v3 parity). */
 .av3{
   /* semantic aliases from canonical primitives */
@@ -204,7 +204,7 @@ select.pinput{cursor:pointer;padding-right:26px}
   --a-border-focus:var(--navy-600);
   --a-accent:var(--crimson-500);
   --a-accent-hover:var(--crimson-600);
-  /* channel identity (navy/crimson + one neutral gold) */
+  /* channel identity (neutral/accent + one neutral gold) */
   --a-ch-email:var(--navy-500);
   --a-ch-call:var(--crimson-600);
   --a-ch-sms:var(--navy-300);
@@ -422,7 +422,7 @@ select.pinput{cursor:pointer;padding-right:26px}
 .co-stat{display:flex;flex-direction:column;align-items:flex-start;gap:1px;cursor:pointer;
   background:var(--surface);border:1px solid var(--line-2);border-left-width:3px;border-radius:9px;
   padding:7px 13px 7px 11px;transition:.14s;font-family:inherit;min-width:96px}
-.co-stat:hover{border-color:var(--line);transform:translateY(-1px);box-shadow:0 2px 8px rgba(16,24,40,.07)}
+.co-stat:hover{border-color:var(--line);transform:translateY(-1px);box-shadow:0 2px 8px rgba(var(--navy-800-rgb),.07)}
 .co-stat.on{background:var(--surface-2);border-color:var(--brand);box-shadow:var(--ring)}
 .co-stat .n{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--text);line-height:1.1}
 .co-stat .l{font-size:11px;font-weight:600;color:var(--text-mute);letter-spacing:.02em}
@@ -462,21 +462,21 @@ tr.co-dead:hover{opacity:.85}
 .sc{display:inline-block;min-width:26px;text-align:center;font-family:var(--mono);
   font-weight:700;font-size:12.5px;padding:2px 6px;border-radius:6px}
 .sc-hot {background:rgba(var(--green-rgb),.16);color:var(--green-deep)}
-.sc-warm{background:rgba(var(--gold-rgb),.18);color:#8a6d1f}
+.sc-warm{background:rgba(var(--gold-rgb),.18);color:var(--warning-deep)}
 .sc-mid {background:var(--surface-2);color:var(--text-dim)}
 .sc-cold{background:var(--surface-2);color:var(--text-mute)}
 
 /* freight verdict rides on the distance so one glance answers "can we ship it" */
 .geo{font-family:var(--mono);font-size:12px;padding:2px 6px;border-radius:6px;white-space:nowrap}
 .geo-in  {background:rgba(var(--green-rgb),.13);color:var(--green-deep)}
-.geo-edge{background:rgba(var(--gold-rgb),.18);color:#8a6d1f}
+.geo-edge{background:rgba(var(--gold-rgb),.18);color:var(--warning-deep)}
 .geo-out {background:rgba(var(--red-rgb),.10);color:var(--red)}
 
 /* status pill, shared by the table, the profile and the status picker */
 .stt{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
 .stt-cust{background:rgba(var(--green-rgb),.15);color:var(--green-deep)}
 .stt-eng {background:rgba(var(--brand-rgb),.13);color:var(--brand)}
-.stt-work{background:rgba(var(--gold-rgb),.20);color:#8a6d1f}
+.stt-work{background:rgba(var(--gold-rgb),.20);color:var(--warning-deep)}
 .stt-new {background:var(--surface-2);color:var(--text-dim)}
 .stt-dq  {background:rgba(var(--red-rgb),.10);color:var(--red)}
 
@@ -529,7 +529,7 @@ tr.co-dead:hover{opacity:.85}
 .rr-box{border:1px dashed var(--line-2);border-radius:8px;padding:9px 11px;margin:0 0 11px;background:var(--surface)}
 .rr-head{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
   color:var(--text-mute);margin-bottom:6px;display:flex;gap:7px;align-items:center}
-.rr-head span{font-size:9.5px;font-weight:700;background:rgba(var(--gold-rgb),.2);color:#8a6d1f;
+.rr-head span{font-size:9.5px;font-weight:700;background:rgba(var(--gold-rgb),.2);color:var(--warning-deep);
   padding:1px 6px;border-radius:999px;letter-spacing:.02em;cursor:help}
 .rr-row{display:flex;gap:9px;font-size:12px;padding:2px 0;line-height:1.5}
 .rr-k{flex:0 0 78px;color:var(--text-mute);font-size:11px}
@@ -586,7 +586,7 @@ tr.co-dead:hover{opacity:.85}
 .colp-nudge{display:flex;gap:2px;flex:none}
 .colp-nudge button{width:20px;height:20px;border:1px solid var(--line);background:var(--white);
   color:var(--text-dim);border-radius:var(--r-xs);cursor:pointer;font-size:10px;line-height:1;padding:0}
-.colp-nudge button:hover:not(:disabled){background:var(--navy-700);color:#fff;border-color:var(--navy-700)}
+.colp-nudge button:hover:not(:disabled){background:var(--navy-700);color:var(--white);border-color:var(--navy-700)}
 .colp-nudge button:disabled{opacity:.3;cursor:default}
 
 /* ---- verification + origin badges ---- */
@@ -639,7 +639,7 @@ tr.co-dead:hover{opacity:.85}
 .ibx-chip{background:var(--surface);color:var(--text-dim);border:1px solid var(--line-2);font-family:inherit;
   font-size:12.5px;font-weight:600;border-radius:var(--r-pill);padding:6px 14px;cursor:pointer;transition:.15s}
 .ibx-chip:hover{border-color:var(--slate-600);color:var(--navy-800)}
-.ibx-chip.on{background:var(--navy-700);color:#fff;border-color:var(--navy-700)}
+.ibx-chip.on{background:var(--navy-700);color:var(--white);border-color:var(--navy-700)}
 .ibx-chip b{font-family:var(--mono);font-weight:600;opacity:.75}
 .ibx-chip b.hot{color:var(--accent);opacity:1}
 .ibx-chip.on b.hot{color:#fff}

@@ -12,7 +12,8 @@
  * sacks by the US ton, free samples in 4 to 7 business days, biochar OMRI Listed and Puro
  * certified, IBI tested (never certified). */
 (function(){
-  const SIG = "Victor Jehle\nAmerican BioCarbon\n(225) 398 9286";
+  const BRAND = "Progreaux"; /* the one place the company name lives for cold email copy */
+  const SIG = "Victor Jehle\n" + BRAND + "\n(225) 398 9286";
   const V = (id, line, icp, title, intent, subject, body, ask) => ({ id, line, icp, title, intent,
     copy:{ subject, greeting:"Hi {{firstName}},", body, ask, signoff:SIG } });
 

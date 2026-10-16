@@ -67,7 +67,7 @@ function recipientsFrom(env) {
   return { list, overridden: true };
 }
 
-const DEFAULT_FROM = "American BioCarbon <leads@send.americanbiocarbon.com>";
+const DEFAULT_FROM = "Progreaux <leads@send.americanbiocarbon.com>";
 const MAX_BODY_BYTES = 32 * 1024;
 
 /* Pull the visitor address out of whatever the form called it, so a reply goes to the

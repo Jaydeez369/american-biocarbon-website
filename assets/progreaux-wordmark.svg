@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64" role="img" aria-label="ProGreaux">
+  <g fill="none" stroke="#1a2e1f" stroke-width="3.2" stroke-linecap="round">
+    <path d="M24 48 V27"/>
+  </g>
+  <path d="M24 35c0-8-6-13-13-13 0 8 5 13 13 13z" fill="#1a2e1f" opacity=".72"/>
+  <path d="M24 30c0-8 6-13 14-13 0 8-6 13-14 13z" fill="#1a2e1f"/>
+  <text x="56" y="41" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="27" font-weight="700" letter-spacing="3.4" fill="#1a2e1f">PROGREAUX</text>
+</svg>

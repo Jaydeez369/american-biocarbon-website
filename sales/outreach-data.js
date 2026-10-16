@@ -17,7 +17,7 @@ const OUTREACH = {
     "built": "September 16, 2026",
     "source": "ICP taxonomy and product facts only. The cold copy bank that used to live here (17 campaigns, subjects, variants, follow ups, phone scripts) was retired on September 16, 2026 in favour of the Cold Email section of the Sales OS: eight one to two sentence variants, edited and saved there, canonical once Victor marks them. The old Instantly build documents in the campaigns folder are history, not canon.",
     "phone": "(225) 398 9286",
-    "signature": "Victor Jehle\nAmerican BioCarbon\n(225) 398 9286"
+    "signature": "Victor Jehle\nProgreaux\n(225) 398 9286"
   },
   "facts": {
     "biocharMt": 450,

@@ -1,13 +1,33 @@
 /* ============================================================
-   AMERICAN BIOCARBON - CANONICAL BRAND TOKENS  (v1, 2026-07)
+   PROGREAUX - CANONICAL BRAND TOKENS  (v2, Base palette)
    Single source of truth. Imported by BOTH the public site
    (website/styles.css, light theme) and the Sales OS console
-   (website/sales/styles.css, dark theme).
+   (website/sales/styles.css, light content over a near-black spine).
 
    EDIT THIS FILE ONLY. website/sales/tokens.css is a build-managed
    MIRROR of this file (scripts/stamp-assets.mjs copies it on every
    build so the standalone Sales OS deploy has a local copy; the
    build's --check gate fails on drift). Never hand-edit the mirror.
+
+   Variable NAMES and alias contracts are unchanged on purpose -
+   ~180 references across two stylesheets, two data layers and the
+   print/email templates read these names, and renaming them is a
+   mechanical risk with no visual payoff. Only the VALUES moved, so
+   the two brand slots carry different colors than their names say:
+
+       --navy-*     -> NEUTRAL scale  (white -> paper -> gray -> black)
+       --crimson-*  -> FOREST GREEN scale (the brand accent)
+
+   Read the slots by role, not by name:
+     navy-700  = #1A1A1A  the near-black used for dark bands
+     navy-500  = #595959  the mid gray
+     crimson-500 = #1A2E1F  the deep forest accent (fills, on light)
+     crimson-400 = #4F7D5C  lighter forest, for fills ON dark
+     crimson-300 = #9EBBA6  light forest, for TEXT/rules ON dark
+
+   PALETTE (Base):
+     accent  #1A2E1F   black #1A1A1A   white #FFFFFF
+     paper   #F8F8F6   gray  #595959
 
    ARCHITECTURE - two layers:
      1. PRIMITIVES  (this file): raw brand scales + type/space/
@@ -17,46 +37,56 @@
         primitives onto local role names (--brand, --surface,
         --text …) per theme. Light and dark map differently.
 
-   RULE: brand identity = NAVY + CRIMSON. Green / amber / red /
-   blue are STATUS colors only (success / warning / danger /
-   info) - never brand. This is why the console is navy, not
-   green: green now means "good," not "us."
+   RULE: this is a NEAR-MONOCHROME system. White / paper / black /
+   gray carry the page; forest green is used sparingly - primary
+   buttons, links, key rules, small emphasis. Green-as-STATUS
+   (success) is deliberately shifted toward emerald/teal so it
+   stays distinguishable from green-as-BRAND. Status colors are
+   never brand.
    ============================================================ */
 
 :root{
-  /* ---------- BRAND · Navy (primary) ---------- */
-  --navy-50:#eef2f9;  --navy-100:#d9e2f1; --navy-200:#b3c4e0;
-  --navy-300:#9db3d6; --navy-400:#6f93c9; --navy-500:#4d6ba3;
-  --navy-600:#24478a; --navy-700:#1a376c; --navy-800:#122a52;
-  --navy-900:#0d1f3d;
+  /* ---------- BRAND · Neutral (primary surface scale) ---------- */
+  --navy-50:#f8f8f6;  --navy-100:#efefec; --navy-200:#dcdcd9;
+  --navy-300:#b5b5b5; --navy-400:#8c8c8c; --navy-500:#595959;
+  --navy-600:#3d3d3d; --navy-700:#1a1a1a; --navy-800:#121212;
+  --navy-900:#0a0a0a;
 
-  /* ---------- BRAND · Crimson (accent / CTA) ---------- */
-  --crimson-50:#fdeaef; --crimson-300:#f08aa0; --crimson-400:#e6486a;
-  --crimson-500:#d7153f; --crimson-600:#b91237; --crimson-700:#8f0d2a;
+  /* ---------- BRAND · Forest green (accent / CTA) ---------- */
+  --crimson-50:#eef3ef;  --crimson-300:#9ebba6; --crimson-400:#4f7d5c;
+  --crimson-500:#1a2e1f;  --crimson-600:#2a4a32; --crimson-700:#0f1c13;
 
   /* ---------- NEUTRALS (light-theme surfaces/text) ---------- */
-  --ink:#1a1a1a; --slate:#3e4a5f; --mute:#63676e;
-  --white:#ffffff; --paper:#f7f8fa; --paper-2:#eef1f5;
-  --line:#e2e6ee; --line-2:#c4cfe6;
+  --ink:#1a1a1a; --slate:#454545; --mute:#595959;
+  --white:#ffffff; --paper:#f8f8f6; --paper-2:#efefec;
+  --line:#e2e2de; --line-2:#c9c9c4;
 
   /* ---------- DARK SURFACES (console theme) ---------- */
-  --d-bg:#0a0d12;   --d-950:#0b0e14; --d-900:#111621; --d-850:#151b26;
-  --d-800:#1b222e;  --d-700:#28313f; --d-600:#3a4655;
-  --d-line:#232c39; --d-line-soft:#1a212c;
-  --d-text:#e6ecf5; --d-text-dim:#9aa7bd; --d-text-mute:#67728a;
+  --d-bg:#0d0d0d;   --d-950:#101010; --d-900:#161616; --d-850:#1a1a1a;
+  --d-800:#202020;  --d-700:#2c2c2c; --d-600:#3d3d3d;
+  --d-line:#262626; --d-line-soft:#1c1c1c;
+  --d-text:#ececea; --d-text-dim:#b0b0ac; --d-text-mute:#8a8a85;
 
-  /* ---------- STATUS (semantic, shared, NOT brand) ---------- */
-  --success:#5f8a5b; --success-bright:#84b47b; --success-deep:#3f5f3c;
-  --warning:#caa85a; --warning-soft:#e6cd8a;
+  /* ---------- STATUS (semantic, shared, NOT brand) ----------
+     success shifted emerald/teal so it cannot be confused with the
+     forest-green brand accent. See REBRAND-NOTES.md. */
+  --success:#2e8b6b; --success-bright:#63c9a2; --success-deep:#1e6b52;
+  --warning:#caa85a; --warning-soft:#e6cd8a; --warning-deep:#7d5f14;
   --danger:#c85a54;  --danger-soft:#e69089;  --danger-strong:#c02542;
-  --info:#5a86c8;    --info-soft:#9dbbe6;
-  --purple:#9a7fc8;  /* categorical only (e.g. person tag) */
+  --danger-deep:#a81d2b;
+  --info:#5a86c8;    --info-soft:#9dbbe6;    --info-deep:#1f4d99;
+  --purple:#9a7fc8;  --purple-deep:#5d43a0;  /* categorical only (e.g. person tag) */
 
   /* ---------- rgb channels (for rgba() with alpha) ---------- */
-  --navy-500-rgb:77,107,163; --navy-400-rgb:111,147,201; --navy-600-rgb:36,71,138;
-  --crimson-500-rgb:215,21,63;
-  --success-rgb:132,180,123; --warning-rgb:202,168,90;
-  --danger-rgb:200,90,84;    --info-rgb:90,134,200; --purple-rgb:154,127,200;
+  --navy-100-rgb:239,239,236; --navy-200-rgb:220,220,217;
+  --navy-400-rgb:140,140,140; --navy-500-rgb:89,89,89;
+  --navy-600-rgb:61,61,61;    --navy-700-rgb:26,26,26;
+  --navy-800-rgb:18,18,18;    --navy-900-rgb:10,10,10;
+  --slate-rgb:69,69,69;
+  --crimson-500-rgb:26,46,31; --crimson-400-rgb:79,125,92; --crimson-700-rgb:15,28,19;
+  --success-rgb:99,201,162;  --warning-rgb:202,168,90;
+  --danger-rgb:200,90,84;    --danger-strong-rgb:192,37,66;
+  --info-rgb:90,134,200; --purple-rgb:154,127,200; --purple-rgb-base:93,67,160;
 
   /* ---------- TYPOGRAPHY ---------- */
   --f-sans:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -70,23 +100,28 @@
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
 
-  /* ---------- RADIUS ---------- */
-  --r-xs:6px; --r-sm:8px; --r:10px; --r-lg:12px; --r-xl:16px; --r-pill:999px;
+  /* ---------- RADIUS ----------
+     This is a square system: buttons are hard-cornered (see
+     .btn in styles.css), and container radii are pulled down to a
+     hairline so cards read as panels, not pills. */
+  --r-xs:0px; --r-sm:2px; --r:2px; --r-lg:3px; --r-xl:4px; --r-pill:999px;
 
   /* ---------- ELEVATION ---------- */
-  /* light - navy-tinted, soft */
-  --sh-light-sm:0 1px 2px rgba(var(--navy-600-rgb),.07);
-  --sh-light:0 1px 2px rgba(var(--navy-600-rgb),.07),0 10px 30px rgba(var(--navy-600-rgb),.07);
+  /* light - neutral, soft */
+  --sh-light-sm:0 1px 2px rgba(var(--navy-700-rgb),.07);
+  --sh-light:0 1px 2px rgba(var(--navy-700-rgb),.07),0 10px 30px rgba(var(--navy-700-rgb),.07);
   /* dark - black, deep */
   --sh-dark-1:0 1px 2px rgba(0,0,0,.35);
   --sh-dark-2:0 2px 5px rgba(0,0,0,.30),0 12px 28px -8px rgba(0,0,0,.45);
   --sh-dark-3:0 8px 40px -8px rgba(0,0,0,.55);
 
-  /* ---------- LAYOUT ---------- */
-  /* Every .wrap on the site reads this, so the hero and every section band widen
-     together and stay aligned to one another. The header runs wider on purpose
-     (--wrap-head): it carries nav chrome, not reading copy, so it can use the extra
-     room without stretching body text past a comfortable measure. */
-  --wrap:1240px;
-  --wrap-head:1320px;
+  /* ---------- LAYOUT ----------
+     The brand measure is 1400px with a 4vw gutter. Every
+     .wrap on the site reads --wrap, so the hero and every section
+     band widen together and stay aligned. The header shares the
+     same measure here (the old site ran it wider); at 1400px the
+     nav chrome no longer needs the extra room. */
+  --wrap:1400px;
+  --wrap-head:1400px;
+  --gutter:4vw;
 }

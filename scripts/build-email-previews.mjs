@@ -114,7 +114,7 @@ for (const style of Object.keys(STYLES)) {
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>American BioCarbon — transactional email previews</title>
+<title>Progreaux — transactional email previews</title>
 <style>
   :root{--navy:#0d1f3d;--navy6:#24478a;--crim:#d7153f;--ink:#1a1a1a;--mute:#63676e;--line:#e2e6ee;--paper:#f7f8fa}
   *{box-sizing:border-box}
@@ -147,7 +147,7 @@ const html = `<!doctype html>
 </style></head>
 <body>
 <div class="top">
-  <h1>American BioCarbon — transactional email previews</h1>
+  <h1>Progreaux — transactional email previews</h1>
   <p>Generated from <code>functions/api/_email.js</code>, the same module the live send uses. Internal review copy — not published.</p>
 </div>
 <div class="wrap">

@@ -118,7 +118,7 @@ const SHOT_SRC = SHOT_BASE + '&width=1365';
 const SHOT_SRCSET = [900, 1100, 1365].map((w) => `${SHOT_BASE}&width=${w} ${w}w`).join(', ');
 
 /* The reversed (white) horizontal wordmark, which is the one that works on a dark ground. */
-const LOGO_SRC = CDN + 'abc-logo-horiz_rev_38e8f78a-b79f-4c53-8b36-d10683e943cf.webp?v=1710182358';
+const LOGO_SRC = "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 64%22 width=%22300%22 height=%2264%22 role=%22img%22 aria-label=%22ProGreaux%22%3E %3Cg fill=%22none%22 stroke=%22%23ffffff%22 stroke-width=%223.2%22 stroke-linecap=%22round%22%3E %3Cpath d=%22M24 48 V27%22/%3E %3C/g%3E %3Cpath d=%22M24 35c0-8-6-13-13-13 0 8 5 13 13 13z%22 fill=%22%23ffffff%22 opacity=%22.72%22/%3E %3Cpath d=%22M24 30c0-8 6-13 14-13 0 8-6 13-14 13z%22 fill=%22%23ffffff%22/%3E %3Ctext x=%2256%22 y=%2241%22 font-family=%22'Helvetica Neue',Helvetica,Arial,sans-serif%22 font-size=%2227%22 font-weight=%22700%22 letter-spacing=%223.4%22 fill=%22%23ffffff%22%3EPROGREAUX%3C/text%3E %3C/svg%3E";
 const LOGOUT_PATH = '/__logout';
 
 /* Constant-time compare. A plain === leaks the length of the matching prefix through
@@ -262,7 +262,7 @@ function safeName(value) {
 /* Self-contained by necessity: an unauthenticated request is served no CSS, no JS and no
    font from this origin, so the brand has to be inlined here rather than pulled from
    tokens.css. The values below are copied from sales/tokens.css (dark surfaces --d-bg /
-   --d-900 / --d-line, --d-text, crimson-500 #d7153f, DM Serif Display for the wordmark).
+   --d-900 / --d-line, --d-text, accent crimson-500, DM Serif Display for the wordmark).
    If the palette moves there, move it here too - this is the one place that cannot import
    it. */
 function loginPage(error, username) {
@@ -285,17 +285,17 @@ function loginPage(error, username) {
      bronze, sampled at #9a8f77 overall, #7e6e52 through the pellets and #bbb5a4 up
      at the machinery. The old card was cold navy (#111621) on a flat void, which
      read as a different product sitting on top of the picture. Everything below is
-     warmed to sit IN the photograph instead: bark browns for the surfaces, a khaki
-     dim text lifted straight out of the image, and crimson kept as the one brand
-     colour, which is close to complementary against that khaki and so stays the
+     neutralised to sit IN the photograph instead: near-black surfaces, a pale grey
+     dim text, and the forest accent kept as the one brand
+     colour, so it stays the
      only thing on screen asking to be clicked.
      --------------------------------------------------------------------------- */
   :root {
     color-scheme: dark;
-    --bark-900:#0d0a06; --bark-800:#171208; --bark-700:#241c11;
-    --bronze-line:rgba(219,199,158,.26); --bronze-line-2:rgba(226,208,170,.55);
-    --text:#f4efe4; --text-dim:#bcae94;
-    --crimson-500:#d7153f; --crimson-600:#b91237; --crimson-300:#f4a0b2;
+    --bark-900:#0d0d0d; --bark-800:#161616; --bark-700:#202020;
+    --bronze-line:rgba(255,255,255,.22); --bronze-line-2:rgba(255,255,255,.5);
+    --text:#ececea; --text-dim:#b0b0ac;
+    --crimson-500:#4f7d5c; --crimson-600:#2a4a32; --crimson-300:#9ebba6;
     --f-sans:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     --f-serif:"DM Serif Display",Georgia,serif;
   }
@@ -329,8 +329,8 @@ function loginPage(error, username) {
        the card's own blur and fill for text contrast instead of on darkening the whole
        frame. The vignette still closes the corners so the card has something to sit in. */
     background:
-      radial-gradient(82% 62% at 50% 44%, rgba(16,11,5,.04) 0%, rgba(14,10,5,.34) 56%, rgba(9,7,3,.72) 100%),
-      linear-gradient(180deg, rgba(10,8,4,.42) 0%, rgba(10,8,4,.02) 36%, rgba(9,7,3,.56) 100%);
+      radial-gradient(82% 62% at 50% 44%, rgba(10,10,10,.04) 0%, rgba(10,10,10,.34) 56%, rgba(10,10,10,.72) 100%),
+      linear-gradient(180deg, rgba(10,10,10,.42) 0%, rgba(10,10,10,.02) 36%, rgba(10,10,10,.56) 100%);
   }
   @keyframes settle { from { transform: scale(1.10); opacity: 0 } to { transform: scale(1.04); opacity: 1 } }
 
@@ -344,7 +344,7 @@ function loginPage(error, username) {
   .card {
     grid-row: 1; align-self: center;
     width: min(392px, 100%);
-    background: linear-gradient(180deg, rgba(44,35,24,.74) 0%, rgba(20,15,10,.86) 100%);
+    background: linear-gradient(180deg, rgba(32,32,32,.74) 0%, rgba(16,16,16,.86) 100%);
     -webkit-backdrop-filter: blur(20px) saturate(1.15);
     backdrop-filter: blur(20px) saturate(1.15);
     border: 1px solid var(--bronze-line);
@@ -358,7 +358,7 @@ function loginPage(error, username) {
   }
   @keyframes rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
 
-  /* The company mark first, the product second: this is American BioCarbon's
+  /* The company mark first, the product second: this is Progreaux's
      system, and Sales OS is the thing inside it. */
   .logo { display: block; width: 178px; max-width: 72%; height: auto; margin: 2px auto 0; }
   .rule {
@@ -375,32 +375,32 @@ function loginPage(error, username) {
   input {
     width: 100%; padding: 13px 15px; font: 400 16px/1.2 var(--f-sans);
     text-align: center; letter-spacing: .04em;
-    color: var(--text); background: rgba(11,8,5,.55);
+    color: var(--text); background: rgba(10,10,10,.55);
     border: 1px solid var(--bronze-line); border-radius: 11px;
     transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
   }
   input::placeholder { color: var(--text-dim); letter-spacing: normal; }
   input:hover { border-color: var(--bronze-line-2); }
   input:focus {
-    outline: none; background: rgba(11,8,5,.72);
+    outline: none; background: rgba(10,10,10,.72);
     border-color: var(--crimson-500);
-    box-shadow: 0 0 0 3px rgba(215,21,63,.22);
+    box-shadow: 0 0 0 3px rgba(79,125,92,.22);
   }
   button {
     width: 100%; margin-top: 14px; padding: 14px 15px;
     font: 700 14px/1.2 var(--f-sans); letter-spacing: .03em;
     color: #fff; border: 0; border-radius: 11px; cursor: pointer;
     background: linear-gradient(180deg, var(--crimson-500), var(--crimson-600));
-    box-shadow: 0 8px 22px -8px rgba(215,21,63,.65);
+    box-shadow: 0 8px 22px -8px rgba(79,125,92,.65);
     transition: filter .16s ease, transform .16s ease, box-shadow .16s ease;
   }
-  button:hover { filter: brightness(1.08); box-shadow: 0 12px 28px -8px rgba(215,21,63,.75); }
+  button:hover { filter: brightness(1.08); box-shadow: 0 12px 28px -8px rgba(79,125,92,.75); }
   button:active { transform: translateY(1px); }
   button:focus-visible, input:focus-visible { outline: 2px solid var(--crimson-300); outline-offset: 2px; }
 
   .error {
     margin: 16px 0 0; color: var(--crimson-300); font-size: 13px; line-height: 1.45;
-    background: rgba(215,21,63,.10); border: 1px solid rgba(215,21,63,.30);
+    background: rgba(79,125,92,.10); border: 1px solid rgba(79,125,92,.30);
     border-radius: 9px; padding: 9px 12px;
   }
   .foot {
@@ -426,7 +426,7 @@ function loginPage(error, username) {
   </div>
   <main class="wrap">
     <form class="card" method="POST" action="${LOGIN_PATH}">
-      <img class="logo" src="${LOGO_SRC}" alt="American BioCarbon" />
+      <img class="logo" src="${LOGO_SRC}" alt="Progreaux" />
       <hr class="rule" />
       <h1 class="mark">Sales<span>OS</span></h1>
       <div class="fields">

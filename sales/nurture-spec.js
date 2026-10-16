@@ -16,17 +16,19 @@
  * Field names match what buildNurtureEmail (functions/api/_email.js) reads.
  */
 (function(){
-  const SITE = "https://americanbiocarbon.com";
+  const BRAND = "Progreaux"; /* the one place the company name lives for nurture copy */
+  const DOMAIN = "progreaux.com";
+  const SITE = "https://" + DOMAIN;
   const SPEC_PELLETS = SITE + "/assets/spec-sheets/Absorbent-Pellets-Specification-Sheet.pdf";
   const SPEC_BIOCHAR = SITE + "/assets/spec-sheets/Biochar-Premium-Specification-Sheet.pdf";
   const BOOK = "{{calendarLink}}";
-  const V = "Victor Jehle\nAmerican BioCarbon\n(225) 398 9286";
-  const TEAM = "The team at American BioCarbon\n(225) 398 9286";
+  const V = "Victor Jehle\n" + BRAND + "\n(225) 398 9286";
+  const TEAM = "The team at " + BRAND + "\n(225) 398 9286";
 
   const A = {
-    id: "A", name: "Family", who: "Engaged and Customer stage accounts, plus past ABC customers",
+    id: "A", name: "Family", who: "Engaged and Customer stage accounts, plus past " + BRAND + " customers",
     cadence: "One a week, then monthly", sender: "Victor Jehle <victor@send.americanbiocarbon.com>",
-    footerNote: "You are receiving this because you are a customer of American BioCarbon or have worked with us on a sample.",
+    footerNote: "You are receiving this because you are a customer of " + BRAND + " or have worked with us on a sample.",
     emails: [
       { id:"A1", day:0, title:"What is new at the plant",
         intent:"Reintroduce Victor by name, one real update from White Castle, set the expectation of one short note a week.",
@@ -36,7 +38,7 @@
           heading:"Quick update from the plant",
           greeting:"Hi {{firstName}},",
           paras:[
-            "Victor here from American BioCarbon. You have bought from us or tested our material, so I want to keep you in the loop on what is happening at the plant.",
+            "Victor here from " + BRAND + ". You have bought from us or tested our material, so I want to keep you in the loop on what is happening at the plant.",
             "Right now we are running bagasse through the line for the Q4 ramp. Biochar is on hand today and absorbent pellets and crumble ship by the US ton in 2,000 lb super sacks.",
             "I will send one short note a week, nothing more. If it is not useful, the unsubscribe link at the bottom works and I will not take it personally.",
           ],
@@ -107,8 +109,8 @@
   };
 
   const B = {
-    id: "B", name: "New website lead", who: "Anyone who submits a form on americanbiocarbon.com",
-    cadence: "E1 instant (the live auto reply), then two a week", sender: "American BioCarbon <leads@send.americanbiocarbon.com>, reply to Victor",
+    id: "B", name: "New website lead", who: "Anyone who submits a form on " + DOMAIN,
+    cadence: "E1 instant (the live auto reply), then two a week", sender: BRAND + " <leads@send.americanbiocarbon.com>, reply to Victor",
     footerNote: "You are receiving this because you submitted a request on our website.",
     variants: ["biochar", "absorbent", "bedding"],
     emails: [
@@ -122,7 +124,7 @@
           heading:"What it is, and what it is not",
           greeting:"Hi {{firstName}},",
           paras:[
-            "American BioCarbon makes one thing from one input: sugarcane bagasse from Louisiana, turned into biochar and into absorbent pellets and crumble at our plant in White Castle.",
+            BRAND + " makes one thing from one input: sugarcane bagasse from Louisiana, turned into biochar and into absorbent pellets and crumble at our plant in White Castle.",
             "It is plant based, made in the USA, and consistent load to load because the feedstock is. It is not a chemical, not a clay, and not a blend.",
             "Reply and tell us what you are using today and we will tell you straight whether ours is a fit.",
           ],
@@ -203,8 +205,8 @@
 
   const C = {
     id: "C", name: "Order status", who: "Anyone with an order in flight",
-    cadence: "On each fulfillment event", sender: "American BioCarbon <orders@send.americanbiocarbon.com>, reply to Victor",
-    footerNote: "You are receiving this because you placed an order with American BioCarbon.",
+    cadence: "On each fulfillment event", sender: BRAND + " <orders@send.americanbiocarbon.com>, reply to Victor",
+    footerNote: "You are receiving this because you placed an order with " + BRAND + ".",
     emails: [
       { id:"C1", day:"Order confirmed", title:"Order confirmed",
         intent:"What was ordered, quantity and unit, ship to, expected window, who to call.",

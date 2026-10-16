@@ -49,7 +49,7 @@
     const copy = { ...c, footerNote: c.footerNote || seq.footerNote || "" };
     for(const k of ["subject","preheader","heading","greeting","ctaLabel","ctaHref","signoff"]) copy[k]=fillTokens(copy[k]);
     copy.paras = (copy.paras||[]).map(fillTokens);
-    const out = tpl.buildNurtureEmail(copy, { firstName:(SPEC().previewTokens||{}).firstName||"", unsubscribeHref:"https://americanbiocarbon.com/unsubscribe?u=preview" }, {});
+    const out = tpl.buildNurtureEmail(copy, { firstName:(SPEC().previewTokens||{}).firstName||"", unsubscribeHref:"https://progreaux.com/unsubscribe?u=preview" }, {});
     return out;
   }
 

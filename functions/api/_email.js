@@ -1,5 +1,5 @@
 /**
- * Branded email templates for American BioCarbon.
+ * Branded email templates for Progreaux.
  *
  * Shared deliberately: functions/api/lead.js sends from here, and
  * scripts/build-email-previews.mjs renders the previews from here. One source, so a
@@ -19,20 +19,21 @@
  *   - Every colour is a literal hex. CSS variables do not exist in email.
  */
 
-/* Mirrors tokens.css primitives. Duplicated as literals because email cannot use var(). */
+/* Mirrors tokens.css primitives (slot names kept: navy* = neutral scale, crimson* = forest accent). Duplicated as literals because email cannot use var(). */
 const C = {
-  navy900: "#0d1f3d",
-  navy800: "#122a52",
-  navy700: "#1a376c",
-  navy600: "#24478a",
-  crimson: "#d7153f",
-  crimson600: "#b91237",
+  navy900: "#0a0a0a",
+  navy800: "#121212",
+  navy700: "#1a1a1a",
+  navy600: "#3d3d3d",
+  crimson: "#1a2e1f",
+  crimson600: "#2a4a32",
+  crimson400: "#4f7d5c",
   ink: "#1a1a1a",
-  slate: "#3e4a5f",
-  mute: "#63676e",
+  slate: "#454545",
+  mute: "#595959",
   white: "#ffffff",
-  paper: "#f7f8fa",
-  line: "#e2e6ee",
+  paper: "#f8f8f6",
+  line: "#e2e2de",
 };
 
 /* Logos are served from the Shopify CDN (the only place they exist). Both URLs carry an
@@ -41,15 +42,14 @@ const C = {
    Pinning the format means a header logo cannot silently disappear for Outlook readers if
    that negotiation ever changes. width=440 is 2x the 220px display width, for retina. */
 const BRAND = {
-  name: "American BioCarbon",
+  name: "Progreaux",
   address: "32525 Highway 1 South, White Castle, LA 70788",
   /* Kept in sync with BRAND in website/data.js by hand: a Pages Function cannot import the
      site's browser-global data.js, so this is a deliberate second copy, not a stray one. */
   phone: "(225) 398-9286",
   phoneHref: "tel:+12253989286",
-  logo: "https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_color.png?v=1710167731&width=440&format=png",
-  logoRev:
-    "https://cdn.shopify.com/s/files/1/0773/9270/7876/files/abc-logo-horiz_rev_38e8f78a-b79f-4c53-8b36-d10683e943cf.webp?v=1710182358&width=440&format=png",
+  logo: "https://progreaux.com/assets/progreaux-wordmark.png",
+  logoRev: "https://progreaux.com/assets/progreaux-wordmark-rev.png",
 };
 
 const FONT =
@@ -81,15 +81,15 @@ export const SPEC = {
 export const STYLES = {
   classic: {
     label: "Classic",
-    note: "Navy header bar with the reversed logo, white body, crimson button. Closest to the website. Safest across clients.",
+    note: "Near-black header bar with the reversed logo, white body, forest button. Closest to the website. Safest across clients.",
   },
   minimal: {
     label: "Minimal",
-    note: "Colour logo on white, a thin crimson rule, text-forward. Reads like a note from a person, not a campaign. Best deliverability - least image-dependent.",
+    note: "Colour logo on white, a thin forest rule, text-forward. Reads like a note from a person, not a campaign. Best deliverability - least image-dependent.",
   },
   bold: {
     label: "Bold",
-    note: "Full-bleed navy panel carrying the headline, body on paper. Highest impact, most 'marketing'. Use for sample/quote confirmations, not for docs.",
+    note: "Full-bleed near-black panel carrying the headline, body on paper. Highest impact, most 'marketing'. Use for sample/quote confirmations, not for docs.",
   },
 };
 
@@ -192,10 +192,10 @@ function footer(env, note, unsubscribeHref) {
     ` &nbsp;·&nbsp; <a href="mailto:sales@americanbiocarbon.com" style="color:${C.navy600};text-decoration:none">sales@americanbiocarbon.com</a>` +
     ` &nbsp;·&nbsp; <a href="${BRAND.phoneHref}" style="color:${C.navy600};text-decoration:none">${esc(BRAND.phone)}</a>` +
     `</p>` +
-    `<p style="margin:12px 0 0;font:400 12px/1.5 ${FONT};color:#8b9099">` +
+    `<p style="margin:12px 0 0;font:400 12px/1.5 ${FONT};color:#8c8c8c">` +
     esc(note || "You are receiving this because you submitted a request on our website.") +
     (unsubscribeHref
-      ? ` <a href="${esc(unsubscribeHref)}" style="color:#8b9099;text-decoration:underline">Unsubscribe</a>`
+      ? ` <a href="${esc(unsubscribeHref)}" style="color:#8c8c8c;text-decoration:underline">Unsubscribe</a>`
       : "") +
     `</p>` +
     `</td></tr>`
@@ -228,13 +228,13 @@ export function renderEmail({ style = "classic", preheader = "", heading = "", b
     headingBlock =
       `<h1 style="margin:0 0 18px;font:600 21px/1.35 ${FONT};color:${C.ink}">${esc(heading)}</h1>`;
   } else {
-    /* bold: headline lives inside the navy panel, so the body starts at the content */
+    /* bold: headline lives inside the dark panel, so the body starts at the content */
     header =
       `<tr><td class="pad" style="background:${C.navy900};padding:30px 32px 34px">` +
       `<img src="${BRAND.logoRev}" alt="${BRAND.name}" width="180" ` +
       `style="display:block;border:0;width:180px;max-width:180px;height:auto;margin:0 0 22px">` +
       `<h1 style="margin:0;font:700 27px/1.25 ${FONT};color:${C.white}">${esc(heading)}</h1>` +
-      `<div style="height:4px;width:56px;background:${C.crimson};margin:18px 0 0"></div></td></tr>`;
+      `<div style="height:4px;width:56px;background:${C.crimson400};margin:18px 0 0"></div></td></tr>`;
     headingBlock = "";
   }
 
@@ -246,7 +246,7 @@ export function renderEmail({ style = "classic", preheader = "", heading = "", b
     `<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>` +
     `<meta name="viewport" content="width=device-width,initial-scale=1"/>` +
     /* Tells supporting clients the design handles both schemes, so they don't auto-invert
-       and wreck the navy-on-white contrast. */
+       and wreck the dark-on-white contrast. */
     `<meta name="color-scheme" content="light"/><meta name="supported-color-schemes" content="light"/>` +
     /* The ONLY <style> block in this file, and it is purely progressive enhancement: it
        trims the 32px side padding on narrow screens so a phone gets more usable line
@@ -291,7 +291,7 @@ const ONE_DAY = "within one business day";
 export const SEQUENCES = {
   bedding: {
     label: "Animal bedding sample",
-    subject: "Your American BioCarbon bedding sample",
+    subject: "Your Progreaux bedding sample",
     preheader: `A bedding specialist will follow up ${ONE_DAY}.`,
     heading: "Your bedding sample request is in",
     style: "classic",
@@ -307,7 +307,7 @@ export const SEQUENCES = {
 
   sample: {
     label: "Industrial sample kit",
-    subject: "Your American BioCarbon sample kit",
+    subject: "Your Progreaux sample kit",
     preheader: "Spec sheet inside. A specialist will confirm your ship-to.",
     heading: "Your sample kit request is in",
     style: "classic",
@@ -323,7 +323,7 @@ export const SEQUENCES = {
 
   quote: {
     label: "Bulk quote request",
-    subject: "Your American BioCarbon bulk quote",
+    subject: "Your Progreaux bulk quote",
     preheader: "We're preparing freight-aware pricing for your volume.",
     heading: "We're preparing your quote",
     style: "classic",
@@ -342,7 +342,7 @@ export const SEQUENCES = {
 
   biochar: {
     label: "Biochar sample",
-    subject: "Your American BioCarbon biochar sample",
+    subject: "Your Progreaux biochar sample",
     preheader: "Premium biochar spec sheet inside.",
     heading: "Your biochar sample request is in",
     style: "classic",
@@ -358,13 +358,13 @@ export const SEQUENCES = {
 
   distributor: {
     label: "Distributor / reseller enquiry",
-    subject: "American BioCarbon distributor program",
+    subject: "Progreaux distributor program",
     preheader: "We're preparing the margin model for your geography.",
     heading: "Thanks for your interest in carrying our line",
     style: "classic",
     build: (o) => ({
       paras: [
-        "Thanks for your interest in carrying the American BioCarbon line.",
+        "Thanks for your interest in carrying the Progreaux line.",
         "We're preparing the margin model and stocking pilot details for your geography, and will be in touch shortly.",
       ],
       links: [],
@@ -374,13 +374,13 @@ export const SEQUENCES = {
 
   carbon: {
     label: "Carbon removal enquiry",
-    subject: "Your American BioCarbon carbon removal enquiry",
+    subject: "Your Progreaux carbon removal enquiry",
     preheader: "Puro.earth CORC-certified durable carbon removal.",
     heading: "Thanks for your carbon removal enquiry",
     style: "classic",
     build: (o) => ({
       paras: [
-        "Thanks for your interest in durable carbon removal from American BioCarbon.",
+        "Thanks for your interest in durable carbon removal from Progreaux.",
         `Our removals are certified under the Puro.earth CORC methodology. A member of the team will follow up ${ONE_DAY} to discuss volumes, vintages and delivery.`,
       ],
       links: [],
@@ -390,7 +390,7 @@ export const SEQUENCES = {
 
   docs: {
     label: "Documentation request",
-    subject: "Your American BioCarbon documentation",
+    subject: "Your Progreaux documentation",
     preheader: "Specification sheets inside; a specialist will follow up.",
     heading: "Your documentation request",
     style: "classic",
@@ -409,13 +409,13 @@ export const SEQUENCES = {
 
   contact: {
     label: "General contact",
-    subject: "We received your message - American BioCarbon",
+    subject: "We received your message - Progreaux",
     preheader: `We'll get back to you ${ONE_DAY}.`,
     heading: "Thanks for getting in touch",
     style: "classic",
     build: (o) => ({
       paras: [
-        "Thanks for contacting American BioCarbon. We've received your message.",
+        "Thanks for contacting Progreaux. We've received your message.",
         `Someone from the team will get back to you ${ONE_DAY}.`,
       ],
       links: [],
@@ -540,7 +540,7 @@ export function buildInternalLead(formKey, fields = {}, page = "", env = {}) {
  * shipped as "Hi ,", which is the bug that made the Instantly campaigns look broken.
  * ------------------------------------------------------------------ */
 const nurtureFooterDefault =
-  "You are receiving this because you have been in touch with American BioCarbon.";
+  "You are receiving this because you have been in touch with Progreaux.";
 
 export function buildNurtureEmail(copy = {}, to = {}, env = {}) {
   const first = String(to.firstName || "").trim();

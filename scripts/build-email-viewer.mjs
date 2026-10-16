@@ -51,7 +51,7 @@ for (const style of STYLE_ORDER) {
 
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Auto-reply styles — American BioCarbon</title>
+<title>Auto-reply styles — Progreaux</title>
 <style>
  :root{--navy:#0d1f3d;--navy6:#24478a;--crim:#d7153f;--ink:#1a1a1a;--mute:#63676e;
        --line:#e2e6ee;--paper:#f7f8fa}
@@ -105,7 +105,7 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 </style></head><body>
 
 <div class="bar">
-  <h1>Auto-reply styles <span>— American BioCarbon</span></h1>
+  <h1>Auto-reply styles <span>— Progreaux</span></h1>
   <div class="grp">
     <span class="glabel">Style</span>
     <div class="seg" id="styleSeg">

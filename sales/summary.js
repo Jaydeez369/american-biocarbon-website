@@ -178,7 +178,7 @@
     const n=k=>A[k]&&A[k].n!=null?num(A[k].n):"—";
     const act=A.activity||{};
     return [
-      { from:"American BioCarbon website", via:"8 forms · /api/lead · POST to allo-hooks, then Resend",
+      { from:"Progreaux website", via:"8 forms · /api/lead · POST to allo-hooks, then Resend",
         to:"D1 records, kind weblead", surface:"Leads screen, account timeline",
         health:"live", count:`${n("weblead")} stored${(A.weblead&&A.weblead.refused)?` · ${A.weblead.refused} refused`:""}`,
         why:`Live end to end since 2026-09-08. A form on americanbiocarbon.com posts to /api/lead, which writes the lead to D1 through the Worker BEFORE it mails the desk, then mails it. The record lands as kind "weblead" with the company as its scope, idempotent on the submission id so a keepalive retry is one lead. The Leads screen lists them and they reach the account timeline carrying the answers the visitor typed. Proved by submitting all eight forms against the live site: 8 stored, 8 mailed, 16 messages delivered. Store first is the load bearing part, because a lead we hold and could not mail is on the Leads screen, and a lead that reached an inbox and not the record is gone the moment the mail is missed.`,

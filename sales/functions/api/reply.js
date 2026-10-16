@@ -47,7 +47,7 @@ const TIMEOUT_MS = 12000;
  * Phone written with spaces, never hyphens, matching every other piece of outreach copy here. */
 const SIGNATURE = {
   name: 'Victor Jehle',
-  company: 'American BioCarbon',
+  company: 'Progreaux',
   phone: '(225) 398 9286',
   site: 'americanbiocarbon.com',
 };
